@@ -8,6 +8,6 @@ Authors@R: 	c(person(given="Paul", family="Murrell",
              	  person(given="Ashley Noel", family="Hinton", 		       
 		         email="ahin017@aucklanduni.ac.nz", 
                          role=c("cre","aut")))
-Description: 	Manage and run openapi pipelines and modules
+Description: 	Manage and run OpenAPI pipelines and modules
 License: 	GPL-2 (>= 2)
 Imports:	tools, XML, graph, RBGL, RCurl

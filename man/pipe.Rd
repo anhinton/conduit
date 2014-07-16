@@ -6,6 +6,7 @@
 %%  ~~function to do ... ~~
 }
 \description{
+  Create a pipe for use in an OpenAPI pipeline.
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -14,13 +15,21 @@ pipe(start, end)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{start}{
+    Character vector of length 2 containing (1) module name which
+    produces the appropriate output (2) name of output. 
 %%     ~~Describe \code{start} here~~
 }
   \item{end}{
+    Character vector of length 2 containing (1) module name which
+    contains the appropriate output (2) name of input.
 %%     ~~Describe \code{end} here~~
 }
 }
 \details{
+  A pipe connects one module's output (start) to another module's input
+  (end). This function requires a \sQuote{start} character vector of the form
+  \code{c("ORIGIN_MODULE_NAME", "OUTPUT_NAME")} and an \sQuote{end} character
+  vector of the form \code{c("TARGET_MODULE_NAME", "INPUT_NAME")}.
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
@@ -34,6 +43,7 @@ pipe(start, end)
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -46,18 +56,6 @@ pipe(start, end)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (start, end) 
-{
-    names(start) <- names(end) <- c("module", "name")
-    list(start = start, end = end)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -6,6 +6,7 @@
   %%  ~~function to do ... ~~
 }
 \description{
+  Attempt to run an OpenAPI pipeline.
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -14,13 +15,30 @@ runPipeline(pipeline)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{pipeline}{
+    Pipeline list object
 %%     ~~Describe \code{pipeline} here~~
 }
 }
 \details{
+  This function will attempt to run an OpenAPI pipeline list object,
+  either loaded from a pipeline .XML file with \code{loadPipeline} or
+  created with \code{pipeline} [\code{pipeline} does not exist as at
+  2014-07-17]].
+
+  First the function will determine the order in which its modules are
+  to be run. Note that the pipeline is not allowed to have any cycles or
+  the function will fail.
+
+  The function then determines the file paths of the objects described
+  in the pipes as inputs/outputs.
+
+  Finally the function runs each module in the order determined,
+  feeding each module its inputs.
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  Meaningless list object. TODO: fix what runPipeline, runModule,
+  runPlatform return.
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -31,6 +49,7 @@ runPipeline(pipeline)
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -43,33 +62,6 @@ runPipeline(pipeline)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (pipeline) 
-{
-    require(tools)
-    if (!file.exists("pipelines")) 
-        dir.create("pipelines")
-    pipelineName <- pipeline$name
-    pipelinePath <- file.path("pipelines", pipelineName)
-    if (file.exists(pipelinePath)) 
-        unlink(pipelinePath, recursive = TRUE)
-    dir.create(pipelinePath, recursive = TRUE)
-    pipelinePath <- file_path_as_absolute(pipelinePath)
-    modules <- pipeline$modules
-    moduleNames <- names(modules)
-    moduleGraph <- graphPipeline(pipeline)
-    moduleOrder <- tsort(moduleGraph)
-    inputs <- inputsList(pipeline$pipes, modules, pipelinePath)
-    x <- lapply(moduleOrder, function(x, modules, inputs, pipelinePath) {
-        runModule(modules[[x]], inputs, pipelinePath)
-    }, modules, inputs, pipelinePath)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
