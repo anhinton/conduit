@@ -45,9 +45,6 @@ sourceOrder <- function(sources) {
 ##   - outputs
 loadModule <- function(filename,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    require(tools)
-    require(XML)
-    require(RCurl)
     module <- xmlRoot(xmlParse(filename))
     name <- file_path_sans_ext(basename(filename))
     descNodes <- getNodeSet(module, "//description|//oa:description",
@@ -185,7 +182,6 @@ loadModule <- function(filename,
 ## description:
 ##   saves a module to an .xml file on disk
 saveModule <- function(module, targetDirectory=getwd()) {
-    require(XML)
     moduleDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
                   node=newXMLNode("module", attrs=c(name=module$name),
@@ -252,8 +248,6 @@ runPlatform <- function(module, inputs, moduleFiles) {
 ##   - determines which platform the module requires
 ##   - runs the module on its platform
 runModule <- function(module, inputs=list(), targetDirectory=getwd()) {
-    require(tools)
-    
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, "modules", module$name)
     if (file.exists(modulePath))

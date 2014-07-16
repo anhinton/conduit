@@ -15,8 +15,6 @@
 loadPipeline <- function(filename,
                          pipelineName=file_path_sans_ext(basename(filename)),
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
-    require(tools)
-    require(XML)
     filename <- file_path_as_absolute(filename)
     pipelineDir <- dirname(filename)
     pipeline <- xmlRoot(xmlParse(filename))
@@ -80,7 +78,6 @@ loadPipeline <- function(filename,
 ##   NB: always called 'pipeline.xml'
 ##   TODO: build in overwrite warning; provide option for different name?
 savePipeline <- function(pipeline, targetDirectory=getwd()) {
-    require(XML)
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
                   node=newXMLNode("pipeline", attrs=c(name=pipeline$name),
@@ -190,8 +187,6 @@ inputsList <- function(pipes, modules, pipelinePath) {
 ## determine run order of modules, but should also be used at some future point
 ## to draw cool pictures of my pipelines
 graphPipeline <- function(pipeline) {
-    require(graph)
-    require(RBGL)
     moduleNames <- names(pipeline$modules)
     pipes.list <-
         lapply(pipeline$pipes,
@@ -228,7 +223,6 @@ graphPipeline <- function(pipeline) {
 ## - calculate location of inputs
 ## - run modules in order with runModule()
 runPipeline <- function(pipeline) {
-    require(tools)
     if (!file.exists("pipelines")) dir.create("pipelines")
     pipelineName <- pipeline$name
     pipelinePath <- file.path("pipelines", pipelineName)
