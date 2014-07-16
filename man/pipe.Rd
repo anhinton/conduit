@@ -2,6 +2,7 @@
 \alias{pipe}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
+  Create a pipe
 %%  ~~function to do ... ~~
 }
 \description{

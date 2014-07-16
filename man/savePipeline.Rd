@@ -49,7 +49,6 @@ savePipeline(pipeline, targetDirectory = getwd())
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-  \code{\link{saveModule}}} \code{\link{}}}
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
