@@ -264,3 +264,22 @@ addPipe <- function(newPipe, pipeline) {
     pipeline$pipes <- c(pipeline$pipes, list(newPipe))
     pipeline
 }
+
+## pipeline()
+## arguments:
+## - name: character
+## - desctription: character
+## - modules: list of modules made with module() or loadModule()
+## - pipes: list of pipes made with pipe()
+## description:
+##   Constructs a pipeline list.
+##   Names modules with module$name.
+pipeline <- function (name, description="", modules=list(), pipes=list()) {
+    names(modules) <-
+        sapply(modules,
+               function(m) {
+                   m$name
+               })
+    list("name"=name, "description"=description, "modules"=modules,
+         "pipes"=pipes)
+}

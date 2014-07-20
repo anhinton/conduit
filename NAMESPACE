@@ -4,6 +4,6 @@ export(# Modules
        "loadModule", "runModule", "module", "saveModule",
        "moduleInput", "moduleOutput", "moduleSource",
        # Pipelines
-       "loadPipeline", "runPipeline",
+       "loadPipeline", "runPipeline", "pipeline",
        "savePipeline", "exportPipeline",
        "pipe", "addModule", "addPipe")
