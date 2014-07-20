@@ -14,25 +14,30 @@ moduleOutput(name, type, format = "", formatType = "text", ref = "")
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{name}{
-%%     ~~Describe \code{name} here~~
-}
+    Module name as character value
+    %%     ~~Describe \code{name} here~~
+  }
   \item{type}{
-%%     ~~Describe \code{type} here~~
-}
+    \dQuote{internal} or \dQuote{external}
+    %%     ~~Describe \code{type} here~~
+  }
   \item{format}{
-%%     ~~Describe \code{format} here~~
-}
+    Character value describing file/data type.
+    %%     ~~Describe \code{format} here~~
+  }
   \item{formatType}{
-%%     ~~Describe \code{formatType} here~~
-}
+    Char doing something
+  }
   \item{ref}{
-%%     ~~Describe \code{ref} here~~
-}
+    File path as character value (when type == \dQuote{external})
+    %%     ~~Describe \code{ref} here~~
+  }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  \code{moduleOutput} list
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -43,6 +48,7 @@ moduleOutput(name, type, format = "", formatType = "text", ref = "")
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -55,16 +61,6 @@ moduleOutput(name, type, format = "", formatType = "text", ref = "")
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (name, type, format = "", formatType = "text", ref = "") 
-{
-    c(name = name, type = type, format = format, formatType = formatType, 
-        ref = ref)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

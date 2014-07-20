@@ -6,7 +6,8 @@
   %%  ~~function to do ... ~~
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Create an OpenAPI \code{module} list.
+  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
 module(name, description = "", platform, inputs = list(), outputs = list(), sources = list())
@@ -14,28 +15,35 @@ module(name, description = "", platform, inputs = list(), outputs = list(), sour
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{name}{
-%%     ~~Describe \code{name} here~~
-}
+    Name of module as character value
+    %%     ~~Describe \code{name} here~~
+  }
   \item{description}{
-%%     ~~Describe \code{description} here~~
-}
+    Description of what module does as character value
+    %%     ~~Describe \code{description} here~~
+  }
   \item{platform}{
-%%     ~~Describe \code{platform} here~~
-}
+    Module platform as character value
+    %%     ~~Describe \code{platform} here~~
+  }
   \item{inputs}{
-%%     ~~Describe \code{inputs} here~~
-}
+    List of \code{moduleInput} objects
+    %%     ~~Describe \code{inputs} here~~
+  }
   \item{outputs}{
-%%     ~~Describe \code{outputs} here~~
-}
+    List of \code{moduleOutput} objects
+    %%     ~~Describe \code{outputs} here~~
+  }
   \item{sources}{
-%%     ~~Describe \code{sources} here~~
-}
+    List of \code{moduleSource} objects
+    %%     ~~Describe \code{sources} here~~
+  }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  OpenAPI \code{module} list
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -46,6 +54,7 @@ module(name, description = "", platform, inputs = list(), outputs = list(), sour
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -58,24 +67,6 @@ module(name, description = "", platform, inputs = list(), outputs = list(), sour
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (name, description = "", platform, inputs = list(), 
-    outputs = list(), sources = list()) 
-{
-    names(platform) <- "name"
-    names(inputs) <- sapply(inputs, function(x) {
-        x["name"]
-    })
-    names(outputs) <- sapply(outputs, function(x) {
-        x["name"]
-    })
-    list(name = name, description = description, platform = platform, 
-        inputs = inputs, outputs = outputs, sources = sources)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

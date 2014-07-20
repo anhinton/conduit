@@ -6,7 +6,8 @@
   %%  ~~function to do ... ~~
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Save a pipeline and its modules to disk as OpenAPI XML files
+  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
 exportPipeline(pipeline, targetDirectory)
@@ -14,16 +15,19 @@ exportPipeline(pipeline, targetDirectory)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{pipeline}{
-%%     ~~Describe \code{pipeline} here~~
+    A \code{pipeline}
+    %%     ~~Describe \code{pipeline} here~~
 }
-  \item{targetDirectory}{
-%%     ~~Describe \code{targetDirectory} here~~
+\item{targetDirectory}{
+  Output directory
+  %%     ~~Describe \code{targetDirectory} here~~
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  List of file paths of pipeline and module files.
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -34,6 +38,7 @@ exportPipeline(pipeline, targetDirectory)
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -46,23 +51,6 @@ exportPipeline(pipeline, targetDirectory)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (pipeline, targetDirectory) 
-{
-    pipelineDirectory <- file.path(targetDirectory, pipeline$name)
-    if (!file.exists(pipelineDirectory)) {
-        dir.create(pipelineDirectory)
-    }
-    else {
-        warning("this pipeline directory exists and you might be writing over something useful")
-    }
-    savePipeline(pipeline, pipelineDirectory)
-    lapply(pipeline$modules, saveModule, pipelineDirectory)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

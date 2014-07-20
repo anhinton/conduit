@@ -6,7 +6,9 @@
   %%  ~~function to do ... ~~
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Run an OpenAPI module which has been created with \code{loadModule} of
+  \code{module}
+  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
 runModule(module, inputs = list(), targetDirectory = getwd())
@@ -14,19 +16,23 @@ runModule(module, inputs = list(), targetDirectory = getwd())
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{module}{
-%%     ~~Describe \code{module} here~~
-}
+    OpenAPI module list
+    %%     ~~Describe \code{module} here~~
+  }
   \item{inputs}{
-%%     ~~Describe \code{inputs} here~~
-}
+    Named list of file paths corresponding to inputs
+    %%     ~~Describe \code{inputs} here~~
+  }
   \item{targetDirectory}{
-%%     ~~Describe \code{targetDirectory} here~~
-}
+    File path where module is to be run
+    %%     ~~Describe \code{targetDirectory} here~~
+  }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  Empty list because helper functions don't do sensible returns just yet
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -37,6 +43,7 @@ runModule(module, inputs = list(), targetDirectory = getwd())
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -49,23 +56,6 @@ runModule(module, inputs = list(), targetDirectory = getwd())
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (module, inputs = list(), targetDirectory = getwd()) 
-{
-    require(tools)
-    modulePath <- file.path(targetDirectory, "modules", module$name)
-    if (file.exists(modulePath)) 
-        unlink(modulePath, recursive = TRUE)
-    dir.create(modulePath, recursive = TRUE)
-    moduleFiles <- file_path_as_absolute(modulePath)
-    modulePlatform <- module$platform
-    class(module) <- modulePlatform
-    runPlatform(module, inputs, modulePath)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -6,6 +6,7 @@
   %%  ~~function to do ... ~~
 }
 \description{
+  Create an OpenAPI module source from an external text document
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -14,19 +15,26 @@ moduleSource(valueRef, type = "", order = "")
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{valueRef}{
-%%     ~~Describe \code{valueRef} here~~
-}
+    File path of document to be wrapped as module
+    %%     ~~Describe \code{valueRef} here~~
+  }
   \item{type}{
-%%     ~~Describe \code{type} here~~
-}
+    Character value (2014-07-21: not used)
+    %%     ~~Describe \code{type} here~~
+  }
   \item{order}{
-%%     ~~Describe \code{order} here~~
-}
+    Numeric value
+    %%     ~~Describe \code{order} here~~
+  }
 }
 \details{
+  This function takes a text document from the filesystem and wraps it
+  as a module's source. This will be expanded to allow other ways of
+  plopping sources in there, but apparently I didn't do that yet.
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  \code{moduleSource} list
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -37,6 +45,7 @@ moduleSource(valueRef, type = "", order = "")
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -49,16 +58,6 @@ moduleSource(valueRef, type = "", order = "")
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (valueRef, type = "", order = "") 
-{
-    value <- readLines(valueRef)
-    list(value = value, type = type, order = order)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
