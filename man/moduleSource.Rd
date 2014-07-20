@@ -10,11 +10,14 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-moduleSource(valueRef, type = "", order = "")
+moduleSource(value, ref=NULL, type = "", order = "")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{valueRef}{
+  \item{value}{
+    Source script as character vector
+  }
+  \item{ref}{
     File path of document to be wrapped as module
     %%     ~~Describe \code{valueRef} here~~
   }
@@ -28,9 +31,9 @@ moduleSource(valueRef, type = "", order = "")
   }
 }
 \details{
-  This function takes a text document from the filesystem and wraps it
-  as a module's source. This will be expanded to allow other ways of
-  plopping sources in there, but apparently I didn't do that yet.
+  If ref is provided the source is created using the contents of the
+  text file at ref. Otherwise the source is created using the character
+  vector value.
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{

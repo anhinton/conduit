@@ -271,8 +271,8 @@ moduleInput <- function(name, type, format="", formatType="text") {
 moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     c(name=name, type=type, format=format, formatType=formatType, ref=ref)
 }
-moduleSource <- function(valueRef, type="", order="") {
-    value <- readLines(valueRef)
+moduleSource <- function(value, ref=NULL, type="", order="") {
+    if (!is.null(ref)) value <- readLines(ref)
     list(value=value, type=type, order=order)
 }
 
