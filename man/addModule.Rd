@@ -6,6 +6,7 @@
   %%  ~~function to do ... ~~
 }
 \description{
+  Add an OpenAPI \code{module} to an OpenAPI \code{pipeline}
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -14,16 +15,19 @@ addModule(newModule, pipeline)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{newModule}{
-%%     ~~Describe \code{newModule} here~~
-}
+    A \code{module} list object
+    %%     ~~Describe \code{newModule} here~~
+  }
   \item{pipeline}{
-%%     ~~Describe \code{pipeline} here~~
-}
+    A \code{pipeline} list object
+    %%     ~~Describe \code{pipeline} here~~
+  }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  The resulting \code{pipeline}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -34,6 +38,7 @@ addModule(newModule, pipeline)
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -46,18 +51,6 @@ addModule(newModule, pipeline)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (newModule, pipeline) 
-{
-    moduleNames <- c(names(pipeline$modules), newModule$name)
-    pipeline$modules <- c(pipeline$modules, temp = list(newModule))
-    names(pipeline$modules) <- moduleNames
-    pipeline
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

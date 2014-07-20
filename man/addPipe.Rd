@@ -6,7 +6,8 @@
   %%  ~~function to do ... ~~
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Add an OpenAPI \code{pipe} list object to a \code{pipeline} list. 
+  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
 addPipe(newPipe, pipeline)
@@ -14,9 +15,11 @@ addPipe(newPipe, pipeline)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{newPipe}{
-%%     ~~Describe \code{newPipe} here~~
-}
+    \code{pipe} object to be added
+    %%     ~~Describe \code{newPipe} here~~
+  }
   \item{pipeline}{
+    \code{pipeline} to which \code{pipe} is to be added
 %%     ~~Describe \code{pipeline} here~~
 }
 }
@@ -24,6 +27,7 @@ addPipe(newPipe, pipeline)
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  The resulting \code{pipeline}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -34,6 +38,7 @@ addPipe(newPipe, pipeline)
 %% ~put references to the literature/web site here ~
 }
 \author{
+  Ashley Noel Hinton
 %%  ~~who you are~~
 }
 \note{
@@ -46,16 +51,6 @@ addPipe(newPipe, pipeline)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (newPipe, pipeline) 
-{
-    pipeline$pipes <- c(pipeline$pipes, list(newPipe))
-    pipeline
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
