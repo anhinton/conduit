@@ -10,8 +10,8 @@ pathSep <- "|"
 defaultSearchPaths <- paste(".//", "${ROOT}", sep=pathSep)
 
 ## split search paths string
-splitPaths <- function(x) {
-    strsplit(x, pathSep, fixed=TRUE)[[1]]
+splitPaths <- function(s) {
+    strsplit(s, pathSep, fixed=TRUE)[[1]]
 }
 
 ## amend paths to be searched
