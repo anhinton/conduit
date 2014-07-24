@@ -4,7 +4,16 @@
 ## the character used to separate search paths
 pathSep <- "|"
 
-## the default Search Path
+## the default Search Paths
 ## ".//" - the directory containing the file which has initiated the search
 ## "${ROOT}" - the directory from which the glue system has been invoked
-defaultSearchPath <- paste(".//", "${ROOT}", sep=pathSep)
+defaultSearchPaths <- paste(".//", "${ROOT}", sep=pathSep)
+
+## split search paths string
+splitPaths <- function(x) {
+    strsplit(x, "|", fixed=TRUE)[[1]]
+}
+
+
+
+splitPaths(defaultSearchPaths)
