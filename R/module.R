@@ -43,10 +43,16 @@ sourceOrder <- function(sources) {
 ##   - platform,
 ##   - sources
 ##   - outputs
-loadModule <- function(filename,
+loadModule <- function(name, ref=NULL, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    module <- xmlRoot(xmlParse(filename))
-    name <- file_path_sans_ext(basename(filename))
+    ## TEST CODE TO GET THINGS GOING
+    ## name <- "createGraph"
+    ## ref <- NULL
+    ## path <- "~/files.fos/openapi/pipelineExamples/simpleGraph"
+    ## namespaces=c(oa="http://www.openapi.org/2014/")
+    file <- if (is.null(ref)) paste0(name, ".xml") else ref
+    filePath <- findFile(file, path)
+    module <- xmlRoot(xmlParse(filePath))
     descNodes <- getNodeSet(module, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
