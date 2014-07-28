@@ -45,13 +45,15 @@ sourceOrder <- function(sources) {
 ##   - outputs
 loadModule <- function(name, ref=NULL, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    ## TEST CODE TO GET THINGS GOING
-    ## name <- "createGraph"
-    ## ref <- NULL
-    ## path <- "~/files.fos/openapi/pipelineExamples/simpleGraph"
-    ## namespaces=c(oa="http://www.openapi.org/2014/")
     file <- if (is.null(ref)) paste0(name, ".xml") else ref
-    filePath <- findFile(file, path)
+    ## the following expects that filePath will return some useful value, and
+    ## if it doesn't things could break anywhere (probably the very next
+    ## line.
+    ## This is where I need to start working on sensible errors but I don't
+    ## know where to start just yet.
+    filePath <- 
+        if (basename(file) == file) { findFile(file, path) }
+        else if (file.exists(file)) { file }
     module <- xmlRoot(xmlParse(filePath))
     descNodes <- getNodeSet(module, "//description|//oa:description",
                             namespaces=namespaces)
