@@ -74,8 +74,8 @@ loadPipeline <- function(filename,
                    list("start"=start, "end"=end)
                },
                namespaces)    
-    list("name"=pipelineName, "description"=description, "modules"=modules,
-         "pipes"=pipes)
+    list(name=pipelineName, description=description, modules=modules,
+         pipes=pipes)
 }
 
 ## functions to write a pipeline (and its modules) to XML files
