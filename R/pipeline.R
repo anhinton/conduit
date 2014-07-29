@@ -31,17 +31,6 @@ loadPipeline <- function(filename,
     
     pipeNodes <- getNodeSet(pipeline, "//pipe|//oa:pipe",
                             namespaces=namespaces)
-    ## moduleFilePaths <-
-    ##     sapply(moduleNodes,
-    ##            function (x, pipelineDir) {
-    ##                attrs <- xmlAttrs(x)
-    ##                if (any(names(attrs) == "name")) {
-    ##                    filename <- paste0(attrs[["name"]], ".xml")
-    ##                    file.path(pipelineDir, filename)                       
-    ##                } else if (any(names(attrs) == "ref")) {
-    ##                    attrs[["ref"]]
-    ##                }
-    ##            }, pipelineDir)
     modules <-
         lapply(moduleNodes,
                function(m, namespaces) {
