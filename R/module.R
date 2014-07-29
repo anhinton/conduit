@@ -43,18 +43,28 @@ sourceOrder <- function(sources) {
 ##   - platform,
 ##   - sources
 ##   - outputs
-loadModule <- function(name, ref=NULL, path=defaultSearchPaths,
+loadModule <- function(ref, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    file <- if (is.null(ref)) paste0(name, ".xml") else ref
+    xml <- if (grepl("^ *https://", ref)) {
+        getURL(ref)
+    } else if (file.exists(ref)) {
+        readLines(ref)
+    } else {
+        readLines(findFile(ref, path))
+    }
+    
     ## the following expects that filePath will return some useful value, and
     ## if it doesn't things could break anywhere (probably the very next
     ## line.
     ## This is where I need to start working on sensible errors but I don't
     ## know where to start just yet.
-    filePath <- 
-        if (basename(file) == file) { findFile(file, path) }
-        else if (file.exists(file)) { file }
-    module <- xmlRoot(xmlParse(filePath))
+    ## filePath <- 
+    ##     if (basename(file) == file) {
+    ##         findFile(file, path)
+    ##     } else {
+    ##         file
+    ##     }
+    module <- xmlRoot(xmlParse(xml))
     descNodes <- getNodeSet(module, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
@@ -177,8 +187,8 @@ loadModule <- function(name, ref=NULL, path=defaultSearchPaths,
             names(outputs) <- outputNames
             outputs
         }
-    list("name"=name, "description"=description, "inputs"=inputs,
-         "platform"=platform, "sources"=sources, "outputs"=outputs)
+    list(description=description, inputs=inputs,
+         platform=platform, sources=sources, outputs=outputs)
 }
 
 ## functions for saving a module object to an XML file
