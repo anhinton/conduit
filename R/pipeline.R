@@ -106,9 +106,10 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineRoot <- xmlRoot(pipelineDoc)
     description <- newXMLNode("description", pipeline$description)
-    modules <- lapply(pipeline$modules,
+    moduleNames <- names(pipeline$modules)
+    modules <- lapply(names(pipeline$modules),
                       function (m) {
-                          newXMLNode("module", attrs=c(name=m$name))
+                          newXMLNode("module", attrs=c(name=m))
                       })
     names(modules) <- NULL
     pipes <-
@@ -260,9 +261,9 @@ runPipeline <- function(pipeline) {
     inputs <- inputsList(pipeline$pipes, modules, pipelinePath)
     x <-
         lapply(moduleOrder,
-                function (x, modules, inputs, pipelinePath) {
-                    runModule(modules[[x]], inputs, pipelinePath)
-                }, modules, inputs, pipelinePath)
+               function (x, modules, inputs, pipelinePath) {
+                   runModule(modules[[x]], moduleName=x, inputs, pipelinePath)
+               }, modules, inputs, pipelinePath)
 }
 
 ## creating new pipelines

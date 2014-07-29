@@ -265,9 +265,10 @@ runPlatform <- function(module, inputs, moduleFiles) {
 ##   - creates a directory for the module to be run in
 ##   - determines which platform the module requires
 ##   - runs the module on its platform
-runModule <- function(module, inputs=list(), targetDirectory=getwd()) {
+runModule <- function(module, moduleName, inputs=list(),
+                      targetDirectory=getwd()) {
     ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, "modules", module$name)
+    modulePath <- file.path(targetDirectory, "modules", moduleName)
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
