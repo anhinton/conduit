@@ -45,6 +45,7 @@ loadPipeline <- function(filename,
                        if (any(names(attrs) == "path")) {
                            attrs[["path"]]
                        } else {
+                           ## FIXME: this should make use of amendSearchPaths()
                            paste0(pipelineDir, pathSep, defaultSearchPaths)
                        }
                    loadModule(ref, path, namespaces)
