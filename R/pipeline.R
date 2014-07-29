@@ -46,12 +46,11 @@ loadPipeline <- function(filename,
         lapply(moduleNodes,
                function(m, namespaces) {
                    attrs <- xmlAttrs(m)
-                   name <- attrs[["name"]]
                    ref <-
                        if (any(names(attrs) == "ref")) {
                            attrs[["ref"]]
                        } else {
-                           NULL
+                           paste0(attrs[["name"]], ".xml")
                        }
                    path <-
                        if (any(names(attrs) == "path")) {
@@ -59,11 +58,18 @@ loadPipeline <- function(filename,
                        } else {
                            paste0(pipelineDir, pathSep, defaultSearchPaths)
                        }
-                   loadModule(name, ref, path, namespaces)
+                   loadModule(ref, path, namespaces)
                    }, namespaces)
-    names(modules) <- sapply(modules,
-               function(m) {
-                   m$name
+    names(modules) <-
+        sapply(moduleNodes,
+               function(m, namespaces) {
+                   attrs <- xmlAttrs(m)
+                   name <- if (any(names(attrs) == "name")) {
+                       attrs[["name"]]
+                   } else {
+                       basename(attrs[["ref"]])
+                   }
+                   name
                })
     pipes <-
         lapply(pipeNodes,
