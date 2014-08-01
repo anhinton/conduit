@@ -28,7 +28,9 @@ runPlatform.python <- function(module, inputs, modulePath) {
                 function (x) {
                     inputName <- x["name"]
                     type <- x["type"]
-                    fromFile <- inputs[[inputName]]
+                    fromFile <- 
+                        getElement(inputs,
+                                   paste(module$name,inputName,sep="."))
                     input <-
                         if (type == "internal") {
                             c(paste0("with open('", fromFile,

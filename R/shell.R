@@ -31,7 +31,9 @@ runPlatform.shell <- function(module, inputs, modulePath) {
                 function (x) {
                     inputName <- x["name"]
                     type <- x["type"]
-                    fromFile <- inputs[[inputName]]
+                    fromFile <- 
+                        getElement(inputs,
+                                   paste(module$name,inputName,sep="."))
                     input <-
                         if (type == "internal") {
                             value <- readLines(fromFile, n=1)
