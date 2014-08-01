@@ -35,6 +35,12 @@ loadPipeline <- function(filename,
         lapply(moduleNodes,
                function(m, namespaces) {
                    attrs <- xmlAttrs(m)
+                   name <-
+                       if (any(names(attrs) == "name")) {
+                           attrs[["name"]]
+                       } else {
+                           attrs[["ref"]]
+                       }
                    ref <-
                        if (any(names(attrs) == "ref")) {
                            attrs[["ref"]]
@@ -48,18 +54,12 @@ loadPipeline <- function(filename,
                            ## FIXME: this should make use of amendSearchPaths()
                            paste0(pipelineDir, pathSep, defaultSearchPaths)
                        }
-                   loadModule(ref, path, namespaces)
+                   loadModule(name, ref, path, namespaces)
                    }, namespaces)
     names(modules) <-
-        sapply(moduleNodes,
-               function(m, namespaces) {
-                   attrs <- xmlAttrs(m)
-                   name <- if (any(names(attrs) == "name")) {
-                       attrs[["name"]]
-                   } else {
-                       basename(attrs[["ref"]])
-                   }
-                   name
+        sapply(modules,
+               function(m) {
+                   m$name
                })
     pipes <-
         lapply(pipeNodes,
@@ -252,7 +252,15 @@ runPipeline <- function(pipeline) {
     x <-
         lapply(moduleOrder,
                function (x, modules, inputs, pipelinePath) {
-                   runModule(modules[[x]], moduleName=x, inputs, pipelinePath)
+                   ## select inputs for this module and strip out module name
+                   module <- modules[[x]]
+                   whichInputs <-
+                       grepl(paste0("^", module$name,"[.]"), names(inputs))
+                   inputs <- inputs[whichInputs]
+                   names(inputs) <-
+                       gsub(paste0("^",module$name,"[.]"), "", names(inputs))
+                   ## run the beast
+                   runModule(module, inputs, pipelinePath)
                }, modules, inputs, pipelinePath)
 }
 

@@ -43,7 +43,7 @@ sourceOrder <- function(sources) {
 ##   - platform,
 ##   - sources
 ##   - outputs
-loadModule <- function(ref, path=defaultSearchPaths,
+loadModule <- function(name, ref, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     xml <- if (grepl("^ *https://", ref)) {
         getURL(ref)
@@ -175,7 +175,7 @@ loadModule <- function(ref, path=defaultSearchPaths,
             names(outputs) <- outputNames
             outputs
         }
-    list(description=description, inputs=inputs,
+    list(name=name, description=description, inputs=inputs,
          platform=platform, sources=sources, outputs=outputs)
 }
 
@@ -253,8 +253,9 @@ runPlatform <- function(module, inputs, moduleFiles) {
 ##   - creates a directory for the module to be run in
 ##   - determines which platform the module requires
 ##   - runs the module on its platform
-runModule <- function(module, moduleName, inputs=list(),
+runModule <- function(module, inputs=list(),
                       targetDirectory=getwd()) {
+    moduleName <- module$name
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, "modules", moduleName)
     if (file.exists(modulePath))

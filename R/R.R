@@ -32,9 +32,7 @@ runPlatform.R <- function(module, inputs, modulePath) {
                 function (x) {
                     inputName <- x["name"]
                     type <- x["type"]
-                    fromFile <-
-                        getElement(inputs,
-                                   paste(module$name,inputName,sep="."))
+                    fromFile <- inputs[[inputName]]
                     input <-
                         if (type == "internal") {
                             paste0(inputName, " <- readRDS(\"", fromFile,
