@@ -168,7 +168,7 @@ inputsList <- function(pipes, modules, pipelinePath) {
     inputNames <-
         lapply(pipes,
                function (x) {
-                   x$end["name"]
+                   paste(x$end["module"], x$end["name"], sep=".")
                })
     inputsList <-
         lapply(pipes,
