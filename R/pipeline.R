@@ -39,7 +39,7 @@ loadPipeline <- function(filename,
                        if (any(names(attrs) == "name")) {
                            attrs[["name"]]
                        } else {
-                           attrs[["ref"]]
+                           basename(attrs[["ref"]])
                        }
                    ref <-
                        if (any(names(attrs) == "ref")) {
