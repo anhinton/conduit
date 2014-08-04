@@ -75,8 +75,8 @@ loadPipeline <- function(filename,
                    list("start"=start, "end"=end)
                },
                namespaces)    
-    list(name=pipelineName, description=description, modules=modules,
-         pipes=pipes)
+    pipeline(name=pipelineName, description=description,
+             components=modules, pipes=pipes)
 }
 
 ## functions to write a pipeline (and its modules) to XML files
@@ -200,7 +200,7 @@ inputsList <- function(pipes, modules, pipelinePath) {
 ## determine run order of modules, but should also be used at some future point
 ## to draw cool pictures of my pipelines
 graphPipeline <- function(pipeline) {
-    moduleNames <- names(pipeline$modules)
+    moduleNames <- names(pipeline$components)
     pipes.list <-
         lapply(pipeline$pipes,
                function (x) {
@@ -243,7 +243,7 @@ runPipeline <- function(pipeline) {
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
     pipelinePath <- file_path_as_absolute(pipelinePath)
-    modules <- pipeline$modules
+    modules <- pipeline$components
     moduleNames <- names(modules)
     ## making a graph of the pipeline to determine order
     moduleGraph <- graphPipeline(pipeline)
@@ -306,7 +306,9 @@ addPipe <- function(newPipe, pipeline) {
 ##   Constructs a pipeline list.
 ##   Names modules with module$name.
 pipeline <- function (name, description="", components=list(), pipes=list()) {
-    names(modules) <- sapply(modules, function(m) { m$name })
-    list(name=name, description=description, components=components,
-         pipes=pipes)
+    names(components) <- sapply(components, function(c) { c$name })
+    pipeline <- list(name=name, description=description, components=components,
+                     pipes=pipes)
+    class(pipeline) <- c("oapipeline", "list")
+    pipeline
 }

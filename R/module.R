@@ -175,8 +175,9 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
             names(outputs) <- outputNames
             outputs
         }
-    list(name=name, description=description, inputs=inputs,
-         platform=platform, sources=sources, outputs=outputs)
+    module(name=name, description=description,
+           platform=platform, inputs=inputs, outputs=outputs,
+           sources=sources)
 }
 
 ## functions for saving a module object to an XML file
@@ -301,19 +302,25 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 ##   - platform,
 ##   - sources
 ##   - outputs
-module <- function(name, description="", platform, inputs=list(),
-                   outputs=list(), sources=list()) {
+module <- function(name, description="", platform, inputs=NULL,
+                   outputs=NULL, sources=list()) {
     names(platform) <- "name"
-    names(inputs) <-
-        sapply(inputs,
-               function (x) {
-                   x["name"]
-               })
-    names(outputs) <-
-        sapply(outputs,
-               function (x) {
-                   x["name"]
-               })
-    list(name=name, description=description, platform=platform, inputs=inputs,
-         outputs=outputs, sources=sources)
+    if (!is.null(inputs)) {
+        names(inputs) <-
+            sapply(inputs,
+                   function (x) {
+                       x["name"]
+                   })
+    }
+    if (!is.null(outputs)) {
+        names(outputs) <-
+            sapply(outputs,
+                   function (x) {
+                       x["name"]
+                   })
+    }
+    module <- list(name=name, description=description, platform=platform,
+                   inputs=inputs, outputs=outputs, sources=sources)
+    class(module) <- c("oamodule", "list")
+    module
 }
