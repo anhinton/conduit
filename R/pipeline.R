@@ -266,9 +266,19 @@ runPipeline <- function(pipeline) {
 
 ## creating new pipelines
 
+pipeStart <- function(componentName=NULL, outputName, componentRef=NULL,
+                      path=NULL) {
+    if (is.null(componentName)) {
+        list("component-ref"=componentRef, "output-name"=outputName)
+    } else {
+        list("component-name"=componentName, "output-name"=outputName)
+    }
+}
+
 ## returns a pipe list object
 pipe <- function(start, end) {
-    names(start) <- names(end) <- c("module", "name")
+    names(start) <- c("component-name", "output-name")
+    names(end) <- c("component-name", "input-name")
     list(start=start, end=end)
 }
 
@@ -295,8 +305,8 @@ addPipe <- function(newPipe, pipeline) {
 ## description:
 ##   Constructs a pipeline list.
 ##   Names modules with module$name.
-pipeline <- function (name, description="", modules=list(), pipes=list()) {
+pipeline <- function (name, description="", components=list(), pipes=list()) {
     names(modules) <- sapply(modules, function(m) { m$name })
-    list("name"=name, "description"=description, "modules"=modules,
-         "pipes"=pipes)
+    list(name=name, description=description, components=components,
+         pipes=pipes)
 }
