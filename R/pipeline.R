@@ -168,26 +168,27 @@ inputsList <- function(pipes, modules, pipelinePath) {
     inputNames <-
         lapply(pipes,
                function (x) {
-                   paste(x$end["module"], x$end["name"], sep=".")
+                   paste(x$end["component-name"], x$end["input-name"], sep=".")
                })
     inputsList <-
         lapply(pipes,
                function (x, modules, pipelinePath) {
-                   endModule <- modules[[x$end["module"]]]
+                   endModule <- modules[[x$end["component-name"]]]
                    platform <- endModule$platform["name"]
-                   type <- endModule$inputs[[x$end["name"]]]["type"]
+                   type <- endModule$inputs[[x$end["component-name"]]]["type"]
                    if (type == "internal") {
                        input <- file.path(pipelinePath, "modules",
-                                          x$start["module"],
-                                          paste(x$start["name"],
+                                          x$start["component-name"],
+                                          paste(x$start["output-name"],
                                                 internalExtension(platform),
                                                 sep=""))
                    } else if (type == "external") {
-                       startModule <- modules[[x$start["module"]]]
-                       input <- startModule$outputs[[x$start["name"]]]["ref"]
+                       startModule <- modules[[x$start["component-name"]]]
+                       input <-
+                           startModule$outputs[[x$start["output-name"]]]["ref"]
                        if (dirname(input) == ".") {
                            input <- file.path(pipelinePath, "modules",
-                                              x$start["module"], input)
+                                              x$start["component-name"], input)
                        }
                    }
                    input
@@ -204,10 +205,10 @@ graphPipeline <- function(pipeline) {
     pipes.list <-
         lapply(pipeline$pipes,
                function (x) {
-                   startModule <- x$start["module"]
-                   startOutput <- x$start["name"]
-                   endModule <- x$end["module"]
-                   endInput <- x$end["name"]
+                   startModule <- x$start["component-name"]
+                   startOutput <- x$start["output-name"]
+                   endModule <- x$end["component-name"]
+                   endInput <- x$end["input-name"]
                    pipe <- c(startModule, startOutput, endModule, endInput)
                    names(pipe) <- c("startModule", "startOutput", "endModule",
                                     "endInput")
@@ -275,18 +276,27 @@ pipeStart <- function(componentName=NULL, outputName, componentRef=NULL,
     }
 }
 
+pipeEnd <- function(componentName=NULL, inputName, componentRef=NULL,
+                      path=NULL) {
+    if (is.null(componentName)) {
+        list("component-ref"=componentRef, "input-name"=inputName)
+    } else {
+        list("component-name"=componentName, "input-name"=inputName)
+    }
+}
+
 ## returns a pipe list object
 pipe <- function(start, end) {
-    names(start) <- c("component-name", "output-name")
-    names(end) <- c("component-name", "input-name")
-    list(start=start, end=end)
+    pipe <- list(start=start, end=end)
+    class(pipe) <- c("oapipe", "list")
+    pipe
 }
 
 ## adds a module object list to a pipeline
 addModule <- function(newModule, pipeline) {
-    moduleNames <- c(names(pipeline$modules), newModule$name)
-    pipeline$modules <- c(pipeline$modules, temp=list(newModule))
-    names(pipeline$modules) <- moduleNames
+    moduleNames <- c(names(pipeline$components), newModule$name)
+    pipeline$modules <- c(pipeline$components, temp=list(newModule))
+    names(pipeline$components) <- moduleNames
     pipeline
 }
 
