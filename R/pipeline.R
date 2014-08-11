@@ -203,13 +203,13 @@ inputsList <- function(pipes, modules, pipelinePath) {
 ## determine run order of modules, but should also be used at some future point
 ## to draw cool pictures of my pipelines
 graphPipeline <- function(pipeline) {
-    moduleNames <- names(pipeline$components)
+    componentNames <- names(pipeline$components)
     pipes.list <-
         lapply(pipeline$pipes,
                function (x) {
-                   startModule <- x$start["component-name"]
-                   startOutput <- x$start["output-name"]
-                   endModule <- x$end["component-name"]
+                   startModuleName <- x$start$componentName
+                   startOutputName <- x$start$outputName
+                   endModuleName <- x$end$componentName
                    endInput <- x$end["input-name"]
                    pipe <- c(startModule, startOutput, endModule, endInput)
                    names(pipe) <- c("startModule", "startOutput", "endModule",
@@ -246,7 +246,9 @@ runPipeline <- function(pipeline) {
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
-    pipelinePath <- file_path_as_absolute(pipelinePath)
+    pipelinePath <- tools::file_path_as_absolute(pipelinePath)
+    ## FIXME: components can be modules or pipelines, but as of 2014-08-12
+    ## we will assume only modules
     modules <- pipeline$components
     moduleNames <- names(modules)
     ## making a graph of the pipeline to determine order
@@ -272,28 +274,28 @@ runPipeline <- function(pipeline) {
 
 #' Create a pipe object
 #'
-#' @param startModuleName Name of start module
+#' @param startComponentName Name of start module
 #' @param startOutputName Name of start object
-#' @param endModuleName Name of end module
+#' @param endComponentName Name of end module
 #' @param endInputName Name of end input
-#' @param startModuleRef Address of start module
-#' @param endModuleRed Address of end module
-#' @return \code{pipe} connecting \code{startModuleName}.\code{startOutputName} to \code{endModuleName}.\code{endInputName}
+#' @param startComponentRef Address of start module
+#' @param endComponentRed Address of end module
+#' @return \code{pipe} connecting \code{startComponentName}.\code{startOutputName} to \code{endComponentName}.\code{endInputName}
 #' @export
-pipe <- function (startModuleName=NULL, startOutputName,
-                  endModuleName=NULL, endInputName,
-                  startModuleRef=NULL, endModuleRef=NULL) {
+pipe <- function (startComponentName=NULL, startOutputName,
+                  endComponentName=NULL, endInputName,
+                  startComponentRef=NULL, endComponentRef=NULL) {
     start <-
-        if (is.null(startModuleName)) {
-            list(componentRef=startModuleRef, outputName=startOutputName)
+        if (is.null(startComponentName)) {
+            list(componentRef=startComponentRef, outputName=startOutputName)
         } else {
-            list(componentName=startModuleName, outputName=startOutputName)
+            list(componentName=startComponentName, outputName=startOutputName)
         }
     end <-
-        if (is.null(endModuleName)) {
-            list(componentRef=endModuleRef, inputName=endInputName)
+        if (is.null(endComponentName)) {
+            list(componentRef=endComponentRef, inputName=endInputName)
         } else {
-            list(componentName=endModuleName, inputName=endInputName)
+            list(componentName=endComponentName, inputName=endInputName)
         }
     pipe <- list(start=start, end=end)
     class(pipe) <- "pipe"
