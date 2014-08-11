@@ -267,30 +267,58 @@ runPipeline <- function(pipeline) {
 
 ## creating new pipelines
 
-pipeStart <- function(componentName=NULL, outputName, componentRef=NULL,
-                      path=NULL) {
-    if (is.null(componentName)) {
-        list("component-ref"=componentRef, "output-name"=outputName)
-    } else {
-        list("component-name"=componentName, "output-name"=outputName)
-    }
+## pipeStart <- function(componentName=NULL, outputName, componentRef=NULL,
+##                       path=NULL) {
+##     if (is.null(componentName)) {
+##         list("component-ref"=componentRef, "output-name"=outputName)
+##     } else {
+##         list("component-name"=componentName, "output-name"=outputName)
+##     }
+## }
+
+## pipeEnd <- function(componentName=NULL, inputName, componentRef=NULL,
+##                       path=NULL) {
+##     if (is.null(componentName)) {
+##         list("component-ref"=componentRef, "input-name"=inputName)
+##     } else {
+##         list("component-name"=componentName, "input-name"=inputName)
+##     }
+## }
+
+## ## returns a pipe list object
+## pipe <- function(start, end) {
+##     pipe <- list(start=start, end=end)
+##     class(pipe) <- c("oapipe", "list")
+##     pipe
+## }
+
+#' Create a pipe object
+#'
+#' @param startModuleName Name of start module
+#' @param startOutputName Name of start object
+#' @param endModuleName Name of end module
+#' @param endInputName Name of end input
+#' @param startModuleRef Address of start module
+#' @param endModuleRed Address of end module
+#' @return \code{pipe} connecting \code{startModuleName}.\code{startOutputName} to \code{endModuleName}.\code{endInputName}
+#' @export
+pipe <- function (startModuleName=NULL, startOutputName,
+                  endModuleName=NULL, endInputName,
+                  startModuleRef=NULL, endModuleRef=NULL) {
+    start <-
+        if (is.null(startModuleName)) {
+            list(componentRef=startModuleRef, outputName=startOutputName)
+        } else {
+            list(componentName=startModuleName, outputName=startOutputName)
+        }
+    end <-
+        if (is.null(endModuleName)) {
+            list(componentRef=endModuleRef, inputName=endInputName)
+        } else {
+            list(componentName=endModuleName, inputName=endInputName)
+        }
 }
 
-pipeEnd <- function(componentName=NULL, inputName, componentRef=NULL,
-                      path=NULL) {
-    if (is.null(componentName)) {
-        list("component-ref"=componentRef, "input-name"=inputName)
-    } else {
-        list("component-name"=componentName, "input-name"=inputName)
-    }
-}
-
-## returns a pipe list object
-pipe <- function(start, end) {
-    pipe <- list(start=start, end=end)
-    class(pipe) <- c("oapipe", "list")
-    pipe
-}
 
 ## adds a module object list to a pipeline
 addModule <- function(newModule, pipeline) {
