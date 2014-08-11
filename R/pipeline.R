@@ -270,31 +270,6 @@ runPipeline <- function(pipeline) {
 
 ## creating new pipelines
 
-## pipeStart <- function(componentName=NULL, outputName, componentRef=NULL,
-##                       path=NULL) {
-##     if (is.null(componentName)) {
-##         list("component-ref"=componentRef, "output-name"=outputName)
-##     } else {
-##         list("component-name"=componentName, "output-name"=outputName)
-##     }
-## }
-
-## pipeEnd <- function(componentName=NULL, inputName, componentRef=NULL,
-##                       path=NULL) {
-##     if (is.null(componentName)) {
-##         list("component-ref"=componentRef, "input-name"=inputName)
-##     } else {
-##         list("component-name"=componentName, "input-name"=inputName)
-##     }
-## }
-
-## ## returns a pipe list object
-## pipe <- function(start, end) {
-##     pipe <- list(start=start, end=end)
-##     class(pipe) <- c("oapipe", "list")
-##     pipe
-## }
-
 #' Create a pipe object
 #'
 #' @param startModuleName Name of start module
@@ -320,6 +295,9 @@ pipe <- function (startModuleName=NULL, startOutputName,
         } else {
             list(componentName=endModuleName, inputName=endInputName)
         }
+    pipe <- list(start=start, end=end)
+    class(pipe) <- "pipe"
+    pipe
 }
 
 
