@@ -43,15 +43,19 @@ sourceOrder <- function(sources) {
 ##   - platform,
 ##   - sources
 ##   - outputs
+#' Read a module from an XML file
+#' @param filename File path of module XML document
+#' @param namespaces Namespaces used in XML document as named character vector
+#' @return \code{module} list
+#' @export
+#' @import XML
+#' @import RCurl
+#' @import tools
+#' @import RBGL
+#' @import graph
 loadModule <- function(name, ref, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    xml <- if (grepl("^ *https://", ref)) {
-        getURL(ref)
-    } else if (file.exists(ref)) {
-        readLines(ref)
-    } else {
-        readLines(findFile(ref, path))
-    }
+    xml <- fetchRef(ref, path)
     module <- xmlRoot(xmlParse(xml))
     descNodes <- getNodeSet(module, "//description|//oa:description",
                             namespaces=namespaces)
@@ -103,7 +107,7 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
                                  namespaces=namespaces)
     sources <-
         lapply(sourceNodes,
-               function(node) {
+               function(node, path) {
                    attrs <- xmlAttrs(node)
                    type <-
                        if (length(attrs) && names(attrs) == "type") {
@@ -122,16 +126,18 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
                        if (length(attrs) &&
                            any(grepl("ref", names(attrs)))) {
                            ref <- attrs[["ref"]]
-                           value <- if (grepl("^ *https://", ref)) {
-                               getURL(ref)
-                           } else {
-                               readLines(ref)
-                           }
+                           path <-
+                               if (any(grepl("path", names(attrs)))) {
+                                   attrs[["path"]]
+                               } else {
+                                   path
+                               }
+                           value <- fetchRef(ref, path)
                        } else {
                            xmlValue(node)
                        }
                    list("value"=value, "type"=type, "order"=order)
-               })
+               }, path)
     ## arrange sources in correct order
     sources <- lapply(sourceOrder(sources),
                       function (x, sources) {
@@ -187,6 +193,7 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
 ## - targetDirectory: where to save .xml file
 ## description:
 ##   saves a module to an .xml file on disk
+#' @export
 saveModule <- function(module, targetDirectory=getwd()) {
     moduleDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
@@ -253,6 +260,7 @@ runPlatform <- function(module, inputs, moduleFiles) {
 ##   - creates a directory for the module to be run in
 ##   - determines which platform the module requires
 ##   - runs the module on its platform
+#' @export
 runModule <- function(module, inputs=list(),
                       targetDirectory=getwd()) {
     moduleName <- module$name
@@ -273,12 +281,15 @@ runModule <- function(module, inputs=list(),
 
 ## module creation functions
 
+#' @export
 moduleInput <- function(name, type, format="", formatType="text") {
     c(name=name, type=type, format=format, formatType=formatType)
 }
+#' @export
 moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     c(name=name, type=type, format=format, formatType=formatType, ref=ref)
 }
+#' @export
 moduleSource <- function(value, ref=NULL, type="", order="") {
     if (!is.null(ref)) value <- readLines(ref)
     list(value=value, type=type, order=order)
@@ -301,6 +312,7 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 ##   - platform,
 ##   - sources
 ##   - outputs
+#' @export
 module <- function(name, description="", platform, inputs=list(),
                    outputs=list(), sources=list()) {
     names(platform) <- "name"

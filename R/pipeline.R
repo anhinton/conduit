@@ -12,6 +12,7 @@
 ##   - description
 ##   - modules
 ##   - pipes
+#' @export
 loadPipeline <- function(filename,
                          pipelineName=file_path_sans_ext(basename(filename)),
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
@@ -89,6 +90,7 @@ loadPipeline <- function(filename,
 ##   saves a pipeline to a pipeline .xml file
 ##   NB: always called 'pipeline.xml'
 ##   TODO: build in overwrite warning; provide option for different name?
+#' @export
 savePipeline <- function(pipeline, targetDirectory=getwd()) {
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
@@ -235,6 +237,7 @@ graphPipeline <- function(pipeline) {
 ## - determine running order for pipeline
 ## - calculate location of inputs
 ## - run modules in order with runModule()
+#' @export
 runPipeline <- function(pipeline) {
     if (!file.exists("pipelines")) dir.create("pipelines")
     pipelineName <- pipeline$name
@@ -267,12 +270,14 @@ runPipeline <- function(pipeline) {
 ## creating new pipelines
 
 ## returns a pipe list object
+#' @export
 pipe <- function(start, end) {
     names(start) <- names(end) <- c("module", "name")
     list(start=start, end=end)
 }
 
 ## adds a module object list to a pipeline
+#' @export
 addModule <- function(newModule, pipeline) {
     moduleNames <- c(names(pipeline$modules), newModule$name)
     pipeline$modules <- c(pipeline$modules, temp=list(newModule))
@@ -281,6 +286,7 @@ addModule <- function(newModule, pipeline) {
 }
 
 ## adds a pipe object list to a pipeline
+#' @export
 addPipe <- function(newPipe, pipeline) {
     pipeline$pipes <- c(pipeline$pipes, list(newPipe))
     pipeline
@@ -295,6 +301,7 @@ addPipe <- function(newPipe, pipeline) {
 ## description:
 ##   Constructs a pipeline list.
 ##   Names modules with module$name.
+#' @export
 pipeline <- function (name, description="", modules=list(), pipes=list()) {
     names(modules) <- sapply(modules, function(m) { m$name })
     list("name"=name, "description"=description, "modules"=modules,
