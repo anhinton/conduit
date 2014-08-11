@@ -319,6 +319,6 @@ pipeline <- function (name, description="", components=list(), pipes=list()) {
     names(components) <- sapply(components, function(c) { c$name })
     pipeline <- list(name=name, description=description, components=components,
                      pipes=pipes)
-    class(pipeline) <- c("oapipeline", "list")
+    class(pipeline) <- "pipeline"
     pipeline
 }
