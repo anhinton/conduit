@@ -207,25 +207,22 @@ graphPipeline <- function(pipeline) {
     pipes.list <-
         lapply(pipeline$pipes,
                function (x) {
-                   startModuleName <- x$start$componentName
-                   startOutputName <- x$start$outputName
-                   endModuleName <- x$end$componentName
-                   endInput <- x$end["input-name"]
-                   pipe <- c(startModule, startOutput, endModule, endInput)
-                   names(pipe) <- c("startModule", "startOutput", "endModule",
-                                    "endInput")
+                   pipe <- c(x$start$componentName, x$start$outputName,
+                             x$end$componentName, x$start$outputName)
+                   names(pipe) <- c("startComponentName", "startOutput",
+                                    "endComponentName", "endInput")
                    pipe
                })
     pipes.matrix <- do.call(rbind, pipes.list)
     edgeList <-
-        lapply(moduleNames,
-               function (startModule, pipes) {
-                   isStartModule <- pipes[,1] == startModule
-                   list(edges=pipes[isStartModule,3])
+        lapply(componentNames,
+               function (startComponentName, pipes) {
+                   isStartComponent <- pipes[,1] == startComponentName
+                   list(edges=pipes[isStartComponent,3])
                },
                pipes.matrix)
-    names(edgeList) <- moduleNames
-    new("graphNEL", nodes=moduleNames, edgeL=edgeList,
+    names(edgeList) <- componentNames
+    new("graphNEL", nodes=componentNames, edgeL=edgeList,
         edgemode="directed")
 }
 
