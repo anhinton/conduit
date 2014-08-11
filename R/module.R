@@ -321,6 +321,6 @@ module <- function(name, description="", platform, inputs=NULL,
     }
     module <- list(name=name, description=description, platform=platform,
                    inputs=inputs, outputs=outputs, sources=sources)
-    class(module) <- c("oamodule", "list")
+    class(module) <- "module"
     module
 }
