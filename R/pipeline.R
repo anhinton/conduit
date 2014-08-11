@@ -170,14 +170,14 @@ inputsList <- function(pipes, modules, pipelinePath) {
     inputNames <-
         lapply(pipes,
                function (x) {
-                   paste(x$end["component-name"], x$end["input-name"], sep=".")
+                   paste(x$end$componentName, x$end$inputName, sep=".")
                })
     inputsList <-
         lapply(pipes,
                function (x, modules, pipelinePath) {
-                   endModule <- modules[[x$end["component-name"]]]
+                   endModule <- modules[[x$end$componentName]]
                    platform <- endModule$platform["name"]
-                   type <- endModule$inputs[[x$end["component-name"]]]["type"]
+                   type <- endModule$inputs[[x$end$inputName]]["type"]
                    if (type == "internal") {
                        input <- file.path(pipelinePath, "modules",
                                           x$start["component-name"],
@@ -250,7 +250,7 @@ runPipeline <- function(pipeline) {
     moduleNames <- names(modules)
     ## making a graph of the pipeline to determine order
     moduleGraph <- graphPipeline(pipeline)
-    moduleOrder <- tsort(moduleGraph)
+    moduleOrder <- RBGL::tsort(moduleGraph)
     inputs <- inputsList(pipeline$pipes, modules, pipelinePath)
     x <-
         lapply(moduleOrder,
