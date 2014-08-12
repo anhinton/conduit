@@ -90,6 +90,7 @@ loadPipeline <- function(filename,
 ##   saves a pipeline to a pipeline .xml file
 ##   NB: always called 'pipeline.xml'
 ##   TODO: build in overwrite warning; provide option for different name?
+#' @import XML
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd()) {
     pipelineDoc <-
@@ -98,17 +99,25 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineRoot <- xmlRoot(pipelineDoc)
     description <- newXMLNode("description", pipeline$description)
-    moduleNames <- names(pipeline$modules)
-    modules <- lapply(names(pipeline$modules),
-                      function (m) {
-                          newXMLNode("module", attrs=c(name=m))
-                      })
-    names(modules) <- NULL
+    componentNames <- names(pipeline$components)
+    components <-
+        addChildren(
+            newXMLNode("components"),
+            kids=lapply(pipeline$components,
+                function (c) {
+                    if (class(c) == "module") {
+                        newXMLNode("module", attrs=c(name=c$name))
+                    } else if (class(c) == "pipeline") {
+                        newXMLNode("pipeline", attrs=c(name=c$name))
+                    }
+                }))
     pipes <-
         lapply(pipeline$pipes,
                function (p) {
-                   startAttrs <- c(p$start["module"], p$start["name"])
-                   endAttrs <- c(p$end["module"], p$end["name"])
+                   startAttrs <- c("component-name"=p$start$componentName,
+                                   "output-name"=p$start$outputName)
+                   endAttrs <- c("component-name"=p$end$componentName,
+                                 "output-name"=p$end$inputName)
                    pipe <- newXMLNode("pipe")
                    pipe <-
                        addChildren(pipe,
@@ -117,7 +126,7 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
                                        newXMLNode("end", attrs=endAttrs)))
                })
     pipelineRoot <- addChildren(pipelineRoot,
-                                kids=list(description, modules, pipes))
+                                kids=list(description, components, pipes))
     pipelineFilePath <-
         file.path(targetDirectory,
                   "pipeline.xml")
@@ -135,8 +144,11 @@ exportPipeline <- function(pipeline, targetDirectory) {
     pipelineDirectory <- file.path(targetDirectory, pipeline$name)
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
-    } else {
-        warning("this pipeline directory exists and you might be writing over something useful")
+    ## ## FIXME: I was producing this warning every time AKA ignoring it, so it
+    ## ## would be far better if I got some real warnings and errors and what
+    ## ## have you in place
+    ## } else {
+    ##     warning("this pipeline directory exists and you might be writing over something useful")
     }
     savePipeline(pipeline, pipelineDirectory)
     lapply(pipeline$modules, saveModule, pipelineDirectory)
