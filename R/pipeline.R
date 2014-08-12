@@ -210,7 +210,7 @@ inputsList <- function(pipes, components, pipelinePath) {
 #'
 #' @param pipeline A \code{pipeline} list object
 #'
-#' @return A \code{graphNEL} graph
+#' @return A \pkg{graph} \code{graphNEL} object
 #' @import graph
 graphPipeline <- function(pipeline) {
     componentNames <- names(pipeline$components)
@@ -236,15 +236,31 @@ graphPipeline <- function(pipeline) {
         edgemode="directed")
 }
 
-## runPipeline()
-## arguments:
-## - pipeline
-## description:
-## - create a directory called "pipelines"
-## - create a named directory for in pipelines/
-## - determine running order for pipeline
-## - calculate location of inputs
-## - run modules in order with runModule()
+#' Run a pipeline
+#' 
+#' @details
+#' This function will attempt to run an OpenAPI \code{pipeline} list object,
+#' either loaded from a pipeline .XML file with \code{loadPipeline} or created
+#' with \code{pipeline} function.
+#'
+#' The function should produce a directory called \file{pipelines} in the
+#' working directory where it will produce its \code{module}s' results.
+#'
+#' First the function will determine the order in which its modules are to
+#' be run. Note that the \code{pipeline} is not allowed to have any cycles or
+#' the function will fail.
+#'
+#' The function then determines the file paths of the objects described in
+#' the \code{pipe}s as inputs/outputs.
+#'
+#' Finally the function runs each \code{module} in the order determined,
+#' feeding each \code{module} its inputs. A directory will be created for each
+#' \code{module} in \file{pipelines/modules}, in which the function will save
+#' the script used to run the \code{module}, and its outputs.
+#'
+#' @param pipeline A \code{pipeline} list object
+#' @return Meaningless list. TODO: fix what \code{runPipeline},
+#' \code{runModule}, \code{runPlatform} return.
 #' @export
 runPipeline <- function(pipeline) {
     if (!file.exists("pipelines")) dir.create("pipelines")

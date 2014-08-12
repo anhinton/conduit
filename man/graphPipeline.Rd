@@ -6,10 +6,10 @@
 graphPipeline(pipeline)
 }
 \arguments{
-\item{pipeline}{\code{pipeline} list object}
+\item{pipeline}{A \code{pipeline} list object}
 }
 \value{
-A \code{graphNEL} graph
+A \pkg{graph} \code{graphNEL} object
 }
 \description{
 \code{graphPipeline} produces a directed graph of the given
