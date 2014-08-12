@@ -82,14 +82,12 @@ loadPipeline <- function(filename,
 
 ## functions to write a pipeline (and its modules) to XML files
 
-## savePipeline()
-## arguments:
-## - pipeline
-## - targetDirectory: where to save .xml file
-## description:
-##   saves a pipeline to a pipeline .xml file
-##   NB: always called 'pipeline.xml'
-##   TODO: build in overwrite warning; provide option for different name?
+#' Save a pipeline to disk
+#'
+#' Saves a \code{pipeline} to disk as an openapi XML file
+#'
+#' As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
+#' 
 #' @import XML
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd()) {
