@@ -150,8 +150,10 @@ exportPipeline <- function(pipeline, targetDirectory) {
     ## } else {
     ##     warning("this pipeline directory exists and you might be writing over something useful")
     }
-    savePipeline(pipeline, pipelineDirectory)
-    lapply(pipeline$modules, saveModule, pipelineDirectory)
+    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
+    result <- c(pipeline=pipelineFile,
+                lapply(pipeline$components, saveModule, pipelineDirectory))
+    result
 }
 
 ## functions to run a loaded PIPELINE
