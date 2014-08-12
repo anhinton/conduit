@@ -12,11 +12,13 @@
 ##   - description
 ##   - modules
 ##   - pipes
+#' @import XML
 #' @export
-loadPipeline <- function(filename,
-                         pipelineName=file_path_sans_ext(basename(filename)),
-                         namespaces=c(oa="http://www.openapi.org/2014/")) {
-    filename <- file_path_as_absolute(filename)
+loadPipeline <-
+    function(filename,
+             pipelineName=tools::file_path_sans_ext(basename(filename)),
+             namespaces=c(oa="http://www.openapi.org/2014/")) {
+    filename <- tools::file_path_as_absolute(filename)
     pipelineDir <- dirname(filename)
     pipeline <- xmlRoot(xmlParse(filename))
     descNodes <- getNodeSet(pipeline, "//description|//oa:description",
@@ -50,10 +52,14 @@ loadPipeline <- function(filename,
                        }
                    path <-
                        if (any(names(attrs) == "path")) {
-                           attrs[["path"]]
+                           amendSearchPaths(
+                               defaultSearchPaths,
+                               attrs[["path"]])
                        } else {
                            ## FIXME: this should make use of amendSearchPaths()
-                           paste0(pipelineDir, pathSep, defaultSearchPaths)
+                           amendSearchPaths(
+                               defaultSearchPaths,
+                               paste0(pipelineDir, pathSep))
                        }
                    loadModule(name, ref, path, namespaces)
                    }, namespaces)
@@ -65,15 +71,19 @@ loadPipeline <- function(filename,
     pipes <-
         lapply(pipeNodes,
                function (x, namespaces) {
+                   ## FIXME: assumes all pipes contain only
+                   ## start/endComponentName, and not
+                   ## start/endComponetRef. Need to write this case.
                    start <- xmlChildren(x)$start
-                   startModule <- xmlAttrs(start)[["module"]]
-                   startName <- xmlAttrs(start)[["name"]]
-                   start <- c("module"=startModule, "name"=startName)
+                   startComponentName <- xmlAttrs(start)[["component-name"]]
+                   startOutputName <- xmlAttrs(start)[["output-name"]]
                    end <- xmlChildren(x)$end
-                   endModule <- xmlAttrs(end)[["module"]]
-                   endName <- xmlAttrs(end)[["name"]]
-                   end <- c("module"=endModule, "name"=endName)
-                   list("start"=start, "end"=end)
+                   endComponentName <- xmlAttrs(end)[["component-name"]]
+                   endInputName <- xmlAttrs(end)[["input-name"]]
+                   pipe(startComponentName=startComponentName,
+                        startOutputName=startOutputName,
+                        endComponentName=endComponentName,
+                        endInputName=endInputName)
                },
                namespaces)    
     pipeline(name=pipelineName, description=description,
@@ -115,7 +125,7 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
                    startAttrs <- c("component-name"=p$start$componentName,
                                    "output-name"=p$start$outputName)
                    endAttrs <- c("component-name"=p$end$componentName,
-                                 "output-name"=p$end$inputName)
+                                 "input-name"=p$end$inputName)
                    pipe <- newXMLNode("pipe")
                    pipe <-
                        addChildren(pipe,
