@@ -12,6 +12,19 @@
 ##   - description
 ##   - modules
 ##   - pipes
+#' Load a pipeline and its modules from disk
+#'
+#' Read an openapi \code{pipeline} and its associated \code{module}s from an
+#' XML document
+#'
+#' @param filename file path to \code{pipeline} XML
+#' @param pipelineName as character value
+#' @param namespaces named charactor vector
+#' @return \code{pipeline} list containing:
+#' \item{name}{as character value}
+#' \item{description}{as character value}
+#' \item{components}{list of \code{module}s and \code{pipeline}s}
+#' \item{pipes}{list of \code{pipe}s}
 #' @import XML
 #' @export
 loadPipeline <-
