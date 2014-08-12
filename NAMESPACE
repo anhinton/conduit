@@ -2,6 +2,7 @@
 
 export(addModule)
 export(addPipe)
+export(exportPipeline)
 export(loadModule)
 export(loadPipeline)
 export(module)
