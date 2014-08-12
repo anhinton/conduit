@@ -133,13 +133,19 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
     saveXML(pipelineDoc, pipelineFilePath)
 }
 
-## exportPipeline()
-## arguments:
-## - pipeline
-## - targetDirectory: where to create named pipeline directory
-## description:
-##   creates a folder named for the pipeline$name in targetDirectory, then saves
-##   pipeline and module .xml files in this directory
+#' Save a pipeline and its modules to disk
+#'
+#' Save a \code{pipeline} and its \code{module}s to disk as openapi XML files
+#'
+#' Creates a directory named for the \code{pipeline} in \code{targetDirectory},
+#' then saves \code{pipeline} and \code{module} XML files in this directory.
+#'
+#' As at 2014-08-12 the \code{pipeline} is always saved as \file{pipeline.xml}
+#' no matter what the \code{pipeline} name.
+#'
+#' @param pipeline A \code{pipeline} list
+#' @param targetDirectory Output directory path
+#' @return A list of the XML file paths written
 exportPipeline <- function(pipeline, targetDirectory) {
     pipelineDirectory <- file.path(targetDirectory, pipeline$name)
     if (!file.exists(pipelineDirectory)) {
