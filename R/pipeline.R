@@ -166,7 +166,7 @@ internalExtension <- function(platform) {
 ##   make a list of where module inputs will come from
 ##   return list of inputs, each item of which is a character value containing
 ##   a path
-inputsList <- function(pipes, modules, pipelinePath) {
+inputsList <- function(pipes, components, pipelinePath) {
     inputNames <-
         lapply(pipes,
                function (x) {
@@ -174,27 +174,30 @@ inputsList <- function(pipes, modules, pipelinePath) {
                })
     inputsList <-
         lapply(pipes,
-               function (x, modules, pipelinePath) {
-                   endModule <- modules[[x$end$componentName]]
-                   platform <- endModule$platform["name"]
-                   type <- endModule$inputs[[x$end$inputName]]["type"]
+               function (x, components, pipelinePath) {
+                   endComponent <- components[[x$end$componentName]]
+                   platform <- endComponent$platform["name"]
+                   type <- endComponent$inputs[[x$end$inputName]]["type"]
+                   ## FIXME: this assumes the start component is a module
+                   ## and can be found in a "modules" folder. Needs to account
+                   ## for pipelines
                    if (type == "internal") {
                        input <- file.path(pipelinePath, "modules",
-                                          x$start["component-name"],
-                                          paste(x$start["output-name"],
+                                          x$start$componentName,
+                                          paste(x$start$outputName,
                                                 internalExtension(platform),
                                                 sep=""))
                    } else if (type == "external") {
-                       startModule <- modules[[x$start["component-name"]]]
+                       startComponent <- components[[x$start$componentName]]
                        input <-
-                           startModule$outputs[[x$start["output-name"]]]["ref"]
+                           startComponent$outputs[[x$start$outputName]]["ref"]
                        if (dirname(input) == ".") {
                            input <- file.path(pipelinePath, "modules",
-                                              x$start["component-name"], input)
+                                              x$start$componentName, input)
                        }
                    }
                    input
-               }, modules, pipelinePath)
+               }, components, pipelinePath)
     names(inputsList) <- inputNames
     inputsList
 }
@@ -257,6 +260,10 @@ runPipeline <- function(pipeline) {
                function (x, modules, inputs, pipelinePath) {
                    ## select inputs for this module and strip out module name
                    module <- modules[[x]]
+                   ## FIXME: selecting inputs from inputsList seems a little
+                   ## inelegant. Possibly calculating all input locations
+                   ## before anything is run is the reason for this.
+                   ## What else shall we try?
                    whichInputs <-
                        grepl(paste0("^", module$name,"[.]"), names(inputs))
                    inputs <- inputs[whichInputs]
