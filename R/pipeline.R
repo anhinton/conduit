@@ -1,17 +1,5 @@
 ### load, save, run and create pipelines
 
-## loadPipeline()
-## arguments:
-## - filename
-## - pipelineName
-## - namespaces
-## description:
-##   load a pipeline and its modules from an .xml file
-##   returns a list of:
-##   - name
-##   - description
-##   - modules
-##   - pipes
 #' Load a pipeline and its modules from disk
 #'
 #' Read an openapi \code{pipeline} and its associated \code{module}s from an
