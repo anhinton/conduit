@@ -157,15 +157,16 @@ internalExtension <- function(platform) {
     extension
 }
 
-## inputsList()
-## arguments:
-## - pipes
-## - modules
-## - pipelinePath: directory where pipeline will be run
-## description:
-##   make a list of where module inputs will come from
-##   return list of inputs, each item of which is a character value containing
-##   a path
+#' Returns a named list of input addresses
+#'
+#' \code{inputsList} returns a named list of absolute file locations for
+#' components' inputs.
+#' 
+#' List items are named as COMPONENT_NAME.INPUT_NAME
+#'
+#' @param pipes List of \code{pipe}s
+#' @param components List of \code{component}s
+#' @param pipelinePath Absolute file path to currently running \code{pipeline}
 inputsList <- function(pipes, components, pipelinePath) {
     inputNames <-
         lapply(pipes,
@@ -202,9 +203,15 @@ inputsList <- function(pipes, components, pipelinePath) {
     inputsList
 }
 
-## creates a graphNEL object from a pipeline. this is used by runPipeline() to
-## determine run order of modules, but should also be used at some future point
-## to draw cool pictures of my pipelines
+#' Create a graph of a pipeline
+#'
+#' \code{graphPipeline} produces a directed graph of the given
+#' \code{pipeline} with components as nodes and pipes as directed edges
+#'
+#' @param pipeline A \code{pipeline} list object
+#'
+#' @return A \code{graphNEL} graph
+#' @import graph
 graphPipeline <- function(pipeline) {
     componentNames <- names(pipeline$components)
     pipes.list <-
