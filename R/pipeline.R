@@ -142,9 +142,9 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
     saveXML(pipelineDoc, pipelineFilePath)
 }
 
-#' Save a pipeline and its modules to disk
+#' Wrie a pipeline and its modules to disk
 #'
-#' Save a \code{pipeline} and its \code{module}s to disk as openapi XML files
+#' Write a \code{pipeline} and its \code{module}s to disk as openapi XML files
 #'
 #' Creates a directory named for the \code{pipeline} in \code{targetDirectory},
 #' then saves \code{pipeline} and \code{module} XML files in this directory.
@@ -155,6 +155,7 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 #' @param pipeline A \code{pipeline} list
 #' @param targetDirectory Output directory path
 #' @return A list of the XML file paths written
+#' @export
 exportPipeline <- function(pipeline, targetDirectory) {
     pipelineDirectory <- file.path(targetDirectory, pipeline$name)
     if (!file.exists(pipelineDirectory)) {
@@ -375,17 +376,31 @@ addPipe <- function(newPipe, pipeline) {
     pipeline
 }
 
-## pipeline()
-## arguments:
-## - name: character
-## - desctription: character
-## - modules: list of modules made with module() or loadModule()
-## - pipes: list of pipes made with pipe()
-## description:
-##   Constructs a pipeline list.
-##   Names modules with module$name.
+#' Create a pipeline
+#'
+#' Create an openapi \code{pipeline} object
+#'
+#' If \code{components} is not specified, \code{pipeline} will construct
+#' it the compoments from \code{modules} and \code{pipelines}.
+#'
+#' @param name \code{pipeline} name
+#' @param description \code{pipeline} description
+#' @param components list of \code{module}s and \code{pipeline}s
+#' @param modules list of \code{module}s
+#' @param pipelines list of \code{pipeline}s
+#' @param pipes list of \code{pipe}s
+#' @return \code{pipeline} list containing:
+#' \item{name}{character value}
+#' \item{description}{character value}
+#' \item{components}{list of \code{module}s and \code{pipeline}s}
+#' \item{pipes}{list of \code{pipe}s}
 #' @export
-pipeline <- function (name, description="", components=list(), pipes=list()) {
+pipeline <- function (name, description="", components=list(), modules=list(),
+                      pipelines=list(), pipes=list()) {
+    components <-
+        if (!length(components)) {
+            c(modules, pipelines)
+        }
     names(components) <- sapply(components, function(c) { c$name })
     pipeline <- list(name=name, description=description, components=components,
                      pipes=pipes)
