@@ -27,6 +27,7 @@ amendSearchPaths <- function(searchPaths, newPaths) {
         } else {
             newPaths
         }
+    searchPaths
 }
 
 ## expandSearchPath to absolute file path
