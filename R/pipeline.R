@@ -362,10 +362,10 @@ pipe <- function (startComponentName=NULL, startOutputName,
 
 ## adds a module object list to a pipeline
 #' @export
-addModule <- function(newModule, pipeline) {
-    moduleNames <- c(names(pipeline$components), newModule$name)
-    pipeline$modules <- c(pipeline$components, temp=list(newModule))
-    names(pipeline$components) <- moduleNames
+addComponent <- function(newComponent, pipeline) {
+    componentNames <- c(names(pipeline$components), componentName(newComponent))
+    pipeline$components <- c(pipeline$components, temp=list(newComponent))
+    names(pipeline$components) <- componentNames
     pipeline
 }
 
