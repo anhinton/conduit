@@ -376,6 +376,16 @@ addPipe <- function(newPipe, pipeline) {
     pipeline
 }
 
+#' return the name of a component
+#'
+#' Returns the name of a \code{module} or \pipeline{pipeline}
+#'
+#' @param component \code{module} or \code{pipeline} object
+#' @return character value
+componentName <- function (component) {
+    component$name
+}
+
 #' Create a pipeline
 #'
 #' Create an openapi \code{pipeline} object
@@ -397,11 +407,10 @@ addPipe <- function(newPipe, pipeline) {
 #' @export
 pipeline <- function (name, description="", components=list(), modules=list(),
                       pipelines=list(), pipes=list()) {
-    components <-
-        if (!length(components)) {
-            c(modules, pipelines)
-        }
-    names(components) <- sapply(components, function(c) { c$name })
+    if (!length(components)) {
+        components <- c(modules, pipelines)
+    } 
+    names(components) <- sapply(components, componentName)
     pipeline <- list(name=name, description=description, components=components,
                      pipes=pipes)
     class(pipeline) <- "pipeline"
