@@ -65,10 +65,7 @@ loadPipeline <-
                    loadModule(name, ref, path, namespaces)
                    }, namespaces)
     names(modules) <-
-        sapply(modules,
-               function(m) {
-                   m$name
-               })
+        sapply(modules, componentName)
     pipes <-
         lapply(pipeNodes,
                function (x, namespaces) {
@@ -104,7 +101,8 @@ loadPipeline <-
 savePipeline <- function(pipeline, targetDirectory=getwd()) {
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=newXMLNode("pipeline", attrs=c(name=pipeline$name),
+                  node=newXMLNode("pipeline",
+                      attrs=c(name=componentName(pipeline)),
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineRoot <- xmlRoot(pipelineDoc)
     description <- newXMLNode("description", pipeline$description)
@@ -115,9 +113,11 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
             kids=lapply(pipeline$components,
                 function (c) {
                     if (class(c) == "module") {
-                        newXMLNode("module", attrs=c(name=c$name))
+                        newXMLNode("module",
+                                   attrs=c(name=componentName(c)))
                     } else if (class(c) == "pipeline") {
-                        newXMLNode("pipeline", attrs=c(name=c$name))
+                        newXMLNode("pipeline",
+                                   attrs=c(name=componentName(c)))
                     }
                 }))
     pipes <-
@@ -157,7 +157,7 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 #' @return A list of the XML file paths written
 #' @export
 exportPipeline <- function(pipeline, targetDirectory) {
-    pipelineDirectory <- file.path(targetDirectory, pipeline$name)
+    pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
     ## ## FIXME: I was producing this warning every time AKA ignoring it, so it
@@ -294,7 +294,7 @@ graphPipeline <- function(pipeline) {
 #' @export
 runPipeline <- function(pipeline) {
     if (!file.exists("pipelines")) dir.create("pipelines")
-    pipelineName <- pipeline$name
+    pipelineName <- componentName(pipeline)
     pipelinePath <- file.path("pipelines", pipelineName)
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
@@ -318,10 +318,12 @@ runPipeline <- function(pipeline) {
                    ## before anything is run is the reason for this.
                    ## What else shall we try?
                    whichInputs <-
-                       grepl(paste0("^", module$name,"[.]"), names(inputs))
+                       grepl(paste0("^", componentName(module),"[.]"),
+                             names(inputs))
                    inputs <- inputs[whichInputs]
                    names(inputs) <-
-                       gsub(paste0("^",module$name,"[.]"), "", names(inputs))
+                       gsub(paste0("^", componentName(module),"[.]"), "",
+                            names(inputs))
                    ## run the beast
                    runModule(module, inputs, pipelinePath)
                }, modules, inputs, pipelinePath)
@@ -369,7 +371,13 @@ addComponent <- function(newComponent, pipeline) {
     pipeline
 }
 
-## adds a pipe object list to a pipeline
+#' add a pipe to a pipeline
+#'
+#' Add a \code{pipe} object to a \code{pipeline}
+#'
+#' @param newPipe \code{pipe} object
+#' @param pipeline \code{pipeline} object
+#' @return \code{pipeline} object
 #' @export
 addPipe <- function(newPipe, pipeline) {
     pipeline$pipes <- c(pipeline$pipes, list(newPipe))
