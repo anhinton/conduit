@@ -318,24 +318,31 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 ##   - outputs
 #' @export
 module <- function(name, description="", platform, inputs=list(),
-                   outputs=list(), sources=list()) {
-    names(platform) <- "name"
-    if (!is.null(inputs)) {
-        names(inputs) <-
-            sapply(inputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-    if (!is.null(outputs)) {
-        names(outputs) <-
-            sapply(outputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-    module <- list(name=name, description=description, platform=platform,
-                   inputs=inputs, outputs=outputs, sources=sources)
+                   outputs=list(), sources=list(),
+                   ref=NULL, path="") {
+    module <-
+        if (!is.null(ref)) {
+            list(ref=ref, path=path)
+        } else {
+            names(platform) <- "name"
+            if (!is.null(inputs)) {
+                names(inputs) <-
+                    sapply(inputs,
+                           function (x) {
+                               x["name"]
+                           })
+            }
+            if (!is.null(outputs)) {
+                names(outputs) <-
+                    sapply(outputs,
+                           function (x) {
+                               x["name"]
+                           })
+            }
+            list(name=name, description=description,
+                 platform=platform, inputs=inputs, outputs=outputs,
+                 sources=sources)
+        }
     class(module) <- "module"
     module
 }
