@@ -196,6 +196,9 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
 ##   saves a module to an .xml file on disk
 #' @export
 saveModule <- function(module, targetDirectory=getwd()) {
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
     moduleDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
                   node=newXMLNode("module", attrs=c(name=module$name),
