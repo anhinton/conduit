@@ -57,7 +57,6 @@ loadPipeline <-
                                defaultSearchPaths,
                                attrs[["path"]])
                        } else {
-                           ## FIXME: this should make use of amendSearchPaths()
                            amendSearchPaths(
                                defaultSearchPaths,
                                paste0(pipelineDir, pathSep))
