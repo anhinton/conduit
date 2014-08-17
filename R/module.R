@@ -188,14 +188,21 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
 
 ## functions for saving a module object to an XML file
 
-## saveModule ()
-## arguments:
-## - module: module object from loadModule() or module()
-## - targetDirectory: where to save .xml file
-## description:
-##   saves a module to an .xml file on disk
+#' Save a module to disk
+#'
+#' Save a \code{module} to an XML file on disk
+#'
+#' The resulting XML file will be called \file{MODULE_NAME.xml} unless another
+#' \code{filename} is specified.
+#'
+#' @param module \code{module} object
+#' @param targetDirectory destination directory as file path
+#' @param filename character string of desired filename
+#' @return character value of resulting file location
+#' @import XML
 #' @export
-saveModule <- function(module, targetDirectory=getwd()) {
+saveModule <- function(module, targetDirectory=getwd(),
+                       filename=paste0(module$name, ".xml")) {
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
@@ -238,8 +245,7 @@ saveModule <- function(module, targetDirectory=getwd()) {
     moduleRoot <- addChildren(moduleRoot,
                               kids=list(description, platform, inputs, sources,
                                   outputs))
-    moduleFilePath <- file.path(targetDirectory,
-                                paste(module$name, ".xml", sep=""))
+    moduleFilePath <- file.path(targetDirectory, filename)
     saveXML(moduleDoc, moduleFilePath)
 }
 
