@@ -188,6 +188,60 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
 
 ## functions for saving a module object to an XML file
 
+#' Convert a module to XML
+#'
+#' @param module \code{module} object
+#' @param namespaceDefinition XML namespaces as character vector
+#' @return \code{XMLNode} object
+#' @import XML
+moduleToXML <- function (module,
+                         namespaceDefinitions=NULL) {
+    moduleRoot <- newXMLNode("module", attrs=c(name=module$name),
+                             namespaceDefinitions=namespaceDefinitions)
+    if (is.null(module$ref)) {
+        description <- newXMLNode("description", module$description)
+        inputs <-
+            lapply(
+                module$inputs,
+                function(i) {
+                    input <- newXMLNode("input", attrs=c(i["name"], i["type"]))
+                    input <-
+                        addChildren(
+                            input,
+                            newXMLNode("format",
+                                       attrs=c(i["formatType"])))
+                })
+        outputs <-
+            lapply(module$outputs,
+                   function(o) {
+                       attrs <- c(o["name"], o["type"])
+                       if (o["type"] == "external") {
+                           attrs <- c(attrs, o["ref"])
+                       }
+                       output <- newXMLNode("output", attrs=attrs)
+                       output <-
+                           addChildren(output,
+                                       newXMLNode("format",
+                                                  attrs=c(o["formatType"])))
+                   })
+        platform <- newXMLNode("platform", attrs=c(module$platform))
+        sources <-
+            lapply(module$sources,
+                   function (s) {
+                       newXMLNode(name="source", attrs=c(s["type"], s["order"]),
+                                  newXMLCDataNode(s$value))
+                       
+                   })
+        moduleRoot <-
+            addChildren(moduleRoot,
+                        kids=list(description, platform, inputs, sources,
+                            outputs))
+    } else {
+        xmlAttrs(moduleRoot) <- c(ref=module$ref, path=module$path)
+    }
+    moduleRoot
+}
+
 #' Save a module to disk
 #'
 #' Save a \code{module} to an XML file on disk
@@ -208,43 +262,8 @@ saveModule <- function(module, targetDirectory=getwd(),
     }
     moduleDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=newXMLNode("module", attrs=c(name=module$name),
+                  node=moduleToXML(module,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
-    moduleRoot <- xmlRoot(moduleDoc)
-    description <- newXMLNode("description", module$description)
-    inputs <-
-        lapply(module$inputs,
-               function(i) {
-                   input <- newXMLNode("input", attrs=c(i["name"], i["type"]))
-                   input <-
-                       addChildren(input,
-                                   newXMLNode("format",
-                                              attrs=c(i["formatType"])))
-               })
-    outputs <-
-        lapply(module$outputs,
-               function(o) {
-                   attrs <- c(o["name"], o["type"])
-                   if (o["type"] == "external") {
-                       attrs <- c(attrs, o["ref"])
-                   }
-                   output <- newXMLNode("output", attrs=attrs)
-                   output <-
-                       addChildren(output,
-                                   newXMLNode("format",
-                                              attrs=c(o["formatType"])))
-               })
-    platform <- newXMLNode("platform", attrs=c(module$platform))
-    sources <-
-        lapply(module$sources,
-               function (s) {
-                   newXMLNode(name="source", attrs=c(s["type"], s["order"]),
-                              newXMLCDataNode(s$value))
-                   
-               })
-    moduleRoot <- addChildren(moduleRoot,
-                              kids=list(description, platform, inputs, sources,
-                                  outputs))
     moduleFilePath <- file.path(targetDirectory, filename)
     saveXML(moduleDoc, moduleFilePath)
 }
@@ -324,25 +343,29 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 ##   - outputs
 #' @export
 module <- function(name, description="", platform, inputs=list(),
-                   outputs=list(), sources=list()) {
-    names(platform) <- "name"
-    if (!is.null(inputs)) {
-        names(inputs) <-
-            sapply(inputs,
-                   function (x) {
-                       x["name"]
-                   })
+                   outputs=list(), sources=list(), ref=NULL, path=NULL) {
+    if (!is.null(ref)) {
+        module <- list(name=name, ref=ref, path=path)
+    } else {
+        names(platform) <- "name"
+        if (!is.null(inputs)) {
+            names(inputs) <-
+                sapply(inputs,
+                       function (x) {
+                           x["name"]
+                       })
+        }
+        if (!is.null(outputs)) {
+            names(outputs) <-
+                sapply(outputs,
+                       function (x) {
+                           x["name"]
+                       })
+        }
+        module <- list(name=name, description=description,
+                       platform=platform, inputs=inputs, outputs=outputs,
+                       sources=sources)
     }
-    if (!is.null(outputs)) {
-        names(outputs) <-
-            sapply(outputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-    module <- list(name=name, description=description,
-         platform=platform, inputs=inputs, outputs=outputs,
-         sources=sources)
     class(module) <- "module"
     module
 }
