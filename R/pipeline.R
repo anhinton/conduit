@@ -39,18 +39,9 @@ loadPipeline <-
         lapply(moduleNodes,
                function(m, namespaces) {
                    attrs <- xmlAttrs(m)
-                   name <-
-                       if (any(names(attrs) == "name")) {
-                           attrs[["name"]]
-                       } else {
-                           basename(attrs[["ref"]])
-                       }
-                   ref <-
-                       if (any(names(attrs) == "ref")) {
-                           attrs[["ref"]]
-                       } else {
-                           paste0(attrs[["name"]], ".xml")
-                       }
+                   name <-attrs[["name"]]
+                   ref <-attrs[["ref"]]
+                   ## FIXME: can't handle anon/inline components
                    path <-
                        if (any(names(attrs) == "path")) {
                            amendSearchPaths(
@@ -89,36 +80,36 @@ loadPipeline <-
 
 ## functions to write a pipeline (and its modules) to XML files
 
-#' Save a pipeline to disk
+#' Convert a pipeline to XML
 #'
-#' Saves a \code{pipeline} to disk as an openapi XML file
-#'
-#' As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
-#' 
-#' @import XML
-#' @export
-savePipeline <- function(pipeline, targetDirectory=getwd()) {
-    pipelineDoc <-
-        newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=newXMLNode("pipeline",
-                      attrs=c(name=componentName(pipeline)),
-                      namespaceDefinitions="http://www.openapi.org/2014/"))
-    pipelineRoot <- xmlRoot(pipelineDoc)
+#' @param pipeline \code{pipeline} object
+#' @param namespaceDefinition XML namespaces as character vector
+#' @return \code{XMLNode} object
+pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
+    pipelineRoot <- newXMLNode("pipeline",
+                               attrs=c(name=componentName(pipeline)),
+                               namespaceDefinitions=namespaceDefinitions)
     description <- newXMLNode("description", pipeline$description)
-    componentNames <- names(pipeline$components)
+    ## componentNames <- names(pipeline$components)
+    ## when export=T we alter all the components to be name/ref only, assuming
+    ## the file will be called COMP_NAME.xml with no path info
     components <-
-        addChildren(
-            newXMLNode("components"),
-            kids=lapply(pipeline$components,
-                function (c) {
-                    if (class(c) == "module") {
-                        newXMLNode("module",
-                                   attrs=c(name=componentName(c)))
-                    } else if (class(c) == "pipeline") {
-                        newXMLNode("pipeline",
-                                   attrs=c(name=componentName(c)))
-                    }
-                }))
+        if (export) {
+            lapply(pipeline$components,
+                   function(c) {
+                       moduleToXML(
+                           module(
+                               name=c$name,
+                               ref=paste0(c$name, ".xml")))
+                   })
+        } else {
+            lapply(pipeline$components,
+                   function(c) {
+                       moduleToXML(c)
+                   })
+        }
+    ## names(components) <- componentNames
+    components <- addChildren(newXMLNode("components"), kids=components)
     pipes <-
         lapply(pipeline$pipes,
                function (p) {
@@ -135,6 +126,29 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
                })
     pipelineRoot <- addChildren(pipelineRoot,
                                 kids=list(description, components, pipes))
+    pipelineRoot
+}
+
+#' Save a pipeline to disk
+#'
+#' Saves a \code{pipeline} to disk as an openapi XML file
+#'
+#' If \code{export} is true the resulting pipeline file will have all
+#' components in name/ref format, assuming the component XML files
+#' have been saved to the \file{targetDirectory}.
+#'
+#' As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
+#'
+#' @param pipeline \code{pipeline} object
+#' @param targetDirectory file location to save output
+#' @param export boolean determining whether to keep components inline
+#' @import XML
+#' @export
+savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
+    pipelineDoc <-
+        newXMLDoc(namespaces="http://www.openapi.org/2014",
+                  node=pipelineToXML(pipeline=pipeline, export=export,
+                      namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineFilePath <-
         file.path(targetDirectory,
                   "pipeline.xml")
@@ -165,7 +179,7 @@ exportPipeline <- function(pipeline, targetDirectory) {
     ## } else {
     ##     warning("this pipeline directory exists and you might be writing over something useful")
     }
-    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
+    pipelineFile <- savePipeline(pipeline, pipelineDirectory, export=TRUE)
     result <- c(pipeline=pipelineFile,
                 lapply(pipeline$components, saveModule, pipelineDirectory))
     result
