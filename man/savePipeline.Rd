@@ -3,12 +3,23 @@
 \alias{savePipeline}
 \title{Save a pipeline to disk}
 \usage{
-savePipeline(pipeline, targetDirectory = getwd())
+savePipeline(pipeline, targetDirectory = getwd(), export = FALSE)
+}
+\arguments{
+\item{pipeline}{\code{pipeline} object}
+
+\item{targetDirectory}{file location to save output}
+
+\item{export}{boolean determining whether to keep components inline}
 }
 \description{
 Saves a \code{pipeline} to disk as an openapi XML file
 }
 \details{
+If \code{export} is true the resulting pipeline file will have all
+components in name/ref format, assuming the component XML files
+have been saved to the \file{targetDirectory}.
+
 As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
 }
 
