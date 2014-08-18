@@ -7,7 +7,7 @@
 fetchRef <- function(ref, path=defaultSearchPaths) {
     if (grepl("^ *https://", ref)){
         getURL(ref)
-    } else if (file.exists(ref)) {
+    } else if (grepl("^ */", dirname(ref))) {
         readLines(ref)
     } else {
         readLines(findFile(ref, path))
