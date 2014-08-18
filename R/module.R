@@ -196,7 +196,7 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
 #' @import XML
 moduleToXML <- function (module,
                          namespaceDefinitions=NULL) {
-    moduleRoot <- newXMLNode("module", attrs=c(module$name),
+    moduleRoot <- newXMLNode("module", attrs=c(name=module$name),
                              namespaceDefinitions=namespaceDefinitions)
     if (is.null(module$ref)) {
         description <- newXMLNode("description", module$description)

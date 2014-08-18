@@ -39,8 +39,8 @@ loadPipeline <-
         lapply(moduleNodes,
                function(m, namespaces) {
                    attrs <- xmlAttrs(m)
-                   name <- attrs["name"]
-                   ref <- attrs["ref"]
+                   name <- attrs[["name"]] # [[ to drop attr names
+                   ref <- attrs[["ref"]]
                    ## FIXME: can't handle anon/inline components
                    path <-
                        if (any(names(attrs) == "path")) {
