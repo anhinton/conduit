@@ -98,14 +98,13 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
                function(c) {
                    componentRoot <-
                        newXMLNode("component",
-                                  attrs=c(name=c$name),
-                                  namespaceDefinitions=namespaceDefinitions)
+                                  attrs=c(name=c$name))
                    if (export) {
                        xmlAttrs(componentRoot) <-
                            c(ref=paste0(c$name, ".xml"),
                              type=class(c))
                    } else {
-                       componentXML <- moduleToXML(c)
+                       componentXML <- moduleToXML(c, namespaceDefinitions)
                        componentRoot <-
                            addChildren(componentRoot,
                                        kids=list(componentXML))
