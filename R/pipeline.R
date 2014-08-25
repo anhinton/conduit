@@ -214,27 +214,27 @@ inputsList <- function(pipes, components, pipelinePath) {
     inputNames <-
         lapply(pipes,
                function (x) {
-                   paste(x$end$componentName, x$end$inputName, sep=".")
+                   paste(x$end$component, x$end$input, sep=".")
                })
     inputsList <-
         lapply(pipes,
                function (x, components, pipelinePath) {
-                   endComponent <- components[[x$end$componentName]]
+                   endComponent <- components[[x$end$component]]
                    platform <- endComponent$platform["name"]
-                   type <- endComponent$inputs[[x$end$inputName]]["type"]
+                   type <- endComponent$inputs[[x$end$input]]["type"]
                    ## FIXME: this assumes the start component is a module
                    ## and can be found in a "modules" folder. Needs to account
                    ## for pipelines
                    if (type == "internal") {
                        input <- file.path(pipelinePath, "modules",
-                                          x$start$componentName,
-                                          paste(x$start$outputName,
+                                          x$start$component,
+                                          paste(x$start$output,
                                                 internalExtension(platform),
                                                 sep=""))
                    } else if (type == "external") {
-                       startComponent <- components[[x$start$componentName]]
+                       startComponent <- components[[x$start$component]]
                        input <-
-                           startComponent$outputs[[x$start$outputName]]["ref"]
+                           startComponent$outputs[[x$start$output]]["ref"]
                        if (dirname(input) == ".") {
                            input <- file.path(pipelinePath, "modules",
                                               x$start$componentName, input)
@@ -260,10 +260,10 @@ graphPipeline <- function(pipeline) {
     pipes.list <-
         lapply(pipeline$pipes,
                function (x) {
-                   pipe <- c(x$start$componentName, x$start$outputName,
-                             x$end$componentName, x$start$outputName)
-                   names(pipe) <- c("startComponentName", "startOutput",
-                                    "endComponentName", "endInput")
+                   pipe <- c(x$start$component, x$start$output,
+                             x$end$component, x$start$output)
+                   names(pipe) <- c("startComponent", "startOutput",
+                                    "endComponent", "endInput")
                    pipe
                })
     pipes.matrix <- do.call(rbind, pipes.list)
@@ -346,34 +346,20 @@ runPipeline <- function(pipeline) {
 
 #' Create a pipe object
 #'
-#' @param startComponentName Name of start module
-#' @param startOutputName Name of start object
-#' @param endComponentName Name of end module
-#' @param endInputName Name of end input
-#' @param startComponentRef Address of start module
-#' @param endComponentRed Address of end module
+#' @param startComponent Name of start module
+#' @param startOutput Name of start object
+#' @param endComponent Name of end module
+#' @param endInput Name of end input
 #' @return \code{pipe} connecting \code{startComponentName}.\code{startOutputName} to \code{endComponentName}.\code{endInputName}
 #' @export
-pipe <- function (startComponentName=NULL, startOutputName,
-                  endComponentName=NULL, endInputName,
-                  startComponentRef=NULL, endComponentRef=NULL) {
-    start <-
-        if (is.null(startComponentName)) {
-            list(componentRef=startComponentRef, outputName=startOutputName)
-        } else {
-            list(componentName=startComponentName, outputName=startOutputName)
-        }
-    end <-
-        if (is.null(endComponentName)) {
-            list(componentRef=endComponentRef, inputName=endInputName)
-        } else {
-            list(componentName=endComponentName, inputName=endInputName)
-        }
+pipe <- function (startComponent, startOutput,
+                  endComponent, endInput) {
+    start <- list(component=startComponent, output=startOutput)
+    end <- list(component=endComponent, input=endInput)
     pipe <- list(start=start, end=end)
     class(pipe) <- "pipe"
     pipe
 }
-
 
 ## adds a module object list to a pipeline
 #' @export
