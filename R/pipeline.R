@@ -115,10 +115,10 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
     pipes <-
         lapply(pipeline$pipes,
                function (p) {
-                   startAttrs <- c("component-name"=p$start$componentName,
-                                   "output-name"=p$start$outputName)
-                   endAttrs <- c("component-name"=p$end$componentName,
-                                 "input-name"=p$end$inputName)
+                   startAttrs <- c("component"=p$start$component,
+                                   "output"=p$start$output)
+                   endAttrs <- c("component"=p$end$component,
+                                 "input"=p$end$input)
                    pipe <- newXMLNode("pipe")
                    pipe <-
                        addChildren(pipe,
