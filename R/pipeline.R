@@ -97,11 +97,14 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
         if (export) {
             lapply(pipeline$components,
                    function(c) {
-                       moduleToXML(
-                           module(
-                               name=c$name,
-                               ref=paste0(c$name, ".xml")))
-                   })
+                       componentRoot <-
+                           newXMLNode(
+                               "component",
+                               attrs=c(name=c$name,
+                                   ref=paste0(c$name, ".xml"),
+                                   type=class(c)),
+                               namespaceDefinitions=namespaceDefinitions)
+                       })
         } else {
             lapply(pipeline$components,
                    function(c) {
