@@ -64,19 +64,19 @@ loadPipeline <-
         lapply(pipeNodes,
                function (x, namespaces) {
                    start <- xmlChildren(x)$start
-                   startComponentName <- xmlAttrs(start)[["component-name"]]
-                   startOutputName <- xmlAttrs(start)[["output-name"]]
+                   startComponent <- xmlAttrs(start)[["component"]]
+                   startOutput <- xmlAttrs(start)[["output"]]
                    end <- xmlChildren(x)$end
-                   endComponentName <- xmlAttrs(end)[["component-name"]]
-                   endInputName <- xmlAttrs(end)[["input-name"]]
-                   pipe(startComponentName=startComponentName,
-                        startOutputName=startOutputName,
-                        endComponentName=endComponentName,
-                        endInputName=endInputName)
+                   endComponent <- xmlAttrs(end)[["component"]]
+                   endInput <- xmlAttrs(end)[["input"]]
+                   pipe(startComponent=startComponent,
+                        startOutput=startOutput,
+                        endComponent=endComponent,
+                        endInput=endInput)
                },
                namespaces)    
     pipeline(name=pipelineName, description=description,
-             components=modules, pipes=pipes)
+             components=components, pipes=pipes)
 }
 
 ## functions to write a pipeline (and its modules) to XML files
@@ -222,8 +222,8 @@ inputsList <- function(pipes, components, pipelinePath) {
         lapply(pipes,
                function (x, components, pipelinePath) {
                    endComponent <- components[[x$end$component]]
-                   platform <- endComponent$platform["name"]
-                   type <- endComponent$inputs[[x$end$input]]["type"]
+                   platform <- endComponent$platform[["name"]]
+                   type <- endComponent$inputs[[x$end$input]][["type"]]
                    ## FIXME: this assumes the start component is a module
                    ## and can be found in a "modules" folder. Needs to account
                    ## for pipelines
@@ -239,7 +239,7 @@ inputsList <- function(pipes, components, pipelinePath) {
                            startComponent$outputs[[x$start$output]]["ref"]
                        if (dirname(input) == ".") {
                            input <- file.path(pipelinePath, "modules",
-                                              x$start$componentName, input)
+                                              x$start$component, input)
                        }
                    }
                    input
