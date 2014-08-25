@@ -30,13 +30,15 @@ loadPipeline <-
         } else {
             character(1)
         }
-    moduleNodes <- getNodeSet(pipeline, "//module|//oa:module",
+    componentNodes <- getNodeSet(pipeline, "//component|//oa:component",
                               namespaces=namespaces)
+    ## FIXME: need to address inline components
     
     pipeNodes <- getNodeSet(pipeline, "//pipe|//oa:pipe",
                             namespaces=namespaces)
-    modules <-
-        lapply(moduleNodes,
+
+    components <-
+        lapply(componentNodes,
                function(m, namespaces) {
                    attrs <- xmlAttrs(m)
                    name <- attrs[["name"]] # [[ to drop attr names
@@ -52,16 +54,15 @@ loadPipeline <-
                                defaultSearchPaths,
                                paste0(pipelineDir, pathSep))
                        }
-                   loadModule(name, ref, path, namespaces)
+                   ## FIXME: need to check whether module or pipeline
+                   component <- loadModule(name, ref, path, namespaces)
+                   component
                    }, namespaces)
-    names(modules) <-
-        sapply(modules, componentName)
+    names(components) <-
+        sapply(components, componentName)
     pipes <-
         lapply(pipeNodes,
                function (x, namespaces) {
-                   ## FIXME: assumes all pipes contain only
-                   ## start/endComponentName, and not
-                   ## start/endComponetRef. Need to write this case.
                    start <- xmlChildren(x)$start
                    startComponentName <- xmlAttrs(start)[["component-name"]]
                    startOutputName <- xmlAttrs(start)[["output-name"]]
