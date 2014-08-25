@@ -196,49 +196,45 @@ loadModule <- function(name, ref, path=defaultSearchPaths,
 #' @import XML
 moduleToXML <- function (module,
                          namespaceDefinitions=NULL) {
-    moduleRoot <- newXMLNode("module", attrs=c(name=module$name),
+    moduleRoot <- newXMLNode("module",
                              namespaceDefinitions=namespaceDefinitions)
-    if (is.null(module$ref)) {
-        description <- newXMLNode("description", module$description)
-        inputs <-
-            lapply(
-                module$inputs,
-                function(i) {
-                    input <- newXMLNode("input", attrs=c(i["name"], i["type"]))
-                    input <-
-                        addChildren(
-                            input,
-                            newXMLNode("format",
-                                       attrs=c(i["formatType"])))
-                })
-        outputs <-
-            lapply(module$outputs,
-                   function(o) {
-                       attrs <- c(o["name"], o["type"])
-                       if (o["type"] == "external") {
-                           attrs <- c(attrs, o["ref"])
-                       }
-                       output <- newXMLNode("output", attrs=attrs)
-                       output <-
-                           addChildren(output,
-                                       newXMLNode("format",
-                                                  attrs=c(o["formatType"])))
-                   })
-        platform <- newXMLNode("platform", attrs=c(module$platform))
-        sources <-
-            lapply(module$sources,
-                   function (s) {
-                       newXMLNode(name="source", attrs=c(s["type"], s["order"]),
-                                  newXMLCDataNode(s$value))
-                       
-                   })
-        moduleRoot <-
-            addChildren(moduleRoot,
-                        kids=list(description, platform, inputs, sources,
-                            outputs))
-    } else {
-        xmlAttrs(moduleRoot) <- c(ref=module$ref, path=module$path)
-    }
+    description <- newXMLNode("description", module$description)
+    inputs <-
+        lapply(
+            module$inputs,
+            function(i) {
+                input <- newXMLNode("input", attrs=c(i["name"], i["type"]))
+                input <-
+                    addChildren(
+                        input,
+                        newXMLNode("format",
+                                   attrs=c(i["formatType"])))
+            })
+    outputs <-
+        lapply(module$outputs,
+               function(o) {
+                   attrs <- c(o["name"], o["type"])
+                   if (o["type"] == "external") {
+                       attrs <- c(attrs, o["ref"])
+                   }
+                   output <- newXMLNode("output", attrs=attrs)
+                   output <-
+                       addChildren(output,
+                                   newXMLNode("format",
+                                              attrs=c(o["formatType"])))
+               })
+    platform <- newXMLNode("platform", attrs=c(module$platform))
+    sources <-
+        lapply(module$sources,
+               function (s) {
+                   newXMLNode(name="source", attrs=c(s["type"], s["order"]),
+                              newXMLCDataNode(s$value))
+                   
+               })
+    moduleRoot <-
+        addChildren(moduleRoot,
+                    kids=list(description, platform, inputs, sources,
+                        outputs))
     moduleRoot
 }
 
