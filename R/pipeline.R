@@ -94,25 +94,24 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
     ## when export=T we alter all the components to be name/ref only, assuming
     ## the file will be called COMP_NAME.xml with no path info
     components <-
-        if (export) {
-            lapply(pipeline$components,
-                   function(c) {
+        lapply(pipeline$components,
+               function(c) {
+                   componentRoot <-
+                       newXMLNode("component",
+                                  attrs=c(name=c$name),
+                                  namespaceDefinitions=namespaceDefinitions)
+                   if (export) {
+                       xmlAttrs(componentRoot) <-
+                           c(ref=paste0(c$name, ".xml"),
+                             type=class(c))
+                   } else {
+                       componentXML <- moduleToXML(c)
                        componentRoot <-
-                           newXMLNode(
-                               "component",
-                               attrs=c(name=c$name,
-                                   ref=paste0(c$name, ".xml"),
-                                   type=class(c)),
-                               namespaceDefinitions=namespaceDefinitions)
-                       })
-        } else {
-            lapply(pipeline$components,
-                   function(c) {
-                       moduleToXML(c)
-                   })
-        }
-    ## names(components) <- componentNames
-    components <- addChildren(newXMLNode("components"), kids=components)
+                           addChildren(componentRoot,
+                                       kids=list(componentXML))
+                   }
+                   componentRoot
+               })
     pipes <-
         lapply(pipeline$pipes,
                function (p) {
