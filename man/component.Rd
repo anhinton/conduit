@@ -3,14 +3,14 @@
 \alias{component}
 \title{Create a component object}
 \usage{
-component(name, type, value = NULL, ref = NULL, path = NULL)
+component(name, value = NULL, type = NULL, ref = NULL, path = NULL)
 }
 \arguments{
 \item{name}{Name of component}
 
-\item{type}{Character value; \dQuote{pipeline} or \dQuote{module}}
-
 \item{value}{\code{pipeline} or \code{module} object}
+
+\item{type}{Character value; \dQuote{pipeline} or \dQuote{module}}
 
 \item{ref}{xml filename}
 
