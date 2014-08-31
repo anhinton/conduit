@@ -222,8 +222,8 @@ inputsList <- function(pipes, components, pipelinePath) {
         lapply(pipes,
                function (x, components, pipelinePath) {
                    endComponent <- components[[x$end$component]]
-                   platform <- endComponent$platform[["name"]]
-                   type <- endComponent$inputs[[x$end$input]][["type"]]
+                   platform <- endComponent$value$platform[["name"]]
+                   type <- endComponent$value$inputs[[x$end$input]][["type"]]
                    ## FIXME: this assumes the start component is a module
                    ## and can be found in a "modules" folder. Needs to account
                    ## for pipelines
@@ -315,33 +315,31 @@ runPipeline <- function(pipeline) {
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
     pipelinePath <- tools::file_path_as_absolute(pipelinePath)
-    ## FIXME: components can be modules or pipelines, but as of 2014-08-12
-    ## we will assume only modules
-    modules <- pipeline$components
-    moduleNames <- names(modules)
+    components <- pipeline$components
+    componentNames <- names(components)
     ## making a graph of the pipeline to determine order
-    moduleGraph <- graphPipeline(pipeline)
-    moduleOrder <- RBGL::tsort(moduleGraph)
-    inputs <- inputsList(pipeline$pipes, modules, pipelinePath)
+    componentGraph <- graphPipeline(pipeline)
+    componentOrder <- RBGL::tsort(componentGraph)
+    inputs <- inputsList(pipeline$pipes, components, pipelinePath)
     x <-
         lapply(moduleOrder,
-               function (x, modules, inputs, pipelinePath) {
+               function (x, components, inputs, pipelinePath) {
                    ## select inputs for this module and strip out module name
-                   module <- modules[[x]]
+                   component <- components[[x]]
                    ## FIXME: selecting inputs from inputsList seems a little
                    ## inelegant. Possibly calculating all input locations
                    ## before anything is run is the reason for this.
                    ## What else shall we try?
                    whichInputs <-
-                       grepl(paste0("^", componentName(module),"[.]"),
+                       grepl(paste0("^", componentName(component),"[.]"),
                              names(inputs))
                    inputs <- inputs[whichInputs]
                    names(inputs) <-
-                       gsub(paste0("^", componentName(module),"[.]"), "",
+                       gsub(paste0("^", componentName(component),"[.]"), "",
                             names(inputs))
                    ## run the beast
-                   runModule(module, inputs, pipelinePath)
-               }, modules, inputs, pipelinePath)
+                   runComponent(component, inputs, pipelinePath)
+               }, components, inputs, pipelinePath)
 }
 
 ## creating new pipelines
