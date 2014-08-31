@@ -1,5 +1,16 @@
 ### Functions for loading, running and creating components
 
+#' Run a component object
+runComponent <- function(component, inputs=list(), pipelinePath) {
+    value <- component$value
+    type <- component$type
+    ## FIXME: write case for when value not loaded in component
+    result <- switch(component$type,
+                     module = runModule(value, inputs, pipelinePath),
+                     pipeline = runPipeline(value))
+    result
+}
+
 #' Create a component object
 #'
 #' Create a \code{component} object for use in a \code{pipeline}.
