@@ -105,7 +105,8 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
                            c(ref=paste0(c$name, ".xml"),
                              type=class(c))
                    } else {
-                       componentXML <- moduleToXML(c, namespaceDefinitions)
+                       componentXML <- componentToXML(c,
+                                                      namespaceDefinitions)
                        componentRoot <-
                            addChildren(componentRoot,
                                        kids=list(componentXML))
@@ -322,9 +323,10 @@ runPipeline <- function(pipeline) {
     componentOrder <- RBGL::tsort(componentGraph)
     inputs <- inputsList(pipeline$pipes, components, pipelinePath)
     x <-
-        lapply(moduleOrder,
+        lapply(componentOrder,
                function (x, components, inputs, pipelinePath) {
-                   ## select inputs for this module and strip out module name
+                   ## select inputs for this component and strip out
+                   ## component name
                    component <- components[[x]]
                    ## FIXME: selecting inputs from inputsList seems a little
                    ## inelegant. Possibly calculating all input locations
