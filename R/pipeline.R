@@ -420,6 +420,15 @@ pipeline <- function (name, description="", components=list(), modules=list(),
         components <- c(modules, pipelines)
     } 
     names(components) <- sapply(components, componentName)
+    components <-
+        lapply(components, function(c) {
+            if (class(c) == "component") {
+                component <- c
+            } else {
+                component <- component(c$name, c)
+            }
+            component
+        })
     pipeline <- list(name=name, description=description, components=components,
                      pipes=pipes)
     class(pipeline) <- "pipeline"
