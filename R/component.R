@@ -20,8 +20,8 @@
 #' will fail.
 #'
 #' @param name Name of component
-#' @param type Character value; \dQuote{pipeline} or \dQuote{module}
 #' @param value \code{pipeline} or \code{module} object
+#' @param type Character value; \dQuote{pipeline} or \dQuote{module}
 #' @param ref xml filename
 #' @param path location of xml file
 #' @return \code{component} list containing:
@@ -30,7 +30,7 @@
 #' \item{path}{path to xml file}
 #' \item{type}{component type}
 #' \item{value}{\code{pipeline} or \code{module} object}
-component <- function(name, type, value=NULL, ref=NULL, path=NULL) {
+component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
     if (!is.null(ref)) {
         value <- NULL
     }
