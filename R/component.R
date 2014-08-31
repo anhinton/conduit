@@ -1,5 +1,16 @@
 ### Functions for loading, running and creating components
 
+#' Convert a component to XML
+componentToXML <- function(component, namespaceDefinitions=NULL) {
+    type <- component$type
+    value <- component$value
+    ## FIXME: define case when ref is given
+    xml <- switch(type,
+                  module = moduleToXML(value, namespaceDefinitions),
+                  pipeline = pipelineToXML(value, namespaceDefinitions=NULL))
+    xml
+}
+
 #' Run a component object
 #'
 #' @param component \code{component} object
