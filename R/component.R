@@ -1,6 +1,12 @@
 ### Functions for loading, running and creating components
 
 #' Run a component object
+#'
+#' @param component \code{component} object
+#' @param inputs Named list of absolute paths for component inputs
+#' @param pipelinePath Pipeline output directory
+#' @return Result of \code{runModule} or \code{runPipeline}
+#' @export
 runComponent <- function(component, inputs=list(), pipelinePath) {
     value <- component$value
     type <- component$type
