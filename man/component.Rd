@@ -28,11 +28,17 @@ component(name, type, value = NULL, ref = NULL, path = NULL)
 Create a \code{component} object for use in a \code{pipeline}.
 }
 \details{
-If an xml file \code{ref} is given the resulting component will have
-\code{value} coerced to NULL.
+A \code{component} object is expected to provide either a \code{ref}, and
+possibly a \code{path}, to an openapi XML fileIf an xml file, or a
+\code{pipeline} or \code{module} object in \code{value}. Accordingly:
 
-If no \code{ref} is given the resulting component will have \code{type}
-coerced to the class of the \code{value} object.
+\itemize{
+\item{if \code{ref} is given the resulting component will have
+\code{value} coerced to NULL.}
+
+\item{if no \code{ref} is given the resulting component will have \code{type}
+coerced to the class of the \code{value} object.}
+}
 
 If \code{type} is not \dQuote{pipeline} or \dQuote{module} the function
 will fail.
