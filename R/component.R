@@ -11,6 +11,17 @@ componentToXML <- function(component, namespaceDefinitions=NULL) {
     xml
 }
 
+#' Save a component to an XML file
+saveComponent <- function(component, targetDirectory=getwd(),
+                          filename=paste0(component$name, ".xml")) {
+    type <- component$type
+    value <- component$value
+    result <- switch(type,
+                     module = saveModule(value, targetDirectory, filename),
+                     pipeline = savePipeline(value, targetDirectory))
+    result
+}
+
 #' Run a component object
 #'
 #' @param component \code{component} object
