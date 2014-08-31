@@ -88,7 +88,6 @@ loadPipeline <-
 #' @return \code{XMLNode} object
 pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
     pipelineRoot <- newXMLNode("pipeline",
-                               attrs=c(name=componentName(pipeline)),
                                namespaceDefinitions=namespaceDefinitions)
     description <- newXMLNode("description", pipeline$description)
     ## componentNames <- names(pipeline$components)
@@ -103,10 +102,9 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
                    if (export) {
                        xmlAttrs(componentRoot) <-
                            c(ref=paste0(c$name, ".xml"),
-                             type=class(c))
+                             type=class(c$value))
                    } else {
-                       componentXML <- componentToXML(c,
-                                                      namespaceDefinitions)
+                       componentXML <- componentToXML(c)
                        componentRoot <-
                            addChildren(componentRoot,
                                        kids=list(componentXML))
@@ -148,6 +146,9 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
 #' @import XML
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
                   node=pipelineToXML(pipeline=pipeline, export=export,
@@ -184,7 +185,7 @@ exportPipeline <- function(pipeline, targetDirectory) {
     }
     pipelineFile <- savePipeline(pipeline, pipelineDirectory, export=TRUE)
     result <- c(pipeline=pipelineFile,
-                lapply(pipeline$components, saveModule, pipelineDirectory))
+                lapply(pipeline$components, saveComponent, pipelineDirectory))
     result
 }
 
