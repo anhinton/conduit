@@ -3,21 +3,16 @@
 \alias{pipe}
 \title{Create a pipe object}
 \usage{
-pipe(startComponentName = NULL, startOutputName, endComponentName = NULL,
-  endInputName, startComponentRef = NULL, endComponentRef = NULL)
+pipe(startComponent, startOutput, endComponent, endInput)
 }
 \arguments{
-\item{startComponentName}{Name of start module}
+\item{startComponent}{Name of start module}
 
-\item{startOutputName}{Name of start object}
+\item{startOutput}{Name of start object}
 
-\item{endComponentName}{Name of end module}
+\item{endComponent}{Name of end module}
 
-\item{endInputName}{Name of end input}
-
-\item{startComponentRef}{Address of start module}
-
-\item{endComponentRed}{Address of end module}
+\item{endInput}{Name of end input}
 }
 \value{
 \code{pipe} connecting \code{startComponentName}.\code{startOutputName} to \code{endComponentName}.\code{endInputName}
