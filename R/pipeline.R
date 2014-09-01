@@ -40,22 +40,15 @@ loadPipeline <-
     components <-
         lapply(componentNodes,
                function(m, namespaces) {
-                   attrs <- xmlAttrs(m)
-                   name <- attrs[["name"]] # [[ to drop attr names
-                   ref <- attrs[["ref"]]
+                   name <- fetchXMLAttr(m, "name")
+                   ref <- fetchXMLAttr(m, "ref")
+                   path <- fetchXMLAttr(m, "path")
+                   type <- fetchXMLAttr(m, "type")
+                   component <- component(name=name, ref=ref, path=path,
+                                          type=type)
                    ## FIXME: can't handle anon/inline components
-                   path <-
-                       if (any(names(attrs) == "path")) {
-                           amendSearchPaths(
-                               defaultSearchPaths,
-                               attrs[["path"]])
-                       } else {
-                           amendSearchPaths(
-                               defaultSearchPaths,
-                               paste0(pipelineDir, pathSep))
-                       }
+                   ## path <-
                    ## FIXME: need to check whether module or pipeline
-                   component <- loadModule(name, ref, path, namespaces)
                    component
                    }, namespaces)
     names(components) <-
