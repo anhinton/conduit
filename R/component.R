@@ -1,7 +1,13 @@
 ### Functions for loading, running and creating components
 
 #' Load a component's value from XML
-#' @return \code{component} object
+#'
+#' Load a \code{component}'s value from the XML file given in its ref and
+#' path slots.
+#'
+#' @param component A \code{component} object
+#' @return \code{component} object with the corresponding \code{pipeline}
+#' or \code{module} object its value slot
 loadComponent <- function(component) {
     name <- component$name
     ref <- component$ref
