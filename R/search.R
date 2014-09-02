@@ -9,6 +9,9 @@ pathSep <- "|"
 ## "${ROOT}" - the directory from which the glue system has been invoked
 defaultSearchPaths <- paste(".//", "${ROOT}", sep=pathSep)
 
+## initialise searchPaths to default
+searchPaths <- defaultSearchPaths
+
 ## split search paths string
 splitPaths <- function(s) {
     strsplit(s, pathSep, fixed=TRUE)[[1]]
