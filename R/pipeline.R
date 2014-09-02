@@ -320,8 +320,9 @@ runPipeline <- function(pipeline) {
             components,
             function (c) {
                 if (!is.null(c$ref)) {
-                    c$path <- if (is.null(c$path)) ""
-                    value <- loadModule(c$name, c$ref, c$path)
+                    if (is.null(c$path)) c$path <- searchPaths
+                    c$value <- loadModule(c$name, c$ref, c$path)
+                    c
                 }
             })
     componentNames <- names(components)
