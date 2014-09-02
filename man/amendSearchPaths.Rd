@@ -3,7 +3,7 @@
 \alias{amendSearchPaths}
 \title{Amend search paths}
 \usage{
-amendSearchPaths(newPaths, searchPaths = defaultSearchPaths)
+amendSearchPaths(newPaths, searchPaths = searchPaths)
 }
 \arguments{
 \item{newPaths}{Character string of paths to be added}

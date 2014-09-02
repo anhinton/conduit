@@ -3,7 +3,7 @@
 \alias{fetchRef}
 \title{Fetch the contents of a referenced file}
 \usage{
-fetchRef(ref, path = defaultSearchPaths)
+fetchRef(ref, path = searchPaths)
 }
 \arguments{
 \item{ref}{Address of referenced file}
