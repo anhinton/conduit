@@ -5,7 +5,20 @@
 \usage{
 componentToXML(component, namespaceDefinitions = NULL)
 }
+\arguments{
+\item{component}{\code{component} object}
+
+\item{namespaceDefinitions}{As named character vector}
+}
+\value{
+\code{xmlNode} object
+}
 \description{
-Convert a component to XML
+Convert a \code{component} object into the corresponding openapi XML
+format.
+}
+\details{
+The \code{component} object \emph{must} have a \code{pipeline} or
+\code{module} objects in its \code{value} slot.
 }
 
