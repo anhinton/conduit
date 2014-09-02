@@ -1,5 +1,17 @@
 ### Functions for loading, running and creating components
 
+#' Load a component's value from XML
+#' @return \code{component} object
+loadComponent <- function(component) {
+    name <- component$name
+    ref <- component$ref
+    path <- component$path
+    type <- component$type
+    value <- switch(type,
+                    loadModule(name, ref, path))
+    component(name=name, value=value, type=type)
+}
+
 #' Convert a component to XML
 #'
 #' Convert a \code{component} object into the corresponding openapi XML
