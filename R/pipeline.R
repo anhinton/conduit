@@ -311,6 +311,16 @@ runPipeline <- function(pipeline) {
     dir.create(pipelinePath, recursive=TRUE)
     pipelinePath <- tools::file_path_as_absolute(pipelinePath)
     components <- pipeline$components
+    ## load component values
+    components <-
+        lapply(
+            components,
+            function (c) {
+                if (!is.null(c$ref)) {
+                    c$path <- if (is.null(c$path)) ""
+                    value <- loadModule(c$name, c$ref, c$path)
+                }
+            })
     componentNames <- names(components)
     ## making a graph of the pipeline to determine order
     componentGraph <- graphPipeline(pipeline)
