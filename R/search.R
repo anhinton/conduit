@@ -15,7 +15,22 @@ splitPaths <- function(s) {
 }
 
 ## amend paths to be searched
-amendSearchPaths <- function(searchPaths, newPaths) {
+#' Amend search paths
+#'
+#' Append, prepend, or replace search paths with a new set.
+#'
+#' If \code{newPaths} ends with the | character, new search paths will be
+#' prepended to \code{searchPaths}.
+#'
+#' If \code{newPaths} begins with | character, new search paths will be
+#' appended to \code{searchPaths}.
+#'
+#' Otherwise \code{newPaths} replaces \code{searchPaths}.
+#'
+#' @param newPaths Character string of paths to be added
+#' @param searchPaths Character string of paths to be amended
+#' @return Character string of amended search paths
+amendSearchPaths <- function(newPaths, searchPaths=defaultSearchPaths) {
     searchPaths <- 
         ## if newPaths starts with pathSep, append to searchPaths
         if (grepl(paste0("^[", pathSep, "]"), newPaths)) {
