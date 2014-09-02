@@ -39,10 +39,13 @@ loadPipeline <-
 
     components <-
         lapply(componentNodes,
-               function(m, namespaces) {
+               function(m, namespaces, pipelineDir) {
                    name <- fetchXMLAttr(m, "name")
                    ref <- fetchXMLAttr(m, "ref")
                    path <- fetchXMLAttr(m, "path")
+                   ## if a path is not given assume this means the xml file
+                   ## is found in the same directory as the pipeline xml
+                   if (is.null(path)) path <- paste0(pipelineDir, "|")
                    type <- fetchXMLAttr(m, "type")
                    component <- component(name=name, ref=ref, path=path,
                                           type=type)
@@ -50,7 +53,7 @@ loadPipeline <-
                    ## path <-
                    ## FIXME: need to check whether module or pipeline
                    component
-                   }, namespaces)
+                   }, namespaces, pipelineDir)
     names(components) <-
         sapply(components, componentName)
     pipes <-
