@@ -98,7 +98,7 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
                    if (export) {
                        xmlAttrs(componentRoot) <-
                            c(ref=paste0(c$name, ".xml"),
-                             type=class(c$value))
+                             type=c$type)
                    } else {
                        componentXML <- componentToXML(c)
                        componentRoot <-
