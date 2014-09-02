@@ -44,7 +44,7 @@ runComponent <- function(component, inputs=list(), pipelinePath) {
 #' Create a \code{component} object for use in a \code{pipeline}.
 #'
 #' A \code{component} object is expected to provide either a \code{ref}, and
-#' possibly a \code{path}, to an openapi XML fileIf an xml file, or a
+#' possibly a \code{path}, to an openapi XML file, or a
 #' \code{pipeline} or \code{module} object in \code{value}. Accordingly:
 #'
 #' \itemize{
