@@ -234,7 +234,7 @@ inputsList <- function(pipes, components, pipelinePath) {
                    } else if (type == "external") {
                        startComponent <- components[[x$start$component]]
                        input <-
-                           startComponent$outputs[[x$start$output]]["ref"]
+                           startComponent$value$outputs[[x$start$output]]["ref"]
                        if (dirname(input) == ".") {
                            input <- file.path(pipelinePath, "modules",
                                               x$start$component, input)
@@ -323,8 +323,8 @@ runPipeline <- function(pipeline) {
                     if (is.null(c$path)) c$path <- searchPaths
                     ## FIXME: only handles modules, not pipelines
                     c$value <- loadModule(c$name, c$ref, c$path)
-                    c
                 }
+                c
             })
     componentNames <- names(components)
     ## making a graph of the pipeline to determine order
