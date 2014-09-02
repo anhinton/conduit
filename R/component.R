@@ -4,7 +4,7 @@
 componentToXML <- function(component, namespaceDefinitions=NULL) {
     type <- component$type
     value <- if (!is.null(component$ref)) {
-        value <- loadModule(component$name, component$ref, component$path)
+        loadModule(component$name, component$ref, component$path)
     } else {
         component$value
     }
