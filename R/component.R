@@ -15,15 +15,18 @@ componentToXML <- function(component, namespaceDefinitions=NULL) {
     xml
 }
 
-#' Save a component to an XML file
-saveComponent <- function(component, targetDirectory=getwd(),
+#' Export a component to an XML file
+exportComponent <- function(component, targetDirectory=getwd(),
                           filename=paste0(component$name, ".xml")) {
-    type <- component$type
-    value <- component$value
-    result <- switch(type,
-                     module = saveModule(value, targetDirectory, filename),
-                     pipeline = savePipeline(value, targetDirectory))
-    result
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
+    componentDoc <-
+        newXMLDoc(namespaces="http://www.openapi.org/2014",
+                  node=componentToXML(component,
+                      namespaceDefinitions="http://www.openapi.org/2014/"))
+    componentFilePath <- file.path(targetDirectory, filename)
+    saveXML(componentDoc, componentFilePath)
 }
 
 #' Run a component object
