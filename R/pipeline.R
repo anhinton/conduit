@@ -321,6 +321,7 @@ runPipeline <- function(pipeline) {
             function (c) {
                 if (!is.null(c$ref)) {
                     if (is.null(c$path)) c$path <- searchPaths
+                    ## FIXME: only handles modules, not pipelines
                     c$value <- loadModule(c$name, c$ref, c$path)
                     c
                 }
