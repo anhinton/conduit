@@ -52,7 +52,7 @@ expandSearchPaths <- function(s) {
 }
 
 findFile <- function (x, searchPaths) {
-    searchPaths <- amendSearchPaths(defaultSearchPaths, searchPaths)
+    searchPaths <- amendSearchPaths(searchPaths, defaultSearchPaths)
     searchPaths <- splitPaths(searchPaths)
     searchPaths <- unique(expandSearchPaths(searchPaths))
     result <- NULL
