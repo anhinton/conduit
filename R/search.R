@@ -33,7 +33,7 @@ splitPaths <- function(s) {
 #' @param newPaths Character string of paths to be added
 #' @param searchPaths Character string of paths to be amended
 #' @return Character string of amended search paths
-amendSearchPaths <- function(newPaths, searchPaths=defaultSearchPaths) {
+amendSearchPaths <- function(newPaths, searchPaths=searchPaths) {
     searchPaths <- 
         ## if newPaths starts with pathSep, append to searchPaths
         if (grepl(paste0("^[", pathSep, "]"), newPaths)) {
@@ -55,7 +55,7 @@ expandSearchPaths <- function(s) {
 }
 
 findFile <- function (x, searchPaths) {
-    searchPaths <- amendSearchPaths(searchPaths, defaultSearchPaths)
+    searchPaths <- amendSearchPaths(searchPaths, searchPaths)
     searchPaths <- splitPaths(searchPaths)
     searchPaths <- unique(expandSearchPaths(searchPaths))
     result <- NULL
@@ -84,7 +84,7 @@ findFile <- function (x, searchPaths) {
 #' @param path File paths to search
 #' @return Character vector containing the contents of \code{ref}
 #' @import XML
-fetchRef <- function(ref, path=defaultSearchPaths) {
+fetchRef <- function(ref, path=searchPaths) {
     if (grepl("^ *https://", ref)){
         getURL(ref)
     } else if (grepl("^ */", dirname(ref))) {
