@@ -3,11 +3,7 @@
 #' Convert a component to XML
 componentToXML <- function(component, namespaceDefinitions=NULL) {
     type <- component$type
-    value <- if (!is.null(component$ref)) {
-        loadModule(component$name, component$ref, component$path)
-    } else {
-        component$value
-    }
+    value <- component$value
     ## FIXME: define case when ref is given
     xml <- switch(type,
                   module = moduleToXML(value, namespaceDefinitions),
@@ -20,6 +16,11 @@ exportComponent <- function(component, targetDirectory=getwd(),
                           filename=paste0(component$name, ".xml")) {
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
+    }
+    if (!is.null(component$ref)) {
+        ## FIXME: this assumes a component is a module
+        component$value <- loadModule(component$name, component$ref,
+                                      component$path)
     }
     componentDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
