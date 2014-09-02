@@ -1,9 +1,22 @@
 ### Functions for loading, running and creating components
 
 #' Convert a component to XML
+#'
+#' Convert a \code{component} object into the corresponding openapi XML
+#' format.
+#'
+#' The \code{component} object \emph{must} have a \code{pipeline} or
+#' \code{module} objects in its \code{value} slot.
+#'
+#' @param component \code{component} object
+#' @param namespaceDefinitions As named character vector
+#' @return \code{xmlNode} object
 componentToXML <- function(component, namespaceDefinitions=NULL) {
     type <- component$type
     value <- component$value
+    if (class(value) != type) {
+        stop("You have provided a mismatched component object")
+    }
     ## FIXME: define case when ref is given
     xml <- switch(type,
                   module = moduleToXML(value, namespaceDefinitions),
