@@ -186,7 +186,7 @@ exportPipeline <- function(pipeline, targetDirectory) {
     }
     pipelineFile <- savePipeline(pipeline, pipelineDirectory, export=TRUE)
     result <- c(pipeline=pipelineFile,
-                lapply(pipeline$components, saveComponent, pipelineDirectory))
+                lapply(pipeline$components, exportComponent, pipelineDirectory))
     result
 }
 
