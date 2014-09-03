@@ -45,6 +45,11 @@ componentToXML <- function(component, namespaceDefinitions=NULL) {
 }
 
 #' Export a component to an XML file
+#'
+#' @param component \code{component} object
+#' @param targetDirectory File path for pipeline output
+#' @param filename Name of resulting file as character
+#' @return Resulting file path as character
 exportComponent <- function(component, targetDirectory=getwd(),
                           filename=paste0(component$name, ".xml")) {
     if (!file.exists(targetDirectory)) {

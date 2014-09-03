@@ -3,7 +3,7 @@
 \alias{runComponent}
 \title{Run a component object}
 \usage{
-runComponent(component, inputs = list(), pipelinePath)
+runComponent(component, inputs = list(), pipelinePath = getwd())
 }
 \arguments{
 \item{component}{\code{component} object}

@@ -6,6 +6,16 @@
 exportComponent(component, targetDirectory = getwd(),
   filename = paste0(component$name, ".xml"))
 }
+\arguments{
+\item{component}{\code{component} object}
+
+\item{targetDirectory}{File path for pipeline output}
+
+\item{filename}{Name of resulting file as character}
+}
+\value{
+Resulting file path as character
+}
 \description{
 Export a component to an XML file
 }
