@@ -377,7 +377,12 @@ pipe <- function (startComponent, startOutput,
     pipe
 }
 
-## adds a module object list to a pipeline
+
+#' Add a new component to a pipeline
+#'
+#' @param newComponent \code{pipeline} or \code{module} object to be added
+#' @param pipeline \code{pipeline} to be amended
+#' @return \code{pipeline} object
 #' @export
 addComponent <- function(newComponent, pipeline) {
     name <- componentName(newComponent)
