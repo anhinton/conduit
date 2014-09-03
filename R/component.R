@@ -14,8 +14,10 @@ loadComponent <- function(component) {
     path <- component$path
     type <- component$type
     value <- switch(type,
-                    loadModule(name, ref, path))
-    component(name=name, value=value, type=type)
+                    module = loadModule(name, ref, path),
+                    ## FIXME: I bet loading a pipeline won't work
+                    pipeline = loadPipeline(ref))
+    component(name=name, value=value)
 }
 
 #' Convert a component to XML
@@ -68,12 +70,16 @@ exportComponent <- function(component, targetDirectory=getwd(),
 #' @param pipelinePath Pipeline output directory
 #' @return Result of \code{runModule} or \code{runPipeline}
 #' @export
-runComponent <- function(component, inputs=list(), pipelinePath) {
+runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
+    if (!is.null(component$ref)) {
+        if (is.null(component$path)) components$path <- searchPaths
+        component <- loadComponent(component)
+    }
     value <- component$value
     type <- component$type
-    ## FIXME: write case for when value not loaded in component
     result <- switch(component$type,
                      module = runModule(value, inputs, pipelinePath),
+                     ## FIXME: running pipelines probably doesn't work
                      pipeline = runPipeline(value))
     result
 }
