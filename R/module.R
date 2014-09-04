@@ -31,20 +31,10 @@ sourceOrder <- function(sources) {
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
 }
 
-## loadModule()
-## arguments:
-## - filename: file path of module .xml file
-## - namespaces: special namespaces used in .xml file
-## description:
-##   loads a module from a module .xml file
-##   returns a list containing:
-##   - description
-##   - inputs,
-##   - platform,
-##   - sources
-##   - outputs
 #' Read a module from an XML file
-#' @param filename File path of module XML document
+#' 
+#' @param name Filename of XML module
+#' @param ref Path to XML file
 #' @param namespaces Namespaces used in XML document as named character vector
 #' @return \code{module} list
 #' @export
