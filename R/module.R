@@ -54,6 +54,8 @@ loadModule <- function(name, ref, path=searchPaths,
     ## fetch module XML from disk
     rawXML <- fetchRef(ref, path)
     xml <- xmlRoot(xmlParse(rawXML))
+    nodes <- xmlChildren(xml)
+
     descNodes <- getNodeSet(module, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
