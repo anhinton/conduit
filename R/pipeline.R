@@ -40,13 +40,13 @@ loadPipeline <-
     components <-
         lapply(componentNodes,
                function(m, namespaces, pipelineDir) {
-                   name <- fetchXMLAttr(m, "name")
-                   ref <- fetchXMLAttr(m, "ref")
-                   path <- fetchXMLAttr(m, "path")
+                   name <- getXMLAttr(m, "name")
+                   ref <- getXMLAttr(m, "ref")
+                   path <- getXMLAttr(m, "path")
                    ## if a path is not given assume this means the xml file
                    ## is found in the same directory as the pipeline xml
                    if (is.null(path)) path <- paste0(pipelineDir, "|")
-                   type <- fetchXMLAttr(m, "type")
+                   type <- getXMLAttr(m, "type")
                    component <- component(name=name, ref=ref, path=path,
                                           type=type)
                    ## FIXME: can't handle anon/inline components
