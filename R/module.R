@@ -58,8 +58,8 @@ loadModule <- function(name, ref, path=searchPaths,
     ## extract description
     descNode <- nodes$description
     description <- xmlValue(descNode)
-    inputNodes <- getNodeSet(module, "//input|//oa:input",
-                             namespaces=namespaces)
+    ## extract inputs
+    inputNodes <- nodes[names(nodes) == "input"]
     inputs <- 
         if (length(inputNodes) == 0) {
             NULL
