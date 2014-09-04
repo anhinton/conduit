@@ -55,15 +55,9 @@ loadModule <- function(name, ref, path=searchPaths,
     rawXML <- fetchRef(ref, path)
     xml <- xmlRoot(xmlParse(rawXML))
     nodes <- xmlChildren(xml)
-
-    descNodes <- getNodeSet(module, "//description|//oa:description",
-                            namespaces=namespaces)
-    description <-
-        if (length(descNodes)) {
-            xmlValue(descNodes[[1]])
-        } else {
-            character(1)
-        }
+    ## extract description
+    descNode <- nodes$description
+    description <- xmlValue(descNode)
     inputNodes <- getNodeSet(module, "//input|//oa:input",
                              namespaces=namespaces)
     inputs <- 
