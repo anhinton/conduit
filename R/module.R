@@ -31,7 +31,7 @@ sourceOrder <- function(sources) {
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
 }
 
-#' Read a module from an XML file
+#' Load a module from an XML file
 #' 
 #' @param name Filename of XML module
 #' @param ref Path to XML file
