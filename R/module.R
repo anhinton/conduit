@@ -51,8 +51,9 @@ sourceOrder <- function(sources) {
 #' @import XML
 loadModule <- function(name, ref, path=searchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    xml <- fetchRef(ref, path)
-    module <- xmlRoot(xmlParse(xml))
+    ## fetch module XML from disk
+    rawXML <- fetchRef(ref, path)
+    xml <- xmlRoot(xmlParse(rawXML))
     descNodes <- getNodeSet(module, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
