@@ -94,9 +94,8 @@ loadModule <- function(name, ref, path=searchPaths,
     ## extract platform
     platformNode <- nodes$platform
     platform <- xmlAttrs(platformNode)["name"]
-
-    sourceNodes <- getNodeSet(module, "//source|//oa:source",
-                                 namespaces=namespaces)
+    ## extract sources
+    sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
         lapply(sourceNodes,
                function(node, path) {
