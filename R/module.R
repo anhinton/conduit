@@ -49,10 +49,6 @@ sourceOrder <- function(sources) {
 #' @return \code{module} list
 #' @export
 #' @import XML
-#' @import RCurl
-#' @import tools
-#' @import RBGL
-#' @import graph
 loadModule <- function(name, ref, path=searchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     xml <- fetchRef(ref, path)
