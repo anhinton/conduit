@@ -134,8 +134,8 @@ loadModule <- function(name, ref, path=searchPaths,
                       function (x, sources) {
                           sources[[x]]
                       }, sources)
-    outputNodes <- getNodeSet(module, "//output|//oa:output",
-                                 namespaces=namespaces)
+    ## extract outputs
+    outputNodes <- nodes[names(nodes) == "output"]
     outputs <-
         if (length(outputNodes) == 0) {
             NULL
