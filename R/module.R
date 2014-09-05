@@ -31,19 +31,13 @@ sourceOrder <- function(sources) {
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
 }
 
-#' Load a module from an XML file
-#' 
-#' @param name Filename of XML module
-#' @param ref Path to XML file
-#' @param namespaces Namespaces used in XML document as named character vector
-#' @return \code{module} list
-#' @export
+#' Parse module XML and return a module object
+#'
+#' @param name Module name
+#' @param xml Module \code{XMLNode}
+#' @return \code{module} object
 #' @import XML
-loadModule <- function(name, ref, path=searchPaths,
-                       namespaces=c(oa="http://www.openapi.org/2014/")) {
-    ## fetch module XML from disk
-    rawXML <- fetchRef(ref, path)
-    xml <- xmlRoot(xmlParse(rawXML))
+readModuleXML <- function(name, xml) {
     nodes <- xmlChildren(xml)
     ## extract description
     descNode <- nodes$description
@@ -167,6 +161,23 @@ loadModule <- function(name, ref, path=searchPaths,
            sources=sources)
 }
 
+#' Load a module from an XML file
+#' 
+#' @param name Filename of XML module
+#' @param ref Path to XML file
+#' @param namespaces Namespaces used in XML document as named character vector
+#' @return \code{module} list
+#' @export
+#' @import XML
+loadModule <- function(name, ref, path=searchPaths,
+                       namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## fetch module XML from disk
+    rawXML <- fetchRef(ref, path)
+    xml <- xmlRoot(xmlParse(rawXML))
+    module <- readModuleXML(name, xml)
+    module
+}
+
 ## functions for saving a module object to an XML file
 
 #' Convert a module to XML
@@ -275,7 +286,7 @@ runModule <- function(module, inputs=list(),
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
-    moduleFiles <- file_path_as_absolute(modulePath)
+    moduleFiles <- tools::file_path_as_absolute(modulePath)
 
     ## set the module class to PLATFORM
     modulePlatform <- module$platform
@@ -321,28 +332,24 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 #' @export
 module <- function(name, description="", platform, inputs=list(),
                    outputs=list(), sources=list(), ref=NULL, path=NULL) {
-    if (!is.null(ref)) {
-        module <- list(name=name, ref=ref, path=path)
-    } else {
-        names(platform) <- "name"
-        if (!is.null(inputs)) {
-            names(inputs) <-
-                sapply(inputs,
-                       function (x) {
-                           x["name"]
-                       })
-        }
-        if (!is.null(outputs)) {
-            names(outputs) <-
-                sapply(outputs,
-                       function (x) {
-                           x["name"]
-                       })
-        }
-        module <- list(name=name, description=description,
-                       platform=platform, inputs=inputs, outputs=outputs,
-                       sources=sources)
+    if (!is.null(inputs)) {
+        names(inputs) <-
+            sapply(inputs,
+                   function (x) {
+                       x["name"]
+                   })
     }
+    if (!is.null(outputs)) {
+        names(outputs) <-
+            sapply(outputs,
+                   function (x) {
+                       x["name"]
+                   })
+    }
+    module <- list(name=name, description=description,
+                   platform=platform, inputs=inputs, outputs=outputs,
+                   sources=sources)
+
     class(module) <- "module"
     module
 }
