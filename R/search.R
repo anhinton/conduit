@@ -58,8 +58,10 @@ findFile <- function (x, searchPaths) {
     result <- NULL
     count <- 1
     while (is.null(result) && count <= length(searchPaths)) {
-        files <- list.files(path=searchPaths[count], pattern=paste0(x,"$"),
-                            full.names=TRUE, recursive=TRUE)
+        filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
+                                  full.names=TRUE)
+        whichFiles <- grep(paste0(x, "$"), filesInPath)
+        files <- filesInPath[whichFiles]
         result <-
             if (length(files) > 0) {
                 if (length(files) > 1) {
