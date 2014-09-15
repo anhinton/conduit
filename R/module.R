@@ -294,7 +294,7 @@ runModule <- function(module, inputs=list(),
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
-    moduleFiles <- file_path_as_absolute(modulePath)
+    moduleFiles <- tools::file_path_as_absolute(modulePath)
 
     ## set the module class to PLATFORM
     modulePlatform <- module$platform
