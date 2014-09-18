@@ -22,7 +22,7 @@ loadPipeline <-
     filename <- tools::file_path_as_absolute(filename)
     pipelineDir <- dirname(filename)
     pipeline <- xmlRoot(xmlParse(filename))
-    path <- amendSearchPaths(paste0(pipelineDir, pathSep))
+    pipelinePath <- paste0(pipelineDir, pathSep)
     descNodes <- getNodeSet(pipeline, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
@@ -46,7 +46,7 @@ loadPipeline <-
                    path <- getXMLAttr(m, "path")
                    ## if a path is not given assume this means the xml file
                    ## is found in the same directory as the pipeline xml
-                   if (is.null(path)) path <- paste0(pipelineDir, "|")
+                   if (is.null(path)) path <- pipelinePath
                    type <- getXMLAttr(m, "type")
                    component <- component(name=name, ref=ref, path=path,
                                           type=type)
@@ -72,7 +72,7 @@ loadPipeline <-
                         endInput=endInput)
                },
                namespaces)    
-    pipeline(name=pipelineName, path=path, description=description,
+    pipeline(name=pipelineName, path=pipelinePath, description=description,
              components=components, pipes=pipes)
 }
 
