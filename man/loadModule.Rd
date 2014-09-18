@@ -3,11 +3,15 @@
 \alias{loadModule}
 \title{Read a module from an XML file}
 \usage{
-loadModule(name, ref, path = defaultSearchPaths, namespaces = c(oa =
+loadModule(name, ref, path = searchPaths, namespaces = c(oa =
   "http://www.openapi.org/2014/"))
 }
 \arguments{
-\item{filename}{File path of module XML document}
+\item{name}{Name of module}
+
+\item{ref}{File name of module XML document}
+
+\item{path}{File path to module XML document}
 
 \item{namespaces}{Namespaces used in XML document as named character vector}
 }

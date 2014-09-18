@@ -28,7 +28,7 @@ splitPaths <- function(s) {
 #' Otherwise \code{newPaths} replaces \code{searchPaths}.
 #'
 #' @param newPaths Character string of paths to be added
-#' @param searchPaths Character string of paths to be amended
+#' @param pathsToAmend Character string of paths to be amended
 #' @return Character string of amended search paths
 amendSearchPaths <- function(newPaths, pathsToAmend=searchPaths) {
     amendedPaths <- 

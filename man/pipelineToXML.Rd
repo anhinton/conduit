@@ -8,7 +8,9 @@ pipelineToXML(pipeline, namespaceDefinitions = NULL, export = FALSE)
 \arguments{
 \item{pipeline}{\code{pipeline} object}
 
-\item{namespaceDefinition}{XML namespaces as character vector}
+\item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{export}{if true inline components are converted to reference files}
 }
 \value{
 \code{XMLNode} object

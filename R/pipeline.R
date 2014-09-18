@@ -81,7 +81,8 @@ loadPipeline <-
 #' Convert a pipeline to XML
 #'
 #' @param pipeline \code{pipeline} object
-#' @param namespaceDefinition XML namespaces as character vector
+#' @param namespaceDefinitions XML namespaces as character vector
+#' @param export if true inline components are converted to reference files
 #' @return \code{XMLNode} object
 pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
     pipelineRoot <- newXMLNode("pipeline",
@@ -430,7 +431,7 @@ componentName <- function (component) {
 #' it the compoments from \code{modules} and \code{pipelines}.
 #'
 #' @param name \code{pipeline} name
-#' @param name location of oringinating pipeline xml file
+#' @param path location of originating pipeline xml file
 #' @param description \code{pipeline} description
 #' @param components list of \code{module}s and \code{pipeline}s
 #' @param modules list of \code{module}s

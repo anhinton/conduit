@@ -44,7 +44,9 @@ sourceOrder <- function(sources) {
 ##   - sources
 ##   - outputs
 #' Read a module from an XML file
-#' @param filename File path of module XML document
+#' @param name Name of module
+#' @param ref File name of module XML document
+#' @param path File path to module XML document
 #' @param namespaces Namespaces used in XML document as named character vector
 #' @return \code{module} list
 #' @export
@@ -191,7 +193,7 @@ loadModule <- function(name, ref, path=searchPaths,
 #' Convert a module to XML
 #'
 #' @param module \code{module} object
-#' @param namespaceDefinition XML namespaces as character vector
+#' @param namespaceDefinitions XML namespaces as character vector
 #' @return \code{XMLNode} object
 #' @import XML
 moduleToXML <- function (module,
@@ -337,31 +339,38 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 ##   - platform,
 ##   - sources
 ##   - outputs
+#' Create a module
+#'
+#' Create a \code{module} list object
+#'
+#' @param name Name of module as character value
+#' @param description Description of what module does as character value
+#' @param platform Module platform as character value
+#' @param inputs List of \code{moduleInput} objects
+#' @param outputs List of \code{moduleOutput} objects
+#' @param sources List of \code{moduleSource} objects
+#' @param path Search path for original module XML file
 #' @export
 module <- function(name, description="", platform, inputs=list(),
-                   outputs=list(), sources=list(), ref=NULL, path=NULL) {
-    if (!is.null(ref)) {
-        module <- list(name=name, ref=ref, path=path)
-    } else {
-        names(platform) <- "name"
-        if (!is.null(inputs)) {
-            names(inputs) <-
-                sapply(inputs,
-                       function (x) {
-                           x["name"]
-                       })
-        }
-        if (!is.null(outputs)) {
-            names(outputs) <-
-                sapply(outputs,
-                       function (x) {
-                           x["name"]
-                       })
-        }
-        module <- list(name=name, path=path, description=description,
-                       platform=platform, inputs=inputs, outputs=outputs,
-                       sources=sources)
+                   outputs=list(), sources=list(), path=NULL) {
+    names(platform) <- "name"
+    if (!is.null(inputs)) {
+        names(inputs) <-
+            sapply(inputs,
+                   function (x) {
+                       x["name"]
+                   })
     }
+    if (!is.null(outputs)) {
+        names(outputs) <-
+            sapply(outputs,
+                   function (x) {
+                       x["name"]
+                   })
+    }
+    module <- list(name=name, path=path, description=description,
+                   platform=platform, inputs=inputs, outputs=outputs,
+                   sources=sources)
     class(module) <- "module"
     module
 }

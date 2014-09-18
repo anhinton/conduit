@@ -3,11 +3,13 @@
 \alias{pipeline}
 \title{Create a pipeline}
 \usage{
-pipeline(name, description = "", components = list(), modules = list(),
-  pipelines = list(), pipes = list())
+pipeline(name, path = NULL, description = "", components = list(),
+  modules = list(), pipelines = list(), pipes = list())
 }
 \arguments{
 \item{name}{\code{pipeline} name}
+
+\item{path}{location of originating pipeline xml file}
 
 \item{description}{\code{pipeline} description}
 
@@ -22,6 +24,7 @@ pipeline(name, description = "", components = list(), modules = list(),
 \value{
 \code{pipeline} list containing:
 \item{name}{character value}
+\item{path}{Location of source pipeline XML file}
 \item{description}{character value}
 \item{components}{list of \code{module}s and \code{pipeline}s}
 \item{pipes}{list of \code{pipe}s}
