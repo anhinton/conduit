@@ -239,11 +239,14 @@ inputsList <- function(pipes, components, pipelinePath) {
                                                 sep=""))
                    } else if (type == "external") {
                        startComponent <- components[[x$start$component]]
-                       input <-
+                       ref <-
                            startComponent$value$outputs[[x$start$output]]["ref"]
-                       if (dirname(input) == ".") {
-                           input <- file.path(pipelinePath, "modules",
-                                              x$start$component, input)
+                       path <- startComponent$value$path
+                       input <- if (dirname(ref) == ".") {
+                           file.path(pipelinePath, "modules",
+                                     x$start$component, ref)
+                       } else {
+                           findFile(ref, amendSearchPaths(path))
                        }
                    }
                    input
