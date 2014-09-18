@@ -30,19 +30,19 @@ splitPaths <- function(s) {
 #' @param newPaths Character string of paths to be added
 #' @param searchPaths Character string of paths to be amended
 #' @return Character string of amended search paths
-amendSearchPaths <- function(newPaths, searchPaths=searchPaths) {
-    searchPaths <- 
+amendSearchPaths <- function(newPaths, pathsToAmend=searchPaths) {
+    amendedPaths <- 
         ## if newPaths starts with pathSep, append to searchPaths
         if (grepl(paste0("^[", pathSep, "]"), newPaths)) {
-            paste0(searchPaths, newPaths)
+            paste0(pathsToAmend, newPaths)
             ## else if newPaths ends with pathSep, prepend to searchPaths
         } else if (grepl(paste0("[", pathSep, "]$"), newPaths)) {
-            paste0(newPaths, searchPaths)
+            paste0(newPaths, pathsToAmend)
             ## else return only newPaths
         } else {
             newPaths
         }
-    searchPaths
+    amendedPaths
 }
 
 ## expandSearchPath to absolute file path
