@@ -181,7 +181,7 @@ loadModule <- function(name, ref, path=searchPaths,
             names(outputs) <- outputNames
             outputs
         }
-    module(name=name, description=description,
+    module(name=name, path=path, description=description,
            platform=platform, inputs=inputs, outputs=outputs,
            sources=sources)
 }
@@ -358,7 +358,7 @@ module <- function(name, description="", platform, inputs=list(),
                            x["name"]
                        })
         }
-        module <- list(name=name, description=description,
+        module <- list(name=name, path=path, description=description,
                        platform=platform, inputs=inputs, outputs=outputs,
                        sources=sources)
     }
