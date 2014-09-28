@@ -55,7 +55,7 @@ sourceOrder <- function(sources) {
 #' @import tools
 #' @import RBGL
 #' @import graph
-loadModule <- function(name, ref, path=searchPaths,
+loadModule <- function(name, ref, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     xml <- fetchRef(ref, path)
     module <- xmlRoot(xmlParse(xml))
@@ -317,7 +317,8 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     c(name=name, type=type, format=format, formatType=formatType, ref=ref)
 }
 #' @export
-moduleSource <- function(value, ref=NULL, path=searchPaths, type="", order="") {
+moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
+                         order="") {
     if (!is.null(ref)) value <- fetchRef(ref, path)
     list(value=value, type=type, order=order)
 }

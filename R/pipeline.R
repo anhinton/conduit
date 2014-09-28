@@ -330,7 +330,7 @@ runPipeline <- function(pipeline) {
             components,
             function (c) {
                 if (!is.null(c$ref)) {
-                    if (is.null(c$path)) c$path <- searchPaths
+                    if (is.null(c$path)) c$path <- defaultSearchPaths
                     ## FIXME: only handles modules, not pipelines
                     c <- loadComponent(c)
                 }
