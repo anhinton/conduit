@@ -317,8 +317,8 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     c(name=name, type=type, format=format, formatType=formatType, ref=ref)
 }
 #' @export
-moduleSource <- function(value, ref=NULL, type="", order="") {
-    if (!is.null(ref)) value <- readLines(ref)
+moduleSource <- function(value, ref=NULL, path=searchPaths, type="", order="") {
+    if (!is.null(ref)) value <- fetchRef(ref, path)
     list(value=value, type=type, order=order)
 }
 
