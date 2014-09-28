@@ -51,7 +51,7 @@ expandSearchPaths <- function(s) {
     normalizePath(s)
 }
 
-findFile <- function (x, path) {
+findFile <- function (x, path = defaultSearchPaths) {
     searchPaths <- amendSearchPaths(path, defaultSearchPaths)
     searchPaths <- splitPaths(searchPaths)
     searchPaths <- unique(expandSearchPaths(searchPaths))
