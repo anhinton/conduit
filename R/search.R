@@ -7,7 +7,7 @@ pathSep <- "|"
 ## the default Search Paths
 ## ".//" - the directory containing the file which has initiated the search
 ## "${ROOT}" - the directory from which the glue system has been invoked
-searchPaths <- paste(".//", "${ROOT}", sep=pathSep)
+defaultSearchPaths <- paste(".//", "${ROOT}", sep=pathSep)
 
 ## split search paths string
 splitPaths <- function(s) {
@@ -20,22 +20,22 @@ splitPaths <- function(s) {
 #' Append, prepend, or replace search paths with a new set.
 #'
 #' If \code{newPaths} ends with the | character, new search paths will be
-#' prepended to \code{searchPaths}.
+#' prepended to \code{pathsToAmend}.
 #'
 #' If \code{newPaths} begins with | character, new search paths will be
-#' appended to \code{searchPaths}.
+#' appended to \code{pathsToAmend}.
 #'
-#' Otherwise \code{newPaths} replaces \code{searchPaths}.
+#' Otherwise \code{newPaths} replaces \code{pathsToAmend}.
 #'
 #' @param newPaths Character string of paths to be added
 #' @param pathsToAmend Character string of paths to be amended
 #' @return Character string of amended search paths
-amendSearchPaths <- function(newPaths, pathsToAmend=searchPaths) {
+amendSearchPaths <- function(newPaths, pathsToAmend=defaultSearchPaths) {
     amendedPaths <- 
-        ## if newPaths starts with pathSep, append to searchPaths
+        ## if newPaths starts with pathSep, append to pathsToAmend
         if (grepl(paste0("^[", pathSep, "]"), newPaths)) {
             paste0(pathsToAmend, newPaths)
-            ## else if newPaths ends with pathSep, prepend to searchPaths
+            ## else if newPaths ends with pathSep, prepend to pathsToAmend
         } else if (grepl(paste0("[", pathSep, "]$"), newPaths)) {
             paste0(newPaths, pathsToAmend)
             ## else return only newPaths
@@ -51,8 +51,8 @@ expandSearchPaths <- function(s) {
     normalizePath(s)
 }
 
-findFile <- function (x, searchPaths) {
-    searchPaths <- amendSearchPaths(searchPaths, searchPaths)
+findFile <- function (x, path) {
+    searchPaths <- amendSearchPaths(path, defaultSearchPaths)
     searchPaths <- splitPaths(searchPaths)
     searchPaths <- unique(expandSearchPaths(searchPaths))
     result <- NULL
@@ -83,7 +83,7 @@ findFile <- function (x, searchPaths) {
 #' @param path File paths to search
 #' @return Character vector containing the contents of \code{ref}
 #' @import XML
-fetchRef <- function(ref, path=searchPaths) {
+fetchRef <- function(ref, path=defaultSearchPaths) {
     if (grepl("^ *https://", ref)){
         getURL(ref)
     } else if (grepl("^ */", dirname(ref))) {
