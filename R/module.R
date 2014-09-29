@@ -298,6 +298,15 @@ runModule <- function(module, inputs=list(),
 
 ## module creation functions
 
+#' Create a module's platform node.
+#'
+#' @param name Name of platform
+#' @return A named character vector containing the platform name
+#' @export
+modulePlatform <- function(name) {
+    c(name=name)
+}
+
 #' @export
 moduleInput <- function(name, type, format="", formatType="text") {
     c(name=name, type=type, format=format, formatType=formatType)
@@ -336,7 +345,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #'
 #' @param name Name of module as character value
 #' @param description Description of what module does as character value
-#' @param platform Module platform as character value
+#' @param platform \code{modulePlatform} character vector
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
@@ -344,6 +353,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #' @export
 module <- function(name, description="", platform, inputs=list(),
                    outputs=list(), sources=list(), ref=NULL, path=NULL) {
+    platform <- modulePlatform(platform)
     if (!is.null(inputs)) {
         names(inputs) <-
             sapply(inputs,

@@ -11,7 +11,7 @@ module(name, description = "", platform, inputs = list(),
 
 \item{description}{Description of what module does as character value}
 
-\item{platform}{Module platform as character value}
+\item{platform}{\code{modulePlatform} character vector}
 
 \item{inputs}{List of \code{moduleInput} objects}
 
