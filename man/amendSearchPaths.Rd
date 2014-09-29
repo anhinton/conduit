@@ -3,12 +3,12 @@
 \alias{amendSearchPaths}
 \title{Amend search paths}
 \usage{
-amendSearchPaths(newPaths, searchPaths = searchPaths)
+amendSearchPaths(newPaths, pathsToAmend = defaultSearchPaths)
 }
 \arguments{
 \item{newPaths}{Character string of paths to be added}
 
-\item{searchPaths}{Character string of paths to be amended}
+\item{pathsToAmend}{Character string of paths to be amended}
 }
 \value{
 Character string of amended search paths
@@ -18,11 +18,11 @@ Append, prepend, or replace search paths with a new set.
 }
 \details{
 If \code{newPaths} ends with the | character, new search paths will be
-prepended to \code{searchPaths}.
+prepended to \code{pathsToAmend}.
 
 If \code{newPaths} begins with | character, new search paths will be
-appended to \code{searchPaths}.
+appended to \code{pathsToAmend}.
 
-Otherwise \code{newPaths} replaces \code{searchPaths}.
+Otherwise \code{newPaths} replaces \code{pathsToAmend}.
 }
 

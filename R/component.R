@@ -77,7 +77,7 @@ exportComponent <- function(component, targetDirectory=getwd(),
 #' @export
 runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
     if (!is.null(component$ref)) {
-        if (is.null(component$path)) components$path <- searchPaths
+        if (is.null(component$path)) components$path <- defaultSearchPaths
         component <- loadComponent(component)
     }
     value <- component$value

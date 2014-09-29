@@ -22,6 +22,7 @@ loadPipeline <-
     filename <- tools::file_path_as_absolute(filename)
     pipelineDir <- dirname(filename)
     pipeline <- xmlRoot(xmlParse(filename))
+    pipelinePath <- paste0(pipelineDir, pathSep)
     descNodes <- getNodeSet(pipeline, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
@@ -45,7 +46,7 @@ loadPipeline <-
                    path <- getXMLAttr(m, "path")
                    ## if a path is not given assume this means the xml file
                    ## is found in the same directory as the pipeline xml
-                   if (is.null(path)) path <- paste0(pipelineDir, "|")
+                   if (is.null(path)) path <- pipelinePath
                    type <- getXMLAttr(m, "type")
                    component <- component(name=name, ref=ref, path=path,
                                           type=type)
@@ -71,7 +72,7 @@ loadPipeline <-
                         endInput=endInput)
                },
                namespaces)    
-    pipeline(name=pipelineName, description=description,
+    pipeline(name=pipelineName, path=pipelinePath, description=description,
              components=components, pipes=pipes)
 }
 
@@ -80,7 +81,8 @@ loadPipeline <-
 #' Convert a pipeline to XML
 #'
 #' @param pipeline \code{pipeline} object
-#' @param namespaceDefinition XML namespaces as character vector
+#' @param namespaceDefinitions XML namespaces as character vector
+#' @param export if true inline components are converted to reference files
 #' @return \code{XMLNode} object
 pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
     pipelineRoot <- newXMLNode("pipeline",
@@ -238,11 +240,14 @@ inputsList <- function(pipes, components, pipelinePath) {
                                                 sep=""))
                    } else if (type == "external") {
                        startComponent <- components[[x$start$component]]
-                       input <-
+                       ref <-
                            startComponent$value$outputs[[x$start$output]]["ref"]
-                       if (dirname(input) == ".") {
-                           input <- file.path(pipelinePath, "modules",
-                                              x$start$component, input)
+                       path <- startComponent$value$path
+                       input <- if (dirname(ref) == ".") {
+                           file.path(pipelinePath, "modules",
+                                     x$start$component, ref)
+                       } else {
+                           findFile(ref, amendSearchPaths(path))
                        }
                    }
                    input
@@ -325,7 +330,7 @@ runPipeline <- function(pipeline) {
             components,
             function (c) {
                 if (!is.null(c$ref)) {
-                    if (is.null(c$path)) c$path <- searchPaths
+                    if (is.null(c$path)) c$path <- defaultSearchPaths
                     ## FIXME: only handles modules, not pipelines
                     c <- loadComponent(c)
                 }
@@ -426,6 +431,7 @@ componentName <- function (component) {
 #' it the compoments from \code{modules} and \code{pipelines}.
 #'
 #' @param name \code{pipeline} name
+#' @param path location of originating pipeline xml file
 #' @param description \code{pipeline} description
 #' @param components list of \code{module}s and \code{pipeline}s
 #' @param modules list of \code{module}s
@@ -433,12 +439,13 @@ componentName <- function (component) {
 #' @param pipes list of \code{pipe}s
 #' @return \code{pipeline} list containing:
 #' \item{name}{character value}
+#' \item{path}{Location of source pipeline XML file}
 #' \item{description}{character value}
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
 #' @export
-pipeline <- function (name, description="", components=list(), modules=list(),
-                      pipelines=list(), pipes=list()) {
+pipeline <- function (name, path=NULL, description="", components=list(),
+                      modules=list(), pipelines=list(), pipes=list()) {
     if (!length(components)) {
         components <- c(modules, pipelines)
     } 
@@ -452,8 +459,8 @@ pipeline <- function (name, description="", components=list(), modules=list(),
             }
             component
         })
-    pipeline <- list(name=name, description=description, components=components,
-                     pipes=pipes)
+    pipeline <- list(name=name, path=path, description=description,
+                     components=components, pipes=pipes)
     class(pipeline) <- "pipeline"
     pipeline
 }

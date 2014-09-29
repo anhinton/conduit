@@ -3,7 +3,7 @@
 \alias{loadModule}
 \title{Load a module from an XML file}
 \usage{
-loadModule(name, ref, path = searchPaths, namespaces = c(oa =
+loadModule(name, ref, path = defaultSearchPaths, namespaces = c(oa =
   "http://www.openapi.org/2014/"))
 }
 \arguments{

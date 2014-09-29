@@ -37,7 +37,7 @@ sourceOrder <- function(sources) {
 #' @param xml Module \code{XMLNode}
 #' @return \code{module} object
 #' @import XML
-readModuleXML <- function(name, xml) {
+readModuleXML <- function(name, xml, path=defaultSearchPaths) {
     nodes <- xmlChildren(xml)
     ## extract description
     descNode <- nodes$description
@@ -156,7 +156,7 @@ readModuleXML <- function(name, xml) {
             names(outputs) <- outputNames
             outputs
         }
-    module(name=name, description=description,
+    module(name=name, path=path, description=description,
            platform=platform, inputs=inputs, outputs=outputs,
            sources=sources)
 }
@@ -169,12 +169,12 @@ readModuleXML <- function(name, xml) {
 #' @return \code{module} list
 #' @export
 #' @import XML
-loadModule <- function(name, ref, path=searchPaths,
+loadModule <- function(name, ref, path=defaultSearchPaths,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## fetch module XML from disk
     rawXML <- fetchRef(ref, path)
     xml <- xmlRoot(xmlParse(rawXML))
-    module <- readModuleXML(name, xml)
+    module <- readModuleXML(name, xml, path)
     module
 }
 
@@ -183,7 +183,7 @@ loadModule <- function(name, ref, path=searchPaths,
 #' Convert a module to XML
 #'
 #' @param module \code{module} object
-#' @param namespaceDefinition XML namespaces as character vector
+#' @param namespaceDefinitions XML namespaces as character vector
 #' @return \code{XMLNode} object
 #' @import XML
 moduleToXML <- function (module,
@@ -307,8 +307,9 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     c(name=name, type=type, format=format, formatType=formatType, ref=ref)
 }
 #' @export
-moduleSource <- function(value, ref=NULL, type="", order="") {
-    if (!is.null(ref)) value <- readLines(ref)
+moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
+                         order="") {
+    if (!is.null(ref)) value <- fetchRef(ref, path)
     list(value=value, type=type, order=order)
 }
 
@@ -329,6 +330,17 @@ moduleSource <- function(value, ref=NULL, type="", order="") {
 ##   - platform,
 ##   - sources
 ##   - outputs
+#' Create a module
+#'
+#' Create a \code{module} list object
+#'
+#' @param name Name of module as character value
+#' @param description Description of what module does as character value
+#' @param platform Module platform as character value
+#' @param inputs List of \code{moduleInput} objects
+#' @param outputs List of \code{moduleOutput} objects
+#' @param sources List of \code{moduleSource} objects
+#' @param path Search path for original module XML file
 #' @export
 module <- function(name, description="", platform, inputs=list(),
                    outputs=list(), sources=list(), ref=NULL, path=NULL) {
@@ -346,10 +358,9 @@ module <- function(name, description="", platform, inputs=list(),
                        x["name"]
                    })
     }
-    module <- list(name=name, description=description,
+    module <- list(name=name, path=path, description=description,
                    platform=platform, inputs=inputs, outputs=outputs,
                    sources=sources)
-
     class(module) <- "module"
     module
 }

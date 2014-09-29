@@ -3,7 +3,7 @@
 \alias{readModuleXML}
 \title{Parse module XML and return a module object}
 \usage{
-readModuleXML(name, xml)
+readModuleXML(name, xml, path = defaultSearchPaths)
 }
 \arguments{
 \item{name}{Module name}

@@ -8,7 +8,7 @@ moduleToXML(module, namespaceDefinitions = NULL)
 \arguments{
 \item{module}{\code{module} object}
 
-\item{namespaceDefinition}{XML namespaces as character vector}
+\item{namespaceDefinitions}{XML namespaces as character vector}
 }
 \value{
 \code{XMLNode} object
