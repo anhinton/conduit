@@ -51,28 +51,38 @@ expandSearchPaths <- function(s) {
     normalizePath(s)
 }
 
-findFile <- function (x, path = defaultSearchPaths) {
-    searchPaths <- amendSearchPaths(path, defaultSearchPaths)
-    searchPaths <- splitPaths(searchPaths)
-    searchPaths <- unique(expandSearchPaths(searchPaths))
+findFile <- function (ref, path = defaultSearchPaths) {
     result <- NULL
-    count <- 1
-    while (is.null(result) && count <= length(searchPaths)) {
-        filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
-                                  full.names=TRUE)
-        whichFiles <- grep(paste0(x, "$"), filesInPath)
-        files <- filesInPath[whichFiles]
-        result <-
-            if (length(files) > 0) {
-                if (length(files) > 1) {
-                    warning(paste(paste("Found more than one match for",
-                                        x), files, collapse="\n"))
+    if (file.exists(ref) {
+        ## check if ref is an absolute path
+        if (ref == normalizePath(ref)) {
+            result <- ref
+        }
+        ## check if ref is relative to home directory  
+        else if (ref != path.expand(ref)) {
+            result <- normalizePath(ref)
+    } else {
+        searchPaths <- amendSearchPaths(path, defaultSearchPaths)
+        searchPaths <- splitPaths(searchPaths)
+        searchPaths <- unique(expandSearchPaths(searchPaths))
+        count <- 1
+        while (is.null(result) && count <= length(searchPaths)) {
+            filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
+                                      full.names=TRUE)
+            whichFiles <- grep(paste0(ref, "$"), filesInPath)
+            files <- filesInPath[whichFiles]
+            result <-
+                if (length(files) > 0) {
+                    if (length(files) > 1) {
+                        warning(paste(paste("Found more than one match for",
+                                            ref), files, collapse="\n"))
+                    }
+                    files[1]
+                } else {
+                    NULL
                 }
-                files[1]
-            } else {
-                NULL
-            }
-        count <- count + 1;
+            count <- count + 1;
+        }
     }
     result
 }
