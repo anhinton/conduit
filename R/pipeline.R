@@ -1,28 +1,24 @@
 ### load, save, run and create pipelines
 
-#' Load a pipeline and its modules from disk
+#' Parse pipeline XML and return a pipeline object
 #'
-#' Read an openapi \code{pipeline} and its associated \code{module}s from an
-#' XML document
-#'
-#' @param filename file path to \code{pipeline} XML
-#' @param pipelineName as character value
-#' @param namespaces named charactor vector
-#' @return \code{pipeline} list containing:
-#' \item{name}{as character value}
-#' \item{description}{as character value}
-#' \item{components}{list of \code{module}s and \code{pipeline}s}
-#' \item{pipes}{list of \code{pipe}s}
+#' @param name Pipeline name
+#' @param xml Pipeline \code{XMLNode}
+#' @return \code{pipeline} object
 #' @import XML
-#' @export
-loadPipeline <-
-    function(filename,
-             pipelineName=tools::file_path_sans_ext(basename(filename)),
-             namespaces=c(oa="http://www.openapi.org/2014/")) {
-    filename <- tools::file_path_as_absolute(filename)
-    pipelineDir <- dirname(filename)
-    pipeline <- xmlRoot(xmlParse(filename))
-    pipelinePath <- paste0(pipelineDir, pathSep)
+readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
+    ## pipelinePath <- paste0(pipelineDir, pathSep)
+    nodes <- xmlChildren(xml)
+    ## extract description
+    descNode <- nodes$description
+    description <- xmlValue(descNode)
+
+    loadPipeline <-
+    ## extract description
+    descNode <- nodes$description
+    description <- xmlValue(descNode)
+
+
     descNodes <- getNodeSet(pipeline, "//description|//oa:description",
                             namespaces=namespaces)
     description <-
@@ -74,6 +70,23 @@ loadPipeline <-
                namespaces)    
     pipeline(name=pipelineName, path=pipelinePath, description=description,
              components=components, pipes=pipes)
+}
+
+#' Load a pipeline from an XML file
+#' 
+#' @param name Filename of XML pipeline
+#' @param ref Path to XML file
+#' @param namespaces Namespaces used in XML document as named character vector
+#' @return \code{pipeline} list
+#' @export
+#' @import XML
+loadPipeline <- function(name, ref, path=defaultSearchPaths,
+                       namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## fetch pipeline XML from disk
+    rawXML <- fetchRef(ref, path)
+    xml <- xmlRoot(xmlParse(rawXML))
+    pipeline <- readPipelineXML(name, xml, path)
+    pipeline
 }
 
 ## functions to write a pipeline (and its modules) to XML files
