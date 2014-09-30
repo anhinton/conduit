@@ -12,37 +12,17 @@ readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
     ## extract description
     descNode <- nodes$description
     description <- xmlValue(descNode)
-
-    loadPipeline <-
-    ## extract description
-    descNode <- nodes$description
-    description <- xmlValue(descNode)
-
-
-    descNodes <- getNodeSet(pipeline, "//description|//oa:description",
-                            namespaces=namespaces)
-    description <-
-        if (length(descNodes)) {
-            xmlValue(descNodes[[1]])
-        } else {
-            character(1)
-        }
-    componentNodes <- getNodeSet(pipeline, "//component|//oa:component",
-                              namespaces=namespaces)
-    ## FIXME: need to address inline components
-    
-    pipeNodes <- getNodeSet(pipeline, "//pipe|//oa:pipe",
-                            namespaces=namespaces)
-
+    ## extract components
+    componentNodes <- nodes[names(nodes) == "component"]
     components <-
         lapply(componentNodes,
-               function(m, namespaces, pipelineDir) {
+               function(m, path) {
                    name <- getXMLAttr(m, "name")
                    ref <- getXMLAttr(m, "ref")
                    path <- getXMLAttr(m, "path")
                    ## if a path is not given assume this means the xml file
                    ## is found in the same directory as the pipeline xml
-                   if (is.null(path)) path <- pipelinePath
+                   if (is.null(path)) path <- path
                    type <- getXMLAttr(m, "type")
                    component <- component(name=name, ref=ref, path=path,
                                           type=type)
@@ -50,9 +30,14 @@ readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
                    ## path <-
                    ## FIXME: need to check whether module or pipeline
                    component
-                   }, namespaces, pipelineDir)
+                   }, path)
     names(components) <-
         sapply(components, componentName)
+    ## FIXME: need to address inline components
+    
+    pipeNodes <- getNodeSet(pipeline, "//pipe|//oa:pipe",
+                            namespaces=namespaces)
+
     pipes <-
         lapply(pipeNodes,
                function (x, namespaces) {
