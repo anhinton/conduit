@@ -6,7 +6,7 @@
 #' @param xml Pipeline \code{XMLNode}
 #' @return \code{pipeline} object
 #' @import XML
-readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
+readPipelineXML <- function(name, xml, path = NULL) {
     ## pipelinePath <- paste0(pipelineDir, pathSep)
     nodes <- xmlChildren(xml)
     ## extract description
@@ -330,7 +330,7 @@ runPipeline <- function(pipeline) {
             components,
             function (c) {
                 if (!is.null(c$ref)) {
-                    if (is.null(c$path)) c$path <- defaultSearchPaths
+                    if (is.null(c$path)) c$path <- pipelinePath
                     ## FIXME: only handles modules, not pipelines
                     c <- loadComponent(c)
                 }

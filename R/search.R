@@ -30,7 +30,7 @@ splitPaths <- function(s) {
 #' @param newPaths Character string of paths to be added
 #' @param pathsToAmend Character string of paths to be amended
 #' @return Character string of amended search paths
-amendSearchPaths <- function(newPaths, pathsToAmend=defaultSearchPaths) {
+amendSearchPaths <- function(newPaths, pathsToAmend = defaultSearchPaths) {
     amendedPaths <- 
         ## if newPaths starts with pathSep, append to pathsToAmend
         if (grepl(paste0("^[", pathSep, "]"), newPaths)) {
@@ -51,7 +51,7 @@ expandSearchPaths <- function(s) {
     normalizePath(s)
 }
 
-findFile <- function (ref, path = defaultSearchPaths) {
+findFile <- function (ref, path = NULL) {
     result <- NULL
     ## check if ref is an absolute path
     if (file.exists(ref) && ref == normalizePath(ref)) {
@@ -61,7 +61,12 @@ findFile <- function (ref, path = defaultSearchPaths) {
         ## if ref is a path relative to $HOME
         result <- normalizePath(ref)
     } else {
-        searchPaths <- amendSearchPaths(path, defaultSearchPaths)
+        searchPaths <-
+            if (is.null(path)) {
+                defaultSearchPaths
+            } else {
+                amendSearchPaths(path)
+            }
         searchPaths <- splitPaths(searchPaths)
         searchPaths <- unique(expandSearchPaths(searchPaths))
         if (grepl("^[.]{2}", ref)[1]) {
@@ -105,11 +110,11 @@ findFile <- function (ref, path = defaultSearchPaths) {
 #' @param path File paths to search
 #' @return Character vector containing the contents of \code{ref}
 #' @import XML
-fetchRef <- function(ref, path=defaultSearchPaths) {
+fetchRef <- function(ref, path = NULL) {
     if (grepl("^ *https://", ref)){
         getURL(ref)
-    } else if (grepl("^ */", dirname(ref))) {
-        readLines(ref)
+    ## } else if (grepl("^ */", dirname(ref))) {
+    ##     readLines(ref)
     } else {
         readLines(findFile(ref, path))
     }

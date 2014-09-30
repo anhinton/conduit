@@ -37,7 +37,7 @@ sourceOrder <- function(sources) {
 #' @param xml Module \code{XMLNode}
 #' @return \code{module} object
 #' @import XML
-readModuleXML <- function(name, xml, path=defaultSearchPaths) {
+readModuleXML <- function(name, xml, path = NULL) {
     nodes <- xmlChildren(xml)
     ## extract description
     descNode <- nodes$description
@@ -169,7 +169,7 @@ readModuleXML <- function(name, xml, path=defaultSearchPaths) {
 #' @return \code{module} list
 #' @export
 #' @import XML
-loadModule <- function(name, ref, path=defaultSearchPaths,
+loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## fetch module XML from disk
     rawXML <- fetchRef(ref, path)
