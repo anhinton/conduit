@@ -53,18 +53,30 @@ expandSearchPaths <- function(s) {
 
 findFile <- function (ref, path = defaultSearchPaths) {
     result <- NULL
-    if (file.exists(ref) {
-        ## check if ref is an absolute path
-        if (ref == normalizePath(ref)) {
-            result <- ref
-        }
-        ## check if ref is relative to home directory  
-        else if (ref != path.expand(ref)) {
-            result <- normalizePath(ref)
+    ## check if ref is an absolute path
+    if (file.exists(ref) && ref == normalizePath(ref)) {
+        ## if ref is an absolute path
+        result <- ref
+    } else if (file.exists(ref) && ref != path.expand(ref)) {
+        ## if ref is a path relative to $HOME
+        result <- normalizePath(ref)
     } else {
         searchPaths <- amendSearchPaths(path, defaultSearchPaths)
         searchPaths <- splitPaths(searchPaths)
         searchPaths <- unique(expandSearchPaths(searchPaths))
+        if (grepl("^[.]{2}", ref)[1]) {
+            ## if ref is relative, calculate search paths
+            relativeStart <- substr(ref, 1, regexpr("[/][^.]", ref) - 1)
+            ref <- substr(ref, regexpr("[/][^.]", ref) + 1, nchar(ref))
+            searchPaths <-
+                sapply(searchPaths,
+                       function (p, relStart) {
+                           owd <- setwd(p)
+                           on.exit(setwd(owd))
+                           setwd(relStart)
+                           getwd()
+                       }, relativeStart)
+        }
         count <- 1
         while (is.null(result) && count <= length(searchPaths)) {
             filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
