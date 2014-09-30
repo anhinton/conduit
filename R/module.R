@@ -171,6 +171,11 @@ readModuleXML <- function(name, xml, path = NULL) {
 #' @import XML
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## if path is not set, make path from ref
+    if (is.null(path)) {
+        path <- paste0(dirname(ref), pathSep)
+        ref <- basename(ref)
+    }
     ## fetch module XML from disk
     rawXML <- fetchRef(ref, path)
     xml <- xmlRoot(xmlParse(rawXML))
