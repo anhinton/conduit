@@ -63,9 +63,13 @@ readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
 #' @return \code{pipeline} list
 #' @export
 #' @import XML
-loadPipeline <- function(name, ref, path=defaultSearchPaths,
+loadPipeline <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## fetch pipeline XML from disk
+    if (is.null(path)) {
+        path <- paste0(dirname(ref), pathSep)
+        ref <- basename(ref)
+    }
     rawXML <- fetchRef(ref, path)
     xml <- xmlRoot(xmlParse(rawXML))
     pipeline <- readPipelineXML(name, xml, path)
