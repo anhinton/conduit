@@ -77,7 +77,7 @@ readModuleXML <- function(name, xml, path=defaultSearchPaths) {
         }
     ## extract platform
     platformNode <- nodes$platform
-    platform <- xmlAttrs(platformNode)["name"]
+    platform <- xmlAttrs(platformNode)[["name"]]
     ## extract sources
     sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
