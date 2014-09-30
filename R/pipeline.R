@@ -16,13 +16,13 @@ readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
     componentNodes <- nodes[names(nodes) == "component"]
     components <-
         lapply(componentNodes,
-               function(m, path) {
+               function(m, pipelinePath) {
                    name <- getXMLAttr(m, "name")
                    ref <- getXMLAttr(m, "ref")
                    path <- getXMLAttr(m, "path")
                    ## if a path is not given assume this means the xml file
                    ## is found in the same directory as the pipeline xml
-                   if (is.null(path)) path <- path
+                   if (is.null(path)) path <- pipelinePath
                    type <- getXMLAttr(m, "type")
                    component <- component(name=name, ref=ref, path=path,
                                           type=type)
