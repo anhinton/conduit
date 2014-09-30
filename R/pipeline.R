@@ -35,12 +35,11 @@ readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
         sapply(components, componentName)
     ## FIXME: need to address inline components
     
-    pipeNodes <- getNodeSet(pipeline, "//pipe|//oa:pipe",
-                            namespaces=namespaces)
-
+    ## extract pipes
+    pipeNodes <- nodes[names(nodes) == "pipe"]
     pipes <-
         lapply(pipeNodes,
-               function (x, namespaces) {
+               function (x) {
                    start <- xmlChildren(x)$start
                    startComponent <- xmlAttrs(start)[["component"]]
                    startOutput <- xmlAttrs(start)[["output"]]
@@ -51,9 +50,8 @@ readPipelineXML <- function(name, xml, path=defaultSearchPaths) {
                         startOutput=startOutput,
                         endComponent=endComponent,
                         endInput=endInput)
-               },
-               namespaces)    
-    pipeline(name=pipelineName, path=pipelinePath, description=description,
+               })    
+    pipeline(name=name, path=path, description=description,
              components=components, pipes=pipes)
 }
 
