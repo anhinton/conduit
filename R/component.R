@@ -1,5 +1,7 @@
 ### Functions for loading, running and creating components
 
+
+
 #' Load a component's value from XML
 #'
 #' Load a \code{component}'s value from the XML file given in its ref and
@@ -120,12 +122,16 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
 #' \item{type}{component type}
 #' \item{value}{\code{pipeline} or \code{module} object}
 component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
+    ## if a 'ref' is given then we ignore given 'value' as 'value' will
+    ## be read from the file given in 'ref' using loadComponent()
     if (!is.null(ref)) {
         value <- NULL
     }
+    ## if a 'value' is given use this to determine the component type
     if (!is.null(value)) {
         type <- class(value)
     }
+    ## if type is not 'module' or 'pipeline' then something is wrong
     if (type != "module" && type != "pipeline") {
         stop("A component must be a module or a pipeline")
     }
