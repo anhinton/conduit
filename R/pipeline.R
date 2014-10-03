@@ -1,5 +1,25 @@
 ### load, save, run and create pipelines
 
+#' Parse a component \code{xmlNode} and return a \code{component}.
+#'
+#' @param node An \code{xmlNode} named \dQuote{component}.
+#' @return \code{component} object
+readComponentNode <- function (node, pipelinePath) {
+    name <- getXMLAttr(node, "name")
+    ref <- getXMLAttr(node, "ref")
+    path <- getXMLAttr(node, "path")
+    ## if a path is not given assume this means the xml file
+    ## is found in the same directory as the pipeline xml
+    if (is.null(path)) path <- pipelinePath
+    type <- getXMLAttr(node, "type")
+    component <- component(name=name, ref=ref, path=path,
+                           type=type)
+    ## FIXME: can't handle anon/inline components
+    ## path <-
+    ## FIXME: need to check whether module or pipeline
+    component
+}
+
 #' Parse pipeline XML and return a pipeline object
 #'
 #' @param name Pipeline name
@@ -9,28 +29,14 @@
 readPipelineXML <- function(name, xml, path = NULL) {
     ## pipelinePath <- paste0(pipelineDir, pathSep)
     nodes <- xmlChildren(xml)
+    
     ## extract description
     descNode <- nodes$description
     description <- xmlValue(descNode)
+
     ## extract components
     componentNodes <- nodes[names(nodes) == "component"]
-    components <-
-        lapply(componentNodes,
-               function(m, pipelinePath) {
-                   name <- getXMLAttr(m, "name")
-                   ref <- getXMLAttr(m, "ref")
-                   path <- getXMLAttr(m, "path")
-                   ## if a path is not given assume this means the xml file
-                   ## is found in the same directory as the pipeline xml
-                   if (is.null(path)) path <- pipelinePath
-                   type <- getXMLAttr(m, "type")
-                   component <- component(name=name, ref=ref, path=path,
-                                          type=type)
-                   ## FIXME: can't handle anon/inline components
-                   ## path <-
-                   ## FIXME: need to check whether module or pipeline
-                   component
-                   }, path)
+    components <- lapply(componentNodes, readComponentNode, path)
     names(components) <-
         sapply(components, componentName)
     ## FIXME: need to address inline components
