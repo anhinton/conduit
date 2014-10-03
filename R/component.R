@@ -1,7 +1,5 @@
 ### Functions for loading, running and creating components
 
-
-
 #' Load a component's value from XML
 #'
 #' Load a \code{component}'s value from the XML file given in its ref and
