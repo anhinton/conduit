@@ -15,6 +15,10 @@ readComponentNode <- function (node, pipelinePath) {
             ## is found in the same directory as the pipeline xml
             if (is.null(path)) path <- pipelinePath
             type <- getXMLAttr(node, "type")
+            ## if type is not 'module' or 'pipeline' then something is wrong
+            if (type != "module" && type != "pipeline") {
+                stop("A component must be a module or a pipeline")
+            }
             component(name=name, ref=ref, path=path, type=type)
             ## FIXME: can't handle anon/inline components
         }
