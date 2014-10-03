@@ -4,11 +4,29 @@
 #'
 #' @param node An \code{xmlNode} named \dQuote{component}.
 #' @return \code{component} object
+#' @import XML
 readComponentNode <- function (node, pipelinePath) {
     name <- getXMLAttr(node, "name")
     ref <- getXMLAttr(node, "ref")
     component <-
         if (is.null(ref)) {
+            rawValue <- xmlChildren(node)[[1]] # only first component node
+                                               # counts
+            ## check if the component has any content
+            if (is.null(rawValue)) {
+                stop(paste("Component", name, "is empty!"))
+            }
+            type <- names(node)[[1]]
+            ## check for appropriate types
+            if (type != "module" && type != "pipeline") {
+                stop("A component must be a module or a pipeline")
+            }
+            value <- switch(type,
+                            module = readModuleXML(name, rawValue,
+                                                   pipelinePath),
+                            pipeline = readPipelineXML(name, rawValue,
+                                                       pipelinePath))
+            component(name = name, type = type, value = value)
         } else {
             path <- getXMLAttr(node, "path")
             ## if a path is not given assume this means the xml file
