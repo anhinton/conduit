@@ -7,14 +7,17 @@
 readComponentNode <- function (node, pipelinePath) {
     name <- getXMLAttr(node, "name")
     ref <- getXMLAttr(node, "ref")
-    path <- getXMLAttr(node, "path")
-    ## if a path is not given assume this means the xml file
-    ## is found in the same directory as the pipeline xml
-    if (is.null(path)) path <- pipelinePath
-    type <- getXMLAttr(node, "type")
-    component <- component(name=name, ref=ref, path=path,
-                           type=type)
-    ## FIXME: can't handle anon/inline components
+    component <-
+        if (is.null(ref)) {
+        } else {
+            path <- getXMLAttr(node, "path")
+            ## if a path is not given assume this means the xml file
+            ## is found in the same directory as the pipeline xml
+            if (is.null(path)) path <- pipelinePath
+            type <- getXMLAttr(node, "type")
+            component(name=name, ref=ref, path=path, type=type)
+            ## FIXME: can't handle anon/inline components
+        }
     ## path <-
     ## FIXME: need to check whether module or pipeline
     component
