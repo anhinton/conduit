@@ -279,7 +279,7 @@ inputsList <- function(pipes, components, pipelinePath) {
                            file.path(pipelinePath, "modules",
                                      x$start$component, ref)
                        } else {
-                           findFile(ref, amendSearchPaths(path))
+                           findFile(ref)
                        }
                    }
                    input
