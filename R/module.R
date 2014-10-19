@@ -201,11 +201,9 @@ moduleToXML <- function (module,
             module$inputs,
             function(i) {
                 input <- newXMLNode("input", attrs=c(i["name"], i["type"]))
-                input <-
-                    addChildren(
-                        input,
-                        newXMLNode("format",
-                                   attrs=c(i["formatType"])))
+                format <- newXMLNode("format", attrs = c(i["formatType"]))
+                xmlValue(format) <- i["format"]
+                input <- addChildren(input, format)
             })
     outputs <-
         lapply(module$outputs,
@@ -215,10 +213,9 @@ moduleToXML <- function (module,
                        attrs <- c(attrs, o["ref"])
                    }
                    output <- newXMLNode("output", attrs=attrs)
-                   output <-
-                       addChildren(output,
-                                   newXMLNode("format",
-                                              attrs=c(o["formatType"])))
+                   format <- newXMLNode("format", attrs = c(o["formatType"]))
+                   xmlValue(format) <- o["format"]
+                   output <- addChildren(output, format)
                })
     platform <- newXMLNode("platform", attrs=c(module$platform))
     sources <-
