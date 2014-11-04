@@ -1,16 +1,16 @@
 ### Platform support for R platform
 
-## runPlatform.R
-## arguments:
-## - module: list object
-## - inputs: named list of file locations
-## - modulePath: file path in which to save outputs
-## description:
-##   platform support for "shell" platform.
-##   Creates an R ".R" script from a given module, taking specific input file
-##   paths from 'inputs'.
-##   Writes script to 'filePath', then attempts to run the script in this
-##   location.
+#' Platform support for "R" platform.
+#'
+#' @details Creates a .R script file from the supplied \code{module},
+#' taking specific input file paths from \code{inputs}.
+#'
+#' Writes script to \code{modulePath}, then attempts to execute the
+#' script in this location.
+#'
+#' @param module \code{module} object
+#' @param inputs Named list of input locations
+#' @param modulePath File path for module output
 runPlatform.R <- function(module, inputs, modulePath) {
     ## sourceScript contains the module's source(s) to be evaluated
     sourceScript <-

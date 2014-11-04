@@ -11,10 +11,10 @@ exportComponent(component, targetDirectory = getwd(),
 
 \item{targetDirectory}{File path for pipeline output}
 
-\item{filename}{Name of resulting file as character}
+\item{filename}{Name of resulting file}
 }
 \value{
-Resulting file path as character
+Resulting file path
 }
 \description{
 Export a component to an XML file

@@ -1,16 +1,16 @@
 ### Platform support for shell platform
 
-## runPlatform.shell()
-## arguments:
-## - module: list object
-## - inputs: named list of input object file paths
-## - modulePath: where this module will save files
-## description:
-##   platform support for "shell" platform.
-##   Creates a shell script from a given module, taking specific input file
-##   paths from 'inputs'.
-##   Writes script to 'filePath', then attempts to run the script in this
-##   location.
+#' Platform support for "shell" platform.
+#'
+#' @details Creates a .sh script file from the supplied \code{module},
+#' taking specific input file paths from \code{inputs}.
+#'
+#' Writes script to \code{modulePath}, then attempts to execute the
+#' script in this location.
+#'
+#' @param module \code{module} object
+#' @param inputs Named list of input locations
+#' @param modulePath File path for module output
 runPlatform.shell <- function(module, inputs, modulePath) {
     ## sourceScript contains the module's source(s) to be evaluated
     sourceScript <-

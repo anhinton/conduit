@@ -48,10 +48,10 @@ componentToXML <- function(component, namespaceDefinitions=NULL) {
 #'
 #' @param component \code{component} object
 #' @param targetDirectory File path for pipeline output
-#' @param filename Name of resulting file as character
-#' @return Resulting file path as character
+#' @param filename Name of resulting file
+#' @return Resulting file path
 exportComponent <- function(component, targetDirectory=getwd(),
-                          filename=paste0(component$name, ".xml")) {
+                            filename=paste0(component$name, ".xml")) {
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }

@@ -1,13 +1,12 @@
 ### Functions for loading, saving, running, creating modules
 
-## sourceOrder()
-## arguments:
-## - sources: list of sources extracted from module xml
-## description:
-##   for a given list of sources read in order of declaration from a module .xml
-##   file, returns a numeric vector of order in which sources should be run
-##   according to their "order" attributes.
-##   Order goes negative < 0 < no order given < positive
+#' Determines running order for \code{moduleSource}s.
+#'
+#' @details Order goes negative < 0 < no order given < positive.
+#'
+#' @param sources List of \code{moduleSource}s
+#' @return Running order as numeric vector
+#' @seealso \code{moduleSource}
 sourceOrder <- function(sources) {
     ## extract order values from sources
     orderValues <- sapply(sources,
@@ -163,10 +162,12 @@ readModuleXML <- function(name, xml, path = NULL) {
 
 #' Load a module from an XML file
 #' 
-#' @param name Filename of XML module
-#' @param ref Path to XML file
-#' @param namespaces Namespaces used in XML document as named character vector
+#' @param name Name of module
+#' @param ref Module location or filename
+#' @param path (Optional) Search path if \code{ref} is a filename
+#' @param namespaces Namespaces used in XML document
 #' @return \code{module} list
+#' @seealso \code{module}
 #' @export
 #' @import XML
 loadModule <- function(name, ref, path = NULL,
@@ -236,12 +237,12 @@ moduleToXML <- function (module,
 #'
 #' Save a \code{module} to an XML file on disk
 #'
-#' The resulting XML file will be called \file{MODULE_NAME.xml} unless another
-#' \code{filename} is specified.
+#' The resulting XML file will be called \file{\code{module$name}.xml}
+#' unless another \code{filename} is specified.
 #'
 #' @param module \code{module} object
-#' @param targetDirectory destination directory as file path
-#' @param filename character string of desired filename
+#' @param targetDirectory destination directory
+#' @param filename Filename for resulting XML file
 #' @return character value of resulting file location
 #' @import XML
 #' @export
@@ -260,25 +261,30 @@ saveModule <- function(module, targetDirectory=getwd(),
 
 ## RUNNING A MODULE
 
-## runPlatform()
-## arguments:
-##   - module: the module to be run
-##   - inputs: list of sources for inputs
-##   - moduleFiles: path where module will be run
-## Passes a module to the appropriate platform support
+#' Execute a \code{module}'s \code{moduleSource}s in the specified
+#' platform.
+#'
+#' @param module \code{module} object
+#' @param inputs Names list of input locations
+#' @param moduleFiles File path to module output location
 runPlatform <- function(module, inputs, moduleFiles) {
     UseMethod("runPlatform")
 }
 
-## runModule()
-## arguments:
-##   - module: module to be run
-##   - inputs: named list of absolute paths for input files
-##   - targetDirectory: where the module output is to be created
-## This function:
-##   - creates a directory for the module to be run in
-##   - determines which platform the module requires
-##   - runs the module on its platform
+#' Execute a \code{module}'s \code{moduleSource}s.
+#'
+#' @details This function:
+#' \itemize{
+#'   \item creates a directory for the \code{module} output
+#'   \item determines which platform the module requires
+#'   \item executes the \code{module}'s \code{moduleSource}s in the specified
+#'         platform
+#' }
+#'
+#' @param module \code{module} object
+#' @param inputs Named list of input locations
+#' @param moduleFiles File path for module output
+#' @seealso \code{module}, \code{moduleSource}
 #' @export
 runModule <- function(module, inputs=list(),
                       targetDirectory=getwd()) {
@@ -300,7 +306,7 @@ runModule <- function(module, inputs=list(),
 
 ## module creation functions
 
-#' Create a module's platform node.
+#' Create a \code{module} platform node
 #'
 #' @param name Name of platform
 #' @return A named character vector containing the platform name
@@ -309,6 +315,12 @@ modulePlatform <- function(name) {
     c(name=name)
 }
 
+#' Create a \code{module} input
+#'
+#' @param name Input name
+#' @param type \sQuote{internal} or \sQuote{external}
+#' @param format Input format
+#' @param formatType Defaults to \dQuote{text}
 #' @export
 moduleInput <- function(name, type, format="", formatType="text") {
     c(name=name, type=type, format=format, formatType=formatType)

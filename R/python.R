@@ -1,12 +1,16 @@
 ### Platform support for python platform
 
-## runPlatform.python
-## arguments:
-## - module: list object
-## - inputs: named list of file locations
-## - modulePath: file path in which to save outputs
-## description:
-##   platform support for "python" platform.
+#' Platform support for "python" platform.
+#'
+#' @details Creates a .py script file from the supplied \code{module},
+#' taking specific input file paths from \code{inputs}.
+#'
+#' Writes script to \code{modulePath}, then attempts to execute the
+#' script in this location.
+#'
+#' @param module \code{module} object
+#' @param inputs Named list of input locations
+#' @param modulePath File path for module output
 runPlatform.python <- function(module, inputs, modulePath) {
     ## sourceScript contains the module's source(s) to be evaluated
     sourceScript <-

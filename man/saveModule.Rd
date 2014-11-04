@@ -9,9 +9,9 @@ saveModule(module, targetDirectory = getwd(), filename = paste0(module$name,
 \arguments{
 \item{module}{\code{module} object}
 
-\item{targetDirectory}{destination directory as file path}
+\item{targetDirectory}{destination directory}
 
-\item{filename}{character string of desired filename}
+\item{filename}{Filename for resulting XML file}
 }
 \value{
 character value of resulting file location
@@ -20,7 +20,7 @@ character value of resulting file location
 Save a \code{module} to an XML file on disk
 }
 \details{
-The resulting XML file will be called \file{MODULE_NAME.xml} unless another
-\code{filename} is specified.
+The resulting XML file will be called \file{\code{module$name}.xml}
+unless another \code{filename} is specified.
 }
 

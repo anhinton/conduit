@@ -7,16 +7,21 @@ loadModule(name, ref, path = NULL, namespaces = c(oa =
   "http://www.openapi.org/2014/"))
 }
 \arguments{
-\item{name}{Filename of XML module}
+\item{name}{Name of module}
 
-\item{ref}{Path to XML file}
+\item{ref}{Module location or filename}
 
-\item{namespaces}{Namespaces used in XML document as named character vector}
+\item{path}{(Optional) Search path if \code{ref} is a filename}
+
+\item{namespaces}{Namespaces used in XML document}
 }
 \value{
 \code{module} list
 }
 \description{
 Load a module from an XML file
+}
+\seealso{
+\code{module}
 }
 
