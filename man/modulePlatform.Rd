@@ -14,4 +14,7 @@ A named character vector containing the platform name
 \description{
 Create a \code{module} platform node
 }
+\seealso{
+\code{module}
+}
 

@@ -310,25 +310,45 @@ runModule <- function(module, inputs=list(),
 #'
 #' @param name Name of platform
 #' @return A named character vector containing the platform name
+#' @seealso \code{module}
 #' @export
 modulePlatform <- function(name) {
     c(name=name)
 }
 
-#' Create a \code{module} input
+#' Create a \code{module} input node
 #'
 #' @param name Input name
 #' @param type \sQuote{internal} or \sQuote{external}
 #' @param format Input format
 #' @param formatType Defaults to \dQuote{text}
+#' @seealso \code{module}
 #' @export
 moduleInput <- function(name, type, format="", formatType="text") {
     c(name=name, type=type, format=format, formatType=formatType)
 }
+
+#' Create a \code{module} output node
+#'
+#' @param name Output name
+#' @param type \sQuote{internal} or \sQuote{external}
+#' @param format Output format
+#' @param formatType Defaults to \dQuote{text}
+#' @param ref Filename of \sQuote{external} output
+#' @seealso \code{module}
 #' @export
 moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     c(name=name, type=type, format=format, formatType=formatType, ref=ref)
 }
+
+#' Create a \code{module} source node
+#'
+#' @param value
+#' @param ref
+#' @param path
+#' @param type
+#' @param order
+#' @seealso \code{module}
 #' @export
 moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
                          order="") {
