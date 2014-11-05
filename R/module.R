@@ -222,9 +222,18 @@ moduleToXML <- function (module,
     sources <-
         lapply(module$sources,
                function (s) {
-                   newXMLNode(name="source", attrs=c(s["type"], s["order"]),
-                              newXMLCDataNode(s$value))
-                   
+                   ## create new source node
+                   sourceNode <- newXMLNode(name="source",
+                                            newXMLCDataNode(s$value))
+                   ## set source 'type' if provided
+                   if (nchar(s["type"])) {
+                       xmlAttrs(sourceNode) <- c(s["type"])
+                   }
+                   ## set source 'order' if provided
+                   if (nchar(s["order"])) {
+                       xmlAttrs(sourceNode) <- c(s["order"])
+                   }
+                   sourceNode
                })
     moduleRoot <-
         addChildren(moduleRoot,
