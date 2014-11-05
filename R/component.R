@@ -34,10 +34,13 @@ loadComponent <- function(component) {
 componentToXML <- function(component, namespaceDefinitions=NULL) {
     type <- component$type
     value <- component$value
-    if (!is.null(value) && class(value) != type) {
+    if (class(value) != type) {
         stop("You have provided a mismatched component object")
     }
-    ## FIXME: define case when ref is given
+    ## FIXME: define case when 'ref' is given. THIS FUNCTION ASSUMES
+    ## that the component being passed in has a 'value', which is
+    ## something all components will one day have. However, if a 'ref' is
+    ## provided I want to be dealing with that
     xml <- switch(type,
                   module = moduleToXML(value, namespaceDefinitions),
                   pipeline = pipelineToXML(value, namespaceDefinitions=NULL))
