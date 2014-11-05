@@ -34,7 +34,7 @@ loadComponent <- function(component) {
 componentToXML <- function(component, namespaceDefinitions=NULL) {
     type <- component$type
     value <- component$value
-    if (class(value) != type) {
+    if (!is.null(value) && class(value) != type) {
         stop("You have provided a mismatched component object")
     }
     ## FIXME: define case when ref is given
