@@ -7,7 +7,7 @@ loadPipeline(name, ref, path = NULL, namespaces = c(oa =
   "http://www.openapi.org/2014/"))
 }
 \arguments{
-\item{name}{Filename of XML pipeline}
+\item{name}{Name of pipeline}
 
 \item{ref}{Path to XML file}
 

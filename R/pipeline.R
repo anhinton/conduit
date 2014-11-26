@@ -88,7 +88,7 @@ readPipelineXML <- function(name, xml, path = NULL) {
 
 #' Load a pipeline from an XML file
 #' 
-#' @param name Filename of XML pipeline
+#' @param name Name of pipeline
 #' @param ref Path to XML file
 #' @param namespaces Namespaces used in XML document as named character vector
 #' @return \code{pipeline} list
