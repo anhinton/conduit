@@ -67,6 +67,10 @@ runPlatform.R <- function(module, inputs, modulePath) {
     close(scriptFile)
 
     ## run the script in an R session
-    systemCall <- paste0("Rscript ", scriptPath)
+    ## FIXME: I have added quotes around the 'scriptPath' when constructin
+    ## systemCall to handle a case where the file path contains spaces.
+    ## This needs to be applied to ALL platform supports. Possibly this part
+    ## of platform support needs to be generalised as a function.
+    systemCall <- paste0("Rscript \"", scriptPath, "\"")
     try(system(systemCall))
 }
