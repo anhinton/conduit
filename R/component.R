@@ -17,7 +17,8 @@ loadComponent <- function(component) {
                     module = loadModule(name, ref, path),
                     ## FIXME: I bet loading a pipeline won't work
                     pipeline = loadPipeline(ref))
-    component(name=name, value=value)
+    component$value <- value
+    component
 }
 
 #' Convert a component to XML

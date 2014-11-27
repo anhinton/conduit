@@ -116,6 +116,12 @@ fetchRef <- function(ref, path = NULL) {
     ## } else if (grepl("^ */", dirname(ref))) {
     ##     readLines(ref)
     } else {
-        readLines(findFile(ref, path))
+        filePath <- findFile(ref, path)
+        if (is.null(filePath)) {
+            stop(paste0("Unable to find file with ref='", ref, "' path='",
+                        path, "'"))
+        } else {
+            readLines(findFile(ref, path))
+        }
     }
 }
