@@ -226,50 +226,6 @@ exportPipeline <- function(pipeline, targetDirectory) {
 
 ## functions to run a loaded PIPELINE
 
-#' Validate a pipe
-#'
-#' Check's that a pipe's start component and output, and end component and
-#' output, exist in the pipeline. Stops with an error message otherwise.
-#'
-#' @param p Pipe
-#' @param components Pipeline components
-#' @param n Pipe number (within pipeline)
-## validatePipe <- function(p, components, n = 0) {   
-##     ## check start component exists
-##     startComponent <- p$start$component
-##     if (!any(names(components) == startComponent)) {
-##         stop(simpleError(
-##             paste0("Start component '", startComponent,
-##                    "' in pipe ", n, " does not exist")))
-##     }
-
-##     ## check start output exists in start component
-##     startOutput <- p$start$output
-##     componentOutputs <- components[[startComponent]]$value$outputs
-##     if (!any(names(componentOutputs) == startOutput)) {
-##         stop(simpleError(
-##             paste0("Start output '", startComponent, ":", startOutput,
-##                     "' in pipe ", n, " does not exist")))
-##     }
-
-##     ## check end component exists
-##     endComponent <- p$end$component
-##     if (!any(names(components) == endComponent)) {
-##         stop(simpleError(
-##             paste0("End component '", endComponent,
-##                     "' in pipe ", n, " does not exist")))
-##     }
-
-##     ## check end input exists in end component
-##     endInput <- p$end$input
-##     componentInputs <- components[[endComponent]]$value$inputs
-##     if (!any(names(componentInputs) == endInput)) {
-##         stop(simpleError(
-##             paste0("End input '", endComponent, ":", endInput,
-##                     "' in pipe ", n, " does not exist")))
-##     }
-## }
-
 ## internalExtension()
 ## arguments:
 ## - platform: character
