@@ -234,41 +234,41 @@ exportPipeline <- function(pipeline, targetDirectory) {
 #' @param p Pipe
 #' @param components Pipeline components
 #' @param n Pipe number (within pipeline)
-validatePipe <- function(p, components, n = 0) {   
-    ## check start component exists
-    startComponent <- p$start$component
-    if (!any(names(components) == startComponent)) {
-        stop(simpleError(
-            paste0("Start component '", startComponent,
-                   "' in pipe ", n, " does not exist")))
-    }
+## validatePipe <- function(p, components, n = 0) {   
+##     ## check start component exists
+##     startComponent <- p$start$component
+##     if (!any(names(components) == startComponent)) {
+##         stop(simpleError(
+##             paste0("Start component '", startComponent,
+##                    "' in pipe ", n, " does not exist")))
+##     }
 
-    ## check start output exists in start component
-    startOutput <- p$start$output
-    componentOutputs <- components[[startComponent]]$value$outputs
-    if (!any(names(componentOutputs) == startOutput)) {
-        stop(simpleError(
-            paste0("Start output '", startComponent, ":", startOutput,
-                    "' in pipe ", n, " does not exist")))
-    }
+##     ## check start output exists in start component
+##     startOutput <- p$start$output
+##     componentOutputs <- components[[startComponent]]$value$outputs
+##     if (!any(names(componentOutputs) == startOutput)) {
+##         stop(simpleError(
+##             paste0("Start output '", startComponent, ":", startOutput,
+##                     "' in pipe ", n, " does not exist")))
+##     }
 
-    ## check end component exists
-    endComponent <- p$end$component
-    if (!any(names(components) == endComponent)) {
-        stop(simpleError(
-            paste0("End component '", endComponent,
-                    "' in pipe ", n, " does not exist")))
-    }
+##     ## check end component exists
+##     endComponent <- p$end$component
+##     if (!any(names(components) == endComponent)) {
+##         stop(simpleError(
+##             paste0("End component '", endComponent,
+##                     "' in pipe ", n, " does not exist")))
+##     }
 
-    ## check end input exists in end component
-    endInput <- p$end$input
-    componentInputs <- components[[endComponent]]$value$inputs
-    if (!any(names(componentInputs) == endInput)) {
-        stop(simpleError(
-            paste0("End input '", endComponent, ":", endInput,
-                    "' in pipe ", n, " does not exist")))
-    }
-}
+##     ## check end input exists in end component
+##     endInput <- p$end$input
+##     componentInputs <- components[[endComponent]]$value$inputs
+##     if (!any(names(componentInputs) == endInput)) {
+##         stop(simpleError(
+##             paste0("End input '", endComponent, ":", endInput,
+##                     "' in pipe ", n, " does not exist")))
+##     }
+## }
 
 ## internalExtension()
 ## arguments:
@@ -413,10 +413,10 @@ runPipeline <- function(pipeline) {
                 c
             })
     componentNames <- names(components)
-    ## validate pipes
-    for (n in seq_along(pipeline$pipes)) {
-        validatePipe(pipeline$pipes[[n]], components, n)
-    }
+    ## ## validate pipes
+    ## for (n in seq_along(pipeline$pipes)) {
+    ##     validatePipe(pipeline$pipes[[n]], components, n)
+    ## }
     ## making a graph of the pipeline to determine order
     componentGraph <- graphPipeline(pipeline)
     componentOrder <- RBGL::tsort(componentGraph)
