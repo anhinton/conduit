@@ -355,11 +355,11 @@ runPipeline <- function(pipeline) {
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
     pipelinePath <- tools::file_path_as_absolute(pipelinePath)
-    components <- pipeline$components
+    ## FIXME: componens values should be loaded in loadPipeline or equivalent!
     ## load component values
-    components <-
+    pipeline$components <-
         lapply(
-            components,
+            pipeline$components,
             function (c) {
                 if (!is.null(c$ref)) {
                     if (is.null(c$path)) c$path <- pipelinePath
@@ -368,11 +368,11 @@ runPipeline <- function(pipeline) {
                 }
                 c
             })
+    components <- pipeline$components
     componentNames <- names(components)
-    ## ## validate pipes
-    ## for (n in seq_along(pipeline$pipes)) {
-    ##     validatePipe(pipeline$pipes[[n]], components, n)
-    ## }
+    ## validate pipes
+    valid <- validatePipeline(pipeline)
+    if (!valid) stop(paste0("Pipeline '", pipelineName, "' is invalid."))
     ## making a graph of the pipeline to determine order
     componentGraph <- graphPipeline(pipeline)
     componentOrder <- RBGL::tsort(componentGraph)
