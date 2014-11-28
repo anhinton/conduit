@@ -178,7 +178,14 @@ loadModule <- function(name, ref, path = NULL,
         ref <- basename(ref)
     }
     ## fetch module XML from disk
-    rawXML <- fetchRef(ref, path)
+    rawXML <-
+        tryCatch(
+            fetchRef(ref, path),
+            error = function(err) {
+                problem <- c(paste0("Unable to load module '", name, "'\n"),
+                             err)
+                stop(problem)
+            })
     xml <- xmlRoot(xmlParse(rawXML))
     module <- readModuleXML(name, xml, path)
     module
