@@ -106,7 +106,13 @@ readModuleXML <- function(name, xml, path = NULL) {
                                } else {
                                    path
                                }
-                           value <- fetchRef(ref, path)
+                           ## FIXME: not well tested or even understood
+                           tryCatch(
+                               fetchRef(ref, path),
+                               error = function (err) {
+                                   stop("Unable to load module source\n",
+                                        err)
+                               })
                        } else {
                            xmlValue(node)
                        }
@@ -368,7 +374,16 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #' @export
 moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
                          order="") {
-    if (!is.null(ref)) value <- fetchRef(ref, path)
+    if (!is.null(ref)) {
+        ## FIXME: not properly teste
+        ## FIXME: ignores the possibility of creating a source given by ref
+        value <-
+            tryCatch(fetchRef(ref, path),
+                     error = function(err) {
+                         stop("Unable to read module source\n",
+                              err)
+                     })
+    }
     list(value=value, type=type, order=order)
 }
 
