@@ -9,12 +9,14 @@ pathSep <- "|"
 ## "${ROOT}" - the directory from which the glue system has been invoked
 defaultSearchPaths <- paste(".//", "${ROOT}", sep=pathSep)
 
-## split search paths string
+#' Split a search paths string separated by \code{pathSep}
+#'
+#' @param s Search paths string
+#' @return A list of paths
 splitPaths <- function(s) {
     strsplit(s, pathSep, fixed=TRUE)[[1]]
 }
 
-## amend paths to be searched
 #' Amend search paths
 #'
 #' Append, prepend, or replace search paths with a new set.
@@ -45,12 +47,20 @@ amendSearchPaths <- function(newPaths, pathsToAmend = defaultSearchPaths) {
     amendedPaths
 }
 
-## expandSearchPath to absolute file path
+#' Expand a search path to an absolute path
+#'
+#' @param s search path
+#' @return absolute path as character string
 expandSearchPaths <- function(s) {
     s <- gsub("${ROOT}", getwd(), s, fixed=TRUE)
     normalizePath(s)
 }
 
+#' Find a file referenced by \code{ref} and \code{path}
+#'
+#' @param ref file path or filename
+#' @param path search path (optional)
+#' @return absolute file path as character or NULL
 findFile <- function (ref, path = NULL) {
     result <- NULL
     ## check if ref is an absolute path
