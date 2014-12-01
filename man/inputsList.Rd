@@ -10,7 +10,11 @@ inputsList(pipes, components, pipelinePath)
 
 \item{components}{List of \code{component}s}
 
-\item{pipelinePath}{Absolute file path to currently running \code{pipeline}}
+\item{pipelinePath}{Absolute file path to originatin \code{pipeline}
+XML file}
+}
+\value{
+named list of file locations by input names
 }
 \description{
 \code{inputsList} returns a named list of absolute file locations for

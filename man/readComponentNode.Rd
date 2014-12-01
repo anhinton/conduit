@@ -7,6 +7,8 @@ readComponentNode(node, pipelinePath)
 }
 \arguments{
 \item{node}{An \code{xmlNode} named \dQuote{component}.}
+
+\item{pipelinePath}{Path to originating pipeline XML}
 }
 \value{
 \code{component} object

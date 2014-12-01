@@ -9,6 +9,8 @@ readPipelineXML(name, xml, path = NULL)
 \item{name}{Pipeline name}
 
 \item{xml}{Pipeline \code{XMLNode}}
+
+\item{path}{Search path (optional)}
 }
 \value{
 \code{pipeline} object

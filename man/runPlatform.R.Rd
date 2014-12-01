@@ -12,6 +12,9 @@
 
 \item{modulePath}{File path for module output}
 }
+\value{
+FIXME: nothing meaningful
+}
 \description{
 Platform support for "R" platform.
 }

@@ -11,7 +11,9 @@ loadPipeline(name, ref, path = NULL, namespaces = c(oa =
 
 \item{ref}{Path to XML file}
 
-\item{namespaces}{Namespaces used in XML document as named character vector}
+\item{path}{Search path (optional)}
+
+\item{namespaces}{Namespaces used in XML document}
 }
 \value{
 \code{pipeline} list
