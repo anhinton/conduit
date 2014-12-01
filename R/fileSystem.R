@@ -9,6 +9,7 @@
 #' @param module \code{module} object
 #' @param inputs Named list of input locations
 #' @param modulePath File path for module output
+#' @return FIXME: nothing meaningful
 runPlatform.fileSystem <- function(module, inputs, modulePath) {
     
 }

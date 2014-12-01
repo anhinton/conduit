@@ -3,6 +3,7 @@
 #' Parse a component \code{xmlNode} and return a \code{component}.
 #'
 #' @param node An \code{xmlNode} named \dQuote{component}.
+#' @param pipelinePath Path to originating pipeline XML
 #' @return \code{component} object
 #' @import XML
 readComponentNode <- function (node, pipelinePath) {
@@ -49,6 +50,7 @@ readComponentNode <- function (node, pipelinePath) {
 #'
 #' @param name Pipeline name
 #' @param xml Pipeline \code{XMLNode}
+#' @param path Search path (optional)
 #' @return \code{pipeline} object
 #' @import XML
 readPipelineXML <- function(name, xml, path = NULL) {
@@ -90,12 +92,13 @@ readPipelineXML <- function(name, xml, path = NULL) {
 #' 
 #' @param name Name of pipeline
 #' @param ref Path to XML file
-#' @param namespaces Namespaces used in XML document as named character vector
+#' @param path Search path (optional)
+#' @param namespaces Namespaces used in XML document
 #' @return \code{pipeline} list
 #' @export
 #' @import XML
 loadPipeline <- function(name, ref, path = NULL,
-                       namespaces=c(oa="http://www.openapi.org/2014/")) {
+                         namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## if path is not set, make path from ref
     if (is.null(path)) {
         path <- paste0(dirname(ref), pathSep)
@@ -114,7 +117,9 @@ loadPipeline <- function(name, ref, path = NULL,
 #'
 #' @param pipeline \code{pipeline} object
 #' @param namespaceDefinitions XML namespaces as character vector
-#' @param export if true inline components are converted to reference files
+#' @param export logical, indicating whether to export inlince components as
+#' referenced XML files
+#' 
 #' @return \code{XMLNode} object
 pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
     pipelineRoot <- newXMLNode("pipeline",
@@ -177,7 +182,7 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
 #'
 #' @param pipeline \code{pipeline} object
 #' @param targetDirectory file location to save output
-#' @param export boolean determining whether to keep components inline
+#' @param export logical, determines whether to keep components inline
 #' @import XML
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
@@ -226,12 +231,10 @@ exportPipeline <- function(pipeline, targetDirectory) {
 
 ## functions to run a loaded PIPELINE
 
-## internalExtension()
-## arguments:
-## - platform: character
-## description
-##   select the right file extension for internal objects of a given platform.
-##   returns a character value of correct extension
+#' Returns the correct file extension for a platform's 'internal' files
+#'
+#' @param platform platform name
+#' @return files exension as character as ".EXT"
 internalExtension <- function(platform) {
     extension <- switch(platform,
                         R = ".rds",
@@ -248,7 +251,9 @@ internalExtension <- function(platform) {
 #'
 #' @param pipes List of \code{pipe}s
 #' @param components List of \code{component}s
-#' @param pipelinePath Absolute file path to currently running \code{pipeline}
+#' @param pipelinePath Absolute file path to originatin \code{pipeline}
+#' XML file
+#' @return named list of file locations by input names
 inputsList <- function(pipes, components, pipelinePath) {
     inputNames <-
         lapply(pipes,
@@ -288,7 +293,7 @@ inputsList <- function(pipes, components, pipelinePath) {
     inputsList
 }
 
-#' Create a graph of a pipeline
+#' Create a \code{graphNEL} node-and-edge graph of a pipeline
 #'
 #' \code{graphPipeline} produces a directed graph of the given
 #' \code{pipeline} with components as nodes and pipes as directed edges

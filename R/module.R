@@ -387,34 +387,17 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
     list(value=value, type=type, order=order)
 }
 
-## module()
-## arguments:
-## - name: module name - character
-## - description - character
-## - platform - character
-## - inputs - list(moduleInput(), ...)
-## - outputs - list(moduleOutput(), ...)
-## - sources - list(moduleSource(), ...)
-## description:
-##   creates a module object
-##   returns a list containing:
-##   - name
-##   - description
-##   - inputs,
-##   - platform,
-##   - sources
-##   - outputs
-#' Create a module
-#'
 #' Create a \code{module} list object
 #'
-#' @param name Name of module as character value
-#' @param description Description of what module does as character value
-#' @param platform \code{modulePlatform} character vector
+#' @param name Name of module
+#' @param description A basic description of the module
+#' @param platform \code{modulePlatform} object
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
-#' @param path Search path for original module XML file
+#' @param ref URI or filename of module XML file (optional)
+#' @param path Search path for module XML file (optional)
+#' @return \code{module} 
 #' @export
 module <- function(name, description="", platform, inputs=list(),
                    outputs=list(), sources=list(), ref=NULL, path=NULL) {

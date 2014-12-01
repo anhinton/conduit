@@ -10,7 +10,7 @@ savePipeline(pipeline, targetDirectory = getwd(), export = FALSE)
 
 \item{targetDirectory}{file location to save output}
 
-\item{export}{boolean determining whether to keep components inline}
+\item{export}{logical, determines whether to keep components inline}
 }
 \description{
 Saves a \code{pipeline} to disk as an openapi XML file

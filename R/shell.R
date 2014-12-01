@@ -11,6 +11,7 @@
 #' @param module \code{module} object
 #' @param inputs Named list of input locations
 #' @param modulePath File path for module output
+#' @return FIXME: nothing meaningful
 runPlatform.shell <- function(module, inputs, modulePath) {
     ## sourceScript contains the module's source(s) to be evaluated
     sourceScript <-
