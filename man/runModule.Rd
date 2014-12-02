@@ -10,7 +10,7 @@ runModule(module, inputs = list(), targetDirectory = getwd())
 
 \item{inputs}{Named list of input locations}
 
-\item{moduleFiles}{File path for module output}
+\item{targetDirectory}{File path for module output}
 }
 \description{
 Execute a \code{module}'s \code{moduleSource}s.

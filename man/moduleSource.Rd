@@ -7,15 +7,15 @@ moduleSource(value, ref = NULL, path = defaultSearchPaths, type = "",
   order = "")
 }
 \arguments{
-\item{value}{}
+\item{value}{\code{module} object}
 
-\item{ref}{}
+\item{ref}{module XML filename}
 
-\item{path}{}
+\item{path}{search path(s)}
 
-\item{type}{}
+\item{type}{\dQuote{module} or \dQuote{pipeline}}
 
-\item{order}{}
+\item{order}{numeric, specifies source position in sources}
 }
 \description{
 Create a \code{module} source node

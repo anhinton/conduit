@@ -32,8 +32,9 @@ sourceOrder <- function(sources) {
 
 #' Parse module XML and return a module object
 #'
-#' @param name Module name
-#' @param xml Module \code{XMLNode}
+#' @param name module name
+#' @param xml module \code{XMLNode}
+#' @param path search path (optional)
 #' @return \code{module} object
 #' @import XML
 readModuleXML <- function(name, xml, path = NULL) {
@@ -292,7 +293,7 @@ runPlatform <- function(module, inputs, moduleFiles) {
 #'
 #' @param module \code{module} object
 #' @param inputs Named list of input locations
-#' @param moduleFiles File path for module output
+#' @param targetDirectory File path for module output
 #' @seealso \code{module}, \code{moduleSource}
 #' @export
 runModule <- function(module, inputs=list(),
@@ -352,11 +353,11 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 
 #' Create a \code{module} source node
 #'
-#' @param value
-#' @param ref
-#' @param path
-#' @param type
-#' @param order
+#' @param value \code{module} object
+#' @param ref module XML filename
+#' @param path search path(s)
+#' @param type \dQuote{module} or \dQuote{pipeline}
+#' @param order numeric, specifies source position in sources
 #' @seealso \code{module}
 #' @export
 moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
