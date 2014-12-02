@@ -353,7 +353,7 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 
 #' Create a \code{module} source node
 #'
-#' @param value \code{module} object
+#' @param value source script
 #' @param ref module XML filename
 #' @param path search path(s)
 #' @param type \dQuote{module} or \dQuote{pipeline}

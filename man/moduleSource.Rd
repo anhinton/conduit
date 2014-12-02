@@ -7,7 +7,7 @@ moduleSource(value, ref = NULL, path = defaultSearchPaths, type = "",
   order = "")
 }
 \arguments{
-\item{value}{\code{module} object}
+\item{value}{source script}
 
 \item{ref}{module XML filename}
 
