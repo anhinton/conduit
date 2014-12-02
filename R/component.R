@@ -84,8 +84,15 @@ exportComponent <- function(component, targetDirectory=getwd(),
 #' @param component \code{component} object
 #' @param inputs Named list of absolute paths for component inputs
 #' @param pipelinePath Pipeline output directory
-#' @return Result of \code{runModule} or \code{runPipeline}
+#' @return FIXME: Result of \code{runModule} or \code{runPipeline}
 #' @export
+#'
+#' @examples
+#' mod1 <- module("setX", platform="R",
+#'                sources=list(moduleSource("x <- \"set\"")))
+#' pip1 <- pipeline("setX-pipe", description="set the value of x",
+#'                  components=list(mod1))
+#' runComponent(pip1$components$setX)
 runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
     if (!is.null(component$ref)) {
         if (is.null(component$path)) components$path <- defaultSearchPaths

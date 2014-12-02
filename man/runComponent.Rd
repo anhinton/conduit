@@ -25,4 +25,11 @@ If \code{component$value} is set to \dQuote{module}, the names of
 
 \code{pipelinePath} must exist on the filesystem.
 }
+\examples{
+mod1 <- module("setX", platform="R",
+               sources=list(moduleSource("x <- \\"set\\"")))
+pip1 <- pipeline("setX-pipe", description="set the value of x",
+                 components=list(mod1))
+runComponent(pip1$components$setX)
+}
 
