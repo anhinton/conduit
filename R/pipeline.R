@@ -456,7 +456,7 @@ addPipe <- function(newPipe, pipeline) {
 
 #' return the name of a component
 #'
-#' Returns the name of a \code{module} or \pipeline{pipeline}
+#' Returns the name of a \code{module} or \code{pipeline}
 #'
 #' @param component \code{module} or \code{pipeline} object
 #' @return character value
