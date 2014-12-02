@@ -52,7 +52,7 @@ runPlatform.R <- function(module, inputs, modulePath) {
                     type <- x["type"]
                     if (type == "internal") {
                         name <- x["name"]
-                         paste0("saveRDS(", name, ", file=\"", name, ".rds\")")
+                        paste0("saveRDS(", name, ", file=\"", name, ".rds\")")
                     } else {
                         character(1)
                     }
