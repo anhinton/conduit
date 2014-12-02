@@ -301,7 +301,6 @@ inputsList <- function(pipes, components, pipelinePath) {
 #' @param pipeline A \code{pipeline} list object
 #'
 #' @return A \pkg{graph} \code{graphNEL} object
-#' @import graph
 graphPipeline <- function(pipeline) {
     componentNames <- names(pipeline$components)
     pipes.list <-
@@ -322,8 +321,9 @@ graphPipeline <- function(pipeline) {
                },
                pipes.matrix)
     names(edgeList) <- componentNames
-    new("graphNEL", nodes=componentNames, edgeL=edgeList,
-        edgemode="directed")
+    pipelineGraph <- graph::graphNEL(nodes=componentNames, edgeL=edgeList,
+                                     edgemode="directed")
+    pipelineGraph
 }
 
 #' Run a pipeline
