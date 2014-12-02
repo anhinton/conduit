@@ -52,10 +52,9 @@ runPlatform.python <- function(module, inputs, modulePath) {
                 function (x) {
                     type <- x["type"]
                     if (type == "internal") {
-                        filename <- paste0(x["name"], ".pickle")
-                        c(paste0("with open('", filename, "', 'wb') as f:"),
-                          paste0("saveRDS(", name, ", file=\"", name,
-                                 ".rds\")"))
+                        ## FIXME: this has not been written. Currently stops
+                        ## with error message.
+                        stop("It is currently not possible to produce an 'external' ouptut in the python platform.")
                     } else {
                         character(1)
                     }
