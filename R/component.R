@@ -71,7 +71,15 @@ exportComponent <- function(component, targetDirectory=getwd(),
     saveXML(componentDoc, componentFilePath)
 }
 
-#' Run a component object
+#' Run a component
+#'
+#' This function executes a \code{component} with \code{runModule} or
+#' \code{runPipeline} depending on the value of \code{component$value}.
+#'
+#' @details If \code{component$value} is set to \dQuote{module}, the names of
+#' \code{inputs} must match the names in \code{component$value$inputs}.
+#'
+#' \code{pipelinePath} must exist on the filesystem.
 #'
 #' @param component \code{component} object
 #' @param inputs Named list of absolute paths for component inputs
@@ -85,10 +93,14 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
     }
     value <- component$value
     type <- component$type
-    result <- switch(component$type,
+    result <- switch(type,
                      module = runModule(value, inputs, pipelinePath),
                      ## FIXME: running pipelines probably doesn't work
-                     pipeline = runPipeline(value))
+                     pipeline = runPipeline(value),
+                     ## if type is incorrect
+                     stop(paste0("Component '", component$name,
+                                 "' has an invalid type: '",
+                                 component$type, "'")))
     result
 }
 

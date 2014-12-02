@@ -11,7 +11,7 @@ module(name, description = "", platform, inputs = list(),
 
 \item{description}{A basic description of the module}
 
-\item{platform}{\code{modulePlatform} object}
+\item{platform}{Platform name}
 
 \item{inputs}{List of \code{moduleInput} objects}
 

@@ -370,7 +370,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #'
 #' @param name Name of module
 #' @param description A basic description of the module
-#' @param platform \code{modulePlatform} object
+#' @param platform Platform name
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
