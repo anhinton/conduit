@@ -266,42 +266,42 @@ moduleToXML <- function (module,
     moduleRoot
 }
 
-##' Save a module to disk
-##' 
-##' Save a \code{module} to an XML file on disk. File is saved to the directory
-##' named in \code{targetDirectory}.
-##' 
-##' @details The resulting XML file will be called \file{\code{module$name}.xml}
-##' unless another \code{filename} is specified.
-##' 
-##' \code{targetDirectory} must exist, or function exits with error. If no
-##' \code{targetDirectory} file is saved to current working directory.
-##' 
-##' @param module \code{module} object
-##' @param targetDirectory destination directory
-##' @param filename Filename for resulting XML file
-##' @return resulting file location
-##' @import XML
-##' @export
-##' 
-##' @examples
-##' 
-##' targ1 <- tempdir() 
-##' 
-##' ## use a module's name for filename
-##' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
-##' 		           package = "conduit")
-##' mod1 <- loadModule("createGraph", 
-##' 		       ref = mod1xml)
-##' saveModule(module = mod1, targetDirectory = targ1)
-##' 
-##' ## specify a filename for the module XML
-##' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
-##' 		           package = "conduit")
-##' mod2 <- loadModule("layoutGraph",
-##' 		       ref = mod2xml)
-##' saveModule(module = mod2, targetDirectory = targ1,
-##' 	       filename = "myNewModule.xml")
+#' Save a module to disk
+#' 
+#' Save a \code{module} to an XML file on disk. File is saved to the directory
+#' named in \code{targetDirectory}.
+#' 
+#' @details The resulting XML file will be called \file{\code{module$name}.xml}
+#' unless another \code{filename} is specified.
+#' 
+#' \code{targetDirectory} must exist, or function exits with error. If no
+#' \code{targetDirectory} file is saved to current working directory.
+#' 
+#' @param module \code{module} object
+#' @param targetDirectory destination directory
+#' @param filename Filename for resulting XML file
+#' @return resulting file location
+#' @import XML
+#' @export
+#' 
+#' @examples
+#' 
+#' targ1 <- tempdir() 
+#' 
+#' ## use a module's name for filename
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
+#' 		           package = "conduit")
+#' mod1 <- loadModule("createGraph", 
+#' 		       ref = mod1xml)
+#' saveModule(module = mod1, targetDirectory = targ1)
+#' 
+#' ## specify a filename for the module XML
+#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+#' 		           package = "conduit")
+#' mod2 <- loadModule("layoutGraph",
+#' 		       ref = mod2xml)
+#' saveModule(module = mod2, targetDirectory = targ1,
+#' 	       filename = "myNewModule.xml")
 saveModule <- function(module, targetDirectory=getwd(),
                        filename=paste0(module$name, ".xml")) {
     targetDirectory <- file.path(targetDirectory)
@@ -328,23 +328,63 @@ runPlatform <- function(module, inputs, moduleFiles) {
     UseMethod("runPlatform")
 }
 
-#' Execute a \code{module}'s \code{moduleSource}s.
+#' Execute a \code{module}'s source(s)
+#'
+#' Execute the scripts contained in or referenced by a \code{module}'s sources.
 #'
 #' @details This function:
 #' \itemize{
 #'   \item creates a directory for the \code{module} output
 #'   \item determines which platform the module requires
-#'   \item executes the \code{module}'s \code{moduleSource}s in the specified
-#'         platform
+#'   \item executes the \code{module}'s source(s) using this platform
 #' }
+#'
+#' If the \code{module} has inputs the \code{inputs} list must have a named
+#' file location for each input.
+#'
+#' \code{targetDirectory} must exist or the function will return an error.
+#'
+#' This function creates a directory called \sQuote{modules} in
+#' the \code{targetDirectory} if it does not already exist.
 #'
 #' @param module \code{module} object
 #' @param inputs Named list of input locations
 #' @param targetDirectory File path for module output
 #' @seealso \code{module}, \code{moduleSource}
 #' @export
+#'
+#' @examples
+#'
+#' targ1 <- tempdir()
+#' 
+#' ## run a module with no inputs
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
+#' 		       package = "conduit")
+#' mod1 <- loadModule("createGraph", 
+#' 		   ref = mod1xml)
+#' runModule(module = mod1, targetDirectory = targ1)
+#' 
+#' ## run a module with inputs
+#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+#' 		       package = "conduit")
+#' mod2 <- loadModule("layoutGraph",
+#' 		   ref = mod2xml)
+#' ## mod1 output locations
+#' names(mod1$outputs)
+#' list.files(path = file.path(targ1, "modules", mod1$name),
+#'            pattern = paste0("^directedGraph"), full.names = TRUE)
+#' ## mod2 input names
+#' names(mod2$inputs)
+#' mod2inputs <- 
+#'     list(myGraph = file.path(targ1, "modules", "createGraph", 
+#'                              "directedGraph.rds"))
+#' runModule(module = mod2, targetDirectory = targ1, inputs = mod2inputs)
 runModule <- function(module, inputs=list(),
                       targetDirectory=getwd()) {
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
     moduleName <- module$name
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, "modules", moduleName)
