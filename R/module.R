@@ -408,7 +408,6 @@ runModule <- function(module, inputs=list(),
 #' @param name Name of platform
 #' @return A named character vector containing the platform name
 #' @seealso \code{module}
-#' @export
 modulePlatform <- function(name) {
     c(name=name)
 }
