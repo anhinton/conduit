@@ -412,7 +412,11 @@ modulePlatform <- function(name) {
     c(name=name)
 }
 
-#' Create a \code{module} input node
+#' Create a \code{module} input
+#'
+#' Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
+#'
+#' \code{type} must be \sQuote{internal} or \sQuote{external}.
 #'
 #' @param name Input name
 #' @param type \sQuote{internal} or \sQuote{external}
@@ -420,8 +424,20 @@ modulePlatform <- function(name) {
 #' @param formatType Defaults to \dQuote{text}
 #' @seealso \code{module}
 #' @export
+#'
+#' @examples
+#'
+#' inp1 <- moduleInput(name = "bigData", type = "internal",
+#'                     format = "R data frame")
+#' inp1
 moduleInput <- function(name, type, format="", formatType="text") {
-    c(name=name, type=type, format=format, formatType=formatType)
+    ## fail if type is not 'internal' or 'external'
+    if (!(type == "internal" || type == "external")) {
+        stop(paste0("specified type '", type, "' is not supported"))
+    }
+    inp <- c(name=name, type=type, format=format, formatType=formatType)
+    class(inp) <- "moduleInput"
+    inp
 }
 
 #' Create a \code{module} output node
