@@ -19,7 +19,27 @@ loadModule(name, ref, path = NULL, namespaces = c(oa =
 \code{module} list
 }
 \description{
-Load a module from an XML file
+Reads an XML given by \code{ref} and \code{path} and interprets to produce
+a \code{module}.
+}
+\details{
+If \code{path} is not set and conduit needs to search for the file the
+default search paths are used.
+}
+\examples{
+## load a module from XML given by absolute of relative file path
+mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
+                       package = "conduit")
+mod1xml
+
+mod1 <- loadModule(name = "createGraph", ref = mod1xml)
+
+## load a module by searching for 'ref'
+srch1 <- system.file("extdata", package = "conduit")
+srch1
+
+mod2 <- loadModule(name = "layoutGraph", ref = "layoutGraph.xml",
+                   path = srch1)
 }
 \seealso{
 \code{module}
