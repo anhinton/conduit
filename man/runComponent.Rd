@@ -13,7 +13,7 @@ runComponent(component, inputs = list(), pipelinePath = getwd())
 \item{pipelinePath}{Pipeline output directory}
 }
 \value{
-Result of \code{runModule} or \code{runPipeline}
+FIXME: Result of \code{runModule} or \code{runPipeline}
 }
 \description{
 This function executes a \code{component} with \code{runModule} or
