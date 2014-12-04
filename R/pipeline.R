@@ -89,14 +89,25 @@ readPipelineXML <- function(name, xml, path = NULL) {
 }
 
 #' Load a pipeline from an XML file
+#'
+#' Reads an XML file given by \code{ref} and \code{path} and interprets to
+#' produce a \code{pipeline}.
+#'
+#' If \code{path} is not set and conduit needs to search for the file the
+#' default search paths are used.
 #' 
 #' @param name Name of pipeline
 #' @param ref Path to XML file
 #' @param path Search path (optional)
 #' @param namespaces Namespaces used in XML document
 #' @return \code{pipeline} list
+#' @seealso \code{pipeline}
 #' @export
 #' @import XML
+#' @examples
+#' pln1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
+#'                        package = "conduit")
+#' pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
 loadPipeline <- function(name, ref, path = NULL,
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## if path is not set, make path from ref
@@ -174,15 +185,26 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
 #'
 #' Saves a \code{pipeline} to disk as an openapi XML file
 #'
-#' If \code{export} is true the resulting pipeline file will have all
-#' components in name/ref format, assuming the component XML files
-#' have been saved to the \file{targetDirectory}.
+#' If \code{export} is TRUE the resulting pipeline file will have all
+#' components in name/ref format, and assumes the component XML files
+#' have been saved to the \file{targetDirectory}. This function does NOT
+#' create the component XML files. For this see \code{exportPipeline}.
 #'
 #' As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
 #'
 #' @param pipeline \code{pipeline} object
 #' @param targetDirectory file location to save output
-#' @param export logical, determines whether to keep components inline
+#' @param export logical, FALSE to keep components inline
+#' @return file path to resulting XML file
+#' @seealso \code{pipeline}. For exporting a pipeline and its components see
+#' \code{exportPipeline}
+#' @examples
+#' targ1 <- tempdir() 
+#' ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml", 
+#' 		          package = "conduit")
+#' ppl1 <- loadPipeline("simpleGraph", 
+#' 		        ref = ppl1xml)
+#' savePipeline(pipeline = ppl1, targetDirectory = targ1)
 #' @import XML
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
