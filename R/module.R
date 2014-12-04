@@ -163,8 +163,8 @@ readModuleXML <- function(name, xml, path = NULL) {
 
 #' Load a module from an XML file
 #'
-#' Reads an XML given by \code{ref} and \code{path} and interprets to produce
-#' a \code{module}.
+#' Reads an XML file given by \code{ref} and \code{path} and interprets to
+#' produce a \code{module}.
 #'
 #' If \code{path} is not set and conduit needs to search for the file the
 #' default search paths are used.
@@ -184,8 +184,6 @@ readModuleXML <- function(name, xml, path = NULL) {
 #' ## load a module from XML given by absolute of relative file path
 #' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
 #'                        package = "conduit")
-#' mod1xml
-#'
 #' mod1 <- loadModule(name = "createGraph", ref = mod1xml)
 #'
 #' ## load a module by searching for 'ref'
@@ -587,19 +585,23 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #'                inputs = list(moduleInput(name = "y", type = "internal",
 #'                                          format = "R character string")),
 #'                sources = list(moduleSource(value = "print(y)")))
-module <- function(name, platform, description="", inputs=list(),
-                   outputs=list(), sources=list(), ref=NULL, path=NULL) {
+module <- function(name, platform, description="", inputs=NULL,
+                   outputs=NULL, sources=list(), ref=NULL, path=NULL) {
     platform <- modulePlatform(platform)
-    names(inputs) <-
-        sapply(inputs,
-               function (x) {
-                   x["name"]
-               })
-    names(outputs) <-
-        sapply(outputs,
-               function (x) {
-                   x["name"]
-               })
+    if (!is.null(inputs)) {
+        names(inputs) <-
+            sapply(inputs,
+                   function (x) {
+                       x["name"]
+                   })
+    }
+    if (!is.null(outputs)) {
+        names(outputs) <-
+            sapply(outputs,
+                   function (x) {
+                       x["name"]
+                   })
+    }
     module <- list(name=name, platform=platform, description=description,
                    inputs=inputs, outputs=outputs,
                    sources=sources, path=path)
