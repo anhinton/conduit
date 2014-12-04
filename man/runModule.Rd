@@ -24,7 +24,7 @@ This function:
 }
 
 If the \code{module} has inputs the \code{inputs} list must have a named
-file location for each input.
+absolute file location for each input.
 
 \code{targetDirectory} must exist or the function will return an error.
 
