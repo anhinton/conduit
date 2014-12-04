@@ -492,15 +492,46 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     outp
 }
 
-#' Create a \code{module} source node
+#' Create a \code{module} source
+#'
+#' Creates a \code{moduleSource} vector for use in a \code{module}'s sources
+#' list.
+#'
+#' @details If a \code{ref} is provided the returned value will be read from
+#' the script file found using \code{ref} and \code{path}. Otherwise the
+#' \code{value} is used.
+#'
+#' \code{module} sources are exectuted in the order determined by each source's
+#' \sQuote{order}. Running order is:
+#' \enumerate{
+#'   \item{negative numbers in ascending order}
+#'   \item{zero}
+#'   \item{no order specified}
+#'   \item{positive numbers in ascending order}
+#' }
 #'
 #' @param value source script
 #' @param ref module XML filename
-#' @param path search path(s)
-#' @param type \dQuote{module} or \dQuote{pipeline}
-#' @param order numeric, specifies source position in sources
+#' @param path search path(s) (optional)
+#' @param type not used as at 2014-12-05
+#' @param order character containing numeric value specifying source position in sources
+#' @return named \code{moduleSource} list containing:
+#' \itemize{
+#'   \item{value: source script}
+#'   \item{type: not used as at 2014-12-05}
+#'   \item{order: numeric value determining position of source in sources}
+#' }
 #' @seealso \code{module}
 #' @export
+#' @examples
+#' ## create moduleSource with source script in 'value'
+#' val1 <- c("x <- 1:10", "y <- rnorm(10, 0, 1)", "plot(x, y)")
+#' src1 <- moduleSource(value = val1, order = "-1")
+#'
+#' ## create a moduleSource with source script given by 'ref'
+#' modScript <- system.file("extdata", "simpleGraphScripts", "createGraph.R",
+#'                          package = "conduit")
+#' src2 <- moduleSource(ref = modScript)
 moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
                          order="") {
     if (!is.null(ref)) value <- fetchRef(ref, path)
