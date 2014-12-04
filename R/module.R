@@ -340,7 +340,7 @@ runPlatform <- function(module, inputs, moduleFiles) {
 #' }
 #'
 #' If the \code{module} has inputs the \code{inputs} list must have a named
-#' file location for each input.
+#' absolute file location for each input.
 #'
 #' \code{targetDirectory} must exist or the function will return an error.
 #'
@@ -538,38 +538,71 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
     list(value=value, type=type, order=order)
 }
 
-#' Create a \code{module} list object
+#' Create a \code{module} object
+#'
+#' Creates a module object which can be executed in conduit.
+#'
+#' @details \code{inputs}, \code{outputs}, and \code{sources} should be lists
+#' of objects created using \code{moduleInput}, \code{moduleOutput}, and
+#' \code{moduleSource} respectively.
+#'
+#' \code{path} optionally specifies search path(s) to be used for any of the
+#' module's children, e.g. a source specified given by sQuote{ref}.
 #'
 #' @param name Name of module
-#' @param description A basic description of the module
 #' @param platform Platform name
+#' @param description A basic description of the module
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
-#' @param ref URI or filename of module XML file (optional)
-#' @param path Search path for module XML file (optional)
-#' @return \code{module} 
+#' @param path Search path(s) for module children (optional)
+#' @return \code{module} list containing:
+#' \itemize{
+#'   \item{name}
+#'   \item{platform}
+#'   \item{description}
+#'   \item{inputs}
+#'   \item{outputs}
+#'   \item{sources}
+#'   \item{path}
+#' }
+#' @seealso \code{moduleInput}, \code{moduleOutput} and \code{moduleSource} for
+#' creating object for these lists. \code{loadModule} for reading a module
+#' from an XML file. \code{runModule} for executing a module's source
+#' scripts.
 #' @export
-module <- function(name, description="", platform, inputs=list(),
+#' @examples
+#' ## create a module with one output and one source
+#' src1 <- moduleSource(value = "x <- \"set\"")
+#' outp1 <- moduleOutput(name = "x", type = "internal",
+#'                       format = "R character string")
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(outp1),
+#'                sources = list(src1))
+#'
+#' ## create a module with one input and one source
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+module <- function(name, platform, description="", inputs=list(),
                    outputs=list(), sources=list(), ref=NULL, path=NULL) {
     platform <- modulePlatform(platform)
-    if (!is.null(inputs)) {
-        names(inputs) <-
-            sapply(inputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-    if (!is.null(outputs)) {
-        names(outputs) <-
-            sapply(outputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-    module <- list(name=name, path=path, description=description,
-                   platform=platform, inputs=inputs, outputs=outputs,
-                   sources=sources)
+    names(inputs) <-
+        sapply(inputs,
+               function (x) {
+                   x["name"]
+               })
+    names(outputs) <-
+        sapply(outputs,
+               function (x) {
+                   x["name"]
+               })
+    module <- list(name=name, platform=platform, description=description,
+                   inputs=inputs, outputs=outputs,
+                   sources=sources, path=path)
     class(module) <- "module"
     module
 }
