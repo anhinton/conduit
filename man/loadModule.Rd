@@ -19,8 +19,8 @@ loadModule(name, ref, path = NULL, namespaces = c(oa =
 \code{module} list
 }
 \description{
-Reads an XML given by \code{ref} and \code{path} and interprets to produce
-a \code{module}.
+Reads an XML file given by \code{ref} and \code{path} and interprets to
+produce a \code{module}.
 }
 \details{
 If \code{path} is not set and conduit needs to search for the file the
@@ -30,8 +30,6 @@ default search paths are used.
 ## load a module from XML given by absolute of relative file path
 mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
                        package = "conduit")
-mod1xml
-
 mod1 <- loadModule(name = "createGraph", ref = mod1xml)
 
 ## load a module by searching for 'ref'

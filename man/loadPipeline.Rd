@@ -19,6 +19,19 @@ loadPipeline(name, ref, path = NULL, namespaces = c(oa =
 \code{pipeline} list
 }
 \description{
-Load a pipeline from an XML file
+Reads an XML file given by \code{ref} and \code{path} and interprets to
+produce a \code{pipeline}.
+}
+\details{
+If \code{path} is not set and conduit needs to search for the file the
+default search paths are used.
+}
+\examples{
+pln1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
+                       package = "conduit")
+pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
+}
+\seealso{
+\code{pipeline}
 }
 

@@ -3,8 +3,8 @@
 \alias{module}
 \title{Create a \code{module} object}
 \usage{
-module(name, platform, description = "", inputs = list(),
-  outputs = list(), sources = list(), ref = NULL, path = NULL)
+module(name, platform, description = "", inputs = NULL, outputs = NULL,
+  sources = list(), ref = NULL, path = NULL)
 }
 \arguments{
 \item{name}{Name of module}
