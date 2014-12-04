@@ -14,6 +14,15 @@ moduleInput(name, type, format = "", formatType = "text")
 
 \item{formatType}{Defaults to \dQuote{text}}
 }
+\value{
+named \code{moduleInput} character vector containing:
+\itemize{
+  \item{name}
+  \item{type}
+  \item{format}
+  \item{formatType}
+}
+}
 \description{
 Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
 }
@@ -23,7 +32,6 @@ Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
 \examples{
 inp1 <- moduleInput(name = "bigData", type = "internal",
                     format = "R data frame")
-inp1
 }
 \seealso{
 \code{module}

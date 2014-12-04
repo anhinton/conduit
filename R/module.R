@@ -422,6 +422,13 @@ modulePlatform <- function(name) {
 #' @param type \sQuote{internal} or \sQuote{external}
 #' @param format Input format
 #' @param formatType Defaults to \dQuote{text}
+#' @return named \code{moduleInput} character vector containing:
+#' \itemize{
+#'   \item{name}
+#'   \item{type}
+#'   \item{format}
+#'   \item{formatType}
+#' }
 #' @seealso \code{module}
 #' @export
 #'
@@ -429,7 +436,6 @@ modulePlatform <- function(name) {
 #'
 #' inp1 <- moduleInput(name = "bigData", type = "internal",
 #'                     format = "R data frame")
-#' inp1
 moduleInput <- function(name, type, format="", formatType="text") {
     ## fail if type is not 'internal' or 'external'
     if (!(type == "internal" || type == "external")) {
@@ -440,7 +446,15 @@ moduleInput <- function(name, type, format="", formatType="text") {
     inp
 }
 
-#' Create a \code{module} output node
+#' Create a \code{module} output input
+#'
+#' Creates a \code{moduleOutput} vector for use in a \code{module}'s outputs
+#' list.
+#'
+#' @details \code{type} must be \sQuote{internal} or \sQuote{external}.
+#'
+#' It \code{type} is \dQuote{external}, a \code{ref} is required. This needs
+#' to be a resolveable URI created by the \code{module}'s source(s).
 #'
 #' @param name Output name
 #' @param type \sQuote{internal} or \sQuote{external}
@@ -450,7 +464,14 @@ moduleInput <- function(name, type, format="", formatType="text") {
 #' @seealso \code{module}
 #' @export
 moduleOutput <- function(name, type, format="", formatType="text", ref="") {
-    c(name=name, type=type, format=format, formatType=formatType, ref=ref)
+    ## fail if type is not 'internal' or 'external'
+    if (!(type == "internal" || type == "external")) {
+        stop(paste0("specified type '", type, "' is not supported"))
+    }
+    outp <- c(name=name, type=type, format=format, formatType=formatType,
+              ref=ref)
+    class(outp) <- "moduleOutput"
+    outp
 }
 
 #' Create a \code{module} source node
