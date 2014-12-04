@@ -461,12 +461,30 @@ moduleInput <- function(name, type, format="", formatType="text") {
 #' @param format Output format
 #' @param formatType Defaults to \dQuote{text}
 #' @param ref Filename of \sQuote{external} output
+#' @return named \code{moduleOutput} character vector of:
+#' \itemize{
+#'   \item{name}
+#'   \item{type}
+#'   \item{format}
+#'   \item{formatType}
+#'   \item{ref}
+#' }
 #' @seealso \code{module}
 #' @export
+#'
+#' @examples
+#' outp1 <- moduleOutput(name = "bigData", type = "internal",
+#'                       format = "R data frame")
+#' outp2 <- moduleOutput(name = "mediumData", type = "external",
+#'                       format = "CSV file", ref = "mediumData.csv")
 moduleOutput <- function(name, type, format="", formatType="text", ref="") {
     ## fail if type is not 'internal' or 'external'
     if (!(type == "internal" || type == "external")) {
         stop(paste0("specified type '", type, "' is not supported"))
+    }
+    ## fail if no 'ref' set for "external" type
+    if (type == "external" && ref == "") {
+        stop(paste0("no 'ref' set for \"external\" input '", name, "'"))
     }
     outp <- c(name=name, type=type, format=format, formatType=formatType,
               ref=ref)

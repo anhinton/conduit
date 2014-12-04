@@ -16,6 +16,16 @@ moduleOutput(name, type, format = "", formatType = "text", ref = "")
 
 \item{ref}{Filename of \sQuote{external} output}
 }
+\value{
+named \code{moduleOutput} character vector of:
+\itemize{
+  \item{name}
+  \item{type}
+  \item{format}
+  \item{formatType}
+  \item{ref}
+}
+}
 \description{
 Creates a \code{moduleOutput} vector for use in a \code{module}'s outputs
 list.
@@ -25,6 +35,12 @@ list.
 
 It \code{type} is \dQuote{external}, a \code{ref} is required. This needs
 to be a resolveable URI created by the \code{module}'s source(s).
+}
+\examples{
+outp1 <- moduleOutput(name = "bigData", type = "internal",
+                      format = "R data frame")
+outp2 <- moduleOutput(name = "mediumData", type = "external",
+                      format = "CSV file", ref = "mediumData.csv")
 }
 \seealso{
 \code{module}
