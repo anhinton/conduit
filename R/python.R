@@ -52,9 +52,9 @@ runPlatform.python <- function(module, inputs, modulePath) {
                 function (x) {
                     type <- x["type"]
                     if (type == "internal") {
-                        ## FIXME: this has not been written. Currently stops
-                        ## with error message.
-                        stop("It is currently not possible to produce an 'external' ouptut in the python platform.")
+                        name <- x["name"]
+                        c(paste0("with open('", name, ".pickle', 'wb') as f:"),
+                          paste0("\tpickle.dump(", name, ", f)"))
                     } else {
                         character(1)
                     }
