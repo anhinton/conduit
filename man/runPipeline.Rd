@@ -29,7 +29,7 @@ the function will fail.
 The function then produces a list of inputs required by the
 \code{component}s, and resolves the (intended) location of these.
 
-Finally the function executes each \code{component} in the order determined,
+Finally the function executes each \code{component}, in the order determined,
 by passing each component and the inputs list to \code{runComponent}.
 }
 \examples{
