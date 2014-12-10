@@ -209,7 +209,7 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
     if (!file.exists(targetDirectory)) {
-        stop("no such target directory")
+        stop(paste0("no such target directory: '", targetDirectory, "'"))
     }
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
@@ -221,12 +221,16 @@ savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
     saveXML(pipelineDoc, pipelineFilePath)
 }
 
-#' Wrie a pipeline and its modules to disk
+#' Export a pipeline and its components to disk
 #'
-#' Write a \code{pipeline} and its \code{module}s to disk as openapi XML files
+#' Exports a \code{pipeline} and its \code{component}s to disk as openapi
+#' XML files. Unlike \code{savePipeline} this functions converts all inline
+#' \code{component}s to references, and also saves XML files for each of
+#' these.
 #'
-#' Creates a directory named for the \code{pipeline} in \code{targetDirectory},
-#' then saves \code{pipeline} and \code{module} XML files in this directory.
+#' @details Creates a directory named for the \code{pipeline$name} in
+#' \code{targetDirectory}, then saves \code{pipeline} and \code{component} XML
+#' files in this directory.
 #'
 #' As at 2014-08-12 the \code{pipeline} is always saved as \file{pipeline.xml}
 #' no matter what the \code{pipeline} name.
@@ -234,6 +238,27 @@ savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
 #' @param pipeline A \code{pipeline} list
 #' @param targetDirectory Output directory path
 #' @return A list of the XML file paths written
+#' @seealso \code{pipeline}, \code{savePipeline}
+#'
+#' @examples
+#' ## create a pipeline
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(moduleOutput(name = "x", type = "internal",
+#' 					   format = "R character string")),
+#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2), 
+#'                    pipes = list(pipe("setX", "x", "showY", "y")))
+#' outputDir <- tempdir()
+#'
+#' ## export the pipeline to 'outputDir'
+#' exportPipeline(pline1, outputDir)
+#' 
 #' @export
 exportPipeline <- function(pipeline, targetDirectory) {
     pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
@@ -349,11 +374,10 @@ graphPipeline <- function(pipeline) {
 }
 
 #' Run a pipeline
+#'
+#' Executes a \code{pipeline}'s \code{component}s.
 #' 
 #' @details
-#' This function will attempt to run an OpenAPI \code{pipeline} list object,
-#' either loaded from a pipeline .XML file with \code{loadPipeline} or created
-#' with \code{pipeline} function.
 #'
 #' The function should produce a directory called \file{pipelines} in the
 #' working directory where it will produce its \code{module}s' results.

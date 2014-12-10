@@ -13,13 +13,9 @@ Meaningless list. TODO: fix what \code{runPipeline},
 \code{runModule}, \code{runPlatform} return.
 }
 \description{
-Run a pipeline
+Executes a \code{pipeline}'s \code{component}s.
 }
 \details{
-This function will attempt to run an OpenAPI \code{pipeline} list object,
-either loaded from a pipeline .XML file with \code{loadPipeline} or created
-with \code{pipeline} function.
-
 The function should produce a directory called \file{pipelines} in the
 working directory where it will produce its \code{module}s' results.
 
