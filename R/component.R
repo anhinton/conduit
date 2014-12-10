@@ -115,9 +115,9 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
 #'
 #' Create a \code{component} object for use in a \code{pipeline}.
 #'
-#' A \code{component} object is expected to provide either a \code{ref}, and
-#' possibly a \code{path}, to an openapi XML file, or a
-#' \code{pipeline} or \code{module} object in \code{value}. Accordingly:
+#' @details This function requires either a \code{ref}, and possibly a
+#' \code{path}, to an openapi XML file, or a \code{pipeline} or \code{module}
+#' object in \code{value}. Accordingly:
 #'
 #' \itemize{
 #' \item{if \code{ref} is given the resulting component will have
@@ -141,6 +141,22 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
 #' \item{path}{path to xml file}
 #' \item{type}{component type}
 #' \item{value}{\code{pipeline} or \code{module} object}
+#' @seealso \code{pipeline}, \code{module}
+#'
+#' @examples
+#' ## create a component from a pipeline object
+#' pipel1 <-
+#'     loadPipeline("simpleGraph",
+#'                  ref=system.file("extdata", "simpleGraph",
+#'                                  "simpleGraph-pipeline.xml",
+#'                                  package = "conduit"))
+#' comp1 <- component(name = "component1", value = pipel1)
+#' ## create a component from a module XML file
+#' pplxml <- system.file("extdata", "simpleGraph", "plotGraph.xml",
+#'                       package = "conduit")
+#' comp2 <- component(name = "component2", type = "module", ref = pplxml)
+#' 
+#' @export
 component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
     ## if a 'ref' is given then we ignore given 'value' as 'value' will
     ## be read from the file given in 'ref' using loadComponent()
@@ -155,6 +171,7 @@ component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
     if (type != "module" && type != "pipeline") {
         stop("A component must be a module or a pipeline")
     }
+    
     component <- list(name=name, ref=ref, path=path, type=type, value=value)
     class(component) <- "component"
     component
