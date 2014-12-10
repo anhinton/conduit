@@ -261,6 +261,9 @@ savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
 #' 
 #' @export
 exportPipeline <- function(pipeline, targetDirectory) {
+    if (!file.exists(file.path(targetDirectory))) {
+        stop(paste0("Target directory '", targetDirectory, "' does not exist"))
+    }
     pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
@@ -377,26 +380,42 @@ graphPipeline <- function(pipeline) {
 #'
 #' Executes a \code{pipeline}'s \code{component}s.
 #' 
-#' @details
+#' @details This function creates a directory called \code{pipeline$name} in
+#' \file{pipelines}, in the working directory. If the directory \file{pipelines}
+#' does not exist in the working directory it will be created. Working files
+#' and output from the pipeline's \code{components} will be stored in the
+#' named directory.
 #'
-#' The function should produce a directory called \file{pipelines} in the
-#' working directory where it will produce its \code{module}s' results.
-#'
-#' First the function will determine the order in which its modules are to
+#' First the function will determine the order in which its components are to
 #' be run. Note that the \code{pipeline} is not allowed to have any cycles or
 #' the function will fail.
 #'
-#' The function then determines the file paths of the objects described in
-#' the \code{pipe}s as inputs/outputs.
+#' The function then produces a list of inputs required by the
+#' \code{component}s, and resolves the (intended) location of these.
 #'
-#' Finally the function runs each \code{module} in the order determined,
-#' feeding each \code{module} its inputs. A directory will be created for each
-#' \code{module} in \file{pipelines/modules}, in which the function will save
-#' the script used to run the \code{module}, and its outputs.
+#' Finally the function executes each \code{component}, in the order determined,
+#' by passing each component and the inputs list to \code{runComponent}.
 #'
-#' @param pipeline A \code{pipeline} list object
+#' @param pipeline A \code{pipeline} object
 #' @return Meaningless list. TODO: fix what \code{runPipeline},
 #' \code{runModule}, \code{runPlatform} return.
+#' @seealso \code{pipeline}, \code{runComponent}
+#'
+#' @examples
+#' simpleGraph <-
+#'     loadPipeline(name = "simpleGraph",
+#'                  ref = system.file("extdata", "simpleGraph",
+#'                                    "simpleGraph-pipeline.xml",
+#'                                     package = "conduit"))
+#' ## run example in temp directory
+#' oldwd <- setwd(tempdir())
+#'
+#' ## run the pipeline
+#' runPipeline(simpleGraph)
+#' ## observe results
+#' list.files(file.path(tempdir(), "pipelines"), recursive = TRUE)
+#' setwd(oldwd)
+#' 
 #' @export
 runPipeline <- function(pipeline) {
     if (!file.exists("pipelines")) dir.create("pipelines")
