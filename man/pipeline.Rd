@@ -13,13 +13,13 @@ pipeline(name, path = NULL, description = "", components = list(),
 
 \item{description}{\code{pipeline} description}
 
-\item{components}{list of \code{module}s and \code{pipeline}s}
+\item{components}{list of \code{module} and \code{pipeline} objects}
 
-\item{modules}{list of \code{module}s}
+\item{modules}{list of \code{module} objects}
 
-\item{pipelines}{list of \code{pipeline}s}
+\item{pipelines}{list of \code{pipeline} objects}
 
-\item{pipes}{list of \code{pipe}s}
+\item{pipes}{list of \code{pipe} objects}
 }
 \value{
 \code{pipeline} list containing:
@@ -30,10 +30,42 @@ pipeline(name, path = NULL, description = "", components = list(),
 \item{pipes}{list of \code{pipe}s}
 }
 \description{
-Create an openapi \code{pipeline} object
+This functions create a new \code{pipeline} object.
 }
 \details{
-If \code{components} is not specified, \code{pipeline} will construct
-it the compoments from \code{modules} and \code{pipelines}.
+If \code{components} is empty the \code{modules} and
+\code{pipelines} arguments will be used to create the pipeline.
+
+\code{path} is used to set the search path(s) for children of this
+pipeline. It is not required, but is useful if you are using a specific
+directory for providing source and data files to your pipeline. This
+slot is auto-filled when a pipeline is loaded from XML using
+\code{loadPipeline}.
+}
+\examples{
+## create some modules
+mod1 <- module(name = "setX", platform = "R",
+               description = "sets the value of x",
+               outputs = list(moduleOutput(name = "x", type = "internal",
+					   format = "R character string")),
+               sources = list(moduleSource(value = "x <- \\"set\\"")))
+mod2 <- module("showY", platform = "R",
+               description = "displays the value of Y",
+               inputs = list(moduleInput(name = "y", type = "internal",
+                                         format = "R character string")),
+               sources = list(moduleSource(value = "print(y)")))
+## create a pipe
+pipe1 <- pipe("setX", "x",
+              "showY", "y")
+## create a pipeline
+pline1 <- pipeline(name = "ex_pipeline",
+                   modules = list(mod1, mod2),
+                   pipes = list(pipe1))
+}
+\seealso{
+\code{loadPipeline} for loading a pipeline from an XML souce,
+\code{component}, and \code{module} for more information on component objets,
+\code{pipe} for pipes, and \code{addPipe} and \code{addComponent} for
+modifying pipelines.
 }
 
