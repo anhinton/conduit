@@ -29,7 +29,7 @@ As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
 \examples{
 targ1 <- tempdir()
 ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
-		           package = "conduit")
+		          package = "conduit")
 ppl1 <- loadPipeline("simpleGraph",
 		        ref = ppl1xml)
 savePipeline(pipeline = ppl1, targetDirectory = targ1)
