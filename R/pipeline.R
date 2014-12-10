@@ -471,13 +471,22 @@ runPipeline <- function(pipeline) {
 
 ## creating new pipelines
 
-#' Create a pipe object
+#' Creates a \code{pipe} object
 #'
-#' @param startComponent Name of start module
-#' @param startOutput Name of start object
+#' Creates a \code{pipe} object which connects the \code{startComponent}'s
+#' \code{startOutput} to the \code{endComponent}'s \code{endInput}.
+#'
+#' @param startComponent Name of start component
+#' @param startOutput Name of start output
 #' @param endComponent Name of end module
 #' @param endInput Name of end input
 #' @return \code{pipe} connecting \code{startComponentName}.\code{startOutputName} to \code{endComponentName}.\code{endInputName}
+#' @seealso \code{pipeline}, \code{addPipe}
+#'
+#' @examples
+#' pipe1 <- pipe(startComponent = "setX", startOutput = "x",
+#'               endComponent = "showY", endInput = "y")
+#' 
 #' @export
 pipe <- function (startComponent, startOutput,
                   endComponent, endInput) {
