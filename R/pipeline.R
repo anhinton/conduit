@@ -535,13 +535,34 @@ addComponent <- function(newComponent, pipeline) {
     pipeline
 }
 
-#' add a pipe to a pipeline
+#' Add a pipe to a pipeline
 #'
-#' Add a \code{pipe} object to a \code{pipeline}
+#' This functions adds a new \code{pipe} to a \code{pipeline}.
 #'
 #' @param newPipe \code{pipe} object
 #' @param pipeline \code{pipeline} object
 #' @return \code{pipeline} object
+#' @seealso \code{pipe}, \code{pipeline}
+#'
+#' @examples
+#' ## create a pipeline with two modules
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(moduleOutput(name = "x", type = "internal",
+#' 					   format = "R character string")),
+#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
+#' ## create a pipe
+#' pipe1 <- pipe("setX", "x",
+#'               "showY", "y")
+#' ## add pipe to pipeline
+#' pline1 <- addPipe(pipe1, pline1)
+#' 
 #' @export
 addPipe <- function(newPipe, pipeline) {
     pipeline$pipes <- c(pipeline$pipes, list(newPipe))
