@@ -642,7 +642,7 @@ pipeline <- function (name, path=NULL, description="", components=list(),
             if (class(c) == "component") {
                 component <- c
             } else {
-                component <- component(c$name, c)
+                component <- component(name = c$name, value = c, path = c$pathq)
             }
             component
         })
