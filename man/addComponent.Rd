@@ -14,6 +14,26 @@ addComponent(newComponent, pipeline)
 \code{pipeline} object
 }
 \description{
-Add a new component to a pipeline
+This function adds a new \code{component} to a \code{pipeline}.
+}
+\examples{
+## create a pipeline with one module
+mod1 <- module(name = "setX", platform = "R",
+               description = "sets the value of x",
+               outputs = list(moduleOutput(name = "x", type = "internal",
+					   format = "R character string")),
+               sources = list(moduleSource(value = "x <- \\"set\\"")))
+pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1))
+## create a new module
+mod2 <- module("showY", platform = "R",
+               description = "displays the value of Y",
+               inputs = list(moduleInput(name = "y", type = "internal",
+                                         format = "R character string")),
+               sources = list(moduleSource(value = "print(y)")))
+## add new module to pipeline
+pline1 <- addComponent(mod2, pline1)
+}
+\seealso{
+\code{pipeline}, \code{component}, \code{module}
 }
 

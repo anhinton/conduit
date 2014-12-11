@@ -71,13 +71,28 @@ exportComponent <- function(component, targetDirectory=getwd(),
     saveXML(componentDoc, componentFilePath)
 }
 
-#' Run a component object
+#' Run a component
+#'
+#' This function executes a \code{component} with \code{runModule} or
+#' \code{runPipeline} depending on the value of \code{component$value}.
+#'
+#' @details If \code{component$value} is set to \dQuote{module}, the names of
+#' \code{inputs} must match the names in \code{component$value$inputs}.
+#'
+#' \code{pipelinePath} must exist on the filesystem.
 #'
 #' @param component \code{component} object
 #' @param inputs Named list of absolute paths for component inputs
 #' @param pipelinePath Pipeline output directory
-#' @return Result of \code{runModule} or \code{runPipeline}
+#' @return FIXME: Result of \code{runModule} or \code{runPipeline}
 #' @export
+#'
+#' @examples
+#' mod1 <- module("setX", platform="R",
+#'                sources=list(moduleSource("x <- \"set\"")))
+#' pip1 <- pipeline("setX-pipe", description="set the value of x",
+#'                  components=list(mod1))
+#' runComponent(pip1$components$setX)
 runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
     if (!is.null(component$ref)) {
         if (is.null(component$path)) components$path <- defaultSearchPaths
@@ -85,10 +100,14 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
     }
     value <- component$value
     type <- component$type
-    result <- switch(component$type,
+    result <- switch(type,
                      module = runModule(value, inputs, pipelinePath),
                      ## FIXME: running pipelines probably doesn't work
-                     pipeline = runPipeline(value))
+                     pipeline = runPipeline(value),
+                     ## if type is incorrect
+                     stop(paste0("Component '", component$name,
+                                 "' has an invalid type: '",
+                                 component$type, "'")))
     result
 }
 
@@ -96,9 +115,9 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
 #'
 #' Create a \code{component} object for use in a \code{pipeline}.
 #'
-#' A \code{component} object is expected to provide either a \code{ref}, and
-#' possibly a \code{path}, to an openapi XML file, or a
-#' \code{pipeline} or \code{module} object in \code{value}. Accordingly:
+#' @details This function requires either a \code{ref}, and possibly a
+#' \code{path}, to an openapi XML file, or a \code{pipeline} or \code{module}
+#' object in \code{value}. Accordingly:
 #'
 #' \itemize{
 #' \item{if \code{ref} is given the resulting component will have
@@ -122,6 +141,22 @@ runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
 #' \item{path}{path to xml file}
 #' \item{type}{component type}
 #' \item{value}{\code{pipeline} or \code{module} object}
+#' @seealso \code{pipeline}, \code{module}
+#'
+#' @examples
+#' ## create a component from a pipeline object
+#' pipel1 <-
+#'     loadPipeline("simpleGraph",
+#'                  ref=system.file("extdata", "simpleGraph",
+#'                                  "simpleGraph-pipeline.xml",
+#'                                  package = "conduit"))
+#' comp1 <- component(name = "component1", value = pipel1)
+#' ## create a component from a module XML file
+#' pplxml <- system.file("extdata", "simpleGraph", "plotGraph.xml",
+#'                       package = "conduit")
+#' comp2 <- component(name = "component2", type = "module", ref = pplxml)
+#' 
+#' @export
 component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
     ## if a 'ref' is given then we ignore given 'value' as 'value' will
     ## be read from the file given in 'ref' using loadComponent()
@@ -136,6 +171,7 @@ component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
     if (type != "module" && type != "pipeline") {
         stop("A component must be a module or a pipeline")
     }
+    
     component <- list(name=name, ref=ref, path=path, type=type, value=value)
     class(component) <- "component"
     component

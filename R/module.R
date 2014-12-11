@@ -162,6 +162,12 @@ readModuleXML <- function(name, xml, path = NULL) {
 }
 
 #' Load a module from an XML file
+#'
+#' Reads an XML file given by \code{ref} and \code{path} and interprets to
+#' produce a \code{module}.
+#'
+#' If \code{path} is not set and conduit needs to search for the file the
+#' default search paths are used.
 #' 
 #' @param name Name of module
 #' @param ref Module location or filename
@@ -170,7 +176,22 @@ readModuleXML <- function(name, xml, path = NULL) {
 #' @return \code{module} list
 #' @seealso \code{module}
 #' @export
+#' 
 #' @import XML
+#'
+#' @examples
+#'
+#' ## load a module from XML given by absolute of relative file path
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
+#'                        package = "conduit")
+#' mod1 <- loadModule(name = "createGraph", ref = mod1xml)
+#'
+#' ## load a module by searching for 'ref'
+#' srch1 <- system.file("extdata", package = "conduit")
+#' srch1
+#'
+#' mod2 <- loadModule(name = "layoutGraph", ref = "layoutGraph.xml",
+#'                    path = srch1)
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## if path is not set, make path from ref
@@ -244,20 +265,44 @@ moduleToXML <- function (module,
 }
 
 #' Save a module to disk
-#'
-#' Save a \code{module} to an XML file on disk
-#'
-#' The resulting XML file will be called \file{\code{module$name}.xml}
+#' 
+#' Save a \code{module} to an XML file on disk. File is saved to the directory
+#' named in \code{targetDirectory}.
+#' 
+#' @details The resulting XML file will be called \file{\code{module$name}.xml}
 #' unless another \code{filename} is specified.
-#'
+#' 
+#' \code{targetDirectory} must exist, or function exits with error. If no
+#' \code{targetDirectory} file is saved to current working directory.
+#' 
 #' @param module \code{module} object
 #' @param targetDirectory destination directory
 #' @param filename Filename for resulting XML file
-#' @return character value of resulting file location
+#' @return resulting file location
 #' @import XML
 #' @export
+#' 
+#' @examples
+#' 
+#' targ1 <- tempdir() 
+#' 
+#' ## use a module's name for filename
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
+#' 		           package = "conduit")
+#' mod1 <- loadModule("createGraph", 
+#' 		       ref = mod1xml)
+#' saveModule(module = mod1, targetDirectory = targ1)
+#' 
+#' ## specify a filename for the module XML
+#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+#' 		           package = "conduit")
+#' mod2 <- loadModule("layoutGraph",
+#' 		       ref = mod2xml)
+#' saveModule(module = mod2, targetDirectory = targ1,
+#' 	       filename = "myNewModule.xml")
 saveModule <- function(module, targetDirectory=getwd(),
                        filename=paste0(module$name, ".xml")) {
+    targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
@@ -281,23 +326,63 @@ runPlatform <- function(module, inputs, moduleFiles) {
     UseMethod("runPlatform")
 }
 
-#' Execute a \code{module}'s \code{moduleSource}s.
+#' Execute a \code{module}'s source(s)
+#'
+#' Execute the scripts contained in or referenced by a \code{module}'s sources.
 #'
 #' @details This function:
 #' \itemize{
 #'   \item creates a directory for the \code{module} output
 #'   \item determines which platform the module requires
-#'   \item executes the \code{module}'s \code{moduleSource}s in the specified
-#'         platform
+#'   \item executes the \code{module}'s source(s) using this platform
 #' }
+#'
+#' If the \code{module} has inputs the \code{inputs} list must have a named
+#' absolute file location for each input.
+#'
+#' \code{targetDirectory} must exist or the function will return an error.
+#'
+#' This function creates a directory called \sQuote{modules} in
+#' the \code{targetDirectory} if it does not already exist.
 #'
 #' @param module \code{module} object
 #' @param inputs Named list of input locations
 #' @param targetDirectory File path for module output
 #' @seealso \code{module}, \code{moduleSource}
 #' @export
+#'
+#' @examples
+#'
+#' targ1 <- tempdir()
+#' 
+#' ## run a module with no inputs
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
+#' 		       package = "conduit")
+#' mod1 <- loadModule("createGraph", 
+#' 		   ref = mod1xml)
+#' runModule(module = mod1, targetDirectory = targ1)
+#' 
+#' ## run a module with inputs
+#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+#' 		       package = "conduit")
+#' mod2 <- loadModule("layoutGraph",
+#' 		   ref = mod2xml)
+#' ## mod1 output locations
+#' names(mod1$outputs)
+#' list.files(path = file.path(targ1, "modules", mod1$name),
+#'            pattern = paste0("^directedGraph"), full.names = TRUE)
+#' ## mod2 input names
+#' names(mod2$inputs)
+#' mod2inputs <- 
+#'     list(myGraph = file.path(targ1, "modules", "createGraph", 
+#'                              "directedGraph.rds"))
+#' runModule(module = mod2, targetDirectory = targ1, inputs = mod2inputs)
 runModule <- function(module, inputs=list(),
                       targetDirectory=getwd()) {
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
     moduleName <- module$name
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, "modules", moduleName)
@@ -321,65 +406,187 @@ runModule <- function(module, inputs=list(),
 #' @param name Name of platform
 #' @return A named character vector containing the platform name
 #' @seealso \code{module}
-#' @export
 modulePlatform <- function(name) {
     c(name=name)
 }
 
-#' Create a \code{module} input node
+#' Create a \code{module} input
+#'
+#' Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
+#'
+#' \code{type} must be \sQuote{internal} or \sQuote{external}.
 #'
 #' @param name Input name
 #' @param type \sQuote{internal} or \sQuote{external}
 #' @param format Input format
 #' @param formatType Defaults to \dQuote{text}
+#' @return named \code{moduleInput} character vector containing:
+#' \itemize{
+#'   \item{name}
+#'   \item{type}
+#'   \item{format}
+#'   \item{formatType}
+#' }
 #' @seealso \code{module}
 #' @export
+#'
+#' @examples
+#'
+#' inp1 <- moduleInput(name = "bigData", type = "internal",
+#'                     format = "R data frame")
 moduleInput <- function(name, type, format="", formatType="text") {
-    c(name=name, type=type, format=format, formatType=formatType)
+    ## fail if type is not 'internal' or 'external'
+    if (!(type == "internal" || type == "external")) {
+        stop(paste0("specified type '", type, "' is not supported"))
+    }
+    inp <- c(name=name, type=type, format=format, formatType=formatType)
+    class(inp) <- "moduleInput"
+    inp
 }
 
-#' Create a \code{module} output node
+#' Create a \code{module} output input
+#'
+#' Creates a \code{moduleOutput} vector for use in a \code{module}'s outputs
+#' list.
+#'
+#' @details \code{type} must be \sQuote{internal} or \sQuote{external}.
+#'
+#' It \code{type} is \dQuote{external}, a \code{ref} is required. This needs
+#' to be a resolveable URI created by the \code{module}'s source(s).
 #'
 #' @param name Output name
 #' @param type \sQuote{internal} or \sQuote{external}
 #' @param format Output format
 #' @param formatType Defaults to \dQuote{text}
 #' @param ref Filename of \sQuote{external} output
+#' @return named \code{moduleOutput} character vector of:
+#' \itemize{
+#'   \item{name}
+#'   \item{type}
+#'   \item{format}
+#'   \item{formatType}
+#'   \item{ref}
+#' }
 #' @seealso \code{module}
 #' @export
+#'
+#' @examples
+#' outp1 <- moduleOutput(name = "bigData", type = "internal",
+#'                       format = "R data frame")
+#' outp2 <- moduleOutput(name = "mediumData", type = "external",
+#'                       format = "CSV file", ref = "mediumData.csv")
 moduleOutput <- function(name, type, format="", formatType="text", ref="") {
-    c(name=name, type=type, format=format, formatType=formatType, ref=ref)
+    ## fail if type is not 'internal' or 'external'
+    if (!(type == "internal" || type == "external")) {
+        stop(paste0("specified type '", type, "' is not supported"))
+    }
+    ## fail if no 'ref' set for "external" type
+    if (type == "external" && ref == "") {
+        stop(paste0("no 'ref' set for \"external\" input '", name, "'"))
+    }
+    outp <- c(name=name, type=type, format=format, formatType=formatType,
+              ref=ref)
+    class(outp) <- "moduleOutput"
+    outp
 }
 
-#' Create a \code{module} source node
+#' Create a \code{module} source
 #'
-#' @param value \code{module} object
+#' Creates a \code{moduleSource} vector for use in a \code{module}'s sources
+#' list.
+#'
+#' @details If a \code{ref} is provided the returned value will be read from
+#' the script file found using \code{ref} and \code{path}. Otherwise the
+#' \code{value} is used.
+#'
+#' \code{module} sources are exectuted in the order determined by each source's
+#' \sQuote{order}. Running order is:
+#' \enumerate{
+#'   \item{negative numbers in ascending order}
+#'   \item{zero}
+#'   \item{no order specified}
+#'   \item{positive numbers in ascending order}
+#' }
+#'
+#' @param value source script
 #' @param ref module XML filename
-#' @param path search path(s)
-#' @param type \dQuote{module} or \dQuote{pipeline}
-#' @param order numeric, specifies source position in sources
+#' @param path search path(s) (optional)
+#' @param type not used as at 2014-12-05
+#' @param order character containing numeric value specifying source position in sources
+#' @return named \code{moduleSource} list containing:
+#' \itemize{
+#'   \item{value: source script}
+#'   \item{type: not used as at 2014-12-05}
+#'   \item{order: numeric value determining position of source in sources}
+#' }
 #' @seealso \code{module}
 #' @export
+#' @examples
+#' ## create moduleSource with source script in 'value'
+#' val1 <- c("x <- 1:10", "y <- rnorm(10, 0, 1)", "plot(x, y)")
+#' src1 <- moduleSource(value = val1, order = "-1")
+#'
+#' ## create a moduleSource with source script given by 'ref'
+#' modScript <- system.file("extdata", "simpleGraphScripts", "createGraph.R",
+#'                          package = "conduit")
+#' src2 <- moduleSource(ref = modScript)
 moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
                          order="") {
     if (!is.null(ref)) value <- fetchRef(ref, path)
     list(value=value, type=type, order=order)
 }
 
-#' Create a \code{module} list object
+#' Create a \code{module} object
+#'
+#' Creates a module object which can be executed in conduit.
+#'
+#' @details \code{inputs}, \code{outputs}, and \code{sources} should be lists
+#' of objects created using \code{moduleInput}, \code{moduleOutput}, and
+#' \code{moduleSource} respectively.
+#'
+#' \code{path} optionally specifies search path(s) to be used for any of the
+#' module's children, e.g. a source specified given by sQuote{ref}.
 #'
 #' @param name Name of module
+#' @param platform Platform name
 #' @param description A basic description of the module
-#' @param platform \code{modulePlatform} object
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
-#' @param ref URI or filename of module XML file (optional)
-#' @param path Search path for module XML file (optional)
-#' @return \code{module} 
+#' @param path Search path(s) for module children (optional)
+#' @return \code{module} list containing:
+#' \itemize{
+#'   \item{name}
+#'   \item{platform}
+#'   \item{description}
+#'   \item{inputs}
+#'   \item{outputs}
+#'   \item{sources}
+#'   \item{path}
+#' }
+#' @seealso \code{moduleInput}, \code{moduleOutput} and \code{moduleSource} for
+#' creating object for these lists. \code{loadModule} for reading a module
+#' from an XML file. \code{runModule} for executing a module's source
+#' scripts.
 #' @export
-module <- function(name, description="", platform, inputs=list(),
-                   outputs=list(), sources=list(), ref=NULL, path=NULL) {
+#' @examples
+#' ## create a module with one output and one source
+#' src1 <- moduleSource(value = "x <- \"set\"")
+#' outp1 <- moduleOutput(name = "x", type = "internal",
+#'                       format = "R character string")
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(outp1),
+#'                sources = list(src1))
+#'
+#' ## create a module with one input and one source
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+module <- function(name, platform, description="", inputs=NULL,
+                   outputs=NULL, sources=list(), ref=NULL, path=NULL) {
     platform <- modulePlatform(platform)
     if (!is.null(inputs)) {
         names(inputs) <-
@@ -395,9 +602,9 @@ module <- function(name, description="", platform, inputs=list(),
                        x["name"]
                    })
     }
-    module <- list(name=name, path=path, description=description,
-                   platform=platform, inputs=inputs, outputs=outputs,
-                   sources=sources)
+    module <- list(name=name, platform=platform, description=description,
+                   inputs=inputs, outputs=outputs,
+                   sources=sources, path=path)
     class(module) <- "module"
     module
 }
