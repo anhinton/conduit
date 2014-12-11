@@ -6,9 +6,11 @@
 readModuleXML(name, xml, path = NULL)
 }
 \arguments{
-\item{name}{Module name}
+\item{name}{module name}
 
-\item{xml}{Module \code{XMLNode}}
+\item{xml}{module \code{XMLNode}}
+
+\item{path}{search path (optional)}
 }
 \value{
 \code{module} object

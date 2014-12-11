@@ -9,7 +9,7 @@ Authors@R: c(person(given="Paul", family="Murrell",
     email="ahin017@aucklanduni.ac.nz",
     role=c("cre","aut")))
 Description: Manage and run OpenAPI pipelines and modules
-License: GPL-2 (>= 2)
+License: GPL (>= 3)
 Imports:
     XML,
     graph,

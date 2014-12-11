@@ -119,10 +119,9 @@ findFile <- function (ref, path = NULL) {
 #' @param ref Address of referenced file
 #' @param path File paths to search
 #' @return Character vector containing the contents of \code{ref}
-#' @import XML
 fetchRef <- function(ref, path = NULL) {
     if (grepl("^ *https://", ref)){
-        getURL(ref)
+        RCurl::getURL(ref)
     ## } else if (grepl("^ */", dirname(ref))) {
     ##     readLines(ref)
     } else {

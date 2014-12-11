@@ -12,6 +12,6 @@ componentName(component)
 character value
 }
 \description{
-Returns the name of a \code{module} or \pipeline{pipeline}
+Returns the name of a \code{module} or \code{pipeline}
 }
 

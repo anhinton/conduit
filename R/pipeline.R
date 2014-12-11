@@ -89,14 +89,25 @@ readPipelineXML <- function(name, xml, path = NULL) {
 }
 
 #' Load a pipeline from an XML file
+#'
+#' Reads an XML file given by \code{ref} and \code{path} and interprets to
+#' produce a \code{pipeline}.
+#'
+#' If \code{path} is not set and conduit needs to search for the file the
+#' default search paths are used.
 #' 
 #' @param name Name of pipeline
 #' @param ref Path to XML file
 #' @param path Search path (optional)
 #' @param namespaces Namespaces used in XML document
 #' @return \code{pipeline} list
+#' @seealso \code{pipeline}
 #' @export
 #' @import XML
+#' @examples
+#' pln1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
+#'                        package = "conduit")
+#' pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
 loadPipeline <- function(name, ref, path = NULL,
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## if path is not set, make path from ref
@@ -174,20 +185,31 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
 #'
 #' Saves a \code{pipeline} to disk as an openapi XML file
 #'
-#' If \code{export} is true the resulting pipeline file will have all
-#' components in name/ref format, assuming the component XML files
-#' have been saved to the \file{targetDirectory}.
+#' If \code{export} is TRUE the resulting pipeline file will have all
+#' components in name/ref format, and assumes the component XML files
+#' have been saved to the \file{targetDirectory}. This function does NOT
+#' create the component XML files. For this see \code{exportPipeline}.
 #'
 #' As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
 #'
 #' @param pipeline \code{pipeline} object
 #' @param targetDirectory file location to save output
-#' @param export logical, determines whether to keep components inline
+#' @param export logical, FALSE to keep components inline
+#' @return file path to resulting XML file
+#' @seealso \code{pipeline}. For exporting a pipeline and its components see
+#' \code{exportPipeline}
+#' @examples
+#' targ1 <- tempdir() 
+#' ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml", 
+#' 		          package = "conduit")
+#' ppl1 <- loadPipeline("simpleGraph", 
+#' 		        ref = ppl1xml)
+#' savePipeline(pipeline = ppl1, targetDirectory = targ1)
 #' @import XML
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
     if (!file.exists(targetDirectory)) {
-        stop("no such target directory")
+        stop(paste0("no such target directory: '", targetDirectory, "'"))
     }
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
@@ -199,12 +221,16 @@ savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
     saveXML(pipelineDoc, pipelineFilePath)
 }
 
-#' Wrie a pipeline and its modules to disk
+#' Export a pipeline and its components to disk
 #'
-#' Write a \code{pipeline} and its \code{module}s to disk as openapi XML files
+#' Exports a \code{pipeline} and its \code{component}s to disk as openapi
+#' XML files. Unlike \code{savePipeline} this functions converts all inline
+#' \code{component}s to references, and also saves XML files for each of
+#' these.
 #'
-#' Creates a directory named for the \code{pipeline} in \code{targetDirectory},
-#' then saves \code{pipeline} and \code{module} XML files in this directory.
+#' @details Creates a directory named for the \code{pipeline$name} in
+#' \code{targetDirectory}, then saves \code{pipeline} and \code{component} XML
+#' files in this directory.
 #'
 #' As at 2014-08-12 the \code{pipeline} is always saved as \file{pipeline.xml}
 #' no matter what the \code{pipeline} name.
@@ -212,8 +238,32 @@ savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
 #' @param pipeline A \code{pipeline} list
 #' @param targetDirectory Output directory path
 #' @return A list of the XML file paths written
+#' @seealso \code{pipeline}, \code{savePipeline}
+#'
+#' @examples
+#' ## create a pipeline
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(moduleOutput(name = "x", type = "internal",
+#' 					   format = "R character string")),
+#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2), 
+#'                    pipes = list(pipe("setX", "x", "showY", "y")))
+#' outputDir <- tempdir()
+#'
+#' ## export the pipeline to 'outputDir'
+#' exportPipeline(pline1, outputDir)
+#' 
 #' @export
 exportPipeline <- function(pipeline, targetDirectory) {
+    if (!file.exists(file.path(targetDirectory))) {
+        stop(paste0("Target directory '", targetDirectory, "' does not exist"))
+    }
     pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
@@ -301,7 +351,6 @@ inputsList <- function(pipes, components, pipelinePath) {
 #' @param pipeline A \code{pipeline} list object
 #'
 #' @return A \pkg{graph} \code{graphNEL} object
-#' @import graph
 graphPipeline <- function(pipeline) {
     componentNames <- names(pipeline$components)
     pipes.list <-
@@ -322,35 +371,51 @@ graphPipeline <- function(pipeline) {
                },
                pipes.matrix)
     names(edgeList) <- componentNames
-    new("graphNEL", nodes=componentNames, edgeL=edgeList,
-        edgemode="directed")
+    pipelineGraph <- graph::graphNEL(nodes=componentNames, edgeL=edgeList,
+                                     edgemode="directed")
+    pipelineGraph
 }
 
 #' Run a pipeline
+#'
+#' Executes a \code{pipeline}'s \code{component}s.
 #' 
-#' @details
-#' This function will attempt to run an OpenAPI \code{pipeline} list object,
-#' either loaded from a pipeline .XML file with \code{loadPipeline} or created
-#' with \code{pipeline} function.
+#' @details This function creates a directory called \code{pipeline$name} in
+#' \file{pipelines}, in the working directory. If the directory \file{pipelines}
+#' does not exist in the working directory it will be created. Working files
+#' and output from the pipeline's \code{components} will be stored in the
+#' named directory.
 #'
-#' The function should produce a directory called \file{pipelines} in the
-#' working directory where it will produce its \code{module}s' results.
-#'
-#' First the function will determine the order in which its modules are to
+#' First the function will determine the order in which its components are to
 #' be run. Note that the \code{pipeline} is not allowed to have any cycles or
 #' the function will fail.
 #'
-#' The function then determines the file paths of the objects described in
-#' the \code{pipe}s as inputs/outputs.
+#' The function then produces a list of inputs required by the
+#' \code{component}s, and resolves the (intended) location of these.
 #'
-#' Finally the function runs each \code{module} in the order determined,
-#' feeding each \code{module} its inputs. A directory will be created for each
-#' \code{module} in \file{pipelines/modules}, in which the function will save
-#' the script used to run the \code{module}, and its outputs.
+#' Finally the function executes each \code{component}, in the order determined,
+#' by passing each component and the inputs list to \code{runComponent}.
 #'
-#' @param pipeline A \code{pipeline} list object
+#' @param pipeline A \code{pipeline} object
 #' @return Meaningless list. TODO: fix what \code{runPipeline},
 #' \code{runModule}, \code{runPlatform} return.
+#' @seealso \code{pipeline}, \code{runComponent}
+#'
+#' @examples
+#' simpleGraph <-
+#'     loadPipeline(name = "simpleGraph",
+#'                  ref = system.file("extdata", "simpleGraph",
+#'                                    "simpleGraph-pipeline.xml",
+#'                                     package = "conduit"))
+#' ## run example in temp directory
+#' oldwd <- setwd(tempdir())
+#'
+#' ## run the pipeline
+#' runPipeline(simpleGraph)
+#' ## observe results
+#' list.files(file.path(tempdir(), "pipelines"), recursive = TRUE)
+#' setwd(oldwd)
+#' 
 #' @export
 runPipeline <- function(pipeline) {
     if (!file.exists("pipelines")) dir.create("pipelines")
@@ -406,13 +471,22 @@ runPipeline <- function(pipeline) {
 
 ## creating new pipelines
 
-#' Create a pipe object
+#' Creates a \code{pipe} object
 #'
-#' @param startComponent Name of start module
-#' @param startOutput Name of start object
+#' Creates a \code{pipe} object which connects the \code{startComponent}'s
+#' \code{startOutput} to the \code{endComponent}'s \code{endInput}.
+#'
+#' @param startComponent Name of start component
+#' @param startOutput Name of start output
 #' @param endComponent Name of end module
 #' @param endInput Name of end input
 #' @return \code{pipe} connecting \code{startComponentName}.\code{startOutputName} to \code{endComponentName}.\code{endInputName}
+#' @seealso \code{pipeline}, \code{addPipe}
+#'
+#' @examples
+#' pipe1 <- pipe(startComponent = "setX", startOutput = "x",
+#'               endComponent = "showY", endInput = "y")
+#' 
 #' @export
 pipe <- function (startComponent, startOutput,
                   endComponent, endInput) {
@@ -423,12 +497,32 @@ pipe <- function (startComponent, startOutput,
     pipe
 }
 
-
 #' Add a new component to a pipeline
+#'
+#' This function adds a new \code{component} to a \code{pipeline}.
 #'
 #' @param newComponent \code{pipeline} or \code{module} object to be added
 #' @param pipeline \code{pipeline} to be amended
 #' @return \code{pipeline} object
+#' @seealso \code{pipeline}, \code{component}, \code{module}
+#'
+#' @examples
+#' ## create a pipeline with one module
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(moduleOutput(name = "x", type = "internal",
+#' 					   format = "R character string")),
+#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1))
+#' ## create a new module
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+#' ## add new module to pipeline
+#' pline1 <- addComponent(mod2, pline1)
+#' 
 #' @export
 addComponent <- function(newComponent, pipeline) {
     name <- componentName(newComponent)
@@ -441,13 +535,34 @@ addComponent <- function(newComponent, pipeline) {
     pipeline
 }
 
-#' add a pipe to a pipeline
+#' Add a pipe to a pipeline
 #'
-#' Add a \code{pipe} object to a \code{pipeline}
+#' This functions adds a new \code{pipe} to a \code{pipeline}.
 #'
 #' @param newPipe \code{pipe} object
 #' @param pipeline \code{pipeline} object
 #' @return \code{pipeline} object
+#' @seealso \code{pipe}, \code{pipeline}
+#'
+#' @examples
+#' ## create a pipeline with two modules
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(moduleOutput(name = "x", type = "internal",
+#' 					   format = "R character string")),
+#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
+#' ## create a pipe
+#' pipe1 <- pipe("setX", "x",
+#'               "showY", "y")
+#' ## add pipe to pipeline
+#' pline1 <- addPipe(pipe1, pline1)
+#' 
 #' @export
 addPipe <- function(newPipe, pipeline) {
     pipeline$pipes <- c(pipeline$pipes, list(newPipe))
@@ -456,7 +571,7 @@ addPipe <- function(newPipe, pipeline) {
 
 #' return the name of a component
 #'
-#' Returns the name of a \code{module} or \pipeline{pipeline}
+#' Returns the name of a \code{module} or \code{pipeline}
 #'
 #' @param component \code{module} or \code{pipeline} object
 #' @return character value
@@ -466,24 +581,55 @@ componentName <- function (component) {
 
 #' Create a pipeline
 #'
-#' Create an openapi \code{pipeline} object
+#' This functions create a new \code{pipeline} object.
 #'
-#' If \code{components} is not specified, \code{pipeline} will construct
-#' it the compoments from \code{modules} and \code{pipelines}.
+#' @details If \code{components} is empty the \code{modules} and
+#' \code{pipelines} arguments will be used to create the pipeline.
+#'
+#' \code{path} is used to set the search path(s) for children of this
+#' pipeline. It is not required, but is useful if you are using a specific
+#' directory for providing source and data files to your pipeline. This
+#' slot is auto-filled when a pipeline is loaded from XML using
+#' \code{loadPipeline}.
 #'
 #' @param name \code{pipeline} name
 #' @param path location of originating pipeline xml file
 #' @param description \code{pipeline} description
-#' @param components list of \code{module}s and \code{pipeline}s
-#' @param modules list of \code{module}s
-#' @param pipelines list of \code{pipeline}s
-#' @param pipes list of \code{pipe}s
+#' @param components list of \code{module} and \code{pipeline} objects
+#' @param modules list of \code{module} objects
+#' @param pipelines list of \code{pipeline} objects
+#' @param pipes list of \code{pipe} objects
 #' @return \code{pipeline} list containing:
 #' \item{name}{character value}
 #' \item{path}{Location of source pipeline XML file}
 #' \item{description}{character value}
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
+#' @seealso \code{loadPipeline} for loading a pipeline from an XML souce,
+#' \code{component}, and \code{module} for more information on component objets,
+#' \code{pipe} for pipes, and \code{addPipe} and \code{addComponent} for
+#' modifying pipelines.
+#'
+#' @examples
+#' ## create some modules
+#' mod1 <- module(name = "setX", platform = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(moduleOutput(name = "x", type = "internal",
+#' 					   format = "R character string")),
+#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#' mod2 <- module("showY", platform = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(moduleInput(name = "y", type = "internal",
+#'                                          format = "R character string")),
+#'                sources = list(moduleSource(value = "print(y)")))
+#' ## create a pipe
+#' pipe1 <- pipe("setX", "x",
+#'               "showY", "y")
+#' ## create a pipeline
+#' pline1 <- pipeline(name = "ex_pipeline",
+#'                    modules = list(mod1, mod2), 
+#'                    pipes = list(pipe1))
+#' 
 #' @export
 pipeline <- function (name, path=NULL, description="", components=list(),
                       modules=list(), pipelines=list(), pipes=list()) {
@@ -496,7 +642,7 @@ pipeline <- function (name, path=NULL, description="", components=list(),
             if (class(c) == "component") {
                 component <- c
             } else {
-                component <- component(c$name, c)
+                component <- component(name = c$name, value = c, path = c$pathq)
             }
             component
         })

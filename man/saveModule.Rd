@@ -14,13 +14,35 @@ saveModule(module, targetDirectory = getwd(), filename = paste0(module$name,
 \item{filename}{Filename for resulting XML file}
 }
 \value{
-character value of resulting file location
+resulting file location
 }
 \description{
-Save a \code{module} to an XML file on disk
+Save a \code{module} to an XML file on disk. File is saved to the directory
+named in \code{targetDirectory}.
 }
 \details{
 The resulting XML file will be called \file{\code{module$name}.xml}
 unless another \code{filename} is specified.
+
+\code{targetDirectory} must exist, or function exits with error. If no
+\code{targetDirectory} file is saved to current working directory.
+}
+\examples{
+targ1 <- tempdir()
+
+## use a module's name for filename
+mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
+		           package = "conduit")
+mod1 <- loadModule("createGraph",
+		       ref = mod1xml)
+saveModule(module = mod1, targetDirectory = targ1)
+
+## specify a filename for the module XML
+mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+		           package = "conduit")
+mod2 <- loadModule("layoutGraph",
+		       ref = mod2xml)
+saveModule(module = mod2, targetDirectory = targ1,
+	       filename = "myNewModule.xml")
 }
 

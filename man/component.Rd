@@ -28,9 +28,9 @@ component(name, value = NULL, type = NULL, ref = NULL, path = NULL)
 Create a \code{component} object for use in a \code{pipeline}.
 }
 \details{
-A \code{component} object is expected to provide either a \code{ref}, and
-possibly a \code{path}, to an openapi XML file, or a
-\code{pipeline} or \code{module} object in \code{value}. Accordingly:
+This function requires either a \code{ref}, and possibly a
+\code{path}, to an openapi XML file, or a \code{pipeline} or \code{module}
+object in \code{value}. Accordingly:
 
 \itemize{
 \item{if \code{ref} is given the resulting component will have
@@ -42,5 +42,21 @@ coerced to the class of the \code{value} object.}
 
 If \code{type} is not \dQuote{pipeline} or \dQuote{module} the function
 will fail.
+}
+\examples{
+## create a component from a pipeline object
+pipel1 <-
+    loadPipeline("simpleGraph",
+                 ref=system.file("extdata", "simpleGraph",
+                                 "simpleGraph-pipeline.xml",
+                                 package = "conduit"))
+comp1 <- component(name = "component1", value = pipel1)
+## create a component from a module XML file
+pplxml <- system.file("extdata", "simpleGraph", "plotGraph.xml",
+                      package = "conduit")
+comp2 <- component(name = "component2", type = "module", ref = pplxml)
+}
+\seealso{
+\code{pipeline}, \code{module}
 }
 

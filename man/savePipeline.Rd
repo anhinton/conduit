@@ -10,16 +10,32 @@ savePipeline(pipeline, targetDirectory = getwd(), export = FALSE)
 
 \item{targetDirectory}{file location to save output}
 
-\item{export}{logical, determines whether to keep components inline}
+\item{export}{logical, FALSE to keep components inline}
+}
+\value{
+file path to resulting XML file
 }
 \description{
 Saves a \code{pipeline} to disk as an openapi XML file
 }
 \details{
-If \code{export} is true the resulting pipeline file will have all
-components in name/ref format, assuming the component XML files
-have been saved to the \file{targetDirectory}.
+If \code{export} is TRUE the resulting pipeline file will have all
+components in name/ref format, and assumes the component XML files
+have been saved to the \file{targetDirectory}. This function does NOT
+create the component XML files. For this see \code{exportPipeline}.
 
 As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
+}
+\examples{
+targ1 <- tempdir()
+ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
+		          package = "conduit")
+ppl1 <- loadPipeline("simpleGraph",
+		        ref = ppl1xml)
+savePipeline(pipeline = ppl1, targetDirectory = targ1)
+}
+\seealso{
+\code{pipeline}. For exporting a pipeline and its components see
+\code{exportPipeline}
 }
 

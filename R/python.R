@@ -52,10 +52,9 @@ runPlatform.python <- function(module, inputs, modulePath) {
                 function (x) {
                     type <- x["type"]
                     if (type == "internal") {
-                        filename <- paste0(x["name"], ".pickle")
-                        c(paste0("with open('", filename, "', 'wb') as f:"),
-                          paste0("saveRDS(", name, ", file=\"", name,
-                                 ".rds\")"))
+                        name <- x["name"]
+                        c(paste0("with open('", name, ".pickle', 'wb') as f:"),
+                          paste0("\tpickle.dump(", name, ", f)"))
                     } else {
                         character(1)
                     }
