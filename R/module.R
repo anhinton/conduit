@@ -608,7 +608,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #'                                          format = "R character string")),
 #'                sources = list(moduleSource(value = "print(y)")))
 module <- function(name, platform, description="", inputs=NULL,
-                   outputs=NULL, sources=list(), ref=NULL, path=NULL) {
+                   outputs=NULL, sources=list(), path=NULL) {
     platform <- modulePlatform(platform)
     if (!is.null(inputs)) {
         names(inputs) <-
