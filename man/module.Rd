@@ -4,7 +4,7 @@
 \title{Create a \code{module} object}
 \usage{
 module(name, platform, description = "", inputs = NULL, outputs = NULL,
-  sources = list(), ref = NULL, path = NULL)
+  sources = list(), path = NULL)
 }
 \arguments{
 \item{name}{Name of module}
