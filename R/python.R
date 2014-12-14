@@ -33,7 +33,7 @@ runPlatform.python <- function(module, inputs, modulePath) {
                 function (x) {
                     inputName <- x["name"]
                     type <- x["type"]
-                    fromFile <- paste(inputs[[inputName]], ".pickle")
+                    fromFile <- paste0(inputs[[inputName]], ".pickle")
                     input <-
                         if (type == "internal") {
                             c(paste0("with open('", fromFile,
