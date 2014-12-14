@@ -35,7 +35,7 @@ pipel1 <-
 ## a valid pipeline
 validatePipeline(pipel1)
 
-## break the pipeline
+## break a pipeline
 pipel2 <- pipel1
 pipel2$pipes[[1]]$start$output <- "veryWrongValue"
 ## and look, it's invalid!
