@@ -567,7 +567,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #' \code{moduleSource} respectively.
 #'
 #' \code{path} optionally specifies search path(s) to be used for any of the
-#' module's children, e.g. a source specified given by sQuote{ref}.
+#' module's children, e.g. a source specified given by \sQuote{ref}.
 #'
 #' @param name Name of module
 #' @param platform Platform name
