@@ -258,8 +258,20 @@ moduleToXML <- function (module,
         lapply(module$sources,
                function (s) {
                    ## create new source node
-                   sourceNode <- newXMLNode(name="source",
-                                            newXMLCDataNode(s$value))
+                   sourceNode <- newXMLNode(name = "source")
+                   ## if no ref is given, save 'value' inline as cdata
+                   if (is.null(s$ref)) {
+                       sourceNode <-
+                           addChildren(
+                               node = sourceNode,
+                               ## collapse value script with newline
+                               ## (assumes value is character vector)
+                               kids = paste0(s$value, collapse = "\n"),
+                               cdata = TRUE)
+                   } else {
+                   ## else record ref and path as attrs
+                       xmlAttrs(sourceNode) <- c(s["ref"], s["path"])
+                   }
                    ## set source 'type' if provided
                    if (nchar(s["type"])) {
                        xmlAttrs(sourceNode) <- c(s["type"])
