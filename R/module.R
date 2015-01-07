@@ -531,6 +531,8 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #'   \item{value: source script}
 #'   \item{type: not used as at 2014-12-05}
 #'   \item{order: numeric value determining position of source in sources}
+#'   \item{ref: originating XML filename}
+#'   \item{path: originating search path}
 #' }
 #' @seealso \code{module}
 #' @export
@@ -555,7 +557,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
                               err)
                      })
     }
-    list(value=value, type=type, order=order)
+    list(value=value, type=type, order=order, ref=ref, path=path)
 }
 
 #' Create a \code{module} object
