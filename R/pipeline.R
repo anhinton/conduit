@@ -606,9 +606,10 @@ componentName <- function (component) {
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
 #' @seealso \code{loadPipeline} for loading a pipeline from an XML souce,
-#' \code{component}, and \code{module} for more information on component objets,
-#' \code{pipe} for pipes, and \code{addPipe} and \code{addComponent} for
-#' modifying pipelines.
+#' \code{module} for information on module objects, \code{runPipeline} for
+#' executing all of a pipeline's components, \code{runComponent} for executing
+#' individual components, \code{pipe} for pipes, and \code{addPipe} and
+#' \code{addComponent} for modifying pipelines.
 #'
 #' @examples
 #' ## create some modules
