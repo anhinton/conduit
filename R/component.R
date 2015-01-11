@@ -88,6 +88,8 @@ exportComponent <- function(component, targetDirectory=getwd(),
 #' @return FIXME: Result of \code{runModule} or \code{runPipeline}
 #' @export
 #'
+#' @seealso `runPipeline` and `runModule`
+#'
 #' @examples
 #' mod1 <- module("setX", platform="R",
 #'                sources=list(moduleSource("x <- \"set\"")))
