@@ -4,10 +4,13 @@
 \alias{runComponent}
 \title{Run a component}
 \usage{
-runComponent(component, inputs = list(), pipelinePath = getwd())
+runComponent(componentName, pipeline, inputs = list(),
+  pipelinePath = getwd())
 }
 \arguments{
-\item{component}{\code{component} object}
+\item{componentName}{Name of component to be executed}
+
+\item{pipeline}{\code{pipeline} containing component}
 
 \item{inputs}{Named list of absolute paths for component inputs}
 
@@ -17,12 +20,12 @@ runComponent(component, inputs = list(), pipelinePath = getwd())
 FIXME: Result of \code{runModule} or \code{runPipeline}
 }
 \description{
-This function executes a \code{component} with \code{runModule} or
-\code{runPipeline} depending on the value of \code{component$value}.
+This function executes a single pipeline component with \code{runModule} or
+\code{runPipeline}.
 }
 \details{
-If \code{component$value} is set to \dQuote{module}, the names of
-\code{inputs} must match the names in \code{component$value$inputs}.
+If the component refers to a \code{module}, the names of
+\code{inputs} must match the names the module's input names.
 
 \code{pipelinePath} must exist on the filesystem.
 }
@@ -31,6 +34,9 @@ mod1 <- module("setX", platform="R",
                sources=list(moduleSource("x <- \\"set\\"")))
 pip1 <- pipeline("setX-pipe", description="set the value of x",
                  components=list(mod1))
-runComponent(pip1$components$setX)
+runComponent(componentName = "setX", pipeline = pip1)
+}
+\seealso{
+`runPipeline` and `runModule`
 }
 
