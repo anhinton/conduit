@@ -2,7 +2,6 @@
 
 export(addComponent)
 export(addPipe)
-export(component)
 export(exportPipeline)
 export(loadModule)
 export(loadPipeline)
