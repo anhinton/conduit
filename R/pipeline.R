@@ -449,24 +449,23 @@ runPipeline <- function(pipeline) {
     inputs <- inputsList(pipeline$pipes, components, pipelinePath)
     x <-
         lapply(componentOrder,
-               function (x, components, inputs, pipelinePath) {
+               function (x, pipeline, inputs, pipelinePath) {
                    ## select inputs for this component and strip out
                    ## component name
-                   component <- components[[x]]
                    ## FIXME: selecting inputs from inputsList seems a little
                    ## inelegant. Possibly calculating all input locations
                    ## before anything is run is the reason for this.
                    ## What else shall we try?
                    whichInputs <-
-                       grepl(paste0("^", componentName(component),"[.]"),
+                       grepl(paste0("^", x,"[.]"),
                              names(inputs))
                    inputs <- inputs[whichInputs]
                    names(inputs) <-
-                       gsub(paste0("^", componentName(component),"[.]"), "",
+                       gsub(paste0("^", x,"[.]"), "",
                             names(inputs))
                    ## run the beast
-                   runComponent(component, inputs, pipelinePath)
-               }, components, inputs, pipelinePath)
+                   runComponent(x, pipeline, inputs, pipelinePath)
+               }, pipeline, inputs, pipelinePath)
 }
 
 ## creating new pipelines
