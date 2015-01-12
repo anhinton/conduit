@@ -96,7 +96,8 @@ exportComponent <- function(component, targetDirectory=getwd(),
 #' pip1 <- pipeline("setX-pipe", description="set the value of x",
 #'                  components=list(mod1))
 #' runComponent(pip1$components$setX)
-runComponent <- function(component, inputs=list(), pipelinePath=getwd()) {
+runComponent <- function(componentName, pipeline, ..., pipelinePath=getwd()) {
+    component <- pipeline$components[[componentName]]
     if (!is.null(component$ref)) {
         if (is.null(component$path)) components$path <- defaultSearchPaths
         component <- loadComponent(component)
