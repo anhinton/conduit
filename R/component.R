@@ -74,15 +74,16 @@ exportComponent <- function(component, targetDirectory=getwd(),
 
 #' Run a component
 #'
-#' This function executes a \code{component} with \code{runModule} or
-#' \code{runPipeline} depending on the value of \code{component$value}.
+#' This function executes a single pipeline component with \code{runModule} or
+#' \code{runPipeline}.
 #'
-#' @details If \code{component$value} is set to \dQuote{module}, the names of
-#' \code{inputs} must match the names in \code{component$value$inputs}.
+#' @details If the component refers to a \code{module}, the names of
+#' \code{inputs} must match the names the module's input names.
 #'
 #' \code{pipelinePath} must exist on the filesystem.
 #'
-#' @param component \code{component} object
+#' @param componentName Name of component to be executed
+#' @param pipeline \code{pipeline} containing component
 #' @param inputs Named list of absolute paths for component inputs
 #' @param pipelinePath Pipeline output directory
 #' @return FIXME: Result of \code{runModule} or \code{runPipeline}
@@ -95,7 +96,7 @@ exportComponent <- function(component, targetDirectory=getwd(),
 #'                sources=list(moduleSource("x <- \"set\"")))
 #' pip1 <- pipeline("setX-pipe", description="set the value of x",
 #'                  components=list(mod1))
-#' runComponent(pip1$components$setX)
+#' runComponent(componentName = "setX", pipeline = pip1)
 runComponent <- function(componentName, pipeline, ..., pipelinePath=getwd()) {
     component <- pipeline$components[[componentName]]
     if (!is.null(component$ref)) {
