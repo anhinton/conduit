@@ -128,37 +128,28 @@ loadPipeline <- function(name, ref, path = NULL,
 #'
 #' @param pipeline \code{pipeline} object
 #' @param namespaceDefinitions XML namespaces as character vector
-#' @param export logical, indicating whether to export inlince components as
-#' referenced XML files
 #' 
 #' @return \code{XMLNode} object
-pipelineToXML <- function(pipeline, namespaceDefinitions=NULL, export=FALSE) {
+pipelineToXML <- function(pipeline, namespaceDefinitions=NULL) {
     pipelineRoot <- newXMLNode("pipeline",
                                namespaceDefinitions=namespaceDefinitions)
     description <- newXMLNode("description", pipeline$description)
-    ## componentNames <- names(pipeline$components)
-    ## when export=T we alter all the components to be name/ref only, assuming
-    ## the file will be called COMP_NAME.xml with no path info
     components <-
         lapply(pipeline$components,
                function(c) {
                    componentRoot <-
                        newXMLNode("component",
                                   attrs=c(name=c$name))
-                   if (export) {
-                       xmlAttrs(componentRoot) <-
-                           c(ref=paste0(c$name, ".xml"),
-                             type=c$type)
-                   } else if (!is.null(c$ref)) {
-                       xmlAttrs(componentRoot) <-
-                           c(ref=paste0(c$name, ".xml"),
-                             path=c$path,
-                             type=c$type)
-                   } else {
+                   if (is.null(c$ref)) {
                        componentXML <- componentToXML(c)
                        componentRoot <-
                            addChildren(componentRoot,
                                        kids=list(componentXML))
+                   } else {
+                       xmlAttrs(componentRoot) <-
+                           c(ref  = c$ref,
+                             path = c$path,
+                             type = c$type)
                    }
                    componentRoot
                })
