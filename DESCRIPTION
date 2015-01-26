@@ -3,11 +3,11 @@ Type: Package
 Title: Prototype glue system for openapi
 Version: 0.1-0
 Date: 2014-07-16
-Authors@R: c(person(given="Paul", family="Murrell",
-    email="p.murrell@auckland.ac.nz", role="aut"),
-    person(given="Ashley Noel", family="Hinton",
+Authors@R: c(person(given="Ashley Noel", family="Hinton",
     email="ahin017@aucklanduni.ac.nz",
-    role=c("cre","aut")))
+    role=c("cre","aut")),
+    person(given="Paul", family="Murrell",
+    email="p.murrell@auckland.ac.nz", role="aut"))
 Description: Manage and run OpenAPI pipelines and modules
 License: GPL (>= 3)
 Imports:
