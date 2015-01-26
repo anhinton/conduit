@@ -208,10 +208,8 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 
 #' Export a pipeline and its components to disk
 #'
-#' Exports a \code{pipeline} and its \code{component}s to disk as openapi
-#' XML files. Unlike \code{savePipeline} this functions converts all inline
-#' \code{component}s to references, and also saves XML files for each of
-#' these.
+#' Exports a \code{pipeline} and its referenced \code{component}s to disk as
+#' openapi XML files.
 #'
 #' @details Creates a directory named for the \code{pipeline$name} in
 #' \code{targetDirectory}, then saves \code{pipeline} and \code{component} XML
@@ -258,9 +256,26 @@ exportPipeline <- function(pipeline, targetDirectory) {
     ## } else {
     ##     warning("this pipeline directory exists and you might be writing over something useful")
     }
-    pipelineFile <- savePipeline(pipeline, pipelineDirectory, export=TRUE)
-    result <- c(pipeline=pipelineFile,
-                lapply(pipeline$components, exportComponent, pipelineDirectory))
+    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
+    ## determine which components have a `ref`
+    componentHasRef <-
+        sapply(pipeline$components,
+               function (c) {
+                   hasRef <- if (!is.null(c$ref)) {
+                       TRUE
+                   } else {
+                       FALSE
+                   }
+                   hasRef
+               })
+    ## export components with `ref` to XML
+    result <-
+        lapply(which(componentHasRef),
+               function (n, components, pipelineDirectory) {
+                   component <- components[[n]]
+                   exportComponent(component, pipelineDirectory)
+               }, pipeline$components, pipelineDirectory)
+    result <- c(pipeline = pipelineFile, result)
     result
 }
 
