@@ -176,16 +176,10 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL) {
 #'
 #' Saves a \code{pipeline} to disk as an openapi XML file
 #'
-#' If \code{export} is TRUE the resulting pipeline file will have all
-#' components in name/ref format, and assumes the component XML files
-#' have been saved to the \file{targetDirectory}. This function does NOT
-#' create the component XML files. For this see \code{exportPipeline}.
-#'
 #' As at 2014-08-12 the resulting file is always called \file{pipeline.xml}
 #'
 #' @param pipeline \code{pipeline} object
 #' @param targetDirectory file location to save output
-#' @param export logical, FALSE to keep components inline
 #' @return file path to resulting XML file
 #' @seealso \code{pipeline}. For exporting a pipeline and its components see
 #' \code{exportPipeline}
@@ -198,13 +192,13 @@ pipelineToXML <- function(pipeline, namespaceDefinitions=NULL) {
 #' savePipeline(pipeline = ppl1, targetDirectory = targ1)
 #' @import XML
 #' @export
-savePipeline <- function(pipeline, targetDirectory=getwd(), export=FALSE) {
+savePipeline <- function(pipeline, targetDirectory=getwd()) {
     if (!file.exists(targetDirectory)) {
         stop(paste0("no such target directory: '", targetDirectory, "'"))
     }
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=pipelineToXML(pipeline=pipeline, export=export,
+                  node=pipelineToXML(pipeline=pipeline,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineFilePath <-
         file.path(targetDirectory,
