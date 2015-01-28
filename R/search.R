@@ -51,23 +51,24 @@ amendSearchPaths <- function(newPaths, pathsToAmend = defaultSearchPaths) {
 #'
 #' @param s search path
 #' @return absolute path as character string
-expandSearchPaths <- function(s) {
-    s <- gsub("${ROOT}", getwd(), s, fixed=TRUE)
-    normalizePath(s)
+expandSearchPaths <- function(searchPaths, location = getwd()) {
+    searchPaths <- gsub("${ROOT}", getwd(), searchPaths, fixed=TRUE)
+    searchPaths <- gsub(".//", location, searchPaths, fixed=TRUE)
+    normalizePath(searchPaths)
 }
 
 #' Find a file referenced by \code{ref} and \code{path}
 #'
 #' @param ref file path or filename
 #' @param path search path (optional)
+#' @param locatio file directory of invoking pipeline/module xml (optional)
 #' @return absolute file path as character or NULL
-findFile <- function (ref, path = NULL) {
+findFile <- function (ref, path = NULL, location = getwd()) {
     result <- NULL
-    ## check if ref is an absolute path
     if (file.exists(ref) && ref == normalizePath(ref)) {
         ## if ref is an absolute path
         result <- ref
-    } else if (file.exists(ref) && ref != path.expand(ref)) {
+    } else if (file.exists(ref) && normalizePath(ref) == path.expand(ref)) {
         ## if ref is a path relative to $HOME
         result <- normalizePath(ref)
     } else {
@@ -78,7 +79,7 @@ findFile <- function (ref, path = NULL) {
                 amendSearchPaths(path)
             }
         searchPaths <- splitPaths(searchPaths)
-        searchPaths <- unique(expandSearchPaths(searchPaths))
+        searchPaths <- unique(expandSearchPaths(searchPaths, location))
         if (grepl("^[.]{2}", ref)[1]) {
             ## if ref is relative, calculate search paths
             relativeStart <- substr(ref, 1, regexpr("[/][^.]", ref) - 1)
@@ -114,12 +115,35 @@ findFile <- function (ref, path = NULL) {
     result
 }
 
+#' Resolves a full path for a given ref and path
+#'
+#' @param ref address/filename of referenced file
+#' @param path file paths to search
+#' @param location file directory of invoking pipeline/module xml
+#'
+#' @return character string of resolved ref with class set to
+#' appropriate read method
+resolveRef <- function (ref, path = NULL, location = getwd()) {
+    if (grepl("^ *https://", ref)) {
+        ref <- ref
+        class(ref) <- "https"
+    } else if (grepl("^ *http://", ref)) {
+        ref <- ref
+        class(ref) <- "http"
+    } else {
+        ref <- findFile(ref, path, location)
+        class(ref) <- "file"
+    }
+    return(ref)
+}
+
 #' Fetch the contents of a referenced file
 #'
 #' @param ref Address of referenced file
 #' @param path File paths to search
+#' @param location File directory of invoking pipeline/module xml
 #' @return Character vector containing the contents of \code{ref}
-fetchRef <- function(ref, path = NULL) {
+fecthRef <- function(ref, path = NULL, location = getwd()) {
     if (grepl("^ *https://", ref)){
         RCurl::getURL(ref)
     ## } else if (grepl("^ */", dirname(ref))) {
@@ -130,7 +154,7 @@ fetchRef <- function(ref, path = NULL) {
             stop(paste0("Unable to find file with ref='", ref, "' path='",
                         path, "'"))
         } else {
-            readLines(findFile(ref, path))
+            readLines(findFile(ref, path, location))
         }
     }
 }
