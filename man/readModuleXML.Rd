@@ -11,7 +11,7 @@ readModuleXML(name, xml, location = getwd())
 
 \item{xml}{module \code{XMLNode}}
 
-\item{path}{search path (optional)}
+\item{location}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 \code{module} object

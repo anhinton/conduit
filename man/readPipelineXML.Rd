@@ -4,14 +4,14 @@
 \alias{readPipelineXML}
 \title{Parse pipeline XML and return a pipeline object}
 \usage{
-readPipelineXML(name, xml, path = NULL)
+readPipelineXML(name, xml, location = getwd())
 }
 \arguments{
 \item{name}{Pipeline name}
 
 \item{xml}{Pipeline \code{XMLNode}}
 
-\item{path}{Search path (optional)}
+\item{location}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 \code{pipeline} object

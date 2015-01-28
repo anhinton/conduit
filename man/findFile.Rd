@@ -11,7 +11,7 @@ findFile(ref, path = NULL, location = getwd())
 
 \item{path}{search path (optional)}
 
-\item{locatio}{file directory of invoking pipeline/module xml (optional)}
+\item{location}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 absolute file path as character or NULL
