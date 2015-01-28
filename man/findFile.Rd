@@ -4,12 +4,14 @@
 \alias{findFile}
 \title{Find a file referenced by \code{ref} and \code{path}}
 \usage{
-findFile(ref, path = NULL)
+findFile(ref, path = NULL, location = getwd())
 }
 \arguments{
 \item{ref}{file path or filename}
 
 \item{path}{search path (optional)}
+
+\item{locatio}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 absolute file path as character or NULL

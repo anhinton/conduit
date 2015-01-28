@@ -4,7 +4,7 @@
 \alias{readModuleXML}
 \title{Parse module XML and return a module object}
 \usage{
-readModuleXML(name, xml, path = NULL)
+readModuleXML(name, xml, location = getwd())
 }
 \arguments{
 \item{name}{module name}

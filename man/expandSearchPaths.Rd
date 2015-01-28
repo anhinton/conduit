@@ -4,7 +4,7 @@
 \alias{expandSearchPaths}
 \title{Expand a search path to an absolute path}
 \usage{
-expandSearchPaths(s)
+expandSearchPaths(searchPaths, location = getwd())
 }
 \arguments{
 \item{s}{search path}
