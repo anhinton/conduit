@@ -80,19 +80,6 @@ findFile <- function (ref, path = NULL, location = getwd()) {
             }
         searchPaths <- splitPaths(searchPaths)
         searchPaths <- unique(expandSearchPaths(searchPaths, location))
-        if (grepl("^[.]{2}", ref)[1]) {
-            ## if ref is relative, calculate search paths
-            relativeStart <- substr(ref, 1, regexpr("[/][^.]", ref) - 1)
-            ref <- substr(ref, regexpr("[/][^.]", ref) + 1, nchar(ref))
-            searchPaths <-
-                sapply(searchPaths,
-                       function (p, relStart) {
-                           owd <- setwd(p)
-                           on.exit(setwd(owd))
-                           setwd(relStart)
-                           getwd()
-                       }, relativeStart)
-        }
         count <- 1
         while (is.null(result) && count <= length(searchPaths)) {
             filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
@@ -137,24 +124,24 @@ resolveRef <- function (ref, path = NULL, location = getwd()) {
     return(ref)
 }
 
-#' Fetch the contents of a referenced file
+#' Read the contents of a referenced file
+#' 
+#' @details \code{file} should be the result of the function
+#' \code{resolveRef}. The class of this object determines which read
+#' method is used.
 #'
-#' @param ref Address of referenced file
-#' @param path File paths to search
-#' @param location File directory of invoking pipeline/module xml
-#' @return Character vector containing the contents of \code{ref}
-fecthRef <- function(ref, path = NULL, location = getwd()) {
-    if (grepl("^ *https://", ref)){
-        RCurl::getURL(ref)
-    ## } else if (grepl("^ */", dirname(ref))) {
-    ##     readLines(ref)
-    } else {
-        filePath <- findFile(ref, path)
-        if (is.null(filePath)) {
-            stop(paste0("Unable to find file with ref='", ref, "' path='",
-                        path, "'"))
-        } else {
-            readLines(findFile(ref, path, location))
-        }
-    }
+#' @seealso \code{resolveRef}
+#' 
+#' @param file character vector containing resolved ref location
+#' @return Character vector containing the contents of \code{file}
+fetchRef <- function (file) {
+    UseMethod("fetchRef")
+}
+
+fetchRef.https <- function (file) {
+    RCurl::getURL(ref)
+}
+
+fetchRef.default <- function (file) {
+    readLines(file)
 }
