@@ -436,44 +436,41 @@ graphPipeline <- function(pipeline) {
 #' 
 #' @export
 runPipeline <- function(pipeline) {
+    ## create directory for pipeline output
     if (!file.exists("pipelines")) dir.create("pipelines")
     pipelineName <- componentName(pipeline)
     pipelinePath <- file.path("pipelines", pipelineName)
+    pipelinePath <- normalizePath(pipelinePath)
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
-    pipelinePath <- tools::file_path_as_absolute(pipelinePath)
-    ## FIXME: componens values should be loaded in loadPipeline or equivalent!
-    ## load component values
-    ## pipeline$components <-
-    ##     lapply(
-    ##         pipeline$components,
-    ##         function (c) {
-    ##             if (!is.null(c$ref)) {
-    ##                 if (is.null(c$path)) c$path <- pipelinePath
-    ##                 ## FIXME: only handles modules, not pipelines
-    ##                 c <- loadComponent(c)
-    ##             }
-    ##             c
-    ##         })
-    components <- pipeline$components
-    componentNames <- names(components)
+
     ## validate pipes
     valid <- validatePipeline(pipeline)
     if (!valid) stop(paste0("Pipeline '", pipelineName, "' is invalid."))
-    ## making a graph of the pipeline to determine order
+
+    ## make a graph of the pipeline to determine order
     componentGraph <- graphPipeline(pipeline)
     componentOrder <- RBGL::tsort(componentGraph)
-    inputs <- inputsList(pipeline$pipes, components, pipelinePath)
+
+    ## resolve inputs
+    inputs <- inputsList(pipeline$pipes, pipeline$components,
+                         pipelinePath)
+
+    ## execute components in order determined by componentOrder
     x <-
         lapply(componentOrder,
                function (x, pipeline, inputs, pipelinePath) {
                    ## select inputs for this component and strip out
                    ## component name
+
                    ## FIXME: selecting inputs from inputsList seems a little
                    ## inelegant. Possibly calculating all input locations
                    ## before anything is run is the reason for this.
                    ## What else shall we try?
+
+                   ## FIXME: this could be a helper function called something
+                   ## like resolveComponentInputs()
                    whichInputs <-
                        grepl(paste0("^", x,"[.]"),
                              names(inputs))
@@ -481,6 +478,7 @@ runPipeline <- function(pipeline) {
                    names(inputs) <-
                        gsub(paste0("^", x,"[.]"), "",
                             names(inputs))
+                   
                    ## run the beast
                    runComponent(x, pipeline, inputs, pipelinePath)
                }, pipeline, inputs, pipelinePath)
