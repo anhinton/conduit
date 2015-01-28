@@ -99,12 +99,13 @@ readModuleXML <- function(name, xml, location = getwd()) {
                            xmlValue(node)
                        } else {
                            ## FIXME: not well tested or even understood
-                           tryCatch(
-                               fetchRef(ref, path, location),
+                           file <- tryCatch(
+                               resolveRef(ref, path, location),
                                error = function (err) {
                                    stop("Unable to load module source\n",
                                         err)
                                })
+                           fetchRef(file)
                        }
                    list("value"=value, "type"=type, "order"=order, "ref"=ref,
                         "path"=path)
@@ -196,16 +197,17 @@ loadModule <- function(name, ref, path = NULL,
         ref <- basename(ref)
     }
     ## fetch module XML from disk
-    rawXML <-
-        tryCatch(
-            fetchRef(ref, path),
-            error = function(err) {
-                problem <- c(paste0("Unable to load module '", name, "'\n"),
-                             err)
-                stop(problem)
-            })
+    file <- tryCatch(
+        resolveRef(ref, path),
+        error = function(err) {
+            problem <- c(paste0("Unable to load module '", name, "'\n"),
+                         err)
+            stop(problem)
+        })
+    location <- dirname(file)
+    rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
-    module <- readModuleXML(name, xml, path)
+    module <- readModuleXML(name, xml, location)
     module
 }
 
