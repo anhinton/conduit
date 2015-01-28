@@ -61,7 +61,7 @@ expandSearchPaths <- function(searchPaths, location = getwd()) {
 #'
 #' @param ref file path or filename
 #' @param path search path (optional)
-#' @param locatio file directory of invoking pipeline/module xml (optional)
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return absolute file path as character or NULL
 findFile <- function (ref, path = NULL, location = getwd()) {
     result <- NULL
