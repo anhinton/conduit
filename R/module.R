@@ -40,7 +40,7 @@ sourceOrder <- function(sources) {
 #'
 #' @param name module name
 #' @param xml module \code{XMLNode}
-#' @param path search path (optional)
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return \code{module} object
 #' @import XML
 readModuleXML <- function(name, xml, location = getwd()) {
@@ -172,7 +172,6 @@ readModuleXML <- function(name, xml, location = getwd()) {
 #' @param namespaces Namespaces used in XML document
 #' @return \code{module} list
 #' @seealso \code{module}
-#' @export
 #' 
 #' @import XML
 #'
@@ -189,6 +188,7 @@ readModuleXML <- function(name, xml, location = getwd()) {
 #'
 #' mod2 <- loadModule(name = "layoutGraph", ref = "layoutGraph.xml",
 #'                    path = srch1)
+#' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## if path is not set, make path from ref
