@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/">
+  <description>Plots an Ragraph object to a PNG file using the gridGraphviz package</description>
+  <platform name="R"/>
+  <input name="Ragraph" type="internal">
+    <format formatType="text">R "Ragraph" object</format>
+  </input>
+  <source><![CDATA[library(gridGraphviz)
+png("example.png")
+grid.graph(Ragraph, newpage=TRUE)
+dev.off()]]></source>
+  <output name="example.png" type="external" ref="example.png">
+    <format formatType="text">PNG image file</format>
+  </output>
+</module>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/">
+  <description>Lays out a graphNEL graph using the Rgraphviz package</description>
+  <platform name="R"/>
+  <input name="myGraph" type="internal">
+    <format formatType="text">R "graphNEL" object</format>
+  </input>
+  <source><![CDATA[library(Rgraphviz)
+Ragraph <- agopen(myGraph, "myGraph")]]></source>
+  <output name="Ragraph" type="internal">
+    <format formatType="text">R "Ragraph" object</format>
+  </output>
+</module>
