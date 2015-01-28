@@ -15,10 +15,8 @@ exportPipeline(pipeline, targetDirectory)
 A list of the XML file paths written
 }
 \description{
-Exports a \code{pipeline} and its \code{component}s to disk as openapi
-XML files. Unlike \code{savePipeline} this functions converts all inline
-\code{component}s to references, and also saves XML files for each of
-these.
+Exports a \code{pipeline} and its referenced \code{component}s to disk as
+openapi XML files.
 }
 \details{
 Creates a directory named for the \code{pipeline$name} in

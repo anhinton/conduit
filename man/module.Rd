@@ -5,7 +5,7 @@
 \title{Create a \code{module} object}
 \usage{
 module(name, platform, description = "", inputs = NULL, outputs = NULL,
-  sources = list(), path = NULL)
+  sources = list())
 }
 \arguments{
 \item{name}{Name of module}
@@ -19,8 +19,6 @@ module(name, platform, description = "", inputs = NULL, outputs = NULL,
 \item{outputs}{List of \code{moduleOutput} objects}
 
 \item{sources}{List of \code{moduleSource} objects}
-
-\item{path}{Search path(s) for module children (optional)}
 }
 \value{
 \code{module} list containing:
@@ -31,7 +29,6 @@ module(name, platform, description = "", inputs = NULL, outputs = NULL,
   \item{inputs}
   \item{outputs}
   \item{sources}
-  \item{path}
 }
 }
 \description{
@@ -41,9 +38,6 @@ Creates a module object which can be executed in conduit.
 \code{inputs}, \code{outputs}, and \code{sources} should be lists
 of objects created using \code{moduleInput}, \code{moduleOutput}, and
 \code{moduleSource} respectively.
-
-\code{path} optionally specifies search path(s) to be used for any of the
-module's children, e.g. a source specified given by \sQuote{ref}.
 }
 \examples{
 ## create a module with one output and one source
