@@ -41,8 +41,9 @@ readComponentNode <- function (node, location) {
             file <- tryCatch(
                 resolveRef(ref, path, location),
                 error = function(err) {
-                    problem <- c(paste0("Unable to load module '", name, "'\n"),
-                                 err)
+                    problem <-
+                        c(paste0("Unable to locate component '", name, "'\n"),
+                          err)
                     stop(problem)
                 })
             location <- dirname(file)

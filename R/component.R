@@ -162,15 +162,24 @@ runComponent <- function(componentName, pipeline, inputs = list(),
 #'                       package = "conduit")
 #' comp2 <- component(name = "component2", type = "module", ref = pplxml)
 component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
-    ## if a 'ref' is given then we ignore given 'value' as 'value' will
-    ## be read from the file given in 'ref' using loadComponent()
-    if (!is.null(ref)) {
-        value <- NULL
+    valueClass <- class(value)
+
+    ## fail if no ref of value provided
+    if (is.null(ref) && is.null(value)) {
+        stop("A component must have a ref or a value")
     }
-    ## if a 'value' is given use this to determine the component type
-    if (!is.null(value)) {
-        type <- class(value)
+    
+    ## if no type specified, set to class of value
+    if (is.null(type)) {
+        type <- valueClass
     }
+    
+    ## fail if conflicting types given
+    if (valueClass != type) {
+        stop(paste0("Type mismatch! value has type: '", class(value),
+                    "', but `type` is set to: '", type, "'"))
+    }
+    
     ## if type is not 'module' or 'pipeline' then something is wrong
     if (type != "module" && type != "pipeline") {
         stop("A component must be a module or a pipeline")
