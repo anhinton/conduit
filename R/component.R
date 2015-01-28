@@ -100,10 +100,6 @@ exportComponent <- function(component, targetDirectory=getwd(),
 runComponent <- function(componentName, pipeline, inputs = list(),
                          pipelinePath=getwd()) {
     component <- pipeline$components[[componentName]]
-    if (!is.null(component$ref)) {
-        if (is.null(component$path)) components$path <- defaultSearchPaths
-        component <- loadComponent(component)
-    }
     value <- component$value
     type <- component$type
     result <- switch(type,
