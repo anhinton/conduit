@@ -440,10 +440,11 @@ runPipeline <- function(pipeline) {
     if (!file.exists("pipelines")) dir.create("pipelines")
     pipelineName <- componentName(pipeline)
     pipelinePath <- file.path("pipelines", pipelineName)
-    pipelinePath <- normalizePath(pipelinePath)
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
+    ## inputs will need the full file path
+    pipelinePath <- normalizePath(pipelinePath)
 
     ## validate pipes
     valid <- validatePipeline(pipeline)
