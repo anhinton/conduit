@@ -11,7 +11,13 @@ sourceOrder <- function(sources) {
     ## extract order values from sources
     orderValues <- sapply(sources,
                           function(x) {
-                              as.numeric(x$order)
+                              value <-
+                                  if (is.null(x$order)) {
+                                      NA
+                                  } else {                              
+                                      as.numeric(x$order)
+                                  }
+                              return(value)
                           })
     ## logical vector of which order values <= 0
     zeroLess <- !is.na(orderValues) & orderValues <= 0
@@ -37,7 +43,7 @@ sourceOrder <- function(sources) {
 #' @param path search path (optional)
 #' @return \code{module} object
 #' @import XML
-readModuleXML <- function(name, xml, path = NULL) {
+readModuleXML <- function(name, xml, location = getwd()) {
     nodes <- xmlChildren(xml)
     ## extract description
     descNode <- nodes$description
@@ -82,43 +88,27 @@ readModuleXML <- function(name, xml, path = NULL) {
     sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
         lapply(sourceNodes,
-               function(node, path) {
+               function(node, location) {
                    attrs <- xmlAttrs(node)
-                   type <-
-                       if (length(attrs) && names(attrs) == "type") {
-                           attrs[["type"]]
-                       } else {
-                           character(1)
-                       }
-                   order <-
-                       if (length(attrs) &&
-                           any(grepl("order", names(attrs)))) {
-                           attrs[["order"]]
-                       } else {
-                           character(1)
-                       }
+                   type <- getXMLAttr(node, "type")
+                   order <- getXMLAttr(node, "type")
+                   ref <- getXMLAttr(node, "ref")
+                   path <- getXMLAttr(node, "path")
                    value <-
-                       if (length(attrs) &&
-                           any(grepl("ref", names(attrs)))) {
-                           ref <- attrs[["ref"]]
-                           path <-
-                               if (any(grepl("path", names(attrs)))) {
-                                   attrs[["path"]]
-                               } else {
-                                   path
-                               }
+                       if (is.null(ref)) {
+                           xmlValue(node)
+                       } else {
                            ## FIXME: not well tested or even understood
                            tryCatch(
-                               fetchRef(ref, path),
+                               fetchRef(ref, path, location),
                                error = function (err) {
                                    stop("Unable to load module source\n",
                                         err)
                                })
-                       } else {
-                           xmlValue(node)
                        }
-                   list("value"=value, "type"=type, "order"=order)
-               }, path)
+                   list("value"=value, "type"=type, "order"=order, "ref"=ref,
+                        "path"=path)
+               }, location)
     ## arrange sources in correct order
     sources <- lapply(sourceOrder(sources),
                       function (x, sources) {
@@ -162,7 +152,7 @@ readModuleXML <- function(name, xml, path = NULL) {
             names(outputs) <- outputNames
             outputs
         }
-    module(name=name, path=path, description=description,
+    module(name=name, description=description,
            platform=platform, inputs=inputs, outputs=outputs,
            sources=sources)
 }
