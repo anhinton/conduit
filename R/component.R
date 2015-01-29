@@ -65,8 +65,14 @@ exportComponent <- function(component, targetDirectory=getwd()) {
                   node=componentToXML(component,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
 
+    filename <- if (is.null(component$ref)) {
+        paste0(component$name, ".xml")
+    } else {
+        component$ref
+    }
+    
     ## save XML to file
-    componentFilePath <- file.path(targetDirectory, component$ref)
+    componentFilePath <- file.path(targetDirectory, filename)
     saveXML(componentDoc, componentFilePath)
 }
 
