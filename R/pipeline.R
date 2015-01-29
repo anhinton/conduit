@@ -262,39 +262,38 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 #' 
 #' @export
 exportPipeline <- function(pipeline, targetDirectory) {
+    ## stop if targetDirectory doesn't exist
     if (!file.exists(file.path(targetDirectory))) {
         stop(paste0("Target directory '", targetDirectory, "' does not exist"))
     }
+
+    ## create named directory for pipeline XML files
     pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
-    ## ## FIXME: I was producing this warning every time AKA ignoring it, so it
-    ## ## would be far better if I got some real warnings and errors and what
-    ## ## have you in place
-    ## } else {
-    ##     warning("this pipeline directory exists and you might be writing over something useful")
+        ## FIXME: some kind of warning if I delete something?
     }
-    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
-    ## determine which components have a `ref`
-    componentHasRef <-
-        sapply(pipeline$components,
+
+    ## give all components a ref from name
+    pipeline$components <-
+        lapply(pipeline$components,
                function (c) {
-                   hasRef <- if (!is.null(c$ref)) {
-                       TRUE
-                   } else {
-                       FALSE
-                   }
-                   hasRef
+                   c$ref <- paste0(c$name, ".xml")
+                   c$path <- NULL
+                   c
                })
-    ## export components with `ref` to XML
-    result <-
-        lapply(which(componentHasRef),
-               function (n, components, pipelineDirectory) {
-                   component <- components[[n]]
-                   exportComponent(component, pipelineDirectory)
-               }, pipeline$components, pipelineDirectory)
-    result <- c(pipeline = pipelineFile, result)
-    result
+
+    ## save pipeline to xml file
+    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
+
+    ## save components to XML files
+    componentFiles <-
+        lapply(pipeline$components,
+               function (c, pipelineDirectory) {
+                   exportComponent(c, pipelineDirectory)
+               }, pipelineDirectory)
+
+    c(pipeline = pipelineFile, componentFiles)
 }
 
 ## functions to run a loaded PIPELINE
