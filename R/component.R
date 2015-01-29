@@ -52,23 +52,21 @@ componentToXML <- function(component, namespaceDefinitions=NULL) {
 #'
 #' @param component \code{component} object
 #' @param targetDirectory File path for pipeline output
-#' @param filename Name of resulting file
 #' @return Resulting file path
-exportComponent <- function(component, targetDirectory=getwd(),
-                            filename=paste0(component$name, ".xml")) {
+exportComponent <- function(component, targetDirectory=getwd()) {
+    ## stop of targetDirectory doesn't exist
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
-    if (!is.null(component$ref)) {
-        ## FIXME: this assumes a component is a module
-        component$value <- loadModule(component$name, component$ref,
-                                      component$path)
-    }
+
+    ## create XML 
     componentDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
                   node=componentToXML(component,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
-    componentFilePath <- file.path(targetDirectory, filename)
+
+    ## save XML to file
+    componentFilePath <- file.path(targetDirectory, component$ref)
     saveXML(componentDoc, componentFilePath)
 }
 
