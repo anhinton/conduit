@@ -566,7 +566,7 @@ moduleSource <- function(value=NULL, ref=NULL, path=NULL, type=NULL,
         ## FIXME: not properly tested
         ## FIXME: ignores the possibility of creating a source given by ref
         file <-
-            tryCatch(findFile(ref, path),
+            tryCatch(resolveRef(ref, path),
                      error = function(err) {
                          stop(paste0("Unable to find module source with ref='",
                                      ref, "', path='", path, "'\n"),
