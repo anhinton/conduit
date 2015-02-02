@@ -1,25 +1,4 @@
-### Functions for loading, running and creating components
-
-#' Load a component's value from XML
-#'
-#' Load a \code{component}'s value from the XML file given in its ref and
-#' path slots.
-#'
-#' @param component A \code{component} object
-#' @return \code{component} object with the corresponding \code{pipeline}
-#' or \code{module} object its value slot
-loadComponent <- function(component) {
-    name <- component$name
-    ref <- component$ref
-    path <- component$path
-    type <- component$type
-    value <- switch(type,
-                    module = loadModule(name, ref, path),
-                    ## FIXME: I bet loading a pipeline won't work
-                    pipeline = loadPipeline(ref))
-    component$value <- value
-    component
-}
+### Functions for exporting, running and creating components
 
 #' Convert a component to XML
 #'
