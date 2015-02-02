@@ -4,8 +4,8 @@
 \alias{moduleSource}
 \title{Create a \code{module} source}
 \usage{
-moduleSource(value, ref = NULL, path = defaultSearchPaths, type = "",
-  order = "")
+moduleSource(value = NULL, ref = NULL, path = NULL, type = NULL,
+  order = NULL)
 }
 \arguments{
 \item{value}{source script}
@@ -16,7 +16,8 @@ moduleSource(value, ref = NULL, path = defaultSearchPaths, type = "",
 
 \item{type}{not used as at 2014-12-05}
 
-\item{order}{character containing numeric value specifying source position in sources}
+\item{order}{character containing numeric value specifying source
+position in sources}
 }
 \value{
 named \code{moduleSource} list containing:

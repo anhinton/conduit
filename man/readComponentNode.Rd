@@ -4,12 +4,12 @@
 \alias{readComponentNode}
 \title{Parse a component \code{xmlNode} and return a \code{component}.}
 \usage{
-readComponentNode(node, pipelinePath)
+readComponentNode(node, location)
 }
 \arguments{
 \item{node}{An \code{xmlNode} named \dQuote{component}.}
 
-\item{pipelinePath}{Path to originating pipeline XML}
+\item{location}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 \code{component} object
