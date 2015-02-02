@@ -249,29 +249,39 @@ moduleToXML <- function (module,
     sources <-
         lapply(module$sources,
                function (s) {
+                   value <- s$value
+                   ref <- s$ref
+                   path <- s$path
+                   type <- s$type
+                   order <- s$order
+                   
                    ## create new source node
                    sourceNode <- newXMLNode(name = "source")
+                   
                    ## if no ref is given, save 'value' inline as cdata
-                   if (is.null(s$ref)) {
+                   if (is.null(ref)) {
                        sourceNode <-
                            addChildren(
                                node = sourceNode,
                                ## collapse value script with newline
                                ## (assumes value is character vector)
-                               kids = paste0(s$value, collapse = "\n"),
+                               kids = paste0(value, collapse = "\n"),
                                cdata = TRUE)
                    } else {
-                   ## else record ref and path as attrs
-                       xmlAttrs(sourceNode) <- c(s["ref"], s["path"])
+                       ## else record ref and path as attrs
+                       xmlAttrs(sourceNode) <- c(ref=ref, path=path)
                    }
-                   ## set source 'type' if provided
-                   if (nchar(s["type"])) {
-                       xmlAttrs(sourceNode) <- c(s["type"])
+                   
+                   ## set source 'type' if not NULL
+                   if (!is.null(type)) {
+                       xmlAttrs(sourceNode) <- c(type=type)
                    }
-                   ## set source 'order' if provided
-                   if (nchar(s["order"])) {
-                       xmlAttrs(sourceNode) <- c(s["order"])
+                   
+                   ## set source 'order' if not NULL
+                   if (!is.null(order)) {
+                       xmlAttrs(sourceNode) <- c(order=order)
                    }
+                   
                    sourceNode
                })
     moduleRoot <-
