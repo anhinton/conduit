@@ -91,7 +91,7 @@ readModuleXML <- function(name, xml, location = getwd()) {
                function(node, location) {
                    attrs <- xmlAttrs(node)
                    type <- getXMLAttr(node, "type")
-                   order <- getXMLAttr(node, "type")
+                   order <- getXMLAttr(node, "order")
                    ref <- getXMLAttr(node, "ref")
                    path <- getXMLAttr(node, "path")
                    value <-
@@ -107,8 +107,8 @@ readModuleXML <- function(name, xml, location = getwd()) {
                                })
                            fetchRef(file)
                        }
-                   list("value"=value, "type"=type, "order"=order, "ref"=ref,
-                        "path"=path)
+                   list(value=value, type=type, order=order, ref=ref,
+                        path=path)
                }, location)
     ## arrange sources in correct order
     sources <- lapply(sourceOrder(sources),
@@ -539,7 +539,8 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #' @param ref module XML filename
 #' @param path search path(s) (optional)
 #' @param type not used as at 2014-12-05
-#' @param order character containing numeric value specifying source position in sources
+#' @param order character containing numeric value specifying source
+#' position in sources
 #' @return named \code{moduleSource} list containing:
 #' \itemize{
 #'   \item{value: source script}
@@ -559,17 +560,19 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #' modScript <- system.file("extdata", "simpleGraphScripts", "createGraph.R",
 #'                          package = "conduit")
 #' src2 <- moduleSource(ref = modScript)
-moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
-                         order="") {
+moduleSource <- function(value=NULL, ref=NULL, path=NULL, type=NULL,
+                         order=NULL) {
     if (!is.null(ref)) {
-        ## FIXME: not properly teste
+        ## FIXME: not properly tested
         ## FIXME: ignores the possibility of creating a source given by ref
-        value <-
-            tryCatch(fetchRef(ref, path),
+        file <-
+            tryCatch(findFile(ref, path),
                      error = function(err) {
-                         stop("Unable to read module source\n",
+                         stop(paste0("Unable to find module source with ref='",
+                                     ref, "', path='", path, "'\n"),
                               err)
                      })
+        value <- fetchRef(file)
     }
     list(value=value, type=type, order=order, ref=ref, path=path)
 }
