@@ -2,19 +2,25 @@
 % Please edit documentation in R/search.R
 \name{fetchRef}
 \alias{fetchRef}
-\title{Fetch the contents of a referenced file}
+\title{Read the contents of a referenced file}
 \usage{
-fetchRef(ref, path = NULL)
+fetchRef(file)
 }
 \arguments{
-\item{ref}{Address of referenced file}
-
-\item{path}{File paths to search}
+\item{file}{character vector containing resolved ref location}
 }
 \value{
-Character vector containing the contents of \code{ref}
+Character vector containing the contents of \code{file}
 }
 \description{
-Fetch the contents of a referenced file
+Read the contents of a referenced file
+}
+\details{
+\code{file} should be the result of the function
+\code{resolveRef}. The class of this object determines which read
+method is used.
+}
+\seealso{
+\code{resolveRef}
 }
 

@@ -3,10 +3,10 @@
 #' Parse a component \code{xmlNode} and return a \code{component}.
 #'
 #' @param node An \code{xmlNode} named \dQuote{component}.
-#' @param pipelinePath Path to originating pipeline XML
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return \code{component} object
 #' @import XML
-readComponentNode <- function (node, pipelinePath) {
+readComponentNode <- function (node, location) {
     name <- getXMLAttr(node, "name")
     ref <- getXMLAttr(node, "ref")
     component <-
@@ -24,21 +24,36 @@ readComponentNode <- function (node, pipelinePath) {
             }
             value <- switch(type,
                             module = readModuleXML(name, rawValue,
-                                                   pipelinePath),
+                                                   location),
                             pipeline = readPipelineXML(name, rawValue,
-                                                       pipelinePath))
+                                                       location))
             component(name = name, type = type, value = value)
         } else {
             path <- getXMLAttr(node, "path")
-            ## if a path is not given assume this means the xml file
-            ## is found in the same directory as the pipeline xml
-            if (is.null(path)) path <- pipelinePath
+            ## ## if a path is not given assume this means the xml file
+            ## ## is found in the same directory as the pipeline xml
+            ## if (is.null(path)) path <- pipelinePath
             type <- getXMLAttr(node, "type")
             ## if type is not 'module' or 'pipeline' then something is wrong
             if (type != "module" && type != "pipeline") {
                 stop("A component must be a module or a pipeline")
             }
-            component(name=name, ref=ref, path=path, type=type)
+            file <- tryCatch(
+                resolveRef(ref, path, location),
+                error = function(err) {
+                    problem <-
+                        c(paste0("Unable to locate component '", name, "'\n"),
+                          err)
+                    stop(problem)
+                })
+            location <- dirname(file)
+            rawXML <- fetchRef(file)
+            xml <- xmlRoot(xmlParse(rawXML))
+            value <- switch(type,
+                            module = readModuleXML(name, xml, location),
+                            ## FIXME: I bet loading a pipeline won't work
+                            pipeline = readPipelineXML(name, xml, location))
+            component(name=name, ref=ref, path=path, type=type, value=value)
             ## FIXME: can't handle anon/inline components
         }
     ## path <-
@@ -50,10 +65,10 @@ readComponentNode <- function (node, pipelinePath) {
 #'
 #' @param name Pipeline name
 #' @param xml Pipeline \code{XMLNode}
-#' @param path Search path (optional)
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return \code{pipeline} object
 #' @import XML
-readPipelineXML <- function(name, xml, path = NULL) {
+readPipelineXML <- function(name, xml, location = getwd()) {
     ## pipelinePath <- paste0(pipelineDir, pathSep)
     nodes <- xmlChildren(xml)
     
@@ -63,7 +78,7 @@ readPipelineXML <- function(name, xml, path = NULL) {
 
     ## extract components
     componentNodes <- nodes[names(nodes) == "component"]
-    components <- lapply(componentNodes, readComponentNode, path)
+    components <- lapply(componentNodes, readComponentNode, location)
     names(components) <-
         sapply(components, componentName)
     ## FIXME: need to address inline components
@@ -84,7 +99,7 @@ readPipelineXML <- function(name, xml, path = NULL) {
                         endComponent=endComponent,
                         endInput=endInput)
                })    
-    pipeline(name=name, path=path, description=description,
+    pipeline(name=name, description=description,
              components=components, pipes=pipes)
 }
 
@@ -110,15 +125,18 @@ readPipelineXML <- function(name, xml, path = NULL) {
 #' pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
 loadPipeline <- function(name, ref, path = NULL,
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
-    ## if path is not set, make path from ref
-    if (is.null(path)) {
-        path <- paste0(dirname(ref), pathSep)
-        ref <- basename(ref)
-    }
     ## fetch pipeline XML from disk
-    rawXML <- fetchRef(ref, path)
+    file <- tryCatch(
+        resolveRef(ref, path),
+        error = function(err) {
+            problem <- c(paste0("Unable to load module '", name, "'\n"),
+                         err)
+            stop(problem)
+        })
+    location <- dirname(file)
+    rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
-    pipeline <- readPipelineXML(name, xml, path)
+    pipeline <- readPipelineXML(name, xml, location)
     pipeline
 }
 
@@ -244,39 +262,38 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 #' 
 #' @export
 exportPipeline <- function(pipeline, targetDirectory) {
+    ## stop if targetDirectory doesn't exist
     if (!file.exists(file.path(targetDirectory))) {
         stop(paste0("Target directory '", targetDirectory, "' does not exist"))
     }
+
+    ## create named directory for pipeline XML files
     pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
-    ## ## FIXME: I was producing this warning every time AKA ignoring it, so it
-    ## ## would be far better if I got some real warnings and errors and what
-    ## ## have you in place
-    ## } else {
-    ##     warning("this pipeline directory exists and you might be writing over something useful")
+        ## FIXME: some kind of warning if I delete something?
     }
-    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
-    ## determine which components have a `ref`
-    componentHasRef <-
-        sapply(pipeline$components,
+
+    ## give all components a ref from name
+    pipeline$components <-
+        lapply(pipeline$components,
                function (c) {
-                   hasRef <- if (!is.null(c$ref)) {
-                       TRUE
-                   } else {
-                       FALSE
-                   }
-                   hasRef
+                   c$ref <- paste0(c$name, ".xml")
+                   c$path <- NULL
+                   c
                })
-    ## export components with `ref` to XML
-    result <-
-        lapply(which(componentHasRef),
-               function (n, components, pipelineDirectory) {
-                   component <- components[[n]]
-                   exportComponent(component, pipelineDirectory)
-               }, pipeline$components, pipelineDirectory)
-    result <- c(pipeline = pipelineFile, result)
-    result
+
+    ## save pipeline to xml file
+    pipelineFile <- savePipeline(pipeline, pipelineDirectory)
+
+    ## save components to XML files
+    componentFiles <-
+        lapply(pipeline$components,
+               function (c, pipelineDirectory) {
+                   exportComponent(c, pipelineDirectory)
+               }, pipelineDirectory)
+
+    c(pipeline = pipelineFile, componentFiles)
 }
 
 ## functions to run a loaded PIPELINE
@@ -418,44 +435,42 @@ graphPipeline <- function(pipeline) {
 #' 
 #' @export
 runPipeline <- function(pipeline) {
+    ## create directory for pipeline output
     if (!file.exists("pipelines")) dir.create("pipelines")
     pipelineName <- componentName(pipeline)
     pipelinePath <- file.path("pipelines", pipelineName)
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
-    pipelinePath <- tools::file_path_as_absolute(pipelinePath)
-    ## FIXME: componens values should be loaded in loadPipeline or equivalent!
-    ## load component values
-    pipeline$components <-
-        lapply(
-            pipeline$components,
-            function (c) {
-                if (!is.null(c$ref)) {
-                    if (is.null(c$path)) c$path <- pipelinePath
-                    ## FIXME: only handles modules, not pipelines
-                    c <- loadComponent(c)
-                }
-                c
-            })
-    components <- pipeline$components
-    componentNames <- names(components)
+    ## inputs will need the full file path
+    pipelinePath <- normalizePath(pipelinePath)
+
     ## validate pipes
     valid <- validatePipeline(pipeline)
     if (!valid) stop(paste0("Pipeline '", pipelineName, "' is invalid."))
-    ## making a graph of the pipeline to determine order
+
+    ## make a graph of the pipeline to determine order
     componentGraph <- graphPipeline(pipeline)
     componentOrder <- RBGL::tsort(componentGraph)
-    inputs <- inputsList(pipeline$pipes, components, pipelinePath)
+
+    ## resolve inputs
+    inputs <- inputsList(pipeline$pipes, pipeline$components,
+                         pipelinePath)
+
+    ## execute components in order determined by componentOrder
     x <-
         lapply(componentOrder,
                function (x, pipeline, inputs, pipelinePath) {
                    ## select inputs for this component and strip out
                    ## component name
+
                    ## FIXME: selecting inputs from inputsList seems a little
                    ## inelegant. Possibly calculating all input locations
                    ## before anything is run is the reason for this.
                    ## What else shall we try?
+
+                   ## FIXME: this could be a helper function called something
+                   ## like resolveComponentInputs()
                    whichInputs <-
                        grepl(paste0("^", x,"[.]"),
                              names(inputs))
@@ -463,6 +478,7 @@ runPipeline <- function(pipeline) {
                    names(inputs) <-
                        gsub(paste0("^", x,"[.]"), "",
                             names(inputs))
+                   
                    ## run the beast
                    runComponent(x, pipeline, inputs, pipelinePath)
                }, pipeline, inputs, pipelinePath)
@@ -585,14 +601,7 @@ componentName <- function (component) {
 #' @details If \code{components} is empty the \code{modules} and
 #' \code{pipelines} arguments will be used to create the pipeline.
 #'
-#' \code{path} is used to set the search path(s) for children of this
-#' pipeline. It is not required, but is useful if you are using a specific
-#' directory for providing source and data files to your pipeline. This
-#' slot is auto-filled when a pipeline is loaded from XML using
-#' \code{loadPipeline}.
-#'
 #' @param name \code{pipeline} name
-#' @param path location of originating pipeline xml file
 #' @param description \code{pipeline} description
 #' @param components list of \code{module} and \code{pipeline} objects
 #' @param modules list of \code{module} objects
@@ -600,7 +609,6 @@ componentName <- function (component) {
 #' @param pipes list of \code{pipe} objects
 #' @return \code{pipeline} list containing:
 #' \item{name}{character value}
-#' \item{path}{Location of source pipeline XML file}
 #' \item{description}{character value}
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
@@ -631,7 +639,7 @@ componentName <- function (component) {
 #'                    pipes = list(pipe1))
 #' 
 #' @export
-pipeline <- function (name, path=NULL, description="", components=list(),
+pipeline <- function (name, description="", components=list(),
                       modules=list(), pipelines=list(), pipes=list()) {
     if (!length(components)) {
         components <- c(modules, pipelines)
@@ -646,7 +654,7 @@ pipeline <- function (name, path=NULL, description="", components=list(),
             }
             component
         })
-    pipeline <- list(name=name, path=path, description=description,
+    pipeline <- list(name=name, description=description,
                      components=components, pipes=pipes)
     class(pipeline) <- "pipeline"
     pipeline

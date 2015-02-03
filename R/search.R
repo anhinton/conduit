@@ -51,23 +51,24 @@ amendSearchPaths <- function(newPaths, pathsToAmend = defaultSearchPaths) {
 #'
 #' @param s search path
 #' @return absolute path as character string
-expandSearchPaths <- function(s) {
-    s <- gsub("${ROOT}", getwd(), s, fixed=TRUE)
-    normalizePath(s)
+expandSearchPaths <- function(searchPaths, location = getwd()) {
+    searchPaths <- gsub("${ROOT}", getwd(), searchPaths, fixed=TRUE)
+    searchPaths <- gsub(".//", location, searchPaths, fixed=TRUE)
+    normalizePath(searchPaths)
 }
 
 #' Find a file referenced by \code{ref} and \code{path}
 #'
 #' @param ref file path or filename
 #' @param path search path (optional)
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return absolute file path as character or NULL
-findFile <- function (ref, path = NULL) {
+findFile <- function (ref, path = NULL, location = getwd()) {
     result <- NULL
-    ## check if ref is an absolute path
     if (file.exists(ref) && ref == normalizePath(ref)) {
         ## if ref is an absolute path
         result <- ref
-    } else if (file.exists(ref) && ref != path.expand(ref)) {
+    } else if (file.exists(ref) && normalizePath(ref) == path.expand(ref)) {
         ## if ref is a path relative to $HOME
         result <- normalizePath(ref)
     } else {
@@ -78,20 +79,7 @@ findFile <- function (ref, path = NULL) {
                 amendSearchPaths(path)
             }
         searchPaths <- splitPaths(searchPaths)
-        searchPaths <- unique(expandSearchPaths(searchPaths))
-        if (grepl("^[.]{2}", ref)[1]) {
-            ## if ref is relative, calculate search paths
-            relativeStart <- substr(ref, 1, regexpr("[/][^.]", ref) - 1)
-            ref <- substr(ref, regexpr("[/][^.]", ref) + 1, nchar(ref))
-            searchPaths <-
-                sapply(searchPaths,
-                       function (p, relStart) {
-                           owd <- setwd(p)
-                           on.exit(setwd(owd))
-                           setwd(relStart)
-                           getwd()
-                       }, relativeStart)
-        }
+        searchPaths <- unique(expandSearchPaths(searchPaths, location))
         count <- 1
         while (is.null(result) && count <= length(searchPaths)) {
             filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
@@ -114,23 +102,46 @@ findFile <- function (ref, path = NULL) {
     result
 }
 
-#' Fetch the contents of a referenced file
+#' Resolves a full path for a given ref and path
 #'
-#' @param ref Address of referenced file
-#' @param path File paths to search
-#' @return Character vector containing the contents of \code{ref}
-fetchRef <- function(ref, path = NULL) {
-    if (grepl("^ *https://", ref)){
-        RCurl::getURL(ref)
-    ## } else if (grepl("^ */", dirname(ref))) {
-    ##     readLines(ref)
+#' @param ref address/filename of referenced file
+#' @param path file paths to search
+#' @param location file directory of invoking pipeline/module xml
+#'
+#' @return character string of resolved ref with class set to
+#' appropriate read method
+resolveRef <- function (ref, path = NULL, location = getwd()) {
+    if (grepl("^ *https://", ref)) {
+        ref <- ref
+        class(ref) <- "https"
+    } else if (grepl("^ *http://", ref)) {
+        ref <- ref
+        class(ref) <- "http"
     } else {
-        filePath <- findFile(ref, path)
-        if (is.null(filePath)) {
-            stop(paste0("Unable to find file with ref='", ref, "' path='",
-                        path, "'"))
-        } else {
-            readLines(findFile(ref, path))
-        }
+        ref <- findFile(ref, path, location)
+        class(ref) <- "file"
     }
+    return(ref)
+}
+
+#' Read the contents of a referenced file
+#' 
+#' @details \code{file} should be the result of the function
+#' \code{resolveRef}. The class of this object determines which read
+#' method is used.
+#'
+#' @seealso \code{resolveRef}
+#' 
+#' @param file character vector containing resolved ref location
+#' @return Character vector containing the contents of \code{file}
+fetchRef <- function (file) {
+    UseMethod("fetchRef")
+}
+
+fetchRef.https <- function (file) {
+    RCurl::getURL(ref)
+}
+
+fetchRef.default <- function (file) {
+    readLines(file)
 }

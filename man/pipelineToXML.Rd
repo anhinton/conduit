@@ -4,15 +4,12 @@
 \alias{pipelineToXML}
 \title{Convert a pipeline to XML}
 \usage{
-pipelineToXML(pipeline, namespaceDefinitions = NULL, export = FALSE)
+pipelineToXML(pipeline, namespaceDefinitions = NULL)
 }
 \arguments{
 \item{pipeline}{\code{pipeline} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
-
-\item{export}{logical, indicating whether to export inlince components as
-referenced XML files}
 }
 \value{
 \code{XMLNode} object

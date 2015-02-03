@@ -85,20 +85,6 @@ validatePipe <- function(p, components) {
 validatePipeline <- function(pipeline) {
     pipes <- pipeline$pipes
     components <- pipeline$components
-    ## FIXME: this duplicates work done in runPipeline(), and in both cases
-    ## this SHOULD already have been done for any pipeline loaded in conduit
-    ## check the startComponent exists
-    components <-
-        lapply(
-            components,
-            function (c) {
-                if (!is.null(c$ref)) {
-                    if (is.null(c$path)) c$path <- pipeline$path
-                    ## FIXME: only handles modules, not pipelines
-                    c <- loadComponent(c)
-                }
-                c
-            })
     ## check if pipes are valid
     pipesValidity <- sapply(pipes, validatePipe, components)
     allValid <- all(pipesValidity)

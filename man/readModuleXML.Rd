@@ -4,14 +4,14 @@
 \alias{readModuleXML}
 \title{Parse module XML and return a module object}
 \usage{
-readModuleXML(name, xml, path = NULL)
+readModuleXML(name, xml, location = getwd())
 }
 \arguments{
 \item{name}{module name}
 
 \item{xml}{module \code{XMLNode}}
 
-\item{path}{search path (optional)}
+\item{location}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 \code{module} object

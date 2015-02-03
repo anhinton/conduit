@@ -11,7 +11,13 @@ sourceOrder <- function(sources) {
     ## extract order values from sources
     orderValues <- sapply(sources,
                           function(x) {
-                              as.numeric(x$order)
+                              value <-
+                                  if (is.null(x$order)) {
+                                      NA
+                                  } else {                              
+                                      as.numeric(x$order)
+                                  }
+                              return(value)
                           })
     ## logical vector of which order values <= 0
     zeroLess <- !is.na(orderValues) & orderValues <= 0
@@ -34,10 +40,10 @@ sourceOrder <- function(sources) {
 #'
 #' @param name module name
 #' @param xml module \code{XMLNode}
-#' @param path search path (optional)
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return \code{module} object
 #' @import XML
-readModuleXML <- function(name, xml, path = NULL) {
+readModuleXML <- function(name, xml, location = getwd()) {
     nodes <- xmlChildren(xml)
     ## extract description
     descNode <- nodes$description
@@ -82,43 +88,28 @@ readModuleXML <- function(name, xml, path = NULL) {
     sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
         lapply(sourceNodes,
-               function(node, path) {
+               function(node, location) {
                    attrs <- xmlAttrs(node)
-                   type <-
-                       if (length(attrs) && names(attrs) == "type") {
-                           attrs[["type"]]
-                       } else {
-                           character(1)
-                       }
-                   order <-
-                       if (length(attrs) &&
-                           any(grepl("order", names(attrs)))) {
-                           attrs[["order"]]
-                       } else {
-                           character(1)
-                       }
+                   type <- getXMLAttr(node, "type")
+                   order <- getXMLAttr(node, "order")
+                   ref <- getXMLAttr(node, "ref")
+                   path <- getXMLAttr(node, "path")
                    value <-
-                       if (length(attrs) &&
-                           any(grepl("ref", names(attrs)))) {
-                           ref <- attrs[["ref"]]
-                           path <-
-                               if (any(grepl("path", names(attrs)))) {
-                                   attrs[["path"]]
-                               } else {
-                                   path
-                               }
+                       if (is.null(ref)) {
+                           xmlValue(node)
+                       } else {
                            ## FIXME: not well tested or even understood
-                           tryCatch(
-                               fetchRef(ref, path),
+                           file <- tryCatch(
+                               resolveRef(ref, path, location),
                                error = function (err) {
                                    stop("Unable to load module source\n",
                                         err)
                                })
-                       } else {
-                           xmlValue(node)
+                           fetchRef(file)
                        }
-                   list("value"=value, "type"=type, "order"=order)
-               }, path)
+                   list(value=value, type=type, order=order, ref=ref,
+                        path=path)
+               }, location)
     ## arrange sources in correct order
     sources <- lapply(sourceOrder(sources),
                       function (x, sources) {
@@ -162,7 +153,7 @@ readModuleXML <- function(name, xml, path = NULL) {
             names(outputs) <- outputNames
             outputs
         }
-    module(name=name, path=path, description=description,
+    module(name=name, description=description,
            platform=platform, inputs=inputs, outputs=outputs,
            sources=sources)
 }
@@ -181,7 +172,6 @@ readModuleXML <- function(name, xml, path = NULL) {
 #' @param namespaces Namespaces used in XML document
 #' @return \code{module} list
 #' @seealso \code{module}
-#' @export
 #' 
 #' @import XML
 #'
@@ -198,6 +188,7 @@ readModuleXML <- function(name, xml, path = NULL) {
 #'
 #' mod2 <- loadModule(name = "layoutGraph", ref = "layoutGraph.xml",
 #'                    path = srch1)
+#' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## if path is not set, make path from ref
@@ -206,16 +197,17 @@ loadModule <- function(name, ref, path = NULL,
         ref <- basename(ref)
     }
     ## fetch module XML from disk
-    rawXML <-
-        tryCatch(
-            fetchRef(ref, path),
-            error = function(err) {
-                problem <- c(paste0("Unable to load module '", name, "'\n"),
-                             err)
-                stop(problem)
-            })
+    file <- tryCatch(
+        resolveRef(ref, path),
+        error = function(err) {
+            problem <- c(paste0("Unable to load module '", name, "'\n"),
+                         err)
+            stop(problem)
+        })
+    location <- dirname(file)
+    rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
-    module <- readModuleXML(name, xml, path)
+    module <- readModuleXML(name, xml, location)
     module
 }
 
@@ -257,29 +249,39 @@ moduleToXML <- function (module,
     sources <-
         lapply(module$sources,
                function (s) {
+                   value <- s$value
+                   ref <- s$ref
+                   path <- s$path
+                   type <- s$type
+                   order <- s$order
+                   
                    ## create new source node
                    sourceNode <- newXMLNode(name = "source")
+                   
                    ## if no ref is given, save 'value' inline as cdata
-                   if (is.null(s$ref)) {
+                   if (is.null(ref)) {
                        sourceNode <-
                            addChildren(
                                node = sourceNode,
                                ## collapse value script with newline
                                ## (assumes value is character vector)
-                               kids = paste0(s$value, collapse = "\n"),
+                               kids = paste0(value, collapse = "\n"),
                                cdata = TRUE)
                    } else {
-                   ## else record ref and path as attrs
-                       xmlAttrs(sourceNode) <- c(s["ref"], s["path"])
+                       ## else record ref and path as attrs
+                       xmlAttrs(sourceNode) <- c(ref=ref, path=path)
                    }
-                   ## set source 'type' if provided
-                   if (nchar(s["type"])) {
-                       xmlAttrs(sourceNode) <- c(s["type"])
+                   
+                   ## set source 'type' if not NULL
+                   if (!is.null(type)) {
+                       xmlAttrs(sourceNode) <- c(type=type)
                    }
-                   ## set source 'order' if provided
-                   if (nchar(s["order"])) {
-                       xmlAttrs(sourceNode) <- c(s["order"])
+                   
+                   ## set source 'order' if not NULL
+                   if (!is.null(order)) {
+                       xmlAttrs(sourceNode) <- c(order=order)
                    }
+                   
                    sourceNode
                })
     moduleRoot <-
@@ -414,7 +416,7 @@ runModule <- function(module, inputs=list(),
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
-    moduleFiles <- tools::file_path_as_absolute(modulePath)
+    moduleFiles <- normalizePath(modulePath)
 
     ## set the module class to PLATFORM
     modulePlatform <- module$platform
@@ -537,7 +539,8 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #' @param ref module XML filename
 #' @param path search path(s) (optional)
 #' @param type not used as at 2014-12-05
-#' @param order character containing numeric value specifying source position in sources
+#' @param order character containing numeric value specifying source
+#' position in sources
 #' @return named \code{moduleSource} list containing:
 #' \itemize{
 #'   \item{value: source script}
@@ -557,17 +560,19 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #' modScript <- system.file("extdata", "simpleGraphScripts", "createGraph.R",
 #'                          package = "conduit")
 #' src2 <- moduleSource(ref = modScript)
-moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
-                         order="") {
+moduleSource <- function(value=NULL, ref=NULL, path=NULL, type=NULL,
+                         order=NULL) {
     if (!is.null(ref)) {
-        ## FIXME: not properly teste
+        ## FIXME: not properly tested
         ## FIXME: ignores the possibility of creating a source given by ref
-        value <-
-            tryCatch(fetchRef(ref, path),
+        file <-
+            tryCatch(resolveRef(ref, path),
                      error = function(err) {
-                         stop("Unable to read module source\n",
+                         stop(paste0("Unable to find module source with ref='",
+                                     ref, "', path='", path, "'\n"),
                               err)
                      })
+        value <- fetchRef(file)
     }
     list(value=value, type=type, order=order, ref=ref, path=path)
 }
@@ -580,16 +585,12 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #' of objects created using \code{moduleInput}, \code{moduleOutput}, and
 #' \code{moduleSource} respectively.
 #'
-#' \code{path} optionally specifies search path(s) to be used for any of the
-#' module's children, e.g. a source specified given by \sQuote{ref}.
-#'
 #' @param name Name of module
 #' @param platform Platform name
 #' @param description A basic description of the module
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
-#' @param path Search path(s) for module children (optional)
 #' @return \code{module} list containing:
 #' \itemize{
 #'   \item{name}
@@ -598,7 +599,6 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #'   \item{inputs}
 #'   \item{outputs}
 #'   \item{sources}
-#'   \item{path}
 #' }
 #' @seealso \code{moduleInput}, \code{moduleOutput} and \code{moduleSource} for
 #' creating object for these lists. \code{loadModule} for reading a module
@@ -622,7 +622,7 @@ moduleSource <- function(value, ref=NULL, path=defaultSearchPaths, type="",
 #'                                          format = "R character string")),
 #'                sources = list(moduleSource(value = "print(y)")))
 module <- function(name, platform, description="", inputs=NULL,
-                   outputs=NULL, sources=list(), path=NULL) {
+                   outputs=NULL, sources=list()) {
     platform <- modulePlatform(platform)
     if (!is.null(inputs)) {
         names(inputs) <-
@@ -640,7 +640,7 @@ module <- function(name, platform, description="", inputs=NULL,
     }
     module <- list(name=name, platform=platform, description=description,
                    inputs=inputs, outputs=outputs,
-                   sources=sources, path=path)
+                   sources=sources)
     class(module) <- "module"
     module
 }

@@ -11,8 +11,8 @@ Install conduit
 ---------------
 
 `conduit` is an R package built using R version 3.1 on a 64-bit Linux
-machine. It requires the following R packages: `XML`, `graph`, `RBGL`,
-`RCurl`, and `tools`. The `devtools` package is required to install
+machine. It requires the following R packages: `XML`, `graph`, `RBGL`, and
+`RCurl`. The `devtools` package is required to install
 `conduit` directly from github.
 
 Source code for conduit is available at

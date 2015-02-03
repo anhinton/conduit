@@ -4,15 +4,12 @@
 \alias{exportComponent}
 \title{Export a component to an XML file}
 \usage{
-exportComponent(component, targetDirectory = getwd(),
-  filename = paste0(component$name, ".xml"))
+exportComponent(component, targetDirectory = getwd())
 }
 \arguments{
 \item{component}{\code{component} object}
 
 \item{targetDirectory}{File path for pipeline output}
-
-\item{filename}{Name of resulting file}
 }
 \value{
 Resulting file path

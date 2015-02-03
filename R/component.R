@@ -1,25 +1,4 @@
-### Functions for loading, running and creating components
-
-#' Load a component's value from XML
-#'
-#' Load a \code{component}'s value from the XML file given in its ref and
-#' path slots.
-#'
-#' @param component A \code{component} object
-#' @return \code{component} object with the corresponding \code{pipeline}
-#' or \code{module} object its value slot
-loadComponent <- function(component) {
-    name <- component$name
-    ref <- component$ref
-    path <- component$path
-    type <- component$type
-    value <- switch(type,
-                    module = loadModule(name, ref, path),
-                    ## FIXME: I bet loading a pipeline won't work
-                    pipeline = loadPipeline(ref))
-    component$value <- value
-    component
-}
+### Functions for exporting, running and creating components
 
 #' Convert a component to XML
 #'
@@ -52,22 +31,26 @@ componentToXML <- function(component, namespaceDefinitions=NULL) {
 #'
 #' @param component \code{component} object
 #' @param targetDirectory File path for pipeline output
-#' @param filename Name of resulting file
 #' @return Resulting file path
-exportComponent <- function(component, targetDirectory=getwd(),
-                            filename=paste0(component$name, ".xml")) {
+exportComponent <- function(component, targetDirectory=getwd()) {
+    ## stop of targetDirectory doesn't exist
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
-    if (!is.null(component$ref)) {
-        ## FIXME: this assumes a component is a module
-        component$value <- loadModule(component$name, component$ref,
-                                      component$path)
-    }
+
+    ## create XML 
     componentDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014",
                   node=componentToXML(component,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
+
+    filename <- if (is.null(component$ref)) {
+        paste0(component$name, ".xml")
+    } else {
+        component$ref
+    }
+    
+    ## save XML to file
     componentFilePath <- file.path(targetDirectory, filename)
     saveXML(componentDoc, componentFilePath)
 }
@@ -100,10 +83,6 @@ exportComponent <- function(component, targetDirectory=getwd(),
 runComponent <- function(componentName, pipeline, inputs = list(),
                          pipelinePath=getwd()) {
     component <- pipeline$components[[componentName]]
-    if (!is.null(component$ref)) {
-        if (is.null(component$path)) components$path <- defaultSearchPaths
-        component <- loadComponent(component)
-    }
     value <- component$value
     type <- component$type
     result <- switch(type,
@@ -162,15 +141,24 @@ runComponent <- function(componentName, pipeline, inputs = list(),
 #'                       package = "conduit")
 #' comp2 <- component(name = "component2", type = "module", ref = pplxml)
 component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
-    ## if a 'ref' is given then we ignore given 'value' as 'value' will
-    ## be read from the file given in 'ref' using loadComponent()
-    if (!is.null(ref)) {
-        value <- NULL
+    valueClass <- class(value)
+
+    ## fail if no ref of value provided
+    if (is.null(ref) && is.null(value)) {
+        stop("A component must have a ref or a value")
     }
-    ## if a 'value' is given use this to determine the component type
-    if (!is.null(value)) {
-        type <- class(value)
+    
+    ## if no type specified, set to class of value
+    if (is.null(type)) {
+        type <- valueClass
     }
+    
+    ## fail if conflicting types given
+    if (valueClass != type) {
+        stop(paste0("Type mismatch! value has type: '", class(value),
+                    "', but `type` is set to: '", type, "'"))
+    }
+    
     ## if type is not 'module' or 'pipeline' then something is wrong
     if (type != "module" && type != "pipeline") {
         stop("A component must be a module or a pipeline")
