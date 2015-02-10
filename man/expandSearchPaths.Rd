@@ -7,7 +7,9 @@
 expandSearchPaths(searchPaths, location = getwd())
 }
 \arguments{
-\item{s}{search path}
+\item{searchPaths}{search paths}
+
+\item{location}{file directory of invoking pipeline/module xml (optional)}
 }
 \value{
 absolute path as character string

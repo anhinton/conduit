@@ -49,7 +49,8 @@ amendSearchPaths <- function(newPaths, pathsToAmend = defaultSearchPaths) {
 
 #' Expand a search path to an absolute path
 #'
-#' @param s search path
+#' @param searchPaths search paths
+#' @param location file directory of invoking pipeline/module xml (optional)
 #' @return absolute path as character string
 expandSearchPaths <- function(searchPaths, location = getwd()) {
     searchPaths <- gsub("${ROOT}", getwd(), searchPaths, fixed=TRUE)
@@ -139,7 +140,7 @@ fetchRef <- function (file) {
 }
 
 fetchRef.https <- function (file) {
-    RCurl::getURL(ref)
+    RCurl::getURL(file)
 }
 
 fetchRef.default <- function (file) {
