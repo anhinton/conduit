@@ -14,5 +14,4 @@ Imports:
     XML,
     graph,
     RBGL,
-    RCurl,
-    tools
+    RCurl
