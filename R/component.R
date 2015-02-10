@@ -127,19 +127,6 @@ runComponent <- function(componentName, pipeline, inputs = list(),
 #' \item{type}{component type}
 #' \item{value}{\code{pipeline} or \code{module} object}
 #' @seealso \code{pipeline}, \code{module}
-#'
-#' @examples
-#' ## create a component from a pipeline object
-#' pipel1 <-
-#'     loadPipeline("simpleGraph",
-#'                  ref=system.file("extdata", "simpleGraph",
-#'                                  "simpleGraph-pipeline.xml",
-#'                                  package = "conduit"))
-#' comp1 <- component(name = "component1", value = pipel1)
-#' ## create a component from a module XML file
-#' pplxml <- system.file("extdata", "simpleGraph", "plotGraph.xml",
-#'                       package = "conduit")
-#' comp2 <- component(name = "component2", type = "module", ref = pplxml)
 component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
     valueClass <- class(value)
 
