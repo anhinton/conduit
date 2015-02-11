@@ -4,7 +4,7 @@ conduit
 `conduit` is a prototype R-based glue system for OpenAPI.
 
 Find out more about the OpenAPI project in the technical report,
-Introducing OpenAPI, at <http://stattech.wordpress.fos.auckland.ac.nz/2015-01-introducing-openapi/>.
+Introducing OpenAPI, at <https://www.stat.auckland.ac.nz/~paul/Reports/openapi/introducingOpenapi/introducingOpenapi.html>.
 
 Install conduit
 ---------------
