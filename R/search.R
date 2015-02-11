@@ -72,6 +72,9 @@ findFile <- function (ref, path = NULL, location = getwd()) {
     } else if (file.exists(ref) && normalizePath(ref) == path.expand(ref)) {
         ## if ref is a path relative to $HOME
         result <- normalizePath(ref)
+    } else if (grepl("^../", ref) && file.exists(file.path(location, ref))) {
+        ## if ref is relative to `location`
+        result <- normalizePath(file.path(location, ref))
     } else {
         searchPaths <-
             if (is.null(path)) {
