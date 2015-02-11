@@ -102,7 +102,7 @@ readModuleXML <- function(name, xml, location = getwd()) {
                            file <- tryCatch(
                                resolveRef(ref, path, location),
                                error = function (err) {
-                                   stop("Unable to load module source\n",
+                                   stop(paste0("Unable to load module source at ref: ", ref, ", path: ", path, "\n"),
                                         err)
                                })
                            fetchRef(file)
