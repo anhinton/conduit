@@ -1,11 +1,11 @@
 conduit
 =======
 
-`conduit` is a prototype R-based glue system for openapi.
+`conduit` is a prototype R-based glue system for OpenAPI.
 
-Find out more about the openapi project at the website for a talk given
-by Paul Murrell of the University of Auckland: 
-<https://www.stat.auckland.ac.nz/~paul/Talks/OpenAPI2014/>.
+Find out more about the OpenAPI project in the technical report,
+[Introducing OpenAPI](http://stattech.wordpress.fos.auckland.ac.nz/2015-01-introducing-openapi/),
+on the Univesity of Auckland Department of Statistics Technical blog.
 
 Install conduit
 ---------------
