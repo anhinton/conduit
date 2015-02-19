@@ -16,3 +16,6 @@ Imports:
     graph,
     RBGL,
     RCurl
+Suggests:
+    Rgraphviz,
+    gridGraphviz
