@@ -11,11 +11,12 @@ Authors@R: c(person(given="Ashley Noel", family="Hinton",
 Description: Manage and run OpenAPI pipelines and modules
 License: GPL (>= 3)
 Depends: methods
-Imports:
+Imports: 
     XML,
     graph,
     RBGL,
     RCurl
-Suggests:
+Suggests: 
     Rgraphviz,
-    gridGraphviz
+    gridGraphviz,
+    testthat
