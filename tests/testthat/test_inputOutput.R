@@ -1,5 +1,5 @@
 library(conduit)
-context("Create input/output objects")
+context("create input/output objects")
 
 testInternal <- internalIO("mySym")
 

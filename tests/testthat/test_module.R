@@ -1,5 +1,5 @@
 library(conduit)
-context("Create a 'module' object")
+context("create a 'module' object")
 
 testMod <- module("showY", platform = "R",
                   description = "displays the value of Y",
