@@ -494,9 +494,11 @@ moduleInput <- function(name, type, ..., format="", formatType="text") {
     ## switch on 'type'
     attributes <-
         switch(type,
-               internal = internalIO(...))
-               ## file = fileIO(ref, path))
-    
+               internal = internalIO(...) #,
+               ## file = fileIO(ref, path),
+               ## url = urlIO(url)
+               )
+     
     moduleInput <- list(name=name, type=type, attributes=attributes,
                         format=format, formatType=formatType)
     class(moduleInput) <- "moduleInput"
