@@ -1,5 +1,5 @@
 library(conduit)
-context("Create a module object")
+context("Create a 'module' object")
 
 testMod <- module("showY", platform = "R",
                   description = "displays the value of Y",
@@ -13,7 +13,7 @@ test_that("class(module) is \"module\"", {
     expect_match(class(testMod), "^module$")
 })
 
-test_that("module has correct slots", {
+test_that("module has correct slot names", {
     expect_match(names(testMod), "^name$", all = FALSE)
     expect_match(names(testMod), "^platform$", all = FALSE)
     expect_match(names(testMod), "^description$", all = FALSE)
@@ -22,10 +22,26 @@ test_that("module has correct slots", {
     expect_match(names(testMod), "^sources$", all = FALSE)
 })
 
-test_that("class of inputs, outputs, sources correct", {
+test_that("name, platform, description are character vectors", {
+    expect_true(is.character(testMod$name))
+    expect_true(is.character(testMod$platform))
+    expect_true(is.character(testMod$description))
+})
+
+test_that("name, platform, description are length 1", {
+    expect_equal(length(testMod$name), 1)
+    expect_equal(length(testMod$description), 1)
+    expect_equal(length(testMod$platform), 1)
+})
+
+test_that("inputs, outputs, sources are lists", {
+    expect_true(is.list(testMod$inputs))
+    expect_true(is.list(testMod$outputs))
+    expect_true(is.list(testMod$sources))
+})
+
+test_that("class of objects in inputs, outputs, sources correct", {
     expect_match(lapply(testMod$inputs, class), "moduleInput")
     expect_match(lapply(testMod$outputs, class), "moduleOutput")
     expect_match(lapply(testMod$sources, class), "moduleSource")
 })
-
-
