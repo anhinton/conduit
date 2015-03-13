@@ -574,7 +574,9 @@ moduleSource <- function(value=NULL, ref=NULL, path=NULL, type=NULL,
                      })
         value <- fetchRef(file)
     }
-    list(value=value, type=type, order=order, ref=ref, path=path)
+    src <- list(value=value, type=type, order=order, ref=ref, path=path)
+    class(src) <- "moduleSource"
+    src
 }
 
 #' Create a \code{module} object
