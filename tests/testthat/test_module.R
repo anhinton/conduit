@@ -4,7 +4,7 @@ context("Create a 'module' object")
 testMod <- module("showY", platform = "R",
                   description = "displays the value of Y",
                   inputs = list(moduleInput(name = "y", type = "internal",
-                      format = "R character string")),
+                      symbol = "y", format = "R character string")),
                   sources = list(moduleSource(value = "print(y)")),
                   outputs = list(moduleOutput(name = "z", type = "internal",
                       format = "R character string")))
