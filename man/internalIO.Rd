@@ -16,6 +16,6 @@ named \code{internalIO} list item
 Create an internal IO object
 }
 \seealso{
-\code{moduleInput}
+\code{moduleIO}
 }
 
