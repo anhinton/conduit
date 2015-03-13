@@ -4,7 +4,7 @@
 #' @return named \code{internalIO} list item
 #' @seealso \code{moduleInput}
 internalIO <- function(symbol) {
-    internalIO <- c(symbol = symbol)
+    internalIO <- list(symbol = symbol)
     class(internalIO) <- "internalIO"
     return(internalIO)
 }
