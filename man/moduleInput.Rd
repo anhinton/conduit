@@ -4,35 +4,56 @@
 \alias{moduleInput}
 \title{Create a \code{module} input}
 \usage{
-moduleInput(name, type, format = "", formatType = "text")
+moduleInput(name, type, ..., format = "", formatType = "text")
 }
 \arguments{
 \item{name}{Input name}
 
-\item{type}{\sQuote{internal} or \sQuote{external}}
+\item{type}{Input type}
+
+\item{...}{attributes appropriate to \code{type}}
 
 \item{format}{Input format}
 
 \item{formatType}{Defaults to \dQuote{text}}
 }
 \value{
-named \code{moduleInput} character vector containing:
+named \code{moduleInput} list containing:
 \itemize{
   \item{name}
   \item{type}
+  \item{attributes}
   \item{format}
   \item{formatType}
 }
 }
 \description{
-Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
+Creates a \code{moduleInput} list for use in a \code{module}'s inputs list.
 }
 \details{
-\code{type} must be \sQuote{internal} or \sQuote{external}.
+Creates a \code{moduleInput} list with attributes appropriate to
+\code{type}. Attributes given by \code{...} argument.
+
+The following \code{type}s and attributes are accepted:
+\itemize{
+  \item{
+    internal:
+    \itemize{
+      \item{symbol: symbol name}
+    }
+  }
+  \item{
+    file
+    \itemize{
+      \item{ref: relative or absolute path name to file}
+      \item{path: search path to find ref}
+    }
+  }
+}
 }
 \examples{
 inp1 <- moduleInput(name = "bigData", type = "internal",
-                    format = "R data frame")
+                    symbol = "bigData", format = "R data frame")
 }
 \seealso{
 \code{module}

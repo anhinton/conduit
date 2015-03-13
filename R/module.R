@@ -439,18 +439,38 @@ modulePlatform <- function(name) {
 
 #' Create a \code{module} input
 #'
-#' Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
+#' Creates a \code{moduleInput} list for use in a \code{module}'s inputs list.
 #'
-#' \code{type} must be \sQuote{internal} or \sQuote{external}.
+#' Creates a \code{moduleInput} list with attributes appropriate to
+#' \code{type}. Attributes given by \code{...} argument.
+#'
+#' The following \code{type}s and attributes are accepted:
+#' \itemize{
+#'   \item{
+#'     internal:
+#'     \itemize{
+#'       \item{symbol: symbol name}
+#'     }
+#'   }
+#'   \item{
+#'     file
+#'     \itemize{
+#'       \item{ref: relative or absolute path name to file}
+#'       \item{path: search path to find ref}
+#'     }
+#'   }
+#' }
 #'
 #' @param name Input name
-#' @param type \sQuote{internal} or \sQuote{external}
+#' @param type Input type
+#' @param ... attributes appropriate to \code{type}
 #' @param format Input format
 #' @param formatType Defaults to \dQuote{text}
-#' @return named \code{moduleInput} character vector containing:
+#' @return named \code{moduleInput} list containing:
 #' \itemize{
 #'   \item{name}
 #'   \item{type}
+#'   \item{attributes}
 #'   \item{format}
 #'   \item{formatType}
 #' }
@@ -460,15 +480,27 @@ modulePlatform <- function(name) {
 #' @examples
 #'
 #' inp1 <- moduleInput(name = "bigData", type = "internal",
-#'                     format = "R data frame")
-moduleInput <- function(name, type, format="", formatType="text") {
-    ## fail if type is not 'internal' or 'external'
-    if (!(type == "internal" || type == "external")) {
-        stop(paste0("specified type '", type, "' is not supported"))
+#'                     symbol = "bigData", format = "R data frame")
+moduleInput <- function(name, type, ..., format="", formatType="text") {
+    ## fail if type not in known types
+    known_types <-
+        c("internal",
+          "file")
+    if (!(type %in% known_types)) {
+        stop(paste0("specified moduleInput type '", type,
+                    "' is not supported"))
     }
-    inp <- c(name=name, type=type, format=format, formatType=formatType)
-    class(inp) <- "moduleInput"
-    inp
+    
+    ## switch on 'type'
+    attributes <-
+        switch(type,
+               internal = internalIO(...))
+               ## file = fileIO(ref, path))
+    
+    moduleInput <- list(name=name, type=type, attributes=attributes,
+                        format=format, formatType=formatType)
+    class(moduleInput) <- "moduleInput"
+    return(moduleInput)
 }
 
 #' Create a \code{module} output input
