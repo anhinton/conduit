@@ -1,9 +1,13 @@
 library(conduit)
 context("Create input/output objects")
 
-internalIO("mySym")
+testInternal <- internalIO("mySym")
 
-test_that("internalIO contains symbol element", {
-    expect_match(names(internalIO("mySym")), "^symbol$", all=F)
+test_that("internalIO is named character with 'symbol' element", {
+    expect_true(is.character(testInternal))
+    expect_match(names(testInternal), "^symbol$")
 })
 
+test_that("internalIO has class 'internalIO'", {
+    expect_match(class(testInternal), "^internalIO$")
+})
