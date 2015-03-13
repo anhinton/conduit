@@ -479,8 +479,11 @@ modulePlatform <- function(name) {
 #'
 #' @examples
 #'
-#' inp1 <- moduleInput(name = "bigData", type = "internal",
-#'                     symbol = "bigData", format = "R data frame")
+#' internalInput <- moduleInput(name = "bigData", type = "internal",
+#'                              symbol = "bigData", format = "R data frame")
+#' fileInput <- moduleInput(name = "scores.csv", type = "file",
+#'                          ref = "2015-03-13-scores.csv",
+#'                          format = "CSV file")
 moduleInput <- function(name, type, ..., format="", formatType="text") {
     ## fail if type not in known types
     known_types <-
@@ -494,9 +497,9 @@ moduleInput <- function(name, type, ..., format="", formatType="text") {
     ## switch on 'type'
     attributes <-
         switch(type,
-               internal = internalIO(...) #,
-               ## file = fileIO(ref, path),
-               ## url = urlIO(url)
+               internal = internalIO(...),
+               file = fileIO(...)
+               ## url = urlIO(...)
                )
      
     moduleInput <- list(name=name, type=type, attributes=attributes,

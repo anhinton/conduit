@@ -52,8 +52,11 @@ The following \code{type}s and attributes are accepted:
 }
 }
 \examples{
-inp1 <- moduleInput(name = "bigData", type = "internal",
-                    symbol = "bigData", format = "R data frame")
+internalInput <- moduleInput(name = "bigData", type = "internal",
+                             symbol = "bigData", format = "R data frame")
+fileInput <- moduleInput(name = "scores.csv", type = "file",
+                         ref = "2015-03-13-scores.csv",
+                         format = "CSV file")
 }
 \seealso{
 \code{module}
