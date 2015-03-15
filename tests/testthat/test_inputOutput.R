@@ -5,6 +5,18 @@ testInternal <- internalIO("mySym")
 testFile <- fileIO("myFile.txt", "/home/hometime")
 testFileNullPath <- fileIO("myFile.txt")
 
+test_that("functions throw warnings for incorrect inputs", {
+    expect_warning(internalIO(c("symbol1", "symbol2")),
+                   "More than one value")
+    expect_warning(internalIO(666), "not a character")
+    expect_warning(fileIO(c("ref1", "ref1")),
+                   "More than one value")
+    expect_warning(fileIO(666), "not a character")
+    expect_warning(fileIO("ref", c("path1", "path2")),
+                   "More than one value")
+    expect_warning(fileIO("ref", 666), "not a character")
+})
+
 test_that("set attributes are character vectors", {
     expect_true(is.character(testInternal$symbol))
     expect_true(is.character(testFile$ref))

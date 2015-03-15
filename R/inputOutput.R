@@ -4,6 +4,7 @@
 #' @return named \code{internalIO} list item
 #' @seealso \code{moduleIO}
 internalIO <- function(symbol) {
+    symbol <- as_length1_char(symbol, "symbol")
     internalIO <- list(symbol = symbol)
     class(internalIO) <- "internalIO"
     return(internalIO)
@@ -15,6 +16,10 @@ internalIO <- function(symbol) {
 #' @param path Optional search path for locating file
 #' @seealso \code{moduleIO}
 fileIO <- function(ref, path = NULL) {
+    ref <- as_length1_char(ref, "ref")
+    if (!is.null(path)) {
+        path <- as_length1_char(path, "path")
+    }
     fileIO <- list(ref = ref, path = path)
     class(fileIO) <- "fileIO"
     return(fileIO)
