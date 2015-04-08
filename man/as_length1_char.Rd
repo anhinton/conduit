@@ -2,8 +2,7 @@
 % Please edit documentation in R/tools.R
 \name{as_length1_char}
 \alias{as_length1_char}
-\title{Coerce a vector to a character vector of length one and warn about
-coercion.}
+\title{Coerce a vector to a character vector of length 1}
 \usage{
 as_length1_char(x)
 }
@@ -14,7 +13,6 @@ as_length1_char(x)
 character vector of length one
 }
 \description{
-Coerce a vector to a character vector of length one and warn about
-coercion.
+Coerce a vector to a character vector of length 1
 }
 

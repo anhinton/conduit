@@ -17,11 +17,13 @@ internalIO <- function(symbol) {
 #' @seealso \code{moduleIO}
 fileIO <- function(ref, path = NULL) {
     if (!is_length1_char(ref)) {
-        stop("'ref' is not a length 1 charachter vector")
+        warning("'ref' is not a length 1 charachter vector")
+        ref <- as_length1_char(ref)
     }
     if (!is.null(path)) {
         if (!is_length1_char(path)) {
-            stop("'path' is not a length 1 character vector")
+            warning("'path' is not a length 1 character vector")
+            path <- as_length1_char(path)
         }
     }
     fileIO <- list(ref = ref, path = path)
