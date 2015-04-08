@@ -6,12 +6,12 @@ testFile <- fileIO("myFile.txt", "/home/hometime")
 testFileNullPath <- fileIO("myFile.txt")
 
 test_that("functions throw warnings for incorrect inputs", {
-    expect_warning(internalIO(c("symbol1", "symbol2")),
-                   "More than one value")
-    expect_warning(internalIO(666), "not a character")
-    expect_warning(fileIO(c("ref1", "ref1")),
-                   "More than one value")
-    expect_warning(fileIO(666), "not a character")
+    ## expect_error(internalIO(c("symbol1", "symbol2")),
+    ##                "'ref' is not a length 1")
+    ## expect_warning(internalIO(666), "not a character")
+    expect_error(fileIO(c("ref1", "ref1")),
+                 "'ref' is not a length 1")
+    expect_error(fileIO(666), "'ref' is not a length 1")
     expect_warning(fileIO("ref", c("path1", "path2")),
                    "More than one value")
     expect_warning(fileIO("ref", 666), "not a character")

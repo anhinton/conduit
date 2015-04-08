@@ -16,9 +16,13 @@ internalIO <- function(symbol) {
 #' @param path Optional search path for locating file
 #' @seealso \code{moduleIO}
 fileIO <- function(ref, path = NULL) {
-    ref <- as_length1_char(ref)
+    if (!is_length1_char(ref)) {
+        stop("'ref' is not a length 1 charachter vector")
+    }
     if (!is.null(path)) {
-        path <- as_length1_char(path)
+        if (!is_length1_char(path)) {
+            stop("'path' is not a length 1 character vector")
+        }
     }
     fileIO <- list(ref = ref, path = path)
     class(fileIO) <- "fileIO"

@@ -1,12 +1,21 @@
 library(conduit)
 context("test internal tools")
 
-test_that("as_length1_char() works right", {
-    expect_warning(as_length1_char(c("symbol1", "symbol2")),
-                   "More than one value")
-    expect_warning(as_length1_char(666),
-                   "Non-character string")
-    length1char <- as_length1_char("hello")
-    expect_true(is.character(length1char))
-    expect_equal(length(length1char), 1)
+myNumeric <- 666
+twoCharacters <- c("first", "second")
+oneCharacter <- "only"
+
+test_that("is_length1_char() picks length 1 character vectors", {
+    expect_false(is_length1_char(myNumeric))
+    expect_false(is_length1_char(twoCharacters))
+    expect_true(is_length1_char(oneCharacter))
+})
+
+test_that("as_length1_char() creates length 1 character vectors", {
+    fromNumeric <- as_length1_char(myNumeric)
+    fromTwoCharacters <- as_length1_char(twoCharacters)
+    fromOneCharacter <- as_length1_char(oneCharacter)
+    expect_true(is_length1_char(fromNumeric))
+    expect_true(is_length1_char(fromTwoCharacters))
+    expect_true(is_length1_char(fromOneCharacter))
 })
