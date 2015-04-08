@@ -17,16 +17,15 @@ getXMLAttr <- function(xmlNode, attrName) {
 #' coercion.
 #'
 #' @param x vector to be coerced
-#' @param attribute name of attribute being coerced
 #' @return character vector of length one
-as_length1_char <- function(x, attribute) {
+as_length1_char <- function(x) {
     if (length(x) > 1) {
-        warning(paste0("More than one value provide for '", attribute,
-                       "'. Using only the first value."))
+        warning(paste0("More than one value provided. ",
+                       "Using only the first value."))
         x <- x[1]
     }
     if (!is.character(x)) {
-        warning(paste0(attribute, "='", x, "' is not a character string. ",
+        warning(paste0("Non-character string provided. ",
                       "Coercing to string."))
         x <- as.character(x)
     }

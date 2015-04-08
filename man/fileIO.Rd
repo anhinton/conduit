@@ -4,7 +4,7 @@
 \alias{fileIO}
 \title{Create a file IO object}
 \usage{
-fileIO(ref, path)
+fileIO(ref, path = NULL)
 }
 \arguments{
 \item{ref}{Absolute or relative location of file}
