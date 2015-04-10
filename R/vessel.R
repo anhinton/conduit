@@ -9,16 +9,42 @@
 #' @name vessel
 NULL
 
-#' Create an internal IO object
+#' Create an \code{internalVessel} object.
 #'
-#' @param symbol Name of symbol identifier
-#' @return named \code{internalIO} list item
-#' @seealso \code{moduleIO}
-internalIO <- function(symbol) {
-    symbol <- as_length1_char(symbol)
-    internalIO <- list(symbol = symbol)
-    class(internalIO) <- "internalIO"
-    return(internalIO)
+#' @details \code{internalVessel} objects are used to point to objects
+#' internal to a \code{module} script. They are used to pass objects
+#' internal to a module's platform to other modules.
+#'
+#' These can be used to specify:
+#'
+#' \itemize{
+#'   \item{an object created in a \code{module} script to be passed out as
+#'         a \code{moduleOutput}}
+#'   \item{an object which a \code{module} script expects to be provided
+#'         by a \code{moduleInput}}
+#' }
+#'
+#' \code{symbol} must be a character vectors of length 1.
+#'
+#' @param symbol Name of internal object
+#'
+#' @return \code{internalVessel}, \code{vessel} list object
+#'
+#' @seealso More about \code{vessel} objects, more about
+#' \code{moduleInput} and \code{moduleOutput} objects, overview of
+#' \code{module} objects.
+#'
+#' @examples
+#' expenses_df <- internalVessel(symbol="expenses")
+#'  
+#' @export
+internalVessel <- function(symbol) {
+    if (!is_length1_char(symbol)) {
+        stop(paste0("'symbol' is not a length 1 character vector"))
+    }
+    internalVessel <- list(symbol = symbol)
+    class(internalVessel) <- c("internalVessel", "vessel")
+    return(internalVessel)
 }
 
 #' Create a \code{fileVessel} object.
@@ -29,7 +55,8 @@ internalIO <- function(symbol) {
 #' These can be used to specify:
 #'
 #' \itemize{
-#'   \item{to where a \code{moduleOutput} is to be saved}
+#'   \item{where a module script has created a file, to be passed out in
+#'         a\code{moduleOutput}}
 #'   \item{from where a \code{moduleInput} is to retrieved}
 #'   \item{from where a \code{moduleSource} is to be retrieved}
 #' }
