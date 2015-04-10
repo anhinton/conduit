@@ -2,7 +2,7 @@
 % Please edit documentation in R/tools.R
 \name{is_length1_char}
 \alias{is_length1_char}
-\title{Checks whether /code{x} is a length 1 character vector}
+\title{Checks whether \code{x} is a length 1 character vector}
 \usage{
 is_length1_char(x)
 }
@@ -10,9 +10,9 @@ is_length1_char(x)
 \item{x}{vector to be checked}
 }
 \value{
-logical, TRUE if is length 1 char
+logical, TRUE if \code{x} is length 1 char
 }
 \description{
-Checks whether /code{x} is a length 1 character vector
+Checks whether \code{x} is a length 1 character vector
 }
 

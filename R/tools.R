@@ -13,28 +13,14 @@ getXMLAttr <- function(xmlNode, attrName) {
     }
 }
 
-#' Checks whether /code{x} is a length 1 character vector
+#' Checks whether \code{x} is a length 1 character vector
 #'
 #' @param x vector to be checked
-#' @return logical, TRUE if is length 1 char
+#' @return logical, TRUE if \code{x} is length 1 char
 is_length1_char <- function(x) {
     value <- FALSE
     if (length(x) == 1 && is.character(x)) {
         value <- TRUE
     }
     return(value)
-}
-
-#' Coerce a vector to a character vector of length 1
-#'
-#' @param x vector to be coerced
-#' @return character vector of length one
-as_length1_char <- function(x) {
-    if (length(x) > 1) {
-        x <- x[1]
-    }
-    if (!is.character(x)) {
-        x <- as.character(x)
-    }
-    return(x)
 }
