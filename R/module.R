@@ -437,6 +437,40 @@ modulePlatform <- function(name) {
     c(name=name)
 }
 
+#' Create an \code{ioFormat} object.
+#'
+#' Specify the format of a \code{moduleInput} or \code{moduleOutput} object.
+#'
+#' If \code{type} = \dQuote{text}, \code{value} must be a character
+#' vector of length 1.
+#'
+#' @param value Format information
+#' @param type Method of format specification
+#'
+#' @return \code{ioFormat} list object
+#'
+#' @seealso \code{moduleInput}, \code{moduleOutput}, \code{module}
+#'
+#' @examples
+#' i1_format <- ioFormat(value = "CSV file")
+#' 
+#' @export
+ioFormat <- function(value, type="text") {
+    if (!is_length1_char(type)) {
+        stop("'type' is not a length 1 character")
+    }
+    ## give error if value doesn't match format, or format not defined
+    switch(type,
+           text = if(!is_length1_char(value)) {
+               stop("'value' is not a length 1 character vector")
+           },
+           stop("invalid 'type' provided")
+           )
+    ioFormat <- list(value = value, type = type)
+    class(ioFormat) <- "ioFormat"
+    return(ioFormat)
+}
+
 #' Create a \code{module} input
 #'
 #' Creates a \code{moduleInput} list for use in a \code{module}'s inputs list.
