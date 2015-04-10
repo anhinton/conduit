@@ -40,11 +40,14 @@ internalIO <- function(symbol) {
 #' @param ref Absolute or relative location of file
 #' @param path Optional search path for locating file
 #'
-#' @return More about \code{vessel} objects, more on \code{fileVessel}
+#' @return \code{fileVessel}, \code{vessel} list object
+#'
+#' @seealso More about \code{vessel} objects, more on \code{fileVessel}
 #' \code{vessel} list objects, overview of \code{module} objects.
-#' @seealso \code{moduleInput}, \code{moduleOutput}, \code{moduleSource}
-#' 
-#' 
+#'
+#' @examples
+#' data_file <- fileVessel(ref="~/myFiles/data.csv")
+#'  
 #' @export
 fileVessel <- function(ref, path = NULL) {
     if (!is_length1_char(ref)) {

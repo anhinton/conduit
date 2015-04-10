@@ -12,8 +12,7 @@ fileVessel(ref, path = NULL)
 \item{path}{Optional search path for locating file}
 }
 \value{
-More about \code{vessel} objects, more on \code{fileVessel}
-\code{vessel} list objects, overview of \code{module} objects.
+\code{fileVessel}, \code{vessel} list object
 }
 \description{
 Create a \code{fileVessel} object.
@@ -33,7 +32,11 @@ These can be used to specify:
 \code{ref} (and \code{path}, if given), must be character vectors of
 length 1.
 }
+\examples{
+data_file <- fileVessel(ref="~/myFiles/data.csv")
+}
 \seealso{
-\code{moduleInput}, \code{moduleOutput}, \code{moduleSource}
+More about \code{vessel} objects, more on \code{fileVessel}
+\code{vessel} list objects, overview of \code{module} objects.
 }
 
