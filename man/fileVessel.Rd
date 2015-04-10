@@ -24,8 +24,10 @@ the local filesystem.
 These can be used to specify:
 
 \itemize{
-  \item{to where a \code{moduleOutput} is to be saved}
-  \item{from where a \code{moduleInput} is to retrieved}
+  \item{where a module script has created a file, as described in
+        a \code{moduleOutput}}
+  \item{from where a module script expects a file to be available,
+        as described in a \code{moduleInput}}
   \item{from where a \code{moduleSource} is to be retrieved}
 }
 
@@ -36,7 +38,8 @@ length 1.
 data_file <- fileVessel(ref="~/myFiles/data.csv")
 }
 \seealso{
-More about \code{vessel} objects, more on \code{fileVessel}
-\code{vessel} list objects, overview of \code{module} objects.
+More about \code{vessel} objects, more about
+\code{moduleInput}, \code{moduleOutput} and \code{moduleSource}
+objects, an overview of \code{module} objects.
 }
 
