@@ -3,6 +3,7 @@
 export(addComponent)
 export(addPipe)
 export(exportPipeline)
+export(fileVessel)
 export(loadModule)
 export(loadPipeline)
 export(module)
