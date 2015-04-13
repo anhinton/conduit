@@ -2,46 +2,40 @@
 % Please edit documentation in R/module.R
 \name{moduleOutput}
 \alias{moduleOutput}
-\title{Create a \code{module} output input}
+\title{Create a \code{module} output}
 \usage{
-moduleOutput(name, type, format = "", formatType = "text", ref = "")
+moduleOutput(name, vessel, format)
 }
 \arguments{
 \item{name}{Output name}
 
-\item{type}{\sQuote{internal} or \sQuote{external}}
+\item{vessel}{\code{vessel} object}
 
-\item{format}{Output format}
-
-\item{formatType}{Defaults to \dQuote{text}}
-
-\item{ref}{Filename of \sQuote{external} output}
+\item{format}{\code{ioFormat} object}
 }
 \value{
-named \code{moduleOutput} character vector of:
+named \code{moduleOutput} list containing:
 \itemize{
   \item{name}
-  \item{type}
+  \item{vessel}
   \item{format}
-  \item{formatType}
-  \item{ref}
 }
 }
 \description{
-Creates a \code{moduleOutput} vector for use in a \code{module}'s outputs
-list.
-}
-\details{
-\code{type} must be \sQuote{internal} or \sQuote{external}.
-
-It \code{type} is \dQuote{external}, a \code{ref} is required. This needs
-to be a resolveable URI created by the \code{module}'s source(s).
+Create a \code{moduleOutput} list for use in a \code{module}'s
+outputs list.
 }
 \examples{
-outp1 <- moduleOutput(name = "bigData", type = "internal",
-                      format = "R data frame")
-outp2 <- moduleOutput(name = "mediumData", type = "external",
-                      format = "CSV file", ref = "mediumData.csv")
+internalOutput <-
+    moduleOutput(
+        name = "bigData",
+        vessel = internalVessel(symbol = "bigData"),
+        format = ioFormat("R data frame"))
+fileInput <-
+    moduleOutput(
+        name = "scores.csv",
+        vessel = fileVessel(ref = "2015-03-13-scores.csv"),
+        format = ioFormat("CSV file"))
 }
 \seealso{
 \code{module}

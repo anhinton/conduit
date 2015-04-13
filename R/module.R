@@ -508,6 +508,44 @@ moduleInput <- function(name, vessel, format) {
     return(moduleInput)
 }
 
+#' Create a \code{module} output
+#'
+#' Create a \code{moduleOutput} list for use in a \code{module}'s
+#' outputs list.
+#'
+#' @param name Output name
+#' @param vessel \code{vessel} object
+#' @param format \code{ioFormat} object
+#' 
+#' @return named \code{moduleOutput} list containing:
+#' \itemize{
+#'   \item{name}
+#'   \item{vessel}
+#'   \item{format}
+#' }
+#' @seealso \code{module}
+#'
+#' @examples
+#'
+#' internalOutput <-
+#'     moduleOutput(
+#'         name = "bigData",
+#'         vessel = internalVessel(symbol = "bigData"),
+#'         format = ioFormat("R data frame"))
+#' fileInput <-
+#'     moduleOutput(
+#'         name = "scores.csv",
+#'         vessel = fileVessel(ref = "2015-03-13-scores.csv"),
+#'         format = ioFormat("CSV file"))
+#' 
+#' @export
+moduleOutput <- function(name, vessel, format) {
+    moduleOutput <- moduleIO(name = name, type = "output",
+                            vessel = vessel, format = format)
+    class(moduleOutput) <- c("moduleOutput", class(moduleOutput))
+    return(moduleOutput)
+}
+
 #' Create a \code{module} input or output object.
 #'
 #' @details This function is used by \code{moduleInput} and
@@ -545,52 +583,6 @@ moduleIO <- function(name, type, vessel, format) {
                      vessel = vessel, format = format)
     class(moduleIO) <- "moduleIO"
     return(moduleIO)
-}
-
-#' Create a \code{module} output input
-#'
-#' Creates a \code{moduleOutput} vector for use in a \code{module}'s outputs
-#' list.
-#'
-#' @details \code{type} must be \sQuote{internal} or \sQuote{external}.
-#'
-#' It \code{type} is \dQuote{external}, a \code{ref} is required. This needs
-#' to be a resolveable URI created by the \code{module}'s source(s).
-#'
-#' @param name Output name
-#' @param type \sQuote{internal} or \sQuote{external}
-#' @param format Output format
-#' @param formatType Defaults to \dQuote{text}
-#' @param ref Filename of \sQuote{external} output
-#' @return named \code{moduleOutput} character vector of:
-#' \itemize{
-#'   \item{name}
-#'   \item{type}
-#'   \item{format}
-#'   \item{formatType}
-#'   \item{ref}
-#' }
-#' @seealso \code{module}
-#' @export
-#'
-#' @examples
-#' outp1 <- moduleOutput(name = "bigData", type = "internal",
-#'                       format = "R data frame")
-#' outp2 <- moduleOutput(name = "mediumData", type = "external",
-#'                       format = "CSV file", ref = "mediumData.csv")
-moduleOutput <- function(name, type, format="", formatType="text", ref="") {
-    ## fail if type is not 'internal' or 'external'
-    if (!(type == "internal" || type == "external")) {
-        stop(paste0("specified type '", type, "' is not supported"))
-    }
-    ## fail if no 'ref' set for "external" type
-    if (type == "external" && ref == "") {
-        stop(paste0("no 'ref' set for \"external\" input '", name, "'"))
-    }
-    outp <- c(name=name, type=type, format=format, formatType=formatType,
-              ref=ref)
-    class(outp) <- "moduleOutput"
-    outp
 }
 
 #' Create a \code{module} source
