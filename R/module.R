@@ -473,52 +473,40 @@ ioFormat <- function(value, type="text") {
 
 #' Create a \code{module} input
 #'
-#' Creates a \code{moduleInput} list for use in a \code{module}'s inputs list.
-#'
-#' Creates a \code{moduleInput} list with attributes appropriate to
-#' \code{type}. Attributes given by \code{...} argument.
-#'
-#' The following \code{type}s and attributes are accepted:
-#' \itemize{
-#'   \item{
-#'     internal:
-#'     \itemize{
-#'       \item{symbol: symbol name}
-#'     }
-#'   }
-#'   \item{
-#'     file
-#'     \itemize{
-#'       \item{ref: relative or absolute path name to file}
-#'       \item{path: search path to find ref}
-#'     }
-#'   }
-#' }
+#' Create a \code{moduleInput} list for use in a \code{module}'s inputs list
 #'
 #' @param name Input name
-#' @param type Input type
-#' @param ... attributes appropriate to \code{type}
-#' @param format Input format
-#' @param formatType Defaults to \dQuote{text}
+#' @param vessel \code{vessel} object
+#' @param format \code{ioFormat} object
+#' 
 #' @return named \code{moduleInput} list containing:
 #' \itemize{
 #'   \item{name}
-#'   \item{type}
-#'   \item{attributes}
+#'   \item{vessel}
 #'   \item{format}
-#'   \item{formatType}
 #' }
 #' @seealso \code{module}
 #'
 #' @examples
 #'
-#' internalInput <- moduleInput(name = "bigData", type = "internal",
-#'                              symbol = "bigData", format = "R data frame")
-#' fileInput <- moduleInput(name = "scores.csv", type = "file",
-#'                          ref = "2015-03-13-scores.csv",
-#'                          format = "CSV file")
-#' @name moduleInput
-NULL
+#' internalInput <-
+#'     moduleInput(
+#'         name = "bigData",
+#'         vessel = internalVessel(symbol = "bigData"),
+#'         format = ioFormat("R data frame"))
+#' fileInput <-
+#'     moduleInput(
+#'         name = "scores.csv",
+#'         vessel = fileVessel(ref = "2015-03-13-scores.csv"),
+#'         format = ioFormat("CSV file"))
+#' 
+#' @export
+moduleInput <- function(name, vessel, format) {
+    moduleInput <- moduleIO(name = name, type = "input",
+                            vessel = vessel, format = format)
+    class(moduleInput) <- c("moduleInput", class(moduleInput))
+    return(moduleInput)
+}
 
 #' Create a \code{module} input or output object.
 #'

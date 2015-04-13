@@ -3,57 +3,38 @@
 \name{moduleInput}
 \alias{moduleInput}
 \title{Create a \code{module} input}
+\usage{
+moduleInput(name, vessel, format)
+}
 \arguments{
 \item{name}{Input name}
 
-\item{type}{Input type}
+\item{vessel}{\code{vessel} object}
 
-\item{...}{attributes appropriate to \code{type}}
-
-\item{format}{Input format}
-
-\item{formatType}{Defaults to \dQuote{text}}
+\item{format}{\code{ioFormat} object}
 }
 \value{
 named \code{moduleInput} list containing:
 \itemize{
   \item{name}
-  \item{type}
-  \item{attributes}
+  \item{vessel}
   \item{format}
-  \item{formatType}
 }
 }
 \description{
-Creates a \code{moduleInput} list for use in a \code{module}'s inputs list.
-}
-\details{
-Creates a \code{moduleInput} list with attributes appropriate to
-\code{type}. Attributes given by \code{...} argument.
-
-The following \code{type}s and attributes are accepted:
-\itemize{
-  \item{
-    internal:
-    \itemize{
-      \item{symbol: symbol name}
-    }
-  }
-  \item{
-    file
-    \itemize{
-      \item{ref: relative or absolute path name to file}
-      \item{path: search path to find ref}
-    }
-  }
-}
+Create a \code{moduleInput} list for use in a \code{module}'s inputs list
 }
 \examples{
-internalInput <- moduleInput(name = "bigData", type = "internal",
-                             symbol = "bigData", format = "R data frame")
-fileInput <- moduleInput(name = "scores.csv", type = "file",
-                         ref = "2015-03-13-scores.csv",
-                         format = "CSV file")
+internalInput <-
+    moduleInput(
+        name = "bigData",
+        vessel = internalVessel(symbol = "bigData"),
+        format = ioFormat("R data frame"))
+fileInput <-
+    moduleInput(
+        name = "scores.csv",
+        vessel = fileVessel(ref = "2015-03-13-scores.csv"),
+        format = ioFormat("CSV file"))
 }
 \seealso{
 \code{module}
