@@ -4,42 +4,34 @@
 \alias{moduleSource}
 \title{Create a \code{module} source}
 \usage{
-moduleSource(value = NULL, ref = NULL, path = NULL, type = NULL,
-  order = NULL)
+moduleSource(vessel, order = NULL)
 }
 \arguments{
-\item{value}{source script}
+\item{vessel}{\code{vessel} object}
 
-\item{ref}{module XML filename}
-
-\item{path}{search path(s) (optional)}
-
-\item{type}{not used as at 2014-12-05}
-
-\item{order}{character containing numeric value specifying source
-position in sources}
+\item{order}{numeric value specifying source position in sources}
 }
 \value{
 named \code{moduleSource} list containing:
 \itemize{
-  \item{value: source script}
-  \item{type: not used as at 2014-12-05}
+  \item{vessel: \code{vessel} object}
   \item{order: numeric value determining position of source in sources}
-  \item{ref: originating XML filename}
-  \item{path: originating search path}
 }
 }
 \description{
-Creates a \code{moduleSource} vector for use in a \code{module}'s sources
+Create a \code{moduleSource} object for use in a \code{module}'s sources
 list.
 }
 \details{
-If a \code{ref} is provided the returned value will be read from
-the script file found using \code{ref} and \code{path}. Otherwise the
-\code{value} is used.
+The contents of a module's source script are provided by
+the \code{vessel} object. For inline code use a \code{scriptVessel}
+object. For a script file on the local filesystem use
+\code{fileVessel}.
 
-\code{module} sources are exectuted in the order determined by each source's
-\sQuote{order}. Running order is:
+\code{module} sources are exectuted in the order determined by each
+source's \sQuote{order}.
+
+Running order is:
 \enumerate{
   \item{negative numbers in ascending order}
   \item{zero}
@@ -48,16 +40,17 @@ the script file found using \code{ref} and \code{path}. Otherwise the
 }
 }
 \examples{
-## create moduleSource with source script in 'value'
+## create moduleSource with source script inline
 val1 <- c("x <- 1:10", "y <- rnorm(10, 0, 1)", "plot(x, y)")
-src1 <- moduleSource(value = val1, order = "-1")
+src1 <- moduleSource(vessel = scriptVessel(value = val1),
+                     order = -1)
 
-## create a moduleSource with source script given by 'ref'
+## create a moduleSource with source script from file
 modScript <- system.file("extdata", "simpleGraphScripts", "createGraph.R",
                          package = "conduit")
-src2 <- moduleSource(ref = modScript)
+src2 <- moduleSource(vessel = fileVessel(ref = modScript))
 }
 \seealso{
-\code{module}
+\code{module}, \code{fileVessel}, \code{scriptVessel}
 }
 
