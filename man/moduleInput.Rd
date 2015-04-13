@@ -3,9 +3,6 @@
 \name{moduleInput}
 \alias{moduleInput}
 \title{Create a \code{module} input}
-\usage{
-moduleInput(name, type, ..., format = "", formatType = "text")
-}
 \arguments{
 \item{name}{Input name}
 

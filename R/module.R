@@ -453,7 +453,7 @@ modulePlatform <- function(name) {
 #'
 #' @examples
 #' i1_format <- ioFormat(value = "CSV file")
-#' 
+#'
 #' @export
 ioFormat <- function(value, type="text") {
     if (!is_length1_char(type)) {
@@ -509,7 +509,6 @@ ioFormat <- function(value, type="text") {
 #'   \item{formatType}
 #' }
 #' @seealso \code{module}
-#' @export
 #'
 #' @examples
 #'
@@ -518,28 +517,46 @@ ioFormat <- function(value, type="text") {
 #' fileInput <- moduleInput(name = "scores.csv", type = "file",
 #'                          ref = "2015-03-13-scores.csv",
 #'                          format = "CSV file")
-moduleInput <- function(name, type, ..., format="", formatType="text") {
-    ## fail if type not in known types
-    known_types <-
-        c("internal",
-          "file")
-    if (!(type %in% known_types)) {
-        stop(paste0("specified moduleInput type '", type,
-                    "' is not supported"))
+#' @name moduleInput
+NULL
+
+#' Create a \code{module} input or output object.
+#'
+#' @details This function is used by \code{moduleInput} and
+#' \code{moduleOutput} to create input and output objects for
+#' modules.
+#'
+#' @param name Input/output name
+#' @param type \dQuote{input} or \dQuote{output}
+#' @param vessel \code{vessel} object
+#' @param format \code{ioFormat} object
+#'
+#' @return \code{moduleIO} object
+#'
+#' @seealso \code{module}, \code{moduleInput}, \code{moduleOutput},
+#' \code{ioFormat}, \code{vessel}
+moduleIO <- function(name, type, vessel, format) {
+    if (!is_length1_char(name)) {
+        stop("'name' is not a length 1 character vector")
     }
-    
-    ## switch on 'type'
-    attributes <-
-        switch(type,
-               internal = internalIO(...),
-               file = fileIO(...)
-               ## url = urlIO(...)
-               )
-     
-    moduleInput <- list(name=name, type=type, attributes=attributes,
-                        format=format, formatType=formatType)
-    class(moduleInput) <- "moduleInput"
-    return(moduleInput)
+    if (!is_length1_char(type)) {
+        stop("'type' is not a length 1 character vector")
+    }
+    if (!("vessel" %in% class(vessel))) {
+        stop("'vessel' is not a 'vessel' object")
+    }
+    if (!("ioFormat" %in% class(format))) {
+        stop("'format' is not an 'ioFormat' object")
+    }
+    ## fail if 'type' not "input" or "output"
+    if (!(type %in% c("input", "output"))) {
+        stop("'type' must be \"input\" or \"output\"")
+    }
+
+    moduleIO <- list(name = name, type = type,
+                     vessel = vessel, format = format)
+    class(moduleIO) <- "moduleIO"
+    return(moduleIO)
 }
 
 #' Create a \code{module} output input
