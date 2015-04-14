@@ -431,10 +431,17 @@ runModule <- function(module, inputs=list(),
 #' Create a \code{module} platform node
 #'
 #' @param name Name of platform
-#' @return A named character vector containing the platform name
+#' 
+#' @return \code{modulePlatform} list object
+#' 
 #' @seealso \code{module}
 modulePlatform <- function(name) {
-    c(name=name)
+    if (!is_length1_char(name)) {
+        stop("platform 'name' is not a length 1 character vector")
+    }
+    modulePlatform <- list(name = name)
+    class(modulePlatform) <- "modulePlatform"
+    return(modulePlatform)
 }
 
 #' Create an \code{ioFormat} object.

@@ -10,7 +10,7 @@ modulePlatform(name)
 \item{name}{Name of platform}
 }
 \value{
-A named character vector containing the platform name
+\code{modulePlatform} list object
 }
 \description{
 Create a \code{module} platform node
