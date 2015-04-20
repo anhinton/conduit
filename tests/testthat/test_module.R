@@ -1,23 +1,25 @@
 library(conduit)
 context("create 'module' objects")
 
-mod1 <- module(name = "test",
+mod1 <- module(name = "createGraph",
                platform = "R",
                host = "user@remothost:2222",
-               description = "test module",
+               description = "Lays out a graphNEL graph using the Rgraphviz package",
                inputs =
                    list(moduleInput(
-                       name = "in",
-                       vessel = internalVessel("data"),
-                       format = ioFormat("R data frame"))),
+                       name = "myGraph",
+                       vessel = internalVessel("myGraph"),
+                       format = ioFormat("R \"graphNEL\" object"))),
                outputs =
                    list(moduleOutput(
-                       name = "out",
-                       vessel = internalVessel("worked_data"),
-                       format = ioFormat("R data frame"))),
+                       name = "Ragraph",
+                       vessel = internalVessel("Ragraph"),
+                       format = ioFormat("R \"Ragraph\" object"))),
                sources =
                    list(moduleSource(
-                       scriptVessel("worked_data <- data"))))
+                       scriptVessel(
+                           c("library(Rgraphviz)",
+                             "Ragraph <- agopen(myGraph, \"myGraph\")")))))
 mod2 <- module(name = "blank",
                platform = "shell")
                        
