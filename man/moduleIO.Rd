@@ -25,6 +25,9 @@ Create a \code{module} input or output object.
 This function is used by \code{moduleInput} and
 \code{moduleOutput} to create input and output objects for
 modules.
+
+\code{vessel} cannot be a \code{scriptVessel} object, as these are not
+defined for moduleIO objects.
 }
 \seealso{
 \code{module}, \code{moduleInput}, \code{moduleOutput},

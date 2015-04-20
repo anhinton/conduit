@@ -24,6 +24,10 @@ named \code{moduleInput} list containing:
 \description{
 Create a \code{moduleInput} list for use in a \code{module}'s inputs list
 }
+\details{
+\code{vessel} cannot be a \code{scriptVessel} object, as these are not
+defined for \code{moduleIO} objects.
+}
 \examples{
 internalInput <-
     moduleInput(

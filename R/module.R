@@ -482,6 +482,9 @@ ioFormat <- function(value, type="text") {
 #'
 #' Create a \code{moduleInput} list for use in a \code{module}'s inputs list
 #'
+#' \code{vessel} cannot be a \code{scriptVessel} object, as these are not
+#' defined for \code{moduleIO} objects.
+#'
 #' @param name Input name
 #' @param vessel \code{vessel} object
 #' @param format \code{ioFormat} object
@@ -519,6 +522,9 @@ moduleInput <- function(name, vessel, format) {
 #'
 #' Create a \code{moduleOutput} list for use in a \code{module}'s
 #' outputs list.
+#'
+#' \code{vessel} cannot be a \code{scriptVessel} object, as these are not
+#' defined for \code{moduleIO} objects.
 #'
 #' @param name Output name
 #' @param vessel \code{vessel} object
@@ -559,6 +565,9 @@ moduleOutput <- function(name, vessel, format) {
 #' \code{moduleOutput} to create input and output objects for
 #' modules.
 #'
+#' \code{vessel} cannot be a \code{scriptVessel} object, as these are not
+#' defined for moduleIO objects.
+#'
 #' @param name Input/output name
 #' @param type \dQuote{input} or \dQuote{output}
 #' @param vessel \code{vessel} object
@@ -577,6 +586,9 @@ moduleIO <- function(name, type, vessel, format) {
     }
     if (!("vessel" %in% class(vessel))) {
         stop("'vessel' is not a 'vessel' object")
+    }
+    if ("scriptVessel" %in% class(vessel)) {
+        stop("'scriptVessel' vessels not defined for moduleIO objects")
     }
     if (!("ioFormat" %in% class(format))) {
         stop("'format' is not an 'ioFormat' object")

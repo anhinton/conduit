@@ -21,6 +21,9 @@ test_that("moduleIO fails for invalid arguments", {
                           vessel=c("file.txt")),
                  "'vessel' is not")
     expect_error(moduleIO(name="name", type="input",
+                          vessel=scriptVessel("a <- \"b\"")),
+                 "'scriptVessel' vessels not defined for moduleIO objects")
+    expect_error(moduleIO(name="name", type="input",
                           vessel=internalVessel("goodOne"),
                           format=c("clippers")),
                  "'format' is not")

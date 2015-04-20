@@ -25,6 +25,10 @@ named \code{moduleOutput} list containing:
 Create a \code{moduleOutput} list for use in a \code{module}'s
 outputs list.
 }
+\details{
+\code{vessel} cannot be a \code{scriptVessel} object, as these are not
+defined for \code{moduleIO} objects.
+}
 \examples{
 internalOutput <-
     moduleOutput(
