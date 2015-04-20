@@ -662,60 +662,151 @@ moduleSource <- function(vessel, order = NULL) {
 #'
 #' @param name Name of module
 #' @param platform Platform name
+#' @param host Machine on which module is to be run
 #' @param description A basic description of the module
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
+#' 
 #' @return \code{module} list containing:
 #' \itemize{
 #'   \item{name}
 #'   \item{platform}
+#'   \item{host}
 #'   \item{description}
 #'   \item{inputs}
 #'   \item{outputs}
 #'   \item{sources}
 #' }
-#' @seealso \code{moduleInput}, \code{moduleOutput} and \code{moduleSource} for
-#' creating object for these lists. \code{loadModule} for reading a module
-#' from an XML file. \code{runModule} for executing a module's source
-#' scripts.
-#' @export
+#' 
+#' @seealso \code{moduleInput}, \code{moduleOutput} and
+#' \code{moduleSource} for creating objects for these
+#' lists. \code{loadModule} for reading a module from an XML
+#' file. \code{runModule} for executing a module's source scripts.
+#' 
 #' @examples
 #' ## create a module with one output and one source
-#' src1 <- moduleSource(value = "x <- \"set\"")
-#' outp1 <- moduleOutput(name = "x", type = "internal",
-#'                       format = "R character string")
+#' src1 <- moduleSource(vessel = scriptVessel(value = "x <- \"set\""))
+#' outp1 <- moduleOutput(
+#'              name = "x",
+#'              internalVessel(symbol = "x"),
+#'              format = ioFormat("R character string"))
 #' mod1 <- module(name = "setX", platform = "R",
 #'                description = "sets the value of x",
 #'                outputs = list(outp1),
 #'                sources = list(src1))
-#'
+#' 
 #' ## create a module with one input and one source
-#' mod2 <- module("showY", platform = "R",
-#'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
-module <- function(name, platform, description="", inputs=NULL,
-                   outputs=NULL, sources=list()) {
-    platform <- modulePlatform(platform)
+#' mod2 <-
+#'     module(
+#'         "showY",
+#'         platform = "R",
+#'         host = "localhost",
+#'         description = "displays the value of Y",
+#'         inputs =
+#'             list(
+#'                 moduleInput(
+#'                     name = "y",
+#'                     vessel = internalVessel(symbol = "y"),
+#'                     format = ioFormat("R character string"))),
+#'         sources =
+#'             list(
+#'                 moduleSource(
+#'                 scriptVessel(value = "print(y)"))))
+#' 
+#' @export
+module <- function(name, platform, host=NULL,
+                   description=NULL,
+                   inputs=NULL, outputs=NULL, sources=NULL) {
+    ## check arguments for errors
+
+    ## check 'name'
+    if (!is_length1_char(name)) {
+        stop("'name' is not a length 1 character vector")
+    }
+
+    ## check 'platform'
+    platform <-
+        tryCatch(
+            modulePlatform(platform),
+            error =
+                function(e) {
+                    e <- paste("problem creating modulePlatform: \n", e)
+                    stop(e)
+                })
+
+    ## check 'host'
+    if (!is.null(host)) {
+        if (!is_length1_char(host)) {
+            stop("'host' is not a length 1 character vector")
+        }
+    }
+
+    ## check 'description'
+    if (!is.null(description)) {
+        if (!is.character(description)) {
+            stop("'description' is not a character object")
+        }
+    }
+
+    ## check 'inputs'
     if (!is.null(inputs)) {
+        if (class(inputs) != "list") {
+            stop("'inputs' is not a list object")
+        }
+        inputClasses <- lapply(inputs, class)
+        for (i in seq_along(inputClasses)) {
+            if (inputClasses[[i]][1] != "moduleInput") {
+                stop(paste0("input ", i, " is not a 'moduleInput' object"))
+            }
+        }
+        ## name inputs
         names(inputs) <-
             sapply(inputs,
                    function (x) {
                        x["name"]
                    })
     }
+
+    ## check 'outputs'
     if (!is.null(outputs)) {
+        if (class(outputs) != "list") {
+            stop("'outputs' is not a list object")
+        }
+        outputClasses <- lapply(outputs, class)
+        for (i in seq_along(outputClasses)) {
+            if (outputClasses[[i]][1] != "moduleOutput") {
+                stop(paste0("output ", i, " is not a 'moduleOutput' object"))
+            }
+        }        
+        ## name outputs
         names(outputs) <-
             sapply(outputs,
                    function (x) {
                        x["name"]
                    })
     }
-    module <- list(name=name, platform=platform, description=description,
-                   inputs=inputs, outputs=outputs,
-                   sources=sources)
+
+    ## check 'sources'
+    if (!is.null(sources)) {
+        if (class(sources) != "list") {
+            stop("'sources' is not a list object")
+        }
+        sourceClasses <- lapply(sources, class)
+        for (i in seq_along(sourceClasses)) {
+            if (sourceClasses[[i]][1] != "moduleSource") {
+                stop(paste0("source ", i, " is not a 'moduleSource' object"))
+            }
+        }                
+    }
+    
+    module <- list(name = name,
+                   platform = platform,
+                   host = host,
+                   description = description,
+                   inputs = inputs,
+                   outputs = outputs,
+                   sources = sources)
     class(module) <- "module"
     module
 }

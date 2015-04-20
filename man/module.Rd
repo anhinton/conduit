@@ -4,8 +4,8 @@
 \alias{module}
 \title{Create a \code{module} object}
 \usage{
-module(name, platform, host = character(1), description = NULL,
-  inputs = NULL, outputs = NULL, sources = NULL)
+module(name, platform, host = NULL, description = NULL, inputs = NULL,
+  outputs = NULL, sources = NULL)
 }
 \arguments{
 \item{name}{Name of module}
@@ -59,6 +59,7 @@ mod2 <-
     module(
         "showY",
         platform = "R",
+        host = "localhost",
         description = "displays the value of Y",
         inputs =
             list(
