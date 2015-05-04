@@ -76,6 +76,7 @@ mod2 <-
 \code{moduleInput}, \code{moduleOutput} and
 \code{moduleSource} for creating objects for these
 lists. \code{loadModule} for reading a module from an XML
+file. \code{saveModule} for saving a module as an XML
 file. \code{runModule} for executing a module's source scripts.
 }
 
