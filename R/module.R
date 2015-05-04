@@ -274,6 +274,32 @@ ioFormatToXML <- function (ioFormat,
     return(ioFormatXML)
 }
 
+#' Create XML corresponding to \code{moduleIO} object
+#'
+#' @param moduleIO \code{moduleIO} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{moduleIO} objects
+#'
+#' @import XML
+moduleIOToXML <- function (moduleIO,
+                           namespaceDefinitions = NULL) {
+    if (class(moduleIO) != "moduleIO") {
+        stop("'moduleIO' is not a 'moduleIO' object")
+    }
+    moduleIOXML <- newXMLNode(name = moduleIO$type,
+                              namespaceDefinitions = namespaceDefinitions)
+    vesselXML <- vesselToXML(moduleIO$vessel, 
+                             namespaceDefinitions = namespaceDefinitions)
+    ioFormatXML <- ioFormatToXML(moduleIO$format,
+                                 namespaceDefinitions = namespaceDefinitions)
+    xmlChildren(moduleIOXML) <- list(vesselXML,
+                                     ioFormatXML)
+    return(moduleIOXML)
+}
+
 #' Convert a module to XML
 #'
 #' @param module \code{module} object
