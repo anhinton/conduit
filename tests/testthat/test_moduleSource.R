@@ -4,6 +4,8 @@ context("create 'moduleSource' objects")
 test_that("'moduleSource' fails for invalid arguments", {
     expect_error(moduleSource(vessel = c("x <- 1:10", "print(x)")),
                  "'vessel' is not a vessel")
+    expect_error(moduleSource(vessel= internalVessel(symbol = "x")),
+                 "'internalVessel' vessels not defined")
     expect_error(moduleSource(vessel = fileVessel("source.R"),
                               order = "16"),
                  "'order' is not numeric")

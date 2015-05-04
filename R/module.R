@@ -614,6 +614,9 @@ moduleIO <- function(name, type, vessel, format) {
 #' object. For a script file on the local filesystem use
 #' \code{fileVessel}.
 #'
+#' \code{vessel} cannot be an \code{inputVessel} object, as these are not
+#' defined for moduleIO objects.
+#'
 #' \code{module} sources are exectuted in the order determined by each
 #' source's \sQuote{order}.
 #'
@@ -651,6 +654,9 @@ moduleIO <- function(name, type, vessel, format) {
 moduleSource <- function(vessel, order = NULL) {
     if (!("vessel" %in% class(vessel))) {
         stop("'vessel' is not a vessel object")
+    }
+    if ("internalVessel" %in% class(vessel)) {
+        stop("'internalVessel' vessels not defined for moduleSource objects")
     }
     if (!is.null(order)) {
         if (!is.numeric(order)) {

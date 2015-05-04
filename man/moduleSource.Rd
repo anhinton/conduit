@@ -28,6 +28,9 @@ the \code{vessel} object. For inline code use a \code{scriptVessel}
 object. For a script file on the local filesystem use
 \code{fileVessel}.
 
+\code{vessel} cannot be an \code{inputVessel} object, as these are not
+defined for moduleIO objects.
+
 \code{module} sources are exectuted in the order determined by each
 source's \sQuote{order}.
 
