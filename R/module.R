@@ -213,6 +213,44 @@ loadModule <- function(name, ref, path = NULL,
 
 ## functions for saving a module object to an XML file
 
+#' Create XML corresponding to a \code{vessel} object.
+#'
+#' @param vessel \code{vessel} object
+#'
+#' @return \code{XMLNode} object
+#'
+#' @seealso \code{vessel} objects
+#' 
+#' @import XML
+vesselToXML <- function (vessel,
+                         namespaceDefinitions=NULL) {
+    if (!("vessel" %in% class(vessel))) {
+        stop("'vessel' is not a 'vessel' object")
+    }
+    
+    ## determine vessel type from known list
+    type <- switch(
+        class(vessel)[1],
+        fileVessel = "file",
+        internalVessel = "internal",
+        scriptVessel = "script",
+        stop("'vessel' is of unknown type")) # if vessel type not recognised
+
+    ## create vessel XML object
+    vesselXML <- newXMLNode(name = type,
+                            namespaceDefinitions=namespaceDefinitions)
+
+    ## assign value/attributes
+    if (type == "script") {
+        xmlChildren(vesselXML) <- newXMLCDataNode(vessel$value)
+    } else {
+        attributes <- unlist(vessel)
+        xmlAttrs(vesselXML) <- attributes
+    }
+    
+    return(vesselXML)
+}
+
 #' Convert a module to XML
 #'
 #' @param module \code{module} object
