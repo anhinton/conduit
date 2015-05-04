@@ -300,6 +300,31 @@ moduleIOToXML <- function (moduleIO,
     return(moduleIOXML)
 }
 
+#' Create XML corresponding to \code{moduleSource} object
+#'
+#' @param moduleSource \code{moduleSource} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{moduleSource} objects
+#'
+#' @import XML
+moduleSourceToXML <- function (moduleSource,
+                               namespaceDefinitions = NULL) {
+    if (class(moduleSource) != "moduleSource") {
+        stop("'moduleSource' is not a 'moduleSource' object")
+    }
+    moduleSourceXML <- newXMLNode(name = "source",
+                                  namespaceDefinitions = namespaceDefinitions)
+    if (!is.null(moduleSource$order)) {
+        xmlAttrs(moduleSourceXML) <- c("order" = moduleSource$order)
+    }
+    vesselXML <- vesselToXML(moduleSource$vessel)
+    xmlChildren(moduleSourceXML) <- list(vesselXML)
+    return(moduleSourceXML)
+}
+
 #' Convert a module to XML
 #'
 #' @param module \code{module} object
