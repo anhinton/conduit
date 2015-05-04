@@ -216,8 +216,9 @@ loadModule <- function(name, ref, path = NULL,
 #' Create XML corresponding to a \code{vessel} object.
 #'
 #' @param vessel \code{vessel} object
+#' @param namespaceDefinitions XML namespaces as character vector
 #'
-#' @return \code{XMLNode} object
+#' @return \code{XMLInternalNode} object
 #'
 #' @seealso \code{vessel} objects
 #' 
@@ -249,6 +250,28 @@ vesselToXML <- function (vessel,
     }
     
     return(vesselXML)
+}
+    
+#' Create XML corresponding to an \code{ioFormat} object
+#'
+#' @param ioFormat \code{ioFormat} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{ioFormat} objects
+#'
+#' @import XML
+ioFormatToXML <- function (ioFormat,
+                           namespaceDefinitions=NULL) {
+    if (class(ioFormat) != "ioFormat") {
+        stop("'ioFormat' is not an 'ioFormat' object")
+    }
+    ioFormatXML <- newXMLNode("format",
+                              namespaceDefinitions=namespaceDefinitions)
+    xmlAttrs(ioFormatXML) <- c("formatType" = ioFormat$type)
+    xmlChildren(ioFormatXML) <- newXMLTextNode(ioFormat$value)
+    return(ioFormatXML)
 }
 
 #' Convert a module to XML
@@ -504,7 +527,8 @@ ioFormat <- function(value, type="text") {
     if (!is_length1_char(type)) {
         stop("'type' is not a length 1 character")
     }
-    ## give error if value doesn't match format, or format not defined
+    ## give error if value doesn't match format, or format not defined.
+    ## this serves as a master list of know formatTypes
     switch(type,
            text = if(!is_length1_char(value)) {
                stop("'value' is not a length 1 character vector")

@@ -8,9 +8,11 @@ vesselToXML(vessel, namespaceDefinitions = NULL)
 }
 \arguments{
 \item{vessel}{\code{vessel} object}
+
+\item{namespaceDefinitions}{XML namespaces as character vector}
 }
 \value{
-\code{XMLNode} object
+\code{XMLInternalNode} object
 }
 \description{
 Create XML corresponding to a \code{vessel} object.
