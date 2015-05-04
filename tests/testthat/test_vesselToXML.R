@@ -20,25 +20,13 @@ test_that("vesselToXML fails for non-vessels", {
                  "'vessel' is of unknown type")
 })
 
-test_that("vesselToXML returns correct class of object", {
-    expect_match(class(internalXML), "XMLInternalElementNode", all=F)
-    expect_match(class(internalXML), "XMLInternalNode", all=F)
-    expect_match(class(internalXML), "XMLAbstractNode", all=F)
-    expect_match(class(fileXML1), "XMLInternalElementNode", all=F)
-    expect_match(class(fileXML1), "XMLInternalNode", all=F)
-    expect_match(class(fileXML1), "XMLAbstractNode", all=F)
-    expect_match(class(fileXML2), "XMLInternalElementNode", all=F)
-    expect_match(class(fileXML2), "XMLInternalNode", all=F)
-    expect_match(class(fileXML2), "XMLAbstractNode", all=F)
-    expect_match(class(scriptXML), "XMLInternalElementNode", all=F)
-    expect_match(class(scriptXML), "XMLInternalNode", all=F)
-    expect_match(class(scriptXML), "XMLAbstractNode", all=F)
-})
-
-test_that("vesselToXML outputs correct XML", {
+test_that("vesselToXML outputs correct internalVessel XML", {
     expect_match(xmlName(internalXML), "internal")
     expect_match(xmlAttrs(internalXML), "important_data")
     expect_match(names(xmlAttrs(internalXML)), "symbol")
+})
+
+test_that("vesselToXML outputs correct fileVessel XML", {
     expect_match(xmlName(fileXML1), "file")
     expect_match(xmlAttrs(fileXML1), "file.csv")
     expect_match(names(xmlAttrs(fileXML1)), "ref")
@@ -46,7 +34,9 @@ test_that("vesselToXML outputs correct XML", {
     expect_match(xmlAttrs(fileXML2), "file.csv", all=F)
     expect_match(names(xmlAttrs(fileXML2)), "ref", all=F)
     expect_match(xmlAttrs(fileXML2), "/home/user/folder", all=F)
-    expect_match(names(xmlAttrs(fileXML2)), "path", all=F)
+})
+
+test_that("vesselToXML outputs correct scriptVessel XML", {
     expect_match(xmlName(scriptXML), "script")
     scriptValue <- xmlChildren(scriptXML)[[1]]
     expect_match(class(scriptValue), "XMLInternalCDataNode",
