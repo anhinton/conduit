@@ -4,13 +4,13 @@
 \alias{module}
 \title{Create a \code{module} object}
 \usage{
-module(name, platform, host = NULL, description = NULL, inputs = NULL,
+module(name, language, host = NULL, description = NULL, inputs = NULL,
   outputs = NULL, sources = NULL)
 }
 \arguments{
 \item{name}{Name of module}
 
-\item{platform}{Platform name}
+\item{language}{Language name}
 
 \item{host}{Machine on which module is to be run}
 
@@ -26,7 +26,7 @@ module(name, platform, host = NULL, description = NULL, inputs = NULL,
 \code{module} list containing:
 \itemize{
   \item{name}
-  \item{platform}
+  \item{language}
   \item{host}
   \item{description}
   \item{inputs}
@@ -49,7 +49,7 @@ outp1 <- moduleOutput(
              name = "x",
              internalVessel(symbol = "x"),
              format = ioFormat("R character string"))
-mod1 <- module(name = "setX", platform = "R",
+mod1 <- module(name = "setX", language = "R",
                description = "sets the value of x",
                outputs = list(outp1),
                sources = list(src1))
@@ -58,7 +58,7 @@ mod1 <- module(name = "setX", platform = "R",
 mod2 <-
     module(
         "showY",
-        platform = "R",
+        language = "R",
         host = "localhost",
         description = "displays the value of Y",
         inputs =

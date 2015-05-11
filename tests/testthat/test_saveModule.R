@@ -1,7 +1,7 @@
 library(conduit)
 context("save 'module' objects to XML file")
 
-mod2 <- module(name = "setY", platform = "R",
+mod2 <- module(name = "setY", language = "R",
                host = "127.0.0.1",
                description = "a short description",
                inputs = list(moduleInput("in1",

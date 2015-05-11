@@ -341,7 +341,7 @@ moduleToXML <- function (module,
         stop("'module' is not a 'module' object")
     }
     moduleRoot <- newXMLNode(name = "module",
-                             attrs = c(platform = module$platform,
+                             attrs = c(language = module$language,
                                  host = module$host),
                              namespaceDefinitions = namespaceDefinitions)
     description <- newXMLNode("description", children = module$description)
@@ -726,7 +726,7 @@ moduleSource <- function(vessel, order = NULL) {
 #' \code{moduleSource} respectively.
 #'
 #' @param name Name of module
-#' @param platform Platform name
+#' @param language Language name
 #' @param host Machine on which module is to be run
 #' @param description A basic description of the module
 #' @param inputs List of \code{moduleInput} objects
@@ -736,7 +736,7 @@ moduleSource <- function(vessel, order = NULL) {
 #' @return \code{module} list containing:
 #' \itemize{
 #'   \item{name}
-#'   \item{platform}
+#'   \item{language}
 #'   \item{host}
 #'   \item{description}
 #'   \item{inputs}
@@ -757,7 +757,7 @@ moduleSource <- function(vessel, order = NULL) {
 #'              name = "x",
 #'              internalVessel(symbol = "x"),
 #'              format = ioFormat("R character string"))
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
 #'                outputs = list(outp1),
 #'                sources = list(src1))
@@ -766,7 +766,7 @@ moduleSource <- function(vessel, order = NULL) {
 #' mod2 <-
 #'     module(
 #'         "showY",
-#'         platform = "R",
+#'         language = "R",
 #'         host = "localhost",
 #'         description = "displays the value of Y",
 #'         inputs =
@@ -781,7 +781,7 @@ moduleSource <- function(vessel, order = NULL) {
 #'                 scriptVessel(value = "print(y)"))))
 #' 
 #' @export
-module <- function(name, platform, host=NULL,
+module <- function(name, language, host=NULL,
                    description=NULL,
                    inputs=NULL, outputs=NULL, sources=NULL) {
     ## check arguments for errors
@@ -791,9 +791,9 @@ module <- function(name, platform, host=NULL,
         stop("'name' is not a length 1 character vector")
     }
 
-    ## check 'platform'
-    if (!is.null(platform)) {
-        if (!is_length1_char(platform)) {
+    ## check 'language'
+    if (!is.null(language)) {
+        if (!is_length1_char(language)) {
             stop("'host' is not a length 1 character vector")
         }
     }
@@ -864,7 +864,7 @@ module <- function(name, platform, host=NULL,
     }
     
     module <- list(name = name,
-                   platform = platform,
+                   language = language,
                    host = host,
                    description = description,
                    inputs = inputs,
