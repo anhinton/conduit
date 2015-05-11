@@ -64,6 +64,28 @@ readVesselXML <- function (xml) {
     return(vessel)
 }
 
+#' Create a \code{ioFormat} object from format XML
+#'
+#' @param xml format XML
+#'
+#' @return \code{ioFormat} object
+#'
+#' @import XML
+readIOFormatXML <- function (xml) {
+    if (xmlName(xml) != "format") {
+        stop("ioFormat XML is invalid")
+    }   
+    value <- xmlValue(xml)
+    attrs <- xmlAttrs(xml)
+    ioFormat <-
+        if (is.null(attrs)) {
+            ioFormat(value = value)
+        } else {
+            ioFormat(value = value, type = attrs[["formatType"]])
+        }
+    return(ioFormat)
+}
+
 #' Parse module XML and return a module object
 #'
 #' @param name module name
