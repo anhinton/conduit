@@ -48,7 +48,9 @@ readVesselXML <- function (xml) {
     content <-
         switch(type,
                script = xmlValue(xml),
-               xmlAttrs(xml))
+               internal = xmlAttrs(xml),
+               file = xmlAttrs(xml),
+               stop("'vessel' xml unknown type"))    
     vessel <-
         switch(type,
                file = fileVessel(
