@@ -86,6 +86,37 @@ readIOFormatXML <- function (xml) {
     return(ioFormat)
 }
 
+#' Create a \code{moduleIO} object from input/output XML
+#'
+#' @param xml input/output XML
+#'
+#' @return \code{moduleIO} object
+#'
+#' @import XML
+readModuleIOXML <- function (xml) {
+    type <- xmlName(xml)
+    if (type != "input" && type != "output") {
+        stop("moduleIO XML is invalid")
+    }
+    name <- xmlAttrs(xml)[["name"]]
+    children <- xmlChildren(xml)
+
+    ## create ioFormat object
+    formatChild <- children$format
+    ioFormat <- readIOFormatXML(formatChild)
+
+    ## create vessel object:
+    ## determine which child has an appropriate vessel name
+    vesselChild <-
+        which(names(children) %in% c("internal", "file"))
+    vessel <- readVesselXML(children[[vesselChild]])
+
+    ## create moduleIO object
+    moduleIO <- moduleIO(name = name, type = type, vessel = vessel,
+                         format = ioFormat)
+    return(moduleIO)
+}
+
 #' Parse module XML and return a module object
 #'
 #' @param name module name

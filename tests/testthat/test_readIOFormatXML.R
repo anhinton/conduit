@@ -14,4 +14,5 @@ test_that("readIOFormatXML fails for incorrect node name", {
 test_that("readIOFormatXML creates appropriate ioFormat objects", {
     format1 <- readIOFormatXML(format1XML)
     expect_match(class(format1), "ioFormat")
+    expect_match(format1$type, "text")
 })
