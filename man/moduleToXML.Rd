@@ -2,7 +2,7 @@
 % Please edit documentation in R/module.R
 \name{moduleToXML}
 \alias{moduleToXML}
-\title{Convert a module to XML}
+\title{Convert a \code{module} object to XML}
 \usage{
 moduleToXML(module, namespaceDefinitions = NULL)
 }
@@ -12,9 +12,12 @@ moduleToXML(module, namespaceDefinitions = NULL)
 \item{namespaceDefinitions}{XML namespaces as character vector}
 }
 \value{
-\code{XMLNode} object
+\code{XMLInternalNode} object
 }
 \description{
-Convert a module to XML
+Convert a \code{module} object to XML
+}
+\seealso{
+\code{module} objects
 }
 
