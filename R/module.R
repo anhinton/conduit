@@ -143,126 +143,70 @@ readModuleSourceXML <- function (xml) {
     return(moduleSource)
 }
 
-#' Parse module XML and return a module object
+#' Parse module XML and return a \code{module} object
 #'
 #' @param name module name
 #' @param xml module \code{XMLNode}
 #' @param location file directory of invoking pipeline/module xml (optional)
+#' 
 #' @return \code{module} object
+#' 
 #' @import XML
-readModuleXML <- function(name, xml, location = getwd()) {
+readModuleXML <- function (name, xml) {
+    if (xmlName(xml) != "module") {
+        stop("module XML is invalid")
+    }
+    attrs <- xmlAttrs(xml)
+    language <- attrs[["language"]]
+    host <-
+        if("host" %in% names(attrs)) {
+            attrs[["host"]]
+        } else {
+            NULL
+        }
     nodes <- xmlChildren(xml)
+    
     ## extract description
     descNode <- nodes$description
     description <- xmlValue(descNode)
+    
     ## extract inputs
     inputNodes <- nodes[names(nodes) == "input"]
-    inputs <- 
+    inputs <-
         if (length(inputNodes) == 0) {
             NULL
         } else {
-            inputNames <- sapply(inputNodes, function(inputNodes) {
-                attrs <- xmlAttrs(inputNodes)
-                attrs[["name"]]
-            })
-            inputs <- lapply(inputNodes, function(node) {
-                attrs <- xmlAttrs(node)
-                name <- attrs[["name"]]
-                type <- attrs[["type"]]
-                formatNode <- xmlChildren(node)$format
-                format <- if (length(formatNode)) {
-                    formAttrs <- xmlAttrs(formatNode)
-                    formatType <-
-                        if (any(names(formAttrs) == "formatType")) {
-                            formAttrs[["formatType"]]
-                        } else {
-                            "text"
-                        }
-                    list(format=xmlValue(formatNode), type=formatType)
-                } else {
-                    list(format="", type="text")
-                }
-                c("name"=name, "type"=type, "format"=format$format,
-                  "formatType"=format$type)
-            })
-            names(inputs) <- inputNames
-            inputs
+            lapply(inputNodes, readModuleIOXML)
         }
-    ## extract platform
-    platformNode <- nodes$platform
-    platform <- xmlAttrs(platformNode)[["name"]]
+    
     ## extract sources
     sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
-        lapply(sourceNodes,
-               function(node, location) {
-                   attrs <- xmlAttrs(node)
-                   type <- getXMLAttr(node, "type")
-                   order <- getXMLAttr(node, "order")
-                   ref <- getXMLAttr(node, "ref")
-                   path <- getXMLAttr(node, "path")
-                   value <-
-                       if (is.null(ref)) {
-                           xmlValue(node)
-                       } else {
-                           ## FIXME: not well tested or even understood
-                           file <- tryCatch(
-                               resolveRef(ref, path, location),
-                               error = function (err) {
-                                   stop(paste0("Unable to load module source at ref: ", ref, ", path: ", path, "\n"),
-                                        err)
-                               })
-                           fetchRef(file)
-                       }
-                   list(value=value, type=type, order=order, ref=ref,
-                        path=path)
-               }, location)
+        lapply(sourceNodes, readModuleSourceXML)
+    
     ## arrange sources in correct order
+    ## FIXME: do this at runtime?
     sources <- lapply(sourceOrder(sources),
                       function (x, sources) {
                           sources[[x]]
                       }, sources)
+    
     ## extract outputs
     outputNodes <- nodes[names(nodes) == "output"]
     outputs <-
         if (length(outputNodes) == 0) {
             NULL
         } else {
-            outputNames <- sapply(outputNodes, function(outputNodes) {
-                attrs <- xmlAttrs(outputNodes)
-                attrs[["name"]]
-            })
-            outputs <- lapply(outputNodes, function(node) {
-                attrs <- xmlAttrs(node)
-                name <- attrs[["name"]]
-                type <- attrs[["type"]]
-                formatNode <- xmlChildren(node)$format
-                format <- if (length(formatNode)) {
-                    formAttrs <- xmlAttrs(formatNode)
-                    formatType <-
-                        if (any(names(formAttrs) == "formatType")) {
-                            formAttrs[["formatType"]]
-                        } else {
-                            "text"
-                        }
-                    list(format=xmlValue(formatNode), type=formatType)
-                } else {
-                    list(format="", type="text")
-                }
-                ref <- if (type == "external") {
-                    attrs[["ref"]]
-                } else {
-                    character(1)
-                }
-                c("name"=name, "type"=type, "format"=format$format,
-                  "formatType"=format$type, "ref"=ref)
-            })
-            names(outputs) <- outputNames
-            outputs
+            lapply(outputNodes, readModuleIOXML)
         }
-    module(name=name, description=description,
-           platform=platform, inputs=inputs, outputs=outputs,
-           sources=sources)
+
+    module <- module(name = name,
+                     language = language,
+                     description = description,
+                     inputs = inputs,
+                     sources = sources,
+                     outputs = outputs)
+    return(module)
 }
 
 #' Load a module from an XML file
@@ -669,7 +613,6 @@ ioFormat <- function(value, type="text") {
 moduleInput <- function(name, vessel, format) {
     moduleInput <- moduleIO(name = name, type = "input",
                             vessel = vessel, format = format)
-    class(moduleInput) <- c("moduleInput", class(moduleInput))
     return(moduleInput)
 }
 
@@ -710,7 +653,6 @@ moduleInput <- function(name, vessel, format) {
 moduleOutput <- function(name, vessel, format) {
     moduleOutput <- moduleIO(name = name, type = "output",
                             vessel = vessel, format = format)
-    class(moduleOutput) <- c("moduleOutput", class(moduleOutput))
     return(moduleOutput)
 }
 
@@ -755,7 +697,10 @@ moduleIO <- function(name, type, vessel, format) {
 
     moduleIO <- list(name = name, type = type,
                      vessel = vessel, format = format)
-    class(moduleIO) <- "moduleIO"
+    class(moduleIO) <-
+        switch(type,
+               input = c("moduleInput", "moduleIO"),
+               output = c("moduleOutput", "moduleIO"))
     return(moduleIO)
 }
 

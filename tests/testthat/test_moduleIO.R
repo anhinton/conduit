@@ -56,6 +56,6 @@ test_that("'moduleIO' contains appropriate slots", {
 })
 
 test_that("'moduleIO' object has class \"moduleIO\"", {
-    expect_match(class(moduleInput), "^moduleIO$")
-    expect_match(class(moduleOutput), "^moduleIO$")
+    expect_match(class(moduleInput), "^moduleIO$", all=F)
+    expect_match(class(moduleOutput), "^moduleIO$", all=F)
 })

@@ -21,12 +21,12 @@ test_that("readModuleIOXML fails for invalid named XML", {
 
 test_that("readModuleIOXML creates appropriate inputs", {
     input1 <- readModuleIOXML(inputXML1)
-    expect_match(class(input1), "moduleIO")
+    expect_match(class(input1)[2], "moduleIO")
     expect_match(input1$type, type1)
 })
 
 test_that("readModuleIOXML creates appropriate outputs", {
     output2 <- readModuleIOXML(outputXML2)
-    expect_match(class(output2), "moduleIO")
+    expect_match(class(output2)[2], "moduleIO")
     expect_match(output2$type, type2)
 })
