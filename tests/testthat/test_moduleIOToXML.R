@@ -19,6 +19,10 @@ test_that("moduleIOToXML fails for non-moduleIO objects", {
 
 test_that("moduleIOToXML outputs correct input XML", {
     expect_match(xmlName(inputXML), "input")
+    attrs <- xmlAttrs(inputXML)
+    expect_equal(length(attrs), 1)
+    expect_match(names(attrs), "name")
+    expect_match(attrs[1], "addresses")
     children <- xmlChildren(inputXML)
     expect_equal(length(children), 2)
     expect_match(names(children), "internal", all=F)
@@ -27,6 +31,10 @@ test_that("moduleIOToXML outputs correct input XML", {
 
 test_that("moduleIOToXML outputs correct output XML", {
     expect_match(xmlName(outputXML), "output")
+    attrs <- xmlAttrs(outputXML)
+    expect_equal(length(attrs), 1)
+    expect_match(names(attrs), "name")
+    expect_match(attrs[1], "good_data")
     children <- xmlChildren(outputXML)
     expect_equal(length(children), 2)
     expect_match(names(children), "file", all=F)

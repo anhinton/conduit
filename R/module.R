@@ -290,6 +290,7 @@ moduleIOToXML <- function (moduleIO,
         stop("'moduleIO' is not a 'moduleIO' object")
     }
     moduleIOXML <- newXMLNode(name = moduleIO$type,
+                              attrs = c(name = moduleIO$name),
                               namespaceDefinitions = namespaceDefinitions)
     vesselXML <- vesselToXML(moduleIO$vessel, 
                              namespaceDefinitions = namespaceDefinitions)
