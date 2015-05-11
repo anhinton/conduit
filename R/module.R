@@ -538,24 +538,6 @@ runModule <- function(module, inputs=list(),
     runPlatform(module, inputs, modulePath)
 }
 
-## module creation functions
-
-#' Create a \code{module} platform node
-#'
-#' @param name Name of platform
-#' 
-#' @return \code{modulePlatform} list object
-#' 
-#' @seealso \code{module}
-modulePlatform <- function(name) {
-    if (!is_length1_char(name)) {
-        stop("platform 'name' is not a length 1 character vector")
-    }
-    modulePlatform <- list(name = name)
-    class(modulePlatform) <- "modulePlatform"
-    return(modulePlatform)
-}
-
 #' Create an \code{ioFormat} object.
 #'
 #' Specify the format of a \code{moduleInput} or \code{moduleOutput} object.
@@ -858,15 +840,12 @@ module <- function(name, platform, host=NULL,
     }
 
     ## check 'platform'
-    platform <-
-        tryCatch(
-            modulePlatform(platform),
-            error =
-                function(e) {
-                    e <- paste("problem creating modulePlatform: \n", e)
-                    stop(e)
-                })
-
+    if (!is.null(platform)) {
+        if (!is_length1_char(platform)) {
+            stop("'host' is not a length 1 character vector")
+        }
+    }
+    
     ## check 'host'
     if (!is.null(host)) {
         if (!is_length1_char(host)) {

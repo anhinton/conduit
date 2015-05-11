@@ -75,7 +75,6 @@ test_that("'module' fails for invalid arguments", {
 
 test_that("'module' slots are correct type and length", {
     expect_true(is_length1_char(mod1$name))
-    expect_match(class(mod1$platform), "^modulePlatform$")
     expect_equal(length(mod1$platform), 1)
     expect_true(is.character(mod1$description))
     expect_true(is.null(mod2$desctription))
