@@ -391,8 +391,8 @@ moduleToXML <- function (module,
 #' 		       ref = mod2xml)
 #' saveModule(module = mod2, targetDirectory = targ1,
 #' 	       filename = "myNewModule.xml")
-saveModule <- function(module, targetDirectory=getwd(),
-                       filename=paste0(module$name, ".xml")) {
+saveModule <- function(module, targetDirectory = getwd(),
+                       filename = paste0(module$name, ".xml")) {
     targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
