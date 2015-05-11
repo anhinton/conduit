@@ -36,6 +36,32 @@ sourceOrder <- function(sources) {
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
 }
 
+#' Create a \code{vessel} object from vessel XML
+#'
+#' @param xml vessel XML
+#'
+#' @return \code{vessel} object
+#'
+#' @import XML
+readVesselXML <- function (xml) {
+    type <- xmlName(xml)
+    content <-
+        switch(type,
+               script = xmlValue(xml),
+               xmlAttrs(xml))
+    vessel <-
+        switch(type,
+               file = fileVessel(
+                   ref = content[["ref"]],
+                   if ("path" %in% names(content)){
+                       path = content[["path"]]
+                   }),
+               internal = internalVessel(
+                   symbol = content[["symbol"]]),
+               script = scriptVessel(readLines(textConnection(content))))
+    return(vessel)
+}
+
 #' Parse module XML and return a module object
 #'
 #' @param name module name
