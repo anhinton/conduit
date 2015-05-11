@@ -117,6 +117,32 @@ readModuleIOXML <- function (xml) {
     return(moduleIO)
 }
 
+#' create a \code{moduleSource} object from module source XML
+#'
+#' @param xml module source XML
+#'
+#' @return \code{moduleSource} object
+#'
+#' @import XML
+readModuleSourceXML <- function (xml) {
+    if (xmlName(xml) != "source") {
+        stop("moduleSource XML is invalid")
+    }
+
+    ## extract vessel object.
+    child <- xmlChildren(xml)[[1]] # there should be only one child
+    vessel <- readVesselXML(child)
+
+    attrs <- xmlAttrs(xml)
+    moduleSource <-
+        if (is.null(attrs)) {
+            moduleSource(vessel = vessel)
+        } else {
+            moduleSource(vessel = vessel, order = as.numeric(attrs[["order"]]))
+        }
+    return(moduleSource)
+}
+
 #' Parse module XML and return a module object
 #'
 #' @param name module name
