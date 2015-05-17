@@ -6,7 +6,11 @@
     <format formatType="text">R "Ragraph" object</format>
   </input>
   <source>
-    <file ref="~/files.fos/openapi/scripts/simpleGraph/plotGraph.R"/>
+    <script><![CDATA[library(gridGraphviz)
+png("example.png")
+grid.graph(Ragraph, newpage=TRUE)
+dev.off()]]?
+    </script>
   </source>
   <output name="example.png">
     <file ref="example.png"/>

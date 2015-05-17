@@ -2,7 +2,15 @@
 <module xmlns="http://www.openapi.org/2014/" language="R">
   <description>Create a simple directed graphNEL graph object with four nodes and four edges</description>
   <source>
-    <file ref="~/files.fos/openapi/scripts/simpleGraph/createGraph.R"/>
+    <script><![CDATA[library(graph)
+nodes <- c("a", "b", "c", "d")
+edgeList <- list(a=list(edges=c("b")),
+                 b=list(edges=c("c")),
+                 c=list(edges=c("d")),
+                 d=list(edges=c("a")))
+directedGraph <- new("graphNEL", nodes=nodes, edgeL=edgeList, 
+                     edgemode="directed")]]>
+    </script>
   </source>
   <output name="directedGraph">
     <internal symbol="directedGraph"/>

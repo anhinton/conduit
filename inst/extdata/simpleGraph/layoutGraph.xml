@@ -6,7 +6,9 @@
     <format formatType="text">R "graphNEL" object</format>
   </input>
   <source>
-    <file ref="~/files.fos/openapi/scripts/simpleGraph/layoutGraph.R"/>
+    <script><![CDATA[library(Rgraphviz)
+Ragraph <- agopen(myGraph, "myGraph")]]>
+    </script>
   </source>
   <output name="Ragraph">
     <internal symbol="Ragraph"/>
