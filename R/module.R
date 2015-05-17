@@ -242,11 +242,6 @@ readModuleXML <- function (name, xml) {
 #' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    ## if path is not set, make path from ref
-    if (is.null(path)) {
-        path <- paste0(dirname(ref), pathSep)
-        ref <- basename(ref)
-    }
     ## fetch module XML from disk
     file <- tryCatch(
         resolveRef(ref, path),
@@ -254,12 +249,18 @@ loadModule <- function(name, ref, path = NULL,
             problem <- c(paste0("Unable to load module '", name, "'\n"),
                          err)
             stop(problem)
-        })
-    location <- dirname(file)
+        })    
     rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
-    module <- readModuleXML(name, xml, location)
-    module
+
+    ## create module object
+    module <- readModuleXML(name, xml)
+
+    ## store location of originating module file
+    location <- dirname(file)
+    attr(module, "location") <- location
+    
+    return(module)
 }
 
 ## functions for saving a module object to an XML file
