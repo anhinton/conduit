@@ -2,7 +2,7 @@
 % Please edit documentation in R/script.R
 \name{ensureModuleInput}
 \alias{ensureModuleInput}
-\title{convert module input to script}
+\title{ensure module inputs will be satisfied}
 \usage{
 ensureModuleInput(input, resource, language)
 }
@@ -17,6 +17,6 @@ ensureModuleInput(input, resource, language)
 character string containing script to ensure input or NULL
 }
 \description{
-convert module input to script
+ensure module inputs will be satisfied
 }
 

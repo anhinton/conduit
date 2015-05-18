@@ -21,9 +21,9 @@ internalVesselScript <- function (symbol, resource) {
 
 #' ensure input described by internalVessel is satisfied
 #'
-#' @param symbol
-#' @param resource
-#' @param language
+#' @param symbol language symbol to be satisfied
+#' @param resource location of serialised language object
+#' @param language module script language
 #'
 #' @return script as character vector
 #'
@@ -56,7 +56,7 @@ ensureFileVessel <- function (ref, resource) {
     return(NULL)
 }
 
-#' convert module input to script
+#' ensure module inputs will be satisfied
 #'
 #' @param input \code{moduleInput} object
 #' @param resource address of resource to be supplied as input
@@ -76,5 +76,52 @@ ensureModuleInput <- function (input, resource, language) {
         file = ensureFileVessel(vessel$ref, resource)
     )
     
+    return(script)
+}
+
+#' create script to create internal output for language = "R"
+internalOutputScript.R <- function (symbol) {
+    script <- paste0("saveRDS(", symbol, ", file = \"", symbol, ".rds\")")
+    return(script)
+}
+
+#' create script to create internal output
+internalOutputScript <- function (symbol) {
+    UseMethod("internalOutputScript")
+}
+
+#' ensure output described by internalVessel is created
+#'
+#' @param symbol language symbol named as output
+#' @param language module script language
+#'
+#' @return character vector of script to create serialized output object
+#'
+#' @seealso \code{ensureModuleOutput} and \code{executeScript}
+ensureInternalOutput <- function(symbol, language) {
+    class(symbol) <- language
+    script <- internalOutputScript(symbol)
+    return(script)
+}
+
+#' ensure module outputs are produced
+#'
+#' @param output \code{moduleOutput} object
+#' @param language language of module script
+#'
+#' @return character string containing script to produce output or NULL
+#'
+#' @seealso \code{executeScript}
+ensureModuleOutput <- function (output, language) {
+    vessel <- output$vessel
+    type <- switch(
+        class(vessel)[[1]],
+        internalVessel = "internal",
+        "undefined")
+    script <- switch(
+        type,
+        internal = ensureInternalOutput(vessel$symbol, language),
+        undefined = NULL
+        )
     return(script)
 }

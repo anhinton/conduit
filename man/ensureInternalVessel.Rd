@@ -7,11 +7,11 @@
 ensureInternalVessel(symbol, resource, language)
 }
 \arguments{
-\item{symbol}{}
+\item{symbol}{language symbol to be satisfied}
 
-\item{resource}{}
+\item{resource}{location of serialised language object}
 
-\item{language}{}
+\item{language}{module script language}
 }
 \value{
 script as character vector
