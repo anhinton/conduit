@@ -126,6 +126,29 @@ ensureModuleOutput <- function (output, language) {
     return(script)
 }
 
+#' Extract a module's source script from a scriptVessel
+extractModuleSource.scriptVessel <- function(moduleSource) {
+    script <- moduleSource$vessel$value
+    return(script)
+}
+
+#' Extract a module's source script from a fileVessel
+extractModuleSource.fileVessel <- function(moduleSource) {
+    script <- readLines(moduleSource$vessel$ref)
+    return(script)
+}
+
+#' Extract a module's source script
+#'
+#' @param vessel Vessel indicating source script location
+#'
+#' @return character vector of source scrip
+#'
+#' @seealso \code{executeScript}
+extractModuleSource <- function(moduleSource) {
+    UseMethod("extractModuleSource")
+}
+
 #' Execute a \code{module}'s \code{moduleSource}s in the specified
 #' language.
 #'

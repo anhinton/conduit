@@ -184,12 +184,12 @@ readModuleXML <- function (name, xml) {
     sources <-
         lapply(sourceNodes, readModuleSourceXML)
     
-    ## arrange sources in correct order
-    ## FIXME: do this at runtime?
-    sources <- lapply(sourceOrder(sources),
-                      function (x, sources) {
-                          sources[[x]]
-                      }, sources)
+    ## ## arrange sources in correct order
+    ## ## FIXME: do this at runtime?
+    ## sources <- lapply(sourceOrder(sources),
+    ##                   function (x, sources) {
+    ##                       sources[[x]]
+    ##                   }, sources)
     
     ## extract outputs
     outputNodes <- nodes[names(nodes) == "output"]
