@@ -4,7 +4,7 @@
 \alias{runPlatform.R}
 \title{Platform support for "R" platform.}
 \usage{
-\method{runPlatform}{R}(module, inputs, modulePath)
+runPlatform.R(module, inputs, modulePath)
 }
 \arguments{
 \item{module}{\code{module} object}

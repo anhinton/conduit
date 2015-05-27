@@ -125,3 +125,14 @@ ensureModuleOutput <- function (output, language) {
         )
     return(script)
 }
+
+#' Execute a \code{module}'s \code{moduleSource}s in the specified
+#' language.
+#'
+#' @param module \code{module} object
+#' @param inputs Names list of input locations
+#' @param moduleFiles File path to module output location
+executeScript <- function(module, inputs, moduleFiles) {
+    UseMethod("runPlatform")
+}
+

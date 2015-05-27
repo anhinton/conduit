@@ -4,7 +4,7 @@
 \alias{runPlatform.shell}
 \title{Platform support for "shell" platform.}
 \usage{
-\method{runPlatform}{shell}(module, inputs, modulePath)
+runPlatform.shell(module, inputs, modulePath)
 }
 \arguments{
 \item{module}{\code{module} object}

@@ -4,7 +4,7 @@
 \alias{runPlatform.fileSystem}
 \title{Platform support for "fileSystem" platform.}
 \usage{
-\method{runPlatform}{fileSystem}(module, inputs, modulePath)
+runPlatform.fileSystem(module, inputs, modulePath)
 }
 \arguments{
 \item{module}{\code{module} object}

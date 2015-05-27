@@ -460,16 +460,6 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
-#' Execute a \code{module}'s \code{moduleSource}s in the specified
-#' platform.
-#'
-#' @param module \code{module} object
-#' @param inputs Names list of input locations
-#' @param moduleFiles File path to module output location
-runPlatform <- function(module, inputs, moduleFiles) {
-    UseMethod("runPlatform")
-}
-
 #' Execute a \code{module}'s source(s)
 #'
 #' Execute the scripts contained in or referenced by a \code{module}'s sources.

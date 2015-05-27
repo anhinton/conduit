@@ -4,7 +4,7 @@
 \alias{runPlatform.python3}
 \title{Platform support for "python3" platform.}
 \usage{
-\method{runPlatform}{python3}(module, inputs, modulePath)
+runPlatform.python3(module, inputs, modulePath)
 }
 \arguments{
 \item{module}{\code{module} object}
