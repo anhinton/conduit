@@ -1,22 +1,22 @@
-#' prepare internalVessel input script for python language
-internalVesselScript.python <- function (symbol, resource) {
+#' prepare internal input script for python language
+internalInputScript.python <- function (symbol, resource) {
     
 }
 
-#' prepare internalVessel input script for R language
-internalVesselScript.R <- function (symbol, resource) {
+#' prepare internal input script for R language
+internalInputScript.R <- function (symbol, resource) {
     script <- paste0(symbol, " <- readRDS(\"", resource, "\")")
     return(script)
 }
 
-#' prepare internalVessel input script
+#' prepare internal input script
 #'
 #' @param symbol character string with class set to language of module script
 #' @param resource file location of serialised language object
 #'
 #' @return character vector of script to ensure input
-internalVesselScript <- function (symbol, resource) {
-    UseMethod("internalVesselScript")
+internalInputScript <- function (symbol, resource) {
+    UseMethod("internalInputScript")
 }
 
 #' ensure input described by internalVessel is satisfied
@@ -28,9 +28,9 @@ internalVesselScript <- function (symbol, resource) {
 #' @return script as character vector
 #'
 #' @seealso \code{moduleInputScript}, \code{executeScript}
-ensureInternalVessel <- function (symbol, resource, language) {
+ensureInternalInput <- function (symbol, resource, language) {
     class(symbol) <- language
-    script <- internalVesselScript(symbol, resource)
+    script <- internalInputScript(symbol, resource)
     return(script)
 }
 
@@ -40,7 +40,7 @@ ensureInternalVessel <- function (symbol, resource, language) {
 #' @param resource file path to be passed to ref
 #'
 #' @return NULL
-ensureFileVessel <- function (ref, resource) {
+ensureFileInput <- function (ref, resource) {
     ## check if ref already exists
     if (file.exists(ref)) {
         ## check if symlink
@@ -72,8 +72,8 @@ ensureModuleInput <- function (input, resource, language) {
     )
     script <- switch(
         type,
-        internal = ensureInternalVessel(vessel$symbol, resource, language),
-        file = ensureFileVessel(vessel$ref, resource)
+        internal = ensureInternalInput(vessel$symbol, resource, language),
+        file = ensureFileInput(vessel$ref, resource)
     )
     
     return(script)

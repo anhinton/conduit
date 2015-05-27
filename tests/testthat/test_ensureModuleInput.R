@@ -1,26 +1,26 @@
 library(conduit)
 context("ensure module inputs will be satisfied")
 
-test_that("ensureInternalVessel creates appropriate R script", {
+test_that("ensureInternalInput creates appropriate R script", {
     symbol1 <- "y"
     resource1 <- "~/datas/x.rds"
     language1 <- "R"
-    script1 <- ensureInternalVessel(symbol1, resource1, language1)
+    script1 <- ensureInternalInput(symbol1, resource1, language1)
     expect_identical(script1,
                      "y <- readRDS(\"~/datas/x.rds\")")
 })
 
-test_that("ensureFileVessel has appropriate effects", {
+test_that("ensureFileInput has appropriate effects", {
     skip_on_cran()
     ref <- tempfile()
     resource <- tempfile()
     system2("touch", ref)
-    expect_error(ensureFileVessel(ref, resource),
+    expect_error(ensureFileInput(ref, resource),
                  "input file already exists")    
 
     ref <- tempfile()
     resource <- tempfile()
-    script <- ensureFileVessel(ref, resource)
+    script <- ensureFileInput(ref, resource)
     expect_true(Sys.readlink(ref) == resource)    
 })
 
