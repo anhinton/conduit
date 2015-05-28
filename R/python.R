@@ -1,5 +1,15 @@
 ### Platform support for python platform
 
+#' prepare internal input script for python language
+internalInputScript.python <- function (symbol, resource) {
+    
+}
+
+#' create script to create internal output for language = "R"
+internalOutputScript.python <- function (symbol) {
+
+}
+
 #' Platform support for "python" platform.
 #'
 #' @details Creates a .py script file from the supplied \code{module},

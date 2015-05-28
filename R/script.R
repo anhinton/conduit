@@ -1,15 +1,4 @@
-#' prepare internal input script for python language
-internalInputScript.python <- function (symbol, resource) {
-    
-}
-
-#' prepare internal input script for R language
-internalInputScript.R <- function (symbol, resource) {
-    script <- paste0(symbol, " <- readRDS(\"", resource, "\")")
-    return(script)
-}
-
-#' prepare internal input script
+##' prepare internal input script
 #'
 #' @param symbol character string with class set to language of module script
 #' @param resource file location of serialised language object
@@ -79,12 +68,6 @@ ensureModuleInput <- function (input, resource, language) {
     return(script)
 }
 
-#' create script to create internal output for language = "R"
-internalOutputScript.R <- function (symbol) {
-    script <- paste0("saveRDS(", symbol, ", file = \"", symbol, ".rds\")")
-    return(script)
-}
-
 #' create script to create internal output
 internalOutputScript <- function (symbol) {
     UseMethod("internalOutputScript")
@@ -149,13 +132,53 @@ extractModuleSource <- function(moduleSource) {
     UseMethod("extractModuleSource")
 }
 
-#' Execute a \code{module}'s \code{moduleSource}s in the specified
-#' language.
+#' Checks a module output object has been created.
 #'
-#' @param module \code{module} object
-#' @param inputs Names list of input locations
-#' @param moduleFiles File path to module output location
-executeScript <- function(module, inputs, moduleFiles) {
-    UseMethod("runPlatform")
+#' @details Will produce an error if the object does not exist.
+#'
+#' @param output \code{moduleOutput} object
+#' @param internalExtension file extension for serialized internal language
+#' object
+#'
+#' @return named list containing:
+#' \itemize{
+#'   \item name: object name
+#'   \item type: object vessel type
+#'   \item object: output object
+#' }
+checkOutputObject <- function (output, internalExtension) {
+    name <- output$name
+    vessel <- output$vessel
+    type <- class(vessel)[[1]]
+    object <- switch(type,
+                     internalVessel =
+                         paste0(vessel$symbol, internalExtension),
+                     fileVessel = vessel$ref,
+                     stop("vessel type not defined"))
+    object <- try(normalizePath(object))
+
+    if (type == "internalVessel" || type == "fileVessel") {
+        if (!file.exists(object)) {
+            stop(paste0("output object '", name, "' does not exist"))
+        }
+    }
+    object <- list(name = name, type = type, object = object)
+    return(object)
 }
 
+#' Execute a module source scripts.
+#'
+#' Execute module source scripts in the language given by
+#' \code{module$language}. 
+#'
+#' @details A module's inputs and outputs objects are calculated, and a
+#' script is placed in the working directory. The function then attemps to
+#' execute this script using the specified language.
+#'
+#' @param module \code{module} object
+#' @param resources Named list of input objects
+#' 
+#' @return FIXME: nothing meaningful
+executeScript <- function(module, resources) {
+    UseMethod("runPlatform")
+}

@@ -12,7 +12,7 @@
 \item{resources}{Named list of input objects}
 }
 \value{
-FIXME: nothing meaningful
+named list of \code{moduleOutput} objects
 }
 \description{
 Execute a script in the "R" language

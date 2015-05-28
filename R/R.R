@@ -1,3 +1,17 @@
+### R language support
+
+#' prepare internal input script for R language
+internalInputScript.R <- function (symbol, resource) {
+    script <- paste0(symbol, " <- readRDS(\"", resource, "\")")
+    return(script)
+}
+
+#' create script to create internal output for language = "R"
+internalOutputScript.R <- function (symbol) {
+    script <- paste0("saveRDS(", symbol, ", file = \"", symbol, ".rds\")")
+    return(script)
+}
+
 #' Execute a script in the "R" language
 #'
 #' @details Creates a .R script file from the supplied \code{module},
@@ -9,9 +23,10 @@
 #' @param module \code{module} object
 #' @param resources Named list of input objects
 #' 
-#' @return FIXME: nothing meaningful
+#' @return named list of \code{moduleOutput} objects
 executeScript.R <- function(module, resources) {
     language <- "R"
+    internalExtension <- ".rds"
     
     ## sort sources into correct order
     sources <- module$sources
@@ -53,8 +68,8 @@ executeScript.R <- function(module, resources) {
     moduleScript <- c(inputScript, sourceScript, outputScript)
 
     ## write script file to disk
-    scriptName <- "script.R"
-    scriptFile <- file(scriptName)
+    scriptPath <- "script.R"
+    scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
@@ -64,6 +79,9 @@ executeScript.R <- function(module, resources) {
         switch(Sys.info()["sysname"],
                Linux = "/usr/bin/Rscript",
                stop("conduit does not support R on your system"))
-    arguments <- c(scriptName)
+    arguments <- c(scriptPath)
     try(system2(systemCall, arguments))
+
+    objects <- lapply(outputs, checkOutputObject, internalExtension)
+    return(objects)
 }
