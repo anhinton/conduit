@@ -4,12 +4,12 @@
 \alias{executeScript}
 \title{Execute a module source scripts.}
 \usage{
-executeScript(module, resources)
+executeScript(module, inputObjects)
 }
 \arguments{
 \item{module}{\code{module} object}
 
-\item{resources}{Named list of input objects}
+\item{inputObjects}{Named list of input objects}
 }
 \value{
 FIXME: nothing meaningful

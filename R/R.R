@@ -1,8 +1,8 @@
 ### R language support
 
 #' prepare internal input script for R language
-internalInputScript.R <- function (symbol, resource) {
-    script <- paste0(symbol, " <- readRDS(\"", resource, "\")")
+internalInputScript.R <- function (symbol, inputObject) {
+    script <- paste0(symbol, " <- readRDS(\"", inputObject, "\")")
     return(script)
 }
 
@@ -21,10 +21,10 @@ internalOutputScript.R <- function (symbol) {
 #' script in this location.
 #'
 #' @param module \code{module} object
-#' @param resources Named list of input objects
+#' @param inputObjects Named list of input objects
 #' 
 #' @return named list of \code{moduleOutput} objects
-executeScript.R <- function(module, resources) {
+executeScript.R <- function(module, inputObjects) {
     language <- "R"
     internalExtension <- ".rds"
     
@@ -51,11 +51,11 @@ executeScript.R <- function(module, resources) {
     inputScript <-
         lapply(
             inputs,
-            function (input, resources, language) {
-                resource <- getElement(resources, input$name)
+            function (input, inputObjects, language) {
+                resource <- getElement(inputObjects, input$name)
                 script <- ensureModuleInput(input, resource, language)
                 return(script)
-            }, resources, language)
+            }, inputObjects, language)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs

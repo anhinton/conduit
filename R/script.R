@@ -1,35 +1,35 @@
 ##' prepare internal input script
 #'
 #' @param symbol character string with class set to language of module script
-#' @param resource file location of serialised language object
+#' @param inputObject file location of serialised language object
 #'
 #' @return character vector of script to ensure input
-internalInputScript <- function (symbol, resource) {
+internalInputScript <- function (symbol, inputObject) {
     UseMethod("internalInputScript")
 }
 
 #' ensure input described by internalVessel is satisfied
 #'
 #' @param symbol language symbol to be satisfied
-#' @param resource location of serialised language object
+#' @param outputObject location of serialised language object
 #' @param language module script language
 #'
 #' @return script as character vector
 #'
 #' @seealso \code{moduleInputScript}, \code{executeScript}
-ensureInternalInput <- function (symbol, resource, language) {
+ensureInternalInput <- function (symbol, outputObject, language) {
     class(symbol) <- language
-    script <- internalInputScript(symbol, resource)
+    script <- internalInputScript(symbol, outputObject)
     return(script)
 }
 
 #' ensure input described by fileVessel is satisfied
 #'
 #' @param ref file path to be satisfied
-#' @param resource file path to be passed to ref
+#' @param outputObject file path to be passed to ref
 #'
 #' @return NULL
-ensureFileInput <- function (ref, resource) {
+ensureFileInput <- function (ref, outputObject) {
     ## check if ref already exists
     if (file.exists(ref)) {
         ## check if symlink
@@ -41,18 +41,18 @@ ensureFileInput <- function (ref, resource) {
     }
 
     ##  create a symlink to resource at ref
-    file.symlink(resource, ref)
+    file.symlink(outputObject, ref)
     return(NULL)
 }
 
 #' ensure module inputs will be satisfied
 #'
 #' @param input \code{moduleInput} object
-#' @param resource address of resource to be supplied as input
+#' @param inputObject address of resource to be supplied as input
 #' @param language language of module script
 #'
 #' @return character string containing script to ensure input or NULL
-ensureModuleInput <- function (input, resource, language) {
+ensureModuleInput <- function (input, inputObject, language) {
     vessel <- input$vessel
     type <- switch(
         class(vessel)[[1]],
@@ -61,8 +61,8 @@ ensureModuleInput <- function (input, resource, language) {
     )
     script <- switch(
         type,
-        internal = ensureInternalInput(vessel$symbol, resource, language),
-        file = ensureFileInput(vessel$ref, resource)
+        internal = ensureInternalInput(vessel$symbol, inputObject, language),
+        file = ensureFileInput(vessel$ref, inputObject)
     )
     
     return(script)
@@ -166,6 +166,44 @@ checkOutputObject <- function (output, internalExtension) {
     return(object)
 }
 
+#' Determines running order for \code{moduleSource}s.
+#'
+#' @details Order goes negative < 0 < no order given < positive.
+#'
+#' @param sources List of \code{moduleSource}s
+#' 
+#' @return Running order as numeric vector
+#' 
+#' @seealso \code{moduleSource}
+sourceOrder <- function(sources) {
+    ## extract order values from sources
+    orderValues <- sapply(sources,
+                          function(x) {
+                              value <-
+                                  if (is.null(x$order)) {
+                                      NA
+                                  } else {                              
+                                      as.numeric(x$order)
+                                  }
+                              return(value)
+                          })
+    ## logical vector of which order values <= 0
+    zeroLess <- !is.na(orderValues) & orderValues <= 0
+    ## numeric ordering of above
+    zeroLessOrder <- order(orderValues[zeroLess])
+    ## indices of order values <=0 ordered by zeroLessOrder
+    zeroLessOrdered <- which(zeroLess)[zeroLessOrder]
+    ## pos: values > 0 ordered
+    pos <- !is.na(orderValues) & orderValues > 0
+    posOrder <- order(orderValues[pos])
+    ## indices of order values > 0 ordered by posOrder
+    posOrdered <- which(pos)[posOrder]
+    ## indices of missing order values
+    unorderedOrdered <- which(is.na(orderValues))
+    ## negative < 0 < unordered < positive
+    c(zeroLessOrdered, unorderedOrdered, posOrdered)
+}
+
 #' Execute a module source scripts.
 #'
 #' Execute module source scripts in the language given by
@@ -176,9 +214,9 @@ checkOutputObject <- function (output, internalExtension) {
 #' execute this script using the specified language.
 #'
 #' @param module \code{module} object
-#' @param resources Named list of input objects
+#' @param inputObjects Named list of input objects
 #' 
 #' @return FIXME: nothing meaningful
-executeScript <- function(module, resources) {
-    UseMethod("runPlatform")
+executeScript <- function(module, inputObjects) {
+    UseMethod("executeScript")
 }

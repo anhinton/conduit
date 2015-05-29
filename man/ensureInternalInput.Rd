@@ -4,12 +4,12 @@
 \alias{ensureInternalInput}
 \title{ensure input described by internalVessel is satisfied}
 \usage{
-ensureInternalInput(symbol, resource, language)
+ensureInternalInput(symbol, outputObject, language)
 }
 \arguments{
 \item{symbol}{language symbol to be satisfied}
 
-\item{resource}{location of serialised language object}
+\item{outputObject}{location of serialised language object}
 
 \item{language}{module script language}
 }

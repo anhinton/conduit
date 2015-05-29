@@ -4,7 +4,7 @@
 \alias{internalInputScript.R}
 \title{prepare internal input script for R language}
 \usage{
-\method{internalInputScript}{R}(symbol, resource)
+\method{internalInputScript}{R}(symbol, inputObject)
 }
 \description{
 prepare internal input script for R language

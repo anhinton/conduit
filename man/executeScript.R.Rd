@@ -4,12 +4,12 @@
 \alias{executeScript.R}
 \title{Execute a script in the "R" language}
 \usage{
-\method{executeScript}{R}(module, resources)
+\method{executeScript}{R}(module, inputObjects)
 }
 \arguments{
 \item{module}{\code{module} object}
 
-\item{resources}{Named list of input objects}
+\item{inputObjects}{Named list of input objects}
 }
 \value{
 named list of \code{moduleOutput} objects

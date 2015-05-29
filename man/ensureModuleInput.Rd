@@ -4,12 +4,12 @@
 \alias{ensureModuleInput}
 \title{ensure module inputs will be satisfied}
 \usage{
-ensureModuleInput(input, resource, language)
+ensureModuleInput(input, inputObject, language)
 }
 \arguments{
 \item{input}{\code{moduleInput} object}
 
-\item{resource}{address of resource to be supplied as input}
+\item{inputObject}{address of resource to be supplied as input}
 
 \item{language}{language of module script}
 }

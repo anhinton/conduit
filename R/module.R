@@ -1,41 +1,5 @@
 ### Functions for loading, saving, running, creating modules
 
-#' Determines running order for \code{moduleSource}s.
-#'
-#' @details Order goes negative < 0 < no order given < positive.
-#'
-#' @param sources List of \code{moduleSource}s
-#' @return Running order as numeric vector
-#' @seealso \code{moduleSource}
-sourceOrder <- function(sources) {
-    ## extract order values from sources
-    orderValues <- sapply(sources,
-                          function(x) {
-                              value <-
-                                  if (is.null(x$order)) {
-                                      NA
-                                  } else {                              
-                                      as.numeric(x$order)
-                                  }
-                              return(value)
-                          })
-    ## logical vector of which order values <= 0
-    zeroLess <- !is.na(orderValues) & orderValues <= 0
-    ## numeric ordering of above
-    zeroLessOrder <- order(orderValues[zeroLess])
-    ## indices of order values <=0 ordered by zeroLessOrder
-    zeroLessOrdered <- which(zeroLess)[zeroLessOrder]
-    ## pos: values > 0 ordered
-    pos <- !is.na(orderValues) & orderValues > 0
-    posOrder <- order(orderValues[pos])
-    ## indices of order values > 0 ordered by posOrder
-    posOrdered <- which(pos)[posOrder]
-    ## indices of missing order values
-    unorderedOrdered <- which(is.na(orderValues))
-    ## negative < 0 < unordered < positive
-    c(zeroLessOrdered, unorderedOrdered, posOrdered)
-}
-
 #' Create a \code{vessel} object from vessel XML
 #'
 #' @param xml vessel XML
@@ -466,13 +430,13 @@ saveModule <- function(module, targetDirectory = getwd(),
 #'
 #' @details This function:
 #' \itemize{
-#'   \item creates a directory for the \code{module} output
-#'   \item determines which platform the module requires
-#'   \item executes the \code{module}'s source(s) using this platform
+#'   \item creates a directory for the \code{module}'s outputs
+#'   \item determines which language the module script requires
+#'   \item executes the \code{module}'s source(s) using this language
 #' }
 #'
-#' If the \code{module} has inputs the \code{inputs} list must have a named
-#' absolute file location for each input.
+#' If the \code{module} has inputs the \code{inputObjects} list must
+#' have a named absolute file location for each input.
 #'
 #' \code{targetDirectory} must exist or the function will return an error.
 #'
@@ -480,9 +444,11 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' the \code{targetDirectory} if it does not already exist.
 #'
 #' @param module \code{module} object
-#' @param inputs Named list of input locations
+#' @param inputObjects Named list of input objects
 #' @param targetDirectory File path for module output
+#' 
 #' @seealso \code{module}, \code{moduleSource}
+#' 
 #' @export
 #'
 #' @examples
@@ -493,44 +459,57 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
 #' 		       package = "conduit")
 #' mod1 <- loadModule("createGraph", 
-#' 		   ref = mod1xml)
+#' 		      ref = mod1xml)
 #' runModule(module = mod1, targetDirectory = targ1)
 #' 
 #' ## run a module with inputs
 #' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
-#' 		       package = "conduit")
-#' mod2 <- loadModule("layoutGraph",
-#' 		   ref = mod2xml)
+#' 		          package = "conduit")
+#' mod2 <- loadModule("layoutGraph", ref = mod2xml)
+#' 
 #' ## mod1 output locations
 #' names(mod1$outputs)
 #' list.files(path = file.path(targ1, "modules", mod1$name),
 #'            pattern = paste0("^directedGraph"), full.names = TRUE)
+#' 
 #' ## mod2 input names
 #' names(mod2$inputs)
 #' mod2inputs <- 
 #'     list(myGraph = file.path(targ1, "modules", "createGraph", 
 #'                              "directedGraph.rds"))
-#' runModule(module = mod2, targetDirectory = targ1, inputs = mod2inputs)
-runModule <- function(module, inputs=list(),
-                      targetDirectory=getwd()) {
+#'
+#' runModule(module = mod2, targetDirectory = targ1,
+#'           inputObjects = mod2inputs)
+runModule <- function(module, inputObjects = list(),
+                      targetDirectory = tempdir()) {
+    ## check that module inputs are provided by inputObjects
+    inputs <- module$inputs
+    inputNames <- names(module$inputs)
+    objectNames <- names(inputObjects)
+    for (i in inputNames) {
+        if (!(i %in% objectNames)) {
+            stop("module input '", i, "' has not been provided")
+        }
+    }
+    
+    ## ensure targetDirectory exists
     targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
-    moduleName <- module$name
+    
     ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, "modules", moduleName)
+    modulePath <- file.path(targetDirectory, "modules", module$name)
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
-    moduleFiles <- normalizePath(modulePath)
 
-    ## set the module class to PLATFORM
-    modulePlatform <- module$platform
-    class(module) <- modulePlatform
-
-    ## run this module with the appropriate Platform Support
-    runPlatform(module, inputs, modulePath)
+    ## run this module with the appropriate Language Support
+    class(module) <- module$language
+    oldwd <- setwd(modulePath)
+    on.exit(setwd(oldwd))
+    objects <- executeScript(module, inputObjects)
+    return(objects)
 }
 
 #' Create an \code{ioFormat} object.

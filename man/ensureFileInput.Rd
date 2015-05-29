@@ -4,12 +4,12 @@
 \alias{ensureFileInput}
 \title{ensure input described by fileVessel is satisfied}
 \usage{
-ensureFileInput(ref, resource)
+ensureFileInput(ref, outputObject)
 }
 \arguments{
 \item{ref}{file path to be satisfied}
 
-\item{resource}{file path to be passed to ref}
+\item{outputObject}{file path to be passed to ref}
 }
 \description{
 ensure input described by fileVessel is satisfied
