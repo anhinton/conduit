@@ -23,8 +23,7 @@ readComponentNode <- function (node, location) {
                 stop("A component must be a module or a pipeline")
             }
             value <- switch(type,
-                            module = readModuleXML(name, rawValue,
-                                                   location),
+                            module = readModuleXML(name, rawValue),
                             pipeline = readPipelineXML(name, rawValue,
                                                        location))
             component(name = name, type = type, value = value)
@@ -50,7 +49,7 @@ readComponentNode <- function (node, location) {
             rawXML <- fetchRef(file)
             xml <- xmlRoot(xmlParse(rawXML))
             value <- switch(type,
-                            module = readModuleXML(name, xml, location),
+                            module = readModuleXML(name, xml),
                             ## FIXME: I bet loading a pipeline won't work
                             pipeline = readPipelineXML(name, xml, location))
             component(name=name, ref=ref, path=path, type=type, value=value)
@@ -309,6 +308,34 @@ internalExtension <- function(platform) {
     extension
 }
 
+#' Calculate a component's output path
+#'
+#' @param component \code{component} object
+#' @param pipelinePath output path of parent pipeline
+#'
+#' @return output path as character
+componentPath <- function (component, pipelinePath) {
+    path <-
+        switch(
+            class(component$value),
+            module = file.path(pipelinePath, "modules", component$name),
+            stop("Unknown component type")
+        )
+    return(path)
+}
+
+#' Match a component's input name to an output object
+#'
+#' @param pipe \code{pipe} describing match
+#' @param outputObjects named list of output objects
+#'
+#' @return named input list
+matchInput <- function (pipe, outputObjects) {
+    object <- paste(pipe$start$component, pipe$start$output, sep=".")
+    object <- getElement(outputObjects, object)
+    return(object)
+}
+
 #' Returns a named list of input addresses
 #'
 #' \code{inputsList} returns a named list of absolute file locations for
@@ -318,46 +345,71 @@ internalExtension <- function(platform) {
 #'
 #' @param pipes List of \code{pipe}s
 #' @param components List of \code{component}s
-#' @param pipelinePath Absolute file path to originatin \code{pipeline}
+#' @param pipelinePath Absolute file path to originating \code{pipeline}
 #' XML file
 #' @return named list of file locations by input names
 inputsList <- function(pipes, components, pipelinePath) {
-    inputNames <-
-        lapply(pipes,
-               function (x) {
+    ## calculate component output paths
+    componentPaths <- lapply(components, componentPath, pipelinePath)
+
+    ## extract actual objects
+    componentValues <-
+        lapply(
+            components,
+            function(component) {
+                value <- component$value
+                return(value)
+            })                            
+
+    ## calculate component output objects
+    outputObjects <- mapply(calculateOutputs, componentValues, componentPaths)
+
+    ## match output objects to input names
+    resources <- lapply(pipes, matchInput, outputObjects)
+    names(resources) <- 
+        sapply(pipes,
+               function(x) {
                    paste(x$end$component, x$end$input, sep=".")
                })
-    inputsList <-
-        lapply(pipes,
-               function (x, components, pipelinePath) {
-                   endComponent <- components[[x$end$component]]
-                   platform <- endComponent$value$platform[["name"]]
-                   type <- endComponent$value$inputs[[x$end$input]][["type"]]
-                   ## FIXME: this assumes the start component is a module
-                   ## and can be found in a "modules" folder. Needs to account
-                   ## for pipelines
-                   if (type == "internal") {
-                       input <- file.path(pipelinePath, "modules",
-                                          x$start$component,
-                                          paste(x$start$output,
-                                                internalExtension(platform),
-                                                sep=""))
-                   } else if (type == "external") {
-                       startComponent <- components[[x$start$component]]
-                       ref <-
-                           startComponent$value$outputs[[x$start$output]]["ref"]
-                       path <- startComponent$value$path
-                       input <- if (dirname(ref) == ".") {
-                           file.path(pipelinePath, "modules",
-                                     x$start$component, ref)
-                       } else {
-                           findFile(ref)
-                       }
-                   }
-                   input
-               }, components, pipelinePath)
-    names(inputsList) <- inputNames
-    inputsList
+        
+    
+    
+    ## inputNames <-
+    ##     lapply(pipes,
+    ##            function (x) {
+    ##                paste(x$end$component, x$end$input, sep=".")
+    ##            })
+    ## inputsList <-
+    ##     lapply(pipes,
+    ##            function (x, components, pipelinePath) {
+    ##                endComponent <- components[[x$end$component]]
+    ##                platform <- endComponent$value$platform[["name"]]
+    ##                type <- endComponent$value$inputs[[x$end$input]][["type"]]
+    ##                ## FIXME: this assumes the start component is a module
+    ##                ## and can be found in a "modules" folder. Needs to account
+    ##                ## for pipelines
+    ##                if (type == "internal") {
+    ##                    input <- file.path(pipelinePath, "modules",
+    ##                                       x$start$component,
+    ##                                       paste(x$start$output,
+    ##                                             internalExtension(platform),
+    ##                                             sep=""))
+    ##                } else if (type == "external") {
+    ##                    startComponent <- components[[x$start$component]]
+    ##                    ref <-
+    ##                        startComponent$value$outputs[[x$start$output]]["ref"]
+    ##                    path <- startComponent$value$path
+    ##                    input <- if (dirname(ref) == ".") {
+    ##                        file.path(pipelinePath, "modules",
+    ##                                  x$start$component, ref)
+    ##                    } else {
+    ##                        findFile(ref)
+    ##                    }
+    ##                }
+    ##                input
+    ##            }, components, pipelinePath)
+    ## names(inputsList) <- inputNames
+    ## inputsList
 }
 
 #' Create a \code{graphNEL} node-and-edge graph of a pipeline
@@ -434,9 +486,17 @@ graphPipeline <- function(pipeline) {
 #' setwd(oldwd)
 #' 
 #' @export
-runPipeline <- function(pipeline) {
+runPipeline <- function(pipeline, targetDirectory = tempdir()) {
+    ## ensure targetDirectory exists
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
+    
     ## create directory for pipeline output
-    if (!file.exists("pipelines")) dir.create("pipelines")
+    if (!file.exists(file.path(targetDirectory, "pipelines"))) {
+        dir.create("pipelines")
+    }
     pipelineName <- componentName(pipeline)
     pipelinePath <- file.path("pipelines", pipelineName)
     if (file.exists(pipelinePath))

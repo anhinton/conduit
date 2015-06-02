@@ -55,6 +55,49 @@ exportComponent <- function(component, targetDirectory=getwd()) {
     saveXML(componentDoc, componentFilePath)
 }
 
+#' return output object produced by a module output
+#'
+#' @param output \code{moduleOutput} object
+#' @param outputDirectory file location for module execution
+#'
+#' @return output object
+outputObject <- function(output, language, outputDirectory) {
+    name <- output$name
+    vessel <- output$vessel
+    type <- class(vessel)[[1]]
+    outputObject <-
+        switch(type,
+               internalVessel =
+                   paste0(vessel$symbol, internalExtension(language)),
+               fileVessel = vessel$ref,
+               stop("vessel type not defined"))
+    if (dirname(outputObject) == ".") {
+        outputObject <- file.path(outputDirectory, outputObject)
+    }
+    if (file.exists(outputObject)) {
+        outputObject <- try(normalizePath(outputObject))
+    }
+    return(outputObject)
+}
+
+#' calculate output objects produced by a module
+calculateOutputs.module <- function(componentValue, outputDirectory) {
+    language <- componentValue$language
+    outputObjects <- lapply(componentValue$outputs, outputObject, language,
+                            outputDirectory)
+    return(outputObjects)
+}
+
+#' Calculate ouput objects produced by a component
+#'
+#' @param componentValue \code{module} or \code{pipeline} object
+#' @param outputDirectory file location for component outputs
+#'
+#' @return named list of output objects
+calculateOutputs <- function(componentValue, outputDirectory) {
+    UseMethod("calculateOutputs")
+}
+
 #' Run a component
 #'
 #' This function executes a single pipeline component with \code{runModule} or
