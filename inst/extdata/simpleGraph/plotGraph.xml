@@ -9,7 +9,7 @@
     <script><![CDATA[library(gridGraphviz)
 png("example.png")
 grid.graph(Ragraph, newpage=TRUE)
-dev.off()]]?
+dev.off()]]>
     </script>
   </source>
   <output name="example.png">

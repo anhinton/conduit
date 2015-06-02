@@ -4,7 +4,7 @@
 \alias{outputObject}
 \title{return output object produced by a module output}
 \usage{
-outputObject(output, outputDirectory)
+outputObject(output, language, outputDirectory)
 }
 \arguments{
 \item{output}{\code{moduleOutput} object}

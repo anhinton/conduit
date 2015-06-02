@@ -55,10 +55,11 @@ pline1 <- pipeline(name = "ex_pipeline",
                    pipes = list(pipe1))
 }
 \seealso{
-\code{loadPipeline} for loading a pipeline from an XML souce,
-\code{module} for information on module objects, \code{runPipeline} for
-executing all of a pipeline's components, \code{runComponent} for executing
-individual components, \code{pipe} for pipes, and \code{addPipe} and
-\code{addComponent} for modifying pipelines.
+\code{loadPipeline} for loading a pipeline from an XML
+souce, \code{module} for information on module objects,
+\code{runPipeline} for executing all of a pipeline's components,
+\code{runModule} for executing individual \code{module} objects,
+\code{pipe} for pipes, and \code{addPipe} and \code{addComponent}
+for modifying pipelines.
 }
 

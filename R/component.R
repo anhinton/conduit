@@ -1,5 +1,15 @@
 ### Functions for exporting, running and creating components
 
+#' return the name of a component
+#'
+#' Returns the name of a \code{module} or \code{pipeline}
+#'
+#' @param component \code{module} or \code{pipeline} object
+#' @return character value
+componentName <- function (component) {
+    component$name
+}
+
 #' Convert a component to XML
 #'
 #' Convert a \code{component} object into the corresponding openapi XML
@@ -98,6 +108,22 @@ calculateOutputs <- function(componentValue, outputDirectory) {
     UseMethod("calculateOutputs")
 }
 
+#' Calculate a component's output path
+#'
+#' @param component \code{component} object
+#' @param pipelinePath output path of parent pipeline
+#'
+#' @return output path as character
+componentPath <- function (component, pipelinePath) {
+    path <-
+        switch(
+            class(component$value),
+            module = file.path(pipelinePath, "modules", component$name),
+            stop("Unknown component type")
+        )
+    return(path)
+}
+
 #' Run a component
 #'
 #' This function executes a single pipeline component with \code{runModule} or
@@ -110,26 +136,17 @@ calculateOutputs <- function(componentValue, outputDirectory) {
 #'
 #' @param componentName Name of component to be executed
 #' @param pipeline \code{pipeline} containing component
-#' @param inputs Named list of absolute paths for component inputs
+#' @param inputObjects Named list of input objects
 #' @param pipelinePath Pipeline output directory
-#' @return FIXME: Result of \code{runModule} or \code{runPipeline}
-#' @export
-#'
-#' @seealso `runPipeline` and `runModule`
-#'
-#' @examples
-#' mod1 <- module("setX", platform="R",
-#'                sources=list(moduleSource("x <- \"set\"")))
-#' pip1 <- pipeline("setX-pipe", description="set the value of x",
-#'                  components=list(mod1))
-#' runComponent(componentName = "setX", pipeline = pip1)
-runComponent <- function(componentName, pipeline, inputs = list(),
+#' 
+#' @return Named list of output objects
+runComponent <- function(componentName, pipeline, inputObjects = list(),
                          pipelinePath=getwd()) {
     component <- pipeline$components[[componentName]]
     value <- component$value
     type <- component$type
     result <- switch(type,
-                     module = runModule(value, inputs, pipelinePath),
+                     module = runModule(value, inputObjects, pipelinePath),
                      ## FIXME: running pipelines probably doesn't work
                      pipeline = runPipeline(value),
                      ## if type is incorrect

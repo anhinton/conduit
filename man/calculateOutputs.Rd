@@ -4,10 +4,10 @@
 \alias{calculateOutputs}
 \title{Calculate ouput objects produced by a component}
 \usage{
-calculateOutputs(component, outputDirectory)
+calculateOutputs(componentValue, outputDirectory)
 }
 \arguments{
-\item{component}{component object}
+\item{componentValue}{\code{module} or \code{pipeline} object}
 
 \item{outputDirectory}{file location for component outputs}
 }

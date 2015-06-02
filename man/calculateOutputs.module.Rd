@@ -4,7 +4,7 @@
 \alias{calculateOutputs.module}
 \title{calculate output objects produced by a module}
 \usage{
-\method{calculateOutputs}{module}(module, outputDirectory)
+\method{calculateOutputs}{module}(componentValue, outputDirectory)
 }
 \description{
 calculate output objects produced by a module
