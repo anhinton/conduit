@@ -2,7 +2,7 @@
 
 #' prepare internal input script for shell language
 internalInputScript.shell <- function (symbol, inputObject) {
-    script <- paste0(symbol, "=", inputObject)
+    script <- paste0(symbol, "=$(cat ", inputObject, ")")
     return(script)
 }
 
