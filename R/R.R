@@ -82,6 +82,6 @@ executeScript.R <- function(module, inputObjects) {
     arguments <- c(scriptPath)
     try(system2(systemCall, arguments))
 
-    objects <- lapply(outputs, checkOutputObject, internalExtension)
+    objects <- lapply(outputs, checkOutputObject, language, getwd())
     return(objects)
 }

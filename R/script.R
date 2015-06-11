@@ -146,15 +146,11 @@ extractModuleSource <- function(moduleSource) {
 #'   \item type: object vessel type
 #'   \item object: output object
 #' }
-checkOutputObject <- function (output, internalExtension) {
+checkOutputObject <- function (output, language, outputDirectory = getwd()) {
     name <- output$name
     vessel <- output$vessel
     type <- class(vessel)[[1]]
-    object <- switch(type,
-                     internalVessel =
-                         paste0(vessel$symbol, internalExtension),
-                     fileVessel = vessel$ref,
-                     stop("vessel type not defined"))
+    object <- outputObject(output, language, outputDirectory)
     object <- try(normalizePath(object))
 
     if (type == "internalVessel" || type == "fileVessel") {
