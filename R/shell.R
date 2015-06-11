@@ -1,6 +1,18 @@
 ### Platform support for shell platform
 
-#' Platform support for "shell" platform.
+#' prepare internal input script for shell language
+internalInputScript.shell <- function (symbol, inputObject) {
+    script <- paste0(symbol, "=", inputObject)
+    return(script)
+}
+
+#' create script to create internal output for language = "shell"
+internalOutputScript.shell <- function (symbol) {
+    script <- paste0("echo ${", symbol, "} > ", symbol, ".txt")
+    return(script)
+}
+
+#' Execute a script in the "shell" language
 #'
 #' @details Creates a .sh script file from the supplied \code{module},
 #' taking specific input file paths from \code{inputs}.
@@ -9,64 +21,66 @@
 #' script in this location.
 #'
 #' @param module \code{module} object
-#' @param inputs Named list of input locations
-#' @param modulePath File path for module output
-#' @return FIXME: nothing meaningful
-runPlatform.shell <- function(module, inputs, modulePath) {
+#' @param inputObjects Named list of input objects
+#' 
+#' @return named list of \code{moduleOutput} objects
+executeScript.shell <- function(module, inputObjects) {
+    language <- "shell"
+    internalExtension <- ".txt"
+    
+    ## sort sources into correct order
+    sources <- module$sources
+    sources <- lapply(sourceOrder(sources),
+                      function (x, sources) {
+                          sources[[x]]
+                      }, sources)
+
     ## sourceScript contains the module's source(s) to be evaluated
     sourceScript <-
-        lapply(module$sources,
-               function (s) {
-                   s["value"]
-               })
-    sourceScript <- unlist(sourceScript)
-    ## directoryScript ensures the platform call is run in the module's
-    ## assigned directory
-    directoryScript <-
-        paste0("cd ", modulePath)
-    inputScript <- outputScript <- character(1)
+        lapply(
+            sources,
+            function (moduleSource) {
+                class(moduleSource) <- class(moduleSource$vessel)
+                script <- extractModuleSource(moduleSource)
+                return(script)
+            })
+    sourceScript <- unlist(sourceScript, use.names = FALSE)
+
+    ## inputScript loads the module's designated inputs
+    inputs <- module$inputs
     inputScript <-
-        if (length(module$inputs)) {
-            sapply(
-                module$inputs,
-                function (x) {
-                    inputName <- x["name"]
-                    type <- x["type"]
-                    fromFile <- inputs[[inputName]]
-                    input <-
-                        if (type == "internal") {
-                            value <- readLines(fromFile, n=1)
-                            paste0(inputName, "=", value)
-                        } else if (type == "external") {
-                            paste0(inputName, "=", fromFile)
-                        }
-                })
-        }
+        lapply(
+            inputs,
+            function (input, inputObjects, language) {
+                resource <- getElement(inputObjects, input$name)
+                script <- ensureModuleInput(input, resource, language)
+                return(script)
+            }, inputObjects, language)
+    inputScript <- unlist(inputScript, use.names = FALSE)
+
     ## outputScript loads the module's designated outputs
+    outputs <- module$outputs
     outputScript <-
-        if (length(module$outputs)) {
-            sapply(
-                module$outputs,
-                function (x) {
-                    type <- x["type"]
-                    if (type == "internal") {
-                        name <- x["name"]
-                        paste0("echo ${", name, "} > ", name, ".txt")
-                    } else {
-                        character(1)
-                    }
-                })
-        }
+        lapply(outputs, ensureModuleOutput, language)
+    outputScript <- unlist(outputScript, use.names = FALSE)
+
     ## moduleScript combines the scripts in correct order
-    moduleScript <- c(directoryScript, inputScript, sourceScript, outputScript)
-    
-    ## write script file to directory
-    scriptPath <- file.path(modulePath, "script.sh")
+    moduleScript <- c(inputScript, sourceScript, outputScript)
+
+    ## write script file to disk
+    scriptPath <- "script.sh"
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    ## run the script in a PLATFORM session
-    systemCall <- paste0("sh ", scriptPath)
-    try(system(systemCall))
+    ## batch the script file in a shell session
+    systemCall <-
+        switch(Sys.info()["sysname"],
+               Linux = "/bin/bash",
+               stop("conduit does not support R on your system"))
+    arguments <- c(scriptPath)
+    try(system2(systemCall, arguments))
+
+    objects <- lapply(outputs, checkOutputObject, internalExtension)
+    return(objects)
 }
