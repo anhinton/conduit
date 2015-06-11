@@ -315,8 +315,8 @@ internalExtension <- function(platform) {
 #'
 #' @return named input list
 matchInput <- function (pipe, outputObjects) {
-    object <- paste(pipe$start$component, pipe$start$output, sep=".")
-    object <- getElement(outputObjects, object)
+    component <- getElement(outputObjects, pipe$start$component)
+    object <- getElement(component, pipe$start$output)
     return(object)
 }
 
@@ -347,7 +347,11 @@ inputObjects <- function(pipes, components, pipelinePath) {
             })                            
 
     ## calculate component output objects
-    outputObjects <- mapply(calculateOutputs, componentValues, componentPaths)
+    outputObjects <- lapply(componentValues,
+           function (value, componentPaths) {
+               path <- getElement(componentPaths, value$name)
+               output <- calculateOutputs(value, path)
+           }, componentPaths)
 
     ## match output objects to input names
     inputObjects <- lapply(pipes, matchInput, outputObjects)
@@ -461,8 +465,9 @@ runPipeline <- function(pipeline, targetDirectory = tempdir()) {
     componentOrder <- RBGL::tsort(componentGraph)
 
     ## resolve inputs
-    inputObjects <- inputObjects(pipeline$pipes, pipeline$components,
-                              pipelinePath)
+    inputObjects <- inputObjects(pipes = pipeline$pipes,
+                                 components = pipeline$components,
+                                 pipelinePath = pipelinePath)
 
     ## execute components in order determinde by componentOrder
     outputObjects <-
