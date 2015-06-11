@@ -1,161 +1,169 @@
 ### Functions for loading, saving, running, creating modules
 
-#' Determines running order for \code{moduleSource}s.
+#' Create a \code{vessel} object from vessel XML
 #'
-#' @details Order goes negative < 0 < no order given < positive.
+#' @param xml vessel XML
 #'
-#' @param sources List of \code{moduleSource}s
-#' @return Running order as numeric vector
-#' @seealso \code{moduleSource}
-sourceOrder <- function(sources) {
-    ## extract order values from sources
-    orderValues <- sapply(sources,
-                          function(x) {
-                              value <-
-                                  if (is.null(x$order)) {
-                                      NA
-                                  } else {                              
-                                      as.numeric(x$order)
-                                  }
-                              return(value)
-                          })
-    ## logical vector of which order values <= 0
-    zeroLess <- !is.na(orderValues) & orderValues <= 0
-    ## numeric ordering of above
-    zeroLessOrder <- order(orderValues[zeroLess])
-    ## indices of order values <=0 ordered by zeroLessOrder
-    zeroLessOrdered <- which(zeroLess)[zeroLessOrder]
-    ## pos: values > 0 ordered
-    pos <- !is.na(orderValues) & orderValues > 0
-    posOrder <- order(orderValues[pos])
-    ## indices of order values > 0 ordered by posOrder
-    posOrdered <- which(pos)[posOrder]
-    ## indices of missing order values
-    unorderedOrdered <- which(is.na(orderValues))
-    ## negative < 0 < unordered < positive
-    c(zeroLessOrdered, unorderedOrdered, posOrdered)
+#' @return \code{vessel} object
+#'
+#' @import XML
+readVesselXML <- function (xml) {
+    type <- xmlName(xml)
+    content <-
+        switch(type,
+               script = xmlValue(xml),
+               internal = xmlAttrs(xml),
+               file = xmlAttrs(xml),
+               stop("'vessel' xml unknown type"))    
+    vessel <-
+        switch(type,
+               file = fileVessel(
+                   ref = content[["ref"]],
+                   if ("path" %in% names(content)){
+                       path = content[["path"]]
+                   }),
+               internal = internalVessel(
+                   symbol = content[["symbol"]]),
+               script = scriptVessel(readLines(textConnection(content))))
+    return(vessel)
 }
 
-#' Parse module XML and return a module object
+#' Create a \code{ioFormat} object from format XML
+#'
+#' @param xml format XML
+#'
+#' @return \code{ioFormat} object
+#'
+#' @import XML
+readIOFormatXML <- function (xml) {
+    if (xmlName(xml) != "format") {
+        stop("ioFormat XML is invalid")
+    }   
+    value <- xmlValue(xml)
+    attrs <- xmlAttrs(xml)
+    ioFormat <-
+        if (is.null(attrs)) {
+            ioFormat(value = value)
+        } else {
+            ioFormat(value = value, type = attrs[["formatType"]])
+        }
+    return(ioFormat)
+}
+
+#' Create a \code{moduleIO} object from input/output XML
+#'
+#' @param xml input/output XML
+#'
+#' @return \code{moduleIO} object
+#'
+#' @import XML
+readModuleIOXML <- function (xml) {
+    type <- xmlName(xml)
+    if (type != "input" && type != "output") {
+        stop("moduleIO XML is invalid")
+    }
+    name <- xmlAttrs(xml)[["name"]]
+    children <- xmlChildren(xml)
+
+    ## create ioFormat object
+    formatChild <- children$format
+    ioFormat <- readIOFormatXML(formatChild)
+
+    ## create vessel object:
+    ## determine which child has an appropriate vessel name
+    vesselChild <-
+        which(names(children) %in% c("internal", "file"))
+    vessel <- readVesselXML(children[[vesselChild]])
+
+    ## create moduleIO object
+    moduleIO <- moduleIO(name = name, type = type, vessel = vessel,
+                         format = ioFormat)
+    return(moduleIO)
+}
+
+#' create a \code{moduleSource} object from module source XML
+#'
+#' @param xml module source XML
+#'
+#' @return \code{moduleSource} object
+#'
+#' @import XML
+readModuleSourceXML <- function (xml) {
+    if (xmlName(xml) != "source") {
+        stop("moduleSource XML is invalid")
+    }
+
+    ## extract vessel object.
+    child <- xmlChildren(xml)[[1]] # there should be only one child
+    vessel <- readVesselXML(child)
+
+    attrs <- xmlAttrs(xml)
+    moduleSource <-
+        if (is.null(attrs)) {
+            moduleSource(vessel = vessel)
+        } else {
+            moduleSource(vessel = vessel, order = as.numeric(attrs[["order"]]))
+        }
+    return(moduleSource)
+}
+
+#' Parse module XML and return a \code{module} object
 #'
 #' @param name module name
 #' @param xml module \code{XMLNode}
 #' @param location file directory of invoking pipeline/module xml (optional)
+#' 
 #' @return \code{module} object
+#' 
 #' @import XML
-readModuleXML <- function(name, xml, location = getwd()) {
+readModuleXML <- function (name, xml) {
+    if (xmlName(xml) != "module") {
+        stop("module XML is invalid")
+    }
+    attrs <- xmlAttrs(xml)
+    language <- attrs[["language"]]
+    host <-
+        if("host" %in% names(attrs)) {
+            attrs[["host"]]
+        } else {
+            NULL
+        }
     nodes <- xmlChildren(xml)
+    
     ## extract description
     descNode <- nodes$description
     description <- xmlValue(descNode)
+    
     ## extract inputs
     inputNodes <- nodes[names(nodes) == "input"]
-    inputs <- 
+    inputs <-
         if (length(inputNodes) == 0) {
             NULL
         } else {
-            inputNames <- sapply(inputNodes, function(inputNodes) {
-                attrs <- xmlAttrs(inputNodes)
-                attrs[["name"]]
-            })
-            inputs <- lapply(inputNodes, function(node) {
-                attrs <- xmlAttrs(node)
-                name <- attrs[["name"]]
-                type <- attrs[["type"]]
-                formatNode <- xmlChildren(node)$format
-                format <- if (length(formatNode)) {
-                    formAttrs <- xmlAttrs(formatNode)
-                    formatType <-
-                        if (any(names(formAttrs) == "formatType")) {
-                            formAttrs[["formatType"]]
-                        } else {
-                            "text"
-                        }
-                    list(format=xmlValue(formatNode), type=formatType)
-                } else {
-                    list(format="", type="text")
-                }
-                c("name"=name, "type"=type, "format"=format$format,
-                  "formatType"=format$type)
-            })
-            names(inputs) <- inputNames
-            inputs
+            lapply(inputNodes, readModuleIOXML)
         }
-    ## extract platform
-    platformNode <- nodes$platform
-    platform <- xmlAttrs(platformNode)[["name"]]
+    
     ## extract sources
     sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
-        lapply(sourceNodes,
-               function(node, location) {
-                   attrs <- xmlAttrs(node)
-                   type <- getXMLAttr(node, "type")
-                   order <- getXMLAttr(node, "order")
-                   ref <- getXMLAttr(node, "ref")
-                   path <- getXMLAttr(node, "path")
-                   value <-
-                       if (is.null(ref)) {
-                           xmlValue(node)
-                       } else {
-                           ## FIXME: not well tested or even understood
-                           file <- tryCatch(
-                               resolveRef(ref, path, location),
-                               error = function (err) {
-                                   stop(paste0("Unable to load module source at ref: ", ref, ", path: ", path, "\n"),
-                                        err)
-                               })
-                           fetchRef(file)
-                       }
-                   list(value=value, type=type, order=order, ref=ref,
-                        path=path)
-               }, location)
-    ## arrange sources in correct order
-    sources <- lapply(sourceOrder(sources),
-                      function (x, sources) {
-                          sources[[x]]
-                      }, sources)
+        lapply(sourceNodes, readModuleSourceXML)
+    
     ## extract outputs
     outputNodes <- nodes[names(nodes) == "output"]
     outputs <-
         if (length(outputNodes) == 0) {
             NULL
         } else {
-            outputNames <- sapply(outputNodes, function(outputNodes) {
-                attrs <- xmlAttrs(outputNodes)
-                attrs[["name"]]
-            })
-            outputs <- lapply(outputNodes, function(node) {
-                attrs <- xmlAttrs(node)
-                name <- attrs[["name"]]
-                type <- attrs[["type"]]
-                formatNode <- xmlChildren(node)$format
-                format <- if (length(formatNode)) {
-                    formAttrs <- xmlAttrs(formatNode)
-                    formatType <-
-                        if (any(names(formAttrs) == "formatType")) {
-                            formAttrs[["formatType"]]
-                        } else {
-                            "text"
-                        }
-                    list(format=xmlValue(formatNode), type=formatType)
-                } else {
-                    list(format="", type="text")
-                }
-                ref <- if (type == "external") {
-                    attrs[["ref"]]
-                } else {
-                    character(1)
-                }
-                c("name"=name, "type"=type, "format"=format$format,
-                  "formatType"=format$type, "ref"=ref)
-            })
-            names(outputs) <- outputNames
-            outputs
+            lapply(outputNodes, readModuleIOXML)
         }
-    module(name=name, description=description,
-           platform=platform, inputs=inputs, outputs=outputs,
-           sources=sources)
+
+    module <- module(name = name,
+                     language = language,
+                     description = description,
+                     inputs = inputs,
+                     sources = sources,
+                     outputs = outputs)
+    return(module)
 }
 
 #' Load a module from an XML file
@@ -191,11 +199,6 @@ readModuleXML <- function(name, xml, location = getwd()) {
 #' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
-    ## if path is not set, make path from ref
-    if (is.null(path)) {
-        path <- paste0(dirname(ref), pathSep)
-        ref <- basename(ref)
-    }
     ## fetch module XML from disk
     file <- tryCatch(
         resolveRef(ref, path),
@@ -203,92 +206,163 @@ loadModule <- function(name, ref, path = NULL,
             problem <- c(paste0("Unable to load module '", name, "'\n"),
                          err)
             stop(problem)
-        })
-    location <- dirname(file)
+        })    
     rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
-    module <- readModuleXML(name, xml, location)
-    module
+
+    ## create module object
+    module <- readModuleXML(name, xml)
+
+    ## store location of originating module file
+    location <- dirname(file)
+    attr(module, "location") <- location
+    
+    return(module)
 }
 
 ## functions for saving a module object to an XML file
 
-#' Convert a module to XML
+#' Create XML corresponding to a \code{vessel} object.
+#'
+#' @param vessel \code{vessel} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{vessel} objects
+#' 
+#' @import XML
+vesselToXML <- function (vessel,
+                         namespaceDefinitions=NULL) {
+    if (!("vessel" %in% class(vessel))) {
+        stop("'vessel' is not a 'vessel' object")
+    }
+    
+    ## determine vessel type from known list
+    type <- switch(
+        class(vessel)[1],
+        fileVessel = "file",
+        internalVessel = "internal",
+        scriptVessel = "script",
+        stop("'vessel' is of unknown type")) # if vessel type not recognised
+
+    ## create vessel XML object
+    vesselXML <- newXMLNode(name = type,
+                            namespaceDefinitions=namespaceDefinitions)
+
+    ## assign value/attributes
+    if (type == "script") {
+        xmlChildren(vesselXML) <- newXMLCDataNode(vessel$value)
+    } else {
+        attributes <- unlist(vessel)
+        xmlAttrs(vesselXML) <- attributes
+    }
+    
+    return(vesselXML)
+}
+    
+#' Create XML corresponding to an \code{ioFormat} object
+#'
+#' @param ioFormat \code{ioFormat} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{ioFormat} objects
+#'
+#' @import XML
+ioFormatToXML <- function (ioFormat,
+                           namespaceDefinitions=NULL) {
+    if (class(ioFormat) != "ioFormat") {
+        stop("'ioFormat' is not an 'ioFormat' object")
+    }
+    ioFormatXML <- newXMLNode("format",
+                              namespaceDefinitions=namespaceDefinitions)
+    xmlAttrs(ioFormatXML) <- c("formatType" = ioFormat$type)
+    xmlChildren(ioFormatXML) <- newXMLTextNode(ioFormat$value)
+    return(ioFormatXML)
+}
+
+#' Create XML corresponding to \code{moduleIO} object
+#'
+#' @param moduleIO \code{moduleIO} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{moduleIO} objects
+#'
+#' @import XML
+moduleIOToXML <- function (moduleIO,
+                           namespaceDefinitions = NULL) {
+    if (!("moduleIO" %in% class(moduleIO))) {
+        stop("'moduleIO' is not a 'moduleIO' object")
+    }
+    moduleIOXML <- newXMLNode(name = moduleIO$type,
+                              attrs = c(name = moduleIO$name),
+                              namespaceDefinitions = namespaceDefinitions)
+    vesselXML <- vesselToXML(moduleIO$vessel, 
+                             namespaceDefinitions = namespaceDefinitions)
+    ioFormatXML <- ioFormatToXML(moduleIO$format,
+                                 namespaceDefinitions = namespaceDefinitions)
+    xmlChildren(moduleIOXML) <- list(vesselXML,
+                                     ioFormatXML)
+    return(moduleIOXML)
+}
+
+#' Create XML corresponding to \code{moduleSource} object
+#'
+#' @param moduleSource \code{moduleSource} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{moduleSource} objects
+#'
+#' @import XML
+moduleSourceToXML <- function (moduleSource,
+                               namespaceDefinitions = NULL) {
+    if (class(moduleSource) != "moduleSource") {
+        stop("'moduleSource' is not a 'moduleSource' object")
+    }
+    moduleSourceXML <- newXMLNode(name = "source",
+                                  namespaceDefinitions = namespaceDefinitions)
+    if (!is.null(moduleSource$order)) {
+        xmlAttrs(moduleSourceXML) <- c("order" = moduleSource$order)
+    }
+    vesselXML <- vesselToXML(moduleSource$vessel)
+    xmlChildren(moduleSourceXML) <- list(vesselXML)
+    return(moduleSourceXML)
+}
+
+#' Convert a \code{module} object to XML
 #'
 #' @param module \code{module} object
 #' @param namespaceDefinitions XML namespaces as character vector
-#' @return \code{XMLNode} object
+#' 
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{module} objects
+#' 
 #' @import XML
 moduleToXML <- function (module,
                          namespaceDefinitions=NULL) {
-    moduleRoot <- newXMLNode("module",
-                             namespaceDefinitions=namespaceDefinitions)
-    description <- newXMLNode("description", module$description)
-    inputs <-
-        lapply(
-            module$inputs,
-            function(i) {
-                input <- newXMLNode("input", attrs=c(i["name"], i["type"]))
-                format <- newXMLNode("format", attrs = c(i["formatType"]))
-                xmlValue(format) <- i["format"]
-                input <- addChildren(input, format)
-            })
-    outputs <-
-        lapply(module$outputs,
-               function(o) {
-                   attrs <- c(o["name"], o["type"])
-                   if (o["type"] == "external") {
-                       attrs <- c(attrs, o["ref"])
-                   }
-                   output <- newXMLNode("output", attrs=attrs)
-                   format <- newXMLNode("format", attrs = c(o["formatType"]))
-                   xmlValue(format) <- o["format"]
-                   output <- addChildren(output, format)
-               })
-    platform <- newXMLNode("platform", attrs=c(module$platform))
-    sources <-
-        lapply(module$sources,
-               function (s) {
-                   value <- s$value
-                   ref <- s$ref
-                   path <- s$path
-                   type <- s$type
-                   order <- s$order
-                   
-                   ## create new source node
-                   sourceNode <- newXMLNode(name = "source")
-                   
-                   ## if no ref is given, save 'value' inline as cdata
-                   if (is.null(ref)) {
-                       sourceNode <-
-                           addChildren(
-                               node = sourceNode,
-                               ## collapse value script with newline
-                               ## (assumes value is character vector)
-                               kids = paste0(value, collapse = "\n"),
-                               cdata = TRUE)
-                   } else {
-                       ## else record ref and path as attrs
-                       xmlAttrs(sourceNode) <- c(ref=ref, path=path)
-                   }
-                   
-                   ## set source 'type' if not NULL
-                   if (!is.null(type)) {
-                       xmlAttrs(sourceNode) <- c(type=type)
-                   }
-                   
-                   ## set source 'order' if not NULL
-                   if (!is.null(order)) {
-                       xmlAttrs(sourceNode) <- c(order=order)
-                   }
-                   
-                   sourceNode
-               })
+    if (class(module) != "module") {
+        stop("'module' is not a 'module' object")
+    }
+    moduleRoot <- newXMLNode(name = "module",
+                             attrs = c(language = module$language,
+                                 host = module$host),
+                             namespaceDefinitions = namespaceDefinitions)
+    description <- newXMLNode("description", children = module$description)
+    inputs <- lapply(module$inputs, moduleIOToXML)
+    outputs <- lapply(module$outputs, moduleIOToXML)
+    sources <- lapply(module$sources, moduleSourceToXML)
     moduleRoot <-
         addChildren(moduleRoot,
-                    kids=list(description, platform, inputs, sources,
+                    kids=list(description, inputs, sources,
                         outputs))
-    moduleRoot
+    return(moduleRoot)
 }
 
 #' Save a module to disk
@@ -327,8 +401,8 @@ moduleToXML <- function (module,
 #' 		       ref = mod2xml)
 #' saveModule(module = mod2, targetDirectory = targ1,
 #' 	       filename = "myNewModule.xml")
-saveModule <- function(module, targetDirectory=getwd(),
-                       filename=paste0(module$name, ".xml")) {
+saveModule <- function(module, targetDirectory = getwd(),
+                       filename = paste0(module$name, ".xml")) {
     targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
@@ -343,29 +417,19 @@ saveModule <- function(module, targetDirectory=getwd(),
 
 ## RUNNING A MODULE
 
-#' Execute a \code{module}'s \code{moduleSource}s in the specified
-#' platform.
-#'
-#' @param module \code{module} object
-#' @param inputs Names list of input locations
-#' @param moduleFiles File path to module output location
-runPlatform <- function(module, inputs, moduleFiles) {
-    UseMethod("runPlatform")
-}
-
 #' Execute a \code{module}'s source(s)
 #'
 #' Execute the scripts contained in or referenced by a \code{module}'s sources.
 #'
 #' @details This function:
 #' \itemize{
-#'   \item creates a directory for the \code{module} output
-#'   \item determines which platform the module requires
-#'   \item executes the \code{module}'s source(s) using this platform
+#'   \item creates a directory for the \code{module}'s outputs
+#'   \item determines which language the module script requires
+#'   \item executes the \code{module}'s source(s) using this language
 #' }
 #'
-#' If the \code{module} has inputs the \code{inputs} list must have a named
-#' absolute file location for each input.
+#' If the \code{module} has inputs the \code{inputObjects} list must
+#' have a named absolute file location for each input.
 #'
 #' \code{targetDirectory} must exist or the function will return an error.
 #'
@@ -373,9 +437,11 @@ runPlatform <- function(module, inputs, moduleFiles) {
 #' the \code{targetDirectory} if it does not already exist.
 #'
 #' @param module \code{module} object
-#' @param inputs Named list of input locations
+#' @param inputObjects Named list of input objects
 #' @param targetDirectory File path for module output
+#' 
 #' @seealso \code{module}, \code{moduleSource}
+#' 
 #' @export
 #'
 #' @examples
@@ -386,148 +452,238 @@ runPlatform <- function(module, inputs, moduleFiles) {
 #' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
 #' 		       package = "conduit")
 #' mod1 <- loadModule("createGraph", 
-#' 		   ref = mod1xml)
+#' 		      ref = mod1xml)
 #' runModule(module = mod1, targetDirectory = targ1)
 #' 
 #' ## run a module with inputs
 #' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
-#' 		       package = "conduit")
-#' mod2 <- loadModule("layoutGraph",
-#' 		   ref = mod2xml)
+#' 		          package = "conduit")
+#' mod2 <- loadModule("layoutGraph", ref = mod2xml)
+#' 
 #' ## mod1 output locations
 #' names(mod1$outputs)
 #' list.files(path = file.path(targ1, "modules", mod1$name),
 #'            pattern = paste0("^directedGraph"), full.names = TRUE)
+#' 
 #' ## mod2 input names
 #' names(mod2$inputs)
 #' mod2inputs <- 
 #'     list(myGraph = file.path(targ1, "modules", "createGraph", 
 #'                              "directedGraph.rds"))
-#' runModule(module = mod2, targetDirectory = targ1, inputs = mod2inputs)
-runModule <- function(module, inputs=list(),
-                      targetDirectory=getwd()) {
+#'
+#' runModule(module = mod2, targetDirectory = targ1,
+#'           inputObjects = mod2inputs)
+runModule <- function(module, inputObjects = list(),
+                      targetDirectory = tempdir()) {
+    ## check that module inputs are provided by inputObjects
+    inputs <- module$inputs
+    inputNames <- names(module$inputs)
+    objectNames <- names(inputObjects)
+    for (i in inputNames) {
+        if (!(i %in% objectNames)) {
+            stop("module input '", i, "' has not been provided")
+        }
+    }
+    
+    ## ensure targetDirectory exists
     targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
-    moduleName <- module$name
+    
     ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, "modules", moduleName)
+    modulePath <- file.path(targetDirectory, "modules", module$name)
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
-    moduleFiles <- normalizePath(modulePath)
 
-    ## set the module class to PLATFORM
-    modulePlatform <- module$platform
-    class(module) <- modulePlatform
-
-    ## run this module with the appropriate Platform Support
-    runPlatform(module, inputs, modulePath)
+    ## run this module with the appropriate Language Support
+    class(module) <- module$language
+    oldwd <- setwd(modulePath)
+    on.exit(setwd(oldwd))
+    objects <- executeScript(module, inputObjects)
+    return(objects)
 }
 
-## module creation functions
-
-#' Create a \code{module} platform node
+#' Create an \code{ioFormat} object.
 #'
-#' @param name Name of platform
-#' @return A named character vector containing the platform name
-#' @seealso \code{module}
-modulePlatform <- function(name) {
-    c(name=name)
+#' Specify the format of a \code{moduleInput} or \code{moduleOutput} object.
+#'
+#' If \code{type} = \dQuote{text}, \code{value} must be a character
+#' vector of length 1.
+#'
+#' @param value Format information
+#' @param type Method of format specification
+#'
+#' @return \code{ioFormat} list object
+#'
+#' @seealso \code{moduleInput}, \code{moduleOutput}, \code{module}
+#'
+#' @examples
+#' i1_format <- ioFormat(value = "CSV file")
+#'
+#' @export
+ioFormat <- function(value, type="text") {
+    if (!is_length1_char(type)) {
+        stop("'type' is not a length 1 character")
+    }
+    ## give error if value doesn't match format, or format not defined.
+    ## this serves as a master list of know formatTypes
+    switch(type,
+           text = if(!is_length1_char(value)) {
+               stop("'value' is not a length 1 character vector")
+           },
+           stop("invalid 'type' provided")
+           )
+    ioFormat <- list(value = value, type = type)
+    class(ioFormat) <- "ioFormat"
+    return(ioFormat)
 }
 
 #' Create a \code{module} input
 #'
-#' Creates a \code{moduleInput} vector for use in a \code{module}'s inputs list.
+#' Create a \code{moduleInput} list for use in a \code{module}'s inputs list
 #'
-#' \code{type} must be \sQuote{internal} or \sQuote{external}.
+#' \code{vessel} cannot be a \code{scriptVessel} object, as these are not
+#' defined for \code{moduleIO} objects.
 #'
 #' @param name Input name
-#' @param type \sQuote{internal} or \sQuote{external}
-#' @param format Input format
-#' @param formatType Defaults to \dQuote{text}
-#' @return named \code{moduleInput} character vector containing:
+#' @param vessel \code{vessel} object
+#' @param format \code{ioFormat} object
+#' 
+#' @return named \code{moduleInput} list containing:
 #' \itemize{
 #'   \item{name}
-#'   \item{type}
+#'   \item{vessel}
 #'   \item{format}
-#'   \item{formatType}
 #' }
 #' @seealso \code{module}
-#' @export
 #'
 #' @examples
 #'
-#' inp1 <- moduleInput(name = "bigData", type = "internal",
-#'                     format = "R data frame")
-moduleInput <- function(name, type, format="", formatType="text") {
-    ## fail if type is not 'internal' or 'external'
-    if (!(type == "internal" || type == "external")) {
-        stop(paste0("specified type '", type, "' is not supported"))
-    }
-    inp <- c(name=name, type=type, format=format, formatType=formatType)
-    class(inp) <- "moduleInput"
-    inp
+#' internalInput <-
+#'     moduleInput(
+#'         name = "bigData",
+#'         vessel = internalVessel(symbol = "bigData"),
+#'         format = ioFormat("R data frame"))
+#' fileInput <-
+#'     moduleInput(
+#'         name = "scores.csv",
+#'         vessel = fileVessel(ref = "2015-03-13-scores.csv"),
+#'         format = ioFormat("CSV file"))
+#' 
+#' @export
+moduleInput <- function(name, vessel, format) {
+    moduleInput <- moduleIO(name = name, type = "input",
+                            vessel = vessel, format = format)
+    return(moduleInput)
 }
 
-#' Create a \code{module} output input
+#' Create a \code{module} output
 #'
-#' Creates a \code{moduleOutput} vector for use in a \code{module}'s outputs
-#' list.
+#' Create a \code{moduleOutput} list for use in a \code{module}'s
+#' outputs list.
 #'
-#' @details \code{type} must be \sQuote{internal} or \sQuote{external}.
-#'
-#' It \code{type} is \dQuote{external}, a \code{ref} is required. This needs
-#' to be a resolveable URI created by the \code{module}'s source(s).
+#' \code{vessel} cannot be a \code{scriptVessel} object, as these are not
+#' defined for \code{moduleIO} objects.
 #'
 #' @param name Output name
-#' @param type \sQuote{internal} or \sQuote{external}
-#' @param format Output format
-#' @param formatType Defaults to \dQuote{text}
-#' @param ref Filename of \sQuote{external} output
-#' @return named \code{moduleOutput} character vector of:
+#' @param vessel \code{vessel} object
+#' @param format \code{ioFormat} object
+#' 
+#' @return named \code{moduleOutput} list containing:
 #' \itemize{
 #'   \item{name}
-#'   \item{type}
+#'   \item{vessel}
 #'   \item{format}
-#'   \item{formatType}
-#'   \item{ref}
 #' }
 #' @seealso \code{module}
-#' @export
 #'
 #' @examples
-#' outp1 <- moduleOutput(name = "bigData", type = "internal",
-#'                       format = "R data frame")
-#' outp2 <- moduleOutput(name = "mediumData", type = "external",
-#'                       format = "CSV file", ref = "mediumData.csv")
-moduleOutput <- function(name, type, format="", formatType="text", ref="") {
-    ## fail if type is not 'internal' or 'external'
-    if (!(type == "internal" || type == "external")) {
-        stop(paste0("specified type '", type, "' is not supported"))
+#'
+#' internalOutput <-
+#'     moduleOutput(
+#'         name = "bigData",
+#'         vessel = internalVessel(symbol = "bigData"),
+#'         format = ioFormat("R data frame"))
+#' fileInput <-
+#'     moduleOutput(
+#'         name = "scores.csv",
+#'         vessel = fileVessel(ref = "2015-03-13-scores.csv"),
+#'         format = ioFormat("CSV file"))
+#' 
+#' @export
+moduleOutput <- function(name, vessel, format) {
+    moduleOutput <- moduleIO(name = name, type = "output",
+                            vessel = vessel, format = format)
+    return(moduleOutput)
+}
+
+#' Create a \code{module} input or output object.
+#'
+#' @details This function is used by \code{moduleInput} and
+#' \code{moduleOutput} to create input and output objects for
+#' modules.
+#'
+#' \code{vessel} cannot be a \code{scriptVessel} object, as these are not
+#' defined for moduleIO objects.
+#'
+#' @param name Input/output name
+#' @param type \dQuote{input} or \dQuote{output}
+#' @param vessel \code{vessel} object
+#' @param format \code{ioFormat} object
+#'
+#' @return \code{moduleIO} object
+#'
+#' @seealso \code{module}, \code{moduleInput}, \code{moduleOutput},
+#' \code{ioFormat}, \code{vessel}
+moduleIO <- function(name, type, vessel, format) {
+    if (!is_length1_char(name)) {
+        stop("'name' is not a length 1 character vector")
     }
-    ## fail if no 'ref' set for "external" type
-    if (type == "external" && ref == "") {
-        stop(paste0("no 'ref' set for \"external\" input '", name, "'"))
+    if (!is_length1_char(type)) {
+        stop("'type' is not a length 1 character vector")
     }
-    outp <- c(name=name, type=type, format=format, formatType=formatType,
-              ref=ref)
-    class(outp) <- "moduleOutput"
-    outp
+    if (!("vessel" %in% class(vessel))) {
+        stop("'vessel' is not a 'vessel' object")
+    }
+    if ("scriptVessel" %in% class(vessel)) {
+        stop("'scriptVessel' vessels not defined for moduleIO objects")
+    }
+    if (!("ioFormat" %in% class(format))) {
+        stop("'format' is not an 'ioFormat' object")
+    }
+    ## fail if 'type' not "input" or "output"
+    if (!(type %in% c("input", "output"))) {
+        stop("'type' must be \"input\" or \"output\"")
+    }
+
+    moduleIO <- list(name = name, type = type,
+                     vessel = vessel, format = format)
+    class(moduleIO) <-
+        switch(type,
+               input = c("moduleInput", "moduleIO"),
+               output = c("moduleOutput", "moduleIO"))
+    return(moduleIO)
 }
 
 #' Create a \code{module} source
 #'
-#' Creates a \code{moduleSource} vector for use in a \code{module}'s sources
+#' Create a \code{moduleSource} object for use in a \code{module}'s sources
 #' list.
 #'
-#' @details If a \code{ref} is provided the returned value will be read from
-#' the script file found using \code{ref} and \code{path}. Otherwise the
-#' \code{value} is used.
+#' @details The contents of a module's source script are provided by
+#' the \code{vessel} object. For inline code use a \code{scriptVessel}
+#' object. For a script file on the local filesystem use
+#' \code{fileVessel}.
 #'
-#' \code{module} sources are exectuted in the order determined by each source's
-#' \sQuote{order}. Running order is:
+#' \code{vessel} cannot be an \code{inputVessel} object, as these are not
+#' defined for moduleIO objects.
+#'
+#' \code{module} sources are exectuted in the order determined by each
+#' source's \sQuote{order}.
+#'
+#' Running order is:
 #' \enumerate{
 #'   \item{negative numbers in ascending order}
 #'   \item{zero}
@@ -535,46 +691,46 @@ moduleOutput <- function(name, type, format="", formatType="text", ref="") {
 #'   \item{positive numbers in ascending order}
 #' }
 #'
-#' @param value source script
-#' @param ref module XML filename
-#' @param path search path(s) (optional)
-#' @param type not used as at 2014-12-05
-#' @param order character containing numeric value specifying source
-#' position in sources
+#' @param vessel \code{vessel} object
+#' @param order numeric value specifying source position in sources
+#' 
 #' @return named \code{moduleSource} list containing:
 #' \itemize{
-#'   \item{value: source script}
-#'   \item{type: not used as at 2014-12-05}
+#'   \item{vessel: \code{vessel} object}
 #'   \item{order: numeric value determining position of source in sources}
-#'   \item{ref: originating XML filename}
-#'   \item{path: originating search path}
 #' }
-#' @seealso \code{module}
-#' @export
+#' 
+#' @seealso \code{module}, \code{fileVessel}, \code{scriptVessel}
+#' 
 #' @examples
-#' ## create moduleSource with source script in 'value'
+#' ## create moduleSource with source script inline
 #' val1 <- c("x <- 1:10", "y <- rnorm(10, 0, 1)", "plot(x, y)")
-#' src1 <- moduleSource(value = val1, order = "-1")
+#' src1 <- moduleSource(vessel = scriptVessel(value = val1),
+#'                      order = -1)
 #'
-#' ## create a moduleSource with source script given by 'ref'
+#' ## create a moduleSource with source script from file
 #' modScript <- system.file("extdata", "simpleGraphScripts", "createGraph.R",
 #'                          package = "conduit")
-#' src2 <- moduleSource(ref = modScript)
-moduleSource <- function(value=NULL, ref=NULL, path=NULL, type=NULL,
-                         order=NULL) {
-    if (!is.null(ref)) {
-        ## FIXME: not properly tested
-        ## FIXME: ignores the possibility of creating a source given by ref
-        file <-
-            tryCatch(resolveRef(ref, path),
-                     error = function(err) {
-                         stop(paste0("Unable to find module source with ref='",
-                                     ref, "', path='", path, "'\n"),
-                              err)
-                     })
-        value <- fetchRef(file)
+#' src2 <- moduleSource(vessel = fileVessel(ref = modScript))
+#'
+#' @export
+moduleSource <- function(vessel, order = NULL) {
+    if (!("vessel" %in% class(vessel))) {
+        stop("'vessel' is not a vessel object")
     }
-    list(value=value, type=type, order=order, ref=ref, path=path)
+    if ("internalVessel" %in% class(vessel)) {
+        stop("'internalVessel' vessels not defined for moduleSource objects")
+    }
+    if (!is.null(order)) {
+        if (!is.numeric(order)) {
+            stop("'order' is not numeric")
+        } else if (length(order) > 1) {
+            stop("more than one value given for 'order'")
+        }
+    }
+    src <- list(vessel = vessel, order = order)
+    class(src) <- "moduleSource"
+    src
 }
 
 #' Create a \code{module} object
@@ -586,61 +742,150 @@ moduleSource <- function(value=NULL, ref=NULL, path=NULL, type=NULL,
 #' \code{moduleSource} respectively.
 #'
 #' @param name Name of module
-#' @param platform Platform name
+#' @param language Language name
+#' @param host Machine on which module is to be run
 #' @param description A basic description of the module
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
+#' 
 #' @return \code{module} list containing:
 #' \itemize{
 #'   \item{name}
-#'   \item{platform}
+#'   \item{language}
+#'   \item{host}
 #'   \item{description}
 #'   \item{inputs}
 #'   \item{outputs}
 #'   \item{sources}
 #' }
-#' @seealso \code{moduleInput}, \code{moduleOutput} and \code{moduleSource} for
-#' creating object for these lists. \code{loadModule} for reading a module
-#' from an XML file. \code{runModule} for executing a module's source
-#' scripts.
-#' @export
+#' 
+#' @seealso \code{moduleInput}, \code{moduleOutput} and
+#' \code{moduleSource} for creating objects for these
+#' lists. \code{loadModule} for reading a module from an XML
+#' file. \code{saveModule} for saving a module as an XML
+#' file. \code{runModule} for executing a module's source scripts.
+#' 
 #' @examples
 #' ## create a module with one output and one source
-#' src1 <- moduleSource(value = "x <- \"set\"")
-#' outp1 <- moduleOutput(name = "x", type = "internal",
-#'                       format = "R character string")
-#' mod1 <- module(name = "setX", platform = "R",
+#' src1 <- moduleSource(vessel = scriptVessel(value = "x <- \"set\""))
+#' outp1 <- moduleOutput(
+#'              name = "x",
+#'              internalVessel(symbol = "x"),
+#'              format = ioFormat("R character string"))
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
 #'                outputs = list(outp1),
 #'                sources = list(src1))
-#'
+#' 
 #' ## create a module with one input and one source
-#' mod2 <- module("showY", platform = "R",
-#'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
-module <- function(name, platform, description="", inputs=NULL,
-                   outputs=NULL, sources=list()) {
-    platform <- modulePlatform(platform)
+#' mod2 <-
+#'     module(
+#'         "showY",
+#'         language = "R",
+#'         host = "localhost",
+#'         description = "displays the value of Y",
+#'         inputs =
+#'             list(
+#'                 moduleInput(
+#'                     name = "y",
+#'                     vessel = internalVessel(symbol = "y"),
+#'                     format = ioFormat("R character string"))),
+#'         sources =
+#'             list(
+#'                 moduleSource(
+#'                 scriptVessel(value = "print(y)"))))
+#' 
+#' @export
+module <- function(name, language, host=NULL,
+                   description=NULL,
+                   inputs=NULL, outputs=NULL, sources=NULL) {
+    ## check arguments for errors
+
+    ## check 'name'
+    if (!is_length1_char(name)) {
+        stop("'name' is not a length 1 character vector")
+    }
+
+    ## check 'language'
+    if (!is.null(language)) {
+        if (!is_length1_char(language)) {
+            stop("'host' is not a length 1 character vector")
+        }
+    }
+    
+    ## check 'host'
+    if (!is.null(host)) {
+        if (!is_length1_char(host)) {
+            stop("'host' is not a length 1 character vector")
+        }
+    }
+
+    ## check 'description'
+    if (!is.null(description)) {
+        if (!is.character(description)) {
+            stop("'description' is not a character object")
+        }
+    }
+
+    ## check 'inputs'
     if (!is.null(inputs)) {
+        if (class(inputs) != "list") {
+            stop("'inputs' is not a list object")
+        }
+        inputClasses <- lapply(inputs, class)
+        for (i in seq_along(inputClasses)) {
+            if (inputClasses[[i]][1] != "moduleInput") {
+                stop(paste0("input ", i, " is not a 'moduleInput' object"))
+            }
+        }
+        ## name inputs
         names(inputs) <-
             sapply(inputs,
                    function (x) {
                        x["name"]
                    })
     }
+
+    ## check 'outputs'
     if (!is.null(outputs)) {
+        if (class(outputs) != "list") {
+            stop("'outputs' is not a list object")
+        }
+        outputClasses <- lapply(outputs, class)
+        for (i in seq_along(outputClasses)) {
+            if (outputClasses[[i]][1] != "moduleOutput") {
+                stop(paste0("output ", i, " is not a 'moduleOutput' object"))
+            }
+        }        
+        ## name outputs
         names(outputs) <-
             sapply(outputs,
                    function (x) {
                        x["name"]
                    })
     }
-    module <- list(name=name, platform=platform, description=description,
-                   inputs=inputs, outputs=outputs,
-                   sources=sources)
+
+    ## check 'sources'
+    if (!is.null(sources)) {
+        if (class(sources) != "list") {
+            stop("'sources' is not a list object")
+        }
+        sourceClasses <- lapply(sources, class)
+        for (i in seq_along(sourceClasses)) {
+            if (sourceClasses[[i]][1] != "moduleSource") {
+                stop(paste0("source ", i, " is not a 'moduleSource' object"))
+            }
+        }                
+    }
+    
+    module <- list(name = name,
+                   language = language,
+                   host = host,
+                   description = description,
+                   inputs = inputs,
+                   outputs = outputs,
+                   sources = sources)
     class(module) <- "module"
     module
 }

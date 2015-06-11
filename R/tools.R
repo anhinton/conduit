@@ -12,3 +12,15 @@ getXMLAttr <- function(xmlNode, attrName) {
         NULL
     }
 }
+
+#' Checks whether \code{x} is a length 1 character vector
+#'
+#' @param x vector to be checked
+#' @return logical, TRUE if \code{x} is length 1 char
+is_length1_char <- function(x) {
+    value <- FALSE
+    if (length(x) == 1 && is.character(x)) {
+        value <- TRUE
+    }
+    return(value)
+}

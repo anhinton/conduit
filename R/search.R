@@ -1,3 +1,8 @@
+#' Information about file searching in \code{conduit}.
+#' 
+#' @name searching
+NULL
+
 ### these functions relate to searching for files to be loaded as modules,
 ### pipelines, module sources, [...?]
 

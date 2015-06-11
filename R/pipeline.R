@@ -23,8 +23,7 @@ readComponentNode <- function (node, location) {
                 stop("A component must be a module or a pipeline")
             }
             value <- switch(type,
-                            module = readModuleXML(name, rawValue,
-                                                   location),
+                            module = readModuleXML(name, rawValue),
                             pipeline = readPipelineXML(name, rawValue,
                                                        location))
             component(name = name, type = type, value = value)
@@ -50,7 +49,7 @@ readComponentNode <- function (node, location) {
             rawXML <- fetchRef(file)
             xml <- xmlRoot(xmlParse(rawXML))
             value <- switch(type,
-                            module = readModuleXML(name, xml, location),
+                            module = readModuleXML(name, xml),
                             ## FIXME: I bet loading a pipeline won't work
                             pipeline = readPipelineXML(name, xml, location))
             component(name=name, ref=ref, path=path, type=type, value=value)
@@ -309,7 +308,19 @@ internalExtension <- function(platform) {
     extension
 }
 
-#' Returns a named list of input addresses
+#' Match a pipe's input name to an output object
+#'
+#' @param pipe \code{pipe} describing match
+#' @param outputObjects named list of output objects
+#'
+#' @return named input list
+matchInput <- function (pipe, outputObjects) {
+    object <- paste(pipe$start$component, pipe$start$output, sep=".")
+    object <- getElement(outputObjects, object)
+    return(object)
+}
+
+#' Returns a named list of input objects
 #'
 #' \code{inputsList} returns a named list of absolute file locations for
 #' components' inputs.
@@ -318,46 +329,34 @@ internalExtension <- function(platform) {
 #'
 #' @param pipes List of \code{pipe}s
 #' @param components List of \code{component}s
-#' @param pipelinePath Absolute file path to originatin \code{pipeline}
+#' @param pipelinePath Absolute file path to originating \code{pipeline}
 #' XML file
+#' 
 #' @return named list of file locations by input names
-inputsList <- function(pipes, components, pipelinePath) {
-    inputNames <-
-        lapply(pipes,
-               function (x) {
+inputObjects <- function(pipes, components, pipelinePath) {
+    ## calculate component output paths
+    componentPaths <- lapply(components, componentPath, pipelinePath)
+
+    ## extract actual objects
+    componentValues <-
+        lapply(
+            components,
+            function(component) {
+                value <- component$value
+                return(value)
+            })                            
+
+    ## calculate component output objects
+    outputObjects <- mapply(calculateOutputs, componentValues, componentPaths)
+
+    ## match output objects to input names
+    inputObjects <- lapply(pipes, matchInput, outputObjects)
+    names(inputObjects) <- 
+        sapply(pipes,
+               function(x) {
                    paste(x$end$component, x$end$input, sep=".")
                })
-    inputsList <-
-        lapply(pipes,
-               function (x, components, pipelinePath) {
-                   endComponent <- components[[x$end$component]]
-                   platform <- endComponent$value$platform[["name"]]
-                   type <- endComponent$value$inputs[[x$end$input]][["type"]]
-                   ## FIXME: this assumes the start component is a module
-                   ## and can be found in a "modules" folder. Needs to account
-                   ## for pipelines
-                   if (type == "internal") {
-                       input <- file.path(pipelinePath, "modules",
-                                          x$start$component,
-                                          paste(x$start$output,
-                                                internalExtension(platform),
-                                                sep=""))
-                   } else if (type == "external") {
-                       startComponent <- components[[x$start$component]]
-                       ref <-
-                           startComponent$value$outputs[[x$start$output]]["ref"]
-                       path <- startComponent$value$path
-                       input <- if (dirname(ref) == ".") {
-                           file.path(pipelinePath, "modules",
-                                     x$start$component, ref)
-                       } else {
-                           findFile(ref)
-                       }
-                   }
-                   input
-               }, components, pipelinePath)
-    names(inputsList) <- inputNames
-    inputsList
+    return(inputObjects)
 }
 
 #' Create a \code{graphNEL} node-and-edge graph of a pipeline
@@ -397,10 +396,11 @@ graphPipeline <- function(pipeline) {
 #'
 #' Executes a \code{pipeline}'s \code{component}s.
 #' 
-#' @details This function creates a directory called \code{pipeline$name} in
-#' \file{pipelines}, in the working directory. If the directory \file{pipelines}
-#' does not exist in the working directory it will be created. Working files
-#' and output from the pipeline's \code{components} will be stored in the
+#' @details This function creates a directory called
+#' \code{pipeline$name} in \file{pipelines}, in the
+#' \code{targetDirectory}. If the directory \file{pipelines} does not
+#' exist in this directory it will be created. Working files and
+#' output from the pipeline's \code{components} will be stored in the
 #' named directory.
 #'
 #' First the function will determine the order in which its components are to
@@ -410,13 +410,16 @@ graphPipeline <- function(pipeline) {
 #' The function then produces a list of inputs required by the
 #' \code{component}s, and resolves the (intended) location of these.
 #'
-#' Finally the function executes each \code{component}, in the order determined,
-#' by passing each component and the inputs list to \code{runComponent}.
+#' Finally the function executes each \code{component} in the 
+#' determined order.
 #'
 #' @param pipeline A \code{pipeline} object
-#' @return Meaningless list. TODO: fix what \code{runPipeline},
-#' \code{runModule}, \code{runPlatform} return.
-#' @seealso \code{pipeline}, \code{runComponent}
+#' @param targetDirectory File path for pipeline output
+#' 
+#' @return Named list of \code{component} output objects
+#' 
+#' @seealso More about \code{pipeline} objects, run single \code{module}
+#' objects with \code{runModule}.
 #'
 #' @examples
 #' simpleGraph <-
@@ -424,21 +427,25 @@ graphPipeline <- function(pipeline) {
 #'                  ref = system.file("extdata", "simpleGraph",
 #'                                    "simpleGraph-pipeline.xml",
 #'                                     package = "conduit"))
-#' ## run example in temp directory
-#' oldwd <- setwd(tempdir())
 #'
 #' ## run the pipeline
 #' runPipeline(simpleGraph)
-#' ## observe results
-#' list.files(file.path(tempdir(), "pipelines"), recursive = TRUE)
-#' setwd(oldwd)
 #' 
 #' @export
-runPipeline <- function(pipeline) {
+runPipeline <- function(pipeline, targetDirectory = tempdir()) {
+    ## ensure targetDirectory exists
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
+    
     ## create directory for pipeline output
-    if (!file.exists("pipelines")) dir.create("pipelines")
+    targetDirectory <- file.path(targetDirectory, "pipelines")
+    if (!file.exists(targetDirectory)) {
+        dir.create(targetDirectory)
+    }
     pipelineName <- componentName(pipeline)
-    pipelinePath <- file.path("pipelines", pipelineName)
+    pipelinePath <- file.path(targetDirectory, pipelineName)
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
@@ -454,34 +461,26 @@ runPipeline <- function(pipeline) {
     componentOrder <- RBGL::tsort(componentGraph)
 
     ## resolve inputs
-    inputs <- inputsList(pipeline$pipes, pipeline$components,
-                         pipelinePath)
+    inputObjects <- inputObjects(pipeline$pipes, pipeline$components,
+                              pipelinePath)
 
-    ## execute components in order determined by componentOrder
-    x <-
-        lapply(componentOrder,
-               function (x, pipeline, inputs, pipelinePath) {
-                   ## select inputs for this component and strip out
-                   ## component name
-
-                   ## FIXME: selecting inputs from inputsList seems a little
-                   ## inelegant. Possibly calculating all input locations
-                   ## before anything is run is the reason for this.
-                   ## What else shall we try?
-
-                   ## FIXME: this could be a helper function called something
-                   ## like resolveComponentInputs()
-                   whichInputs <-
-                       grepl(paste0("^", x,"[.]"),
-                             names(inputs))
-                   inputs <- inputs[whichInputs]
-                   names(inputs) <-
-                       gsub(paste0("^", x,"[.]"), "",
-                            names(inputs))
-                   
-                   ## run the beast
-                   runComponent(x, pipeline, inputs, pipelinePath)
-               }, pipeline, inputs, pipelinePath)
+    ## execute components in order determinde by componentOrder
+    outputObjects <-
+        lapply(
+            componentOrder,
+            function(componentName, pipeline, inputObjects, pipelinePath) {
+                whichInputs <- grepl(paste0("^", componentName, "[.]"),
+                                     names(inputObjects))
+                inputObjects <- inputObjects[whichInputs]
+                names(inputObjects) <-
+                    gsub(paste0("^", componentName, "[.]"), "",
+                         names(inputObjects))
+                outputObjects <- runComponent(componentName, pipeline,
+                                              inputObjects, pipelinePath)
+                return(outputObjects)
+            }, pipeline, inputObjects, pipelinePath)
+    names(outputObjects) <- componentOrder
+    return(outputObjects)
 }
 
 ## creating new pipelines
@@ -584,16 +583,6 @@ addPipe <- function(newPipe, pipeline) {
     pipeline
 }
 
-#' return the name of a component
-#'
-#' Returns the name of a \code{module} or \code{pipeline}
-#'
-#' @param component \code{module} or \code{pipeline} object
-#' @return character value
-componentName <- function (component) {
-    component$name
-}
-
 #' Create a pipeline
 #'
 #' This functions create a new \code{pipeline} object.
@@ -612,11 +601,12 @@ componentName <- function (component) {
 #' \item{description}{character value}
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
-#' @seealso \code{loadPipeline} for loading a pipeline from an XML souce,
-#' \code{module} for information on module objects, \code{runPipeline} for
-#' executing all of a pipeline's components, \code{runComponent} for executing
-#' individual components, \code{pipe} for pipes, and \code{addPipe} and
-#' \code{addComponent} for modifying pipelines.
+#' @seealso \code{loadPipeline} for loading a pipeline from an XML
+#' souce, \code{module} for information on module objects,
+#' \code{runPipeline} for executing all of a pipeline's components,
+#' \code{runModule} for executing individual \code{module} objects,
+#' \code{pipe} for pipes, and \code{addPipe} and \code{addComponent}
+#' for modifying pipelines.
 #'
 #' @examples
 #' ## create some modules

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <description>create a data frame output from the iris dataset</description>
+  <source>
+    <script><![CDATA[iris_df <- iris[, -5]]]></script>
+  </source>
+  <output name="iris_df">
+    <internal symbol="iris_df"/>
+    <format formatType="text">R data frame</format>
+  </output>
+</module>
