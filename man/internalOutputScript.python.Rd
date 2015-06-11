@@ -2,11 +2,11 @@
 % Please edit documentation in R/python.R
 \name{internalOutputScript.python}
 \alias{internalOutputScript.python}
-\title{create script to create internal output for language = "R"}
+\title{create script to create internal output for language = "python"}
 \usage{
 \method{internalOutputScript}{python}(symbol)
 }
 \description{
-create script to create internal output for language = "R"
+create script to create internal output for language = "python"
 }
 

@@ -4,7 +4,7 @@
 \alias{internalInputScript.python}
 \title{prepare internal input script for python language}
 \usage{
-\method{internalInputScript}{python}(symbol, resource)
+\method{internalInputScript}{python}(symbol, inputObject)
 }
 \description{
 prepare internal input script for python language
