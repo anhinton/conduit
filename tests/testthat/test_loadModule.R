@@ -25,7 +25,7 @@ test_that("loadModule() handles ref, no path", {
 test_that("loadModule() handles ref and path", {
     skip_on_cran()
     ref2 <- "layoutGraph.xml"
-    path2 <- system.file("extdata", package = "conduit")
+    path2 <- system.file("extdata", "simpleGraph", package = "conduit")
     dir2 <-  system.file("extdata", "simpleGraph", package = "conduit")
     mod2 <- loadModule("mod2", ref2, path2)
     expect_match(class(mod2), "module")

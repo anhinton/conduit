@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <description/>
+  <input name="directedGraph">
+    <internal symbol="directedGraph"/>
+    <format formatType="text">R "graphNEL" object</format>
+  </input>
+  <source>
+    <script><![CDATA[library(Rgraphviz)
+toDot(directedGraph, "directedGraph.dot")]]></script>
+  </source>
+  <output name="dotfile">
+    <file ref="directedGraph.dot"/>
+    <format formatType="text">dot file</format>
+  </output>
+</module>

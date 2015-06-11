@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="shell">
+  <description/>
+  <input name="dotfile">
+    <file ref="dot.dot"/>
+    <format formatType="text">dot file</format>
+  </input>
+  <source>
+    <script><![CDATA[dot -Tpng dot.dot -o simpleGraph.png]]></script>
+  </source>
+  <output name="simpleGraph.png">
+    <file ref="simpleGraph.png"/>
+    <format formatType="text">PNG file</format>
+  </output>
+</module>
