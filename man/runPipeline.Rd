@@ -4,7 +4,7 @@
 \alias{runPipeline}
 \title{Run a pipeline}
 \usage{
-runPipeline(pipeline, targetDirectory = tempdir())
+runPipeline(pipeline, targetDirectory = getwd())
 }
 \arguments{
 \item{pipeline}{A \code{pipeline} object}

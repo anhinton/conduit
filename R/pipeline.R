@@ -436,7 +436,7 @@ graphPipeline <- function(pipeline) {
 #' runPipeline(simpleGraph)
 #' 
 #' @export
-runPipeline <- function(pipeline, targetDirectory = tempdir()) {
+runPipeline <- function(pipeline, targetDirectory = getwd()) {
     ## ensure targetDirectory exists
     targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {

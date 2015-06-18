@@ -474,7 +474,7 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' runModule(module = mod2, targetDirectory = targ1,
 #'           inputObjects = mod2inputs)
 runModule <- function(module, inputObjects = list(),
-                      targetDirectory = tempdir()) {
+                      targetDirectory = getwd()) {
     ## check that module inputs are provided by inputObjects
     inputs <- module$inputs
     inputNames <- names(module$inputs)
