@@ -441,19 +441,15 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' @param targetDirectory File path for module output
 #' 
 #' @seealso \code{module}, \code{moduleSource}
-#' 
-#' @export
 #'
 #' @examples
 #'
-#' targ1 <- tempdir()
-#' 
 #' ## run a module with no inputs
 #' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
 #' 		       package = "conduit")
 #' mod1 <- loadModule("createGraph", 
 #' 		      ref = mod1xml)
-#' runModule(module = mod1, targetDirectory = targ1)
+#' runModule(module = mod1)
 #' 
 #' ## run a module with inputs
 #' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
@@ -462,19 +458,20 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' 
 #' ## mod1 output locations
 #' names(mod1$outputs)
-#' list.files(path = file.path(targ1, "modules", mod1$name),
+#' list.files(path = file.path("modules", mod1$name),
 #'            pattern = paste0("^directedGraph"), full.names = TRUE)
 #' 
 #' ## mod2 input names
 #' names(mod2$inputs)
 #' mod2inputs <- 
-#'     list(myGraph = file.path(targ1, "modules", "createGraph", 
-#'                              "directedGraph.rds"))
+#'     list(myGraph = normalizePath(file.path("modules", "createGraph", 
+#'                                            "directedGraph.rds")))
 #'
-#' runModule(module = mod2, targetDirectory = targ1,
-#'           inputObjects = mod2inputs)
+#' runModule(module = mod2, inputObjects = mod2inputs)
+#' 
+#' @export
 runModule <- function(module, inputObjects = list(),
-                      targetDirectory = tempdir()) {
+                      targetDirectory = getwd()) {
     ## check that module inputs are provided by inputObjects
     inputs <- module$inputs
     inputNames <- names(module$inputs)
