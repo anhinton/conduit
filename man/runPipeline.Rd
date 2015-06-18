@@ -44,6 +44,18 @@ simpleGraph <-
 
 ## run the pipeline
 runPipeline(simpleGraph)
+
+## python language example
+pythonExample <- loadPipeline("pythonExample",
+                              system.file("extdata", "pythonExample",
+                                          "pipeline.xml", package="conduit"))
+runPipeline(pythonExample)
+
+## shell language example
+shellExample <- loadPipeline("shellExample",
+                             system.file("extdata", "shellExample",
+                                         "pipeline.xml", package="conduit"))
+runPipeline(shellExample)
 }
 \seealso{
 More about \code{pipeline} objects, run single \code{module}

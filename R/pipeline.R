@@ -434,6 +434,18 @@ graphPipeline <- function(pipeline) {
 #'
 #' ## run the pipeline
 #' runPipeline(simpleGraph)
+#'
+#' ## python language example
+#' pythonExample <- loadPipeline("pythonExample",
+#'                               system.file("extdata", "pythonExample",
+#'                                           "pipeline.xml", package="conduit"))
+#' runPipeline(pythonExample)
+#'
+#' ## shell language example
+#' shellExample <- loadPipeline("shellExample",
+#'                              system.file("extdata", "shellExample",
+#'                                          "pipeline.xml", package="conduit"))
+#' runPipeline(shellExample)
 #' 
 #' @export
 runPipeline <- function(pipeline, targetDirectory = getwd()) {
