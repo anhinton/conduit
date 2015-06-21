@@ -3,38 +3,37 @@ context("ensure module inputs will be satisfied")
 
 test_that("ensureInternalInput creates appropriate R script", {
     symbol1 <- "y"
-    resource1 <- "~/datas/x.rds"
+    inputObject1 <- "~/datas/x.rds"
     language1 <- "R"
-    script1 <- ensureInternalInput(symbol1, resource1, language1)
+    script1 <- ensureInternalInput(inputObject = inputObject1,
+                                   symbol = symbol1, language = language1)
     expect_identical(script1,
                      "y <- readRDS(\"~/datas/x.rds\")")
 })
 
 test_that("ensureFileInput has appropriate effects", {
     skip_on_cran()
-    ref <- tempfile()
-    resource <- tempfile()
-    system2("touch", ref)
-    expect_error(ensureFileInput(ref, resource),
-                 "input file already exists")    
-
-    ref <- tempfile()
-    resource <- tempfile()
-    script <- ensureFileInput(ref, resource)
-    expect_true(Sys.readlink(ref) == resource)    
+    ref <- tempfile("ref")
+    inputObject <- tempfile("inputObject")
+    file.create(inputObject)
+    script <- ensureFileInput(inputObject = inputObject, ref = ref)
+    expect_true(file.exists(inputObject))
+    expect_equal(file.size(ref), file.size(inputObject))
 })
 
 test_that("ensureModuleInput produces desired results", {
     input1 <- moduleInput("inp1", internalVessel("x"), ioFormat("R object"))
-    resource1 <- tempfile()
+    outputObject1 <- tempfile()
     lang1 <- "R"
-    script1 <- ensureModuleInput(input1, resource1, lang1)
+    script1 <- ensureModuleInput(input1, outputObject1, lang1)
     expect_false(is.null(script1))
 
     skip_on_cran()
-    ref2 <- tempfile()
-    resource2 <- tempfile()
+    ref2 <- tempfile("ref")
+    inputObject2 <- tempfile("inputObject")
+    file.create(inputObject2)
     input2 <- moduleInput("inp2", fileVessel(ref2), ioFormat("file"))
-    script2 <- ensureModuleInput(input2, resource2, lang1)
+    script2 <- ensureModuleInput(inputObject = inputObject2,
+                                 input = input2, language = lang1)
     expect_null(script2)
 })

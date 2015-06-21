@@ -1,48 +1,42 @@
 ##' prepare internal input script
 #'
-#' @param symbol character string with class set to language of module script
 #' @param inputObject file location of serialised language object
+#' @param symbol character string with class set to language of module script
 #'
 #' @return character vector of script to ensure input
-internalInputScript <- function (symbol, inputObject) {
+internalInputScript <- function (inputObject, symbol) {
     UseMethod("internalInputScript")
 }
 
 #' ensure input described by internalVessel is satisfied
 #'
+#' @param inputObject location of serialised language object
 #' @param symbol language symbol to be satisfied
-#' @param outputObject location of serialised language object
 #' @param language module script language
 #'
 #' @return script as character vector
 #'
 #' @seealso \code{moduleInputScript}, \code{executeScript}
-ensureInternalInput <- function (symbol, outputObject, language) {
+ensureInternalInput <- function (inputObject, symbol, language) {
     class(symbol) <- language
-    script <- internalInputScript(symbol, outputObject)
+    script <- internalInputScript(symbol, inputObject)
     return(script)
 }
 
 #' ensure input described by fileVessel is satisfied
 #'
+#' @param inputObject file path to be passed to ref
 #' @param ref file path to be satisfied
-#' @param outputObject file path to be passed to ref
 #'
 #' @return NULL
-ensureFileInput <- function (ref, outputObject) {
-    ## check if ref already exists
+ensureFileInput <- function (inputObject, ref) {
+    ##  create a copy of resource at ref
+    file.copy(from = inputObject, to = ref, overwrite = TRUE)
     if (file.exists(ref)) {
-        ## check if symlink
-        if (Sys.readlink(ref) == "") {
-            stop("input file already exists")
-        }
-        ## if ref is a symlink assume created by conduit and remove
-        file.remove(ref)
+        return(NULL)
+    } else {
+        stop(paste0("unable to provide input '", ref, "'"))
     }
-
-    ##  create a symlink to resource at ref
-    file.symlink(outputObject, ref)
-    return(NULL)
 }
 
 #' ensure module inputs will be satisfied
@@ -61,8 +55,9 @@ ensureModuleInput <- function (input, inputObject, language) {
     )
     script <- switch(
         type,
-        internal = ensureInternalInput(vessel$symbol, inputObject, language),
-        file = ensureFileInput(vessel$ref, inputObject)
+        internal = ensureInternalInput(inputObject = inputObject,
+            symbol = vessel$symbol, language = language),
+        file = ensureFileInput(inputObject = inputObject, ref = vessel$ref)
     )
     
     return(script)
