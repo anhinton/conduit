@@ -30,18 +30,8 @@ ensureInternalInput <- function (symbol, outputObject, language) {
 #'
 #' @return NULL
 ensureFileInput <- function (ref, outputObject) {
-    ## check if ref already exists
-    if (file.exists(ref)) {
-        ## check if symlink
-        if (Sys.readlink(ref) == "") {
-            stop("input file already exists")
-        }
-        ## if ref is a symlink assume created by conduit and remove
-        file.remove(ref)
-    }
-
-    ##  create a symlink to resource at ref
-    file.symlink(outputObject, ref)
+    ##  create a copy of resource at ref
+    file.copy(outputObject, ref, overwrite = TRUE)
     return(NULL)
 }
 
