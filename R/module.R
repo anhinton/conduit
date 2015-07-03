@@ -417,6 +417,44 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
+resolveInputObject.internal <- function(input, inputObject) {
+    return(file.exists(inputObject))
+}
+
+resolveInputObject.file <- function(input, inputObject) {
+    ref <- input$vessel$ref
+    if (dirname(ref) == ".") {
+        ##  create a copy of resource at ref
+        file.copy(from = inputObject, to = ref, overwrite = TRUE)
+        return(file.exists(ref))
+    }
+    return(file.exists(ref))
+}
+
+#' Resolve input object
+#'
+#' This function ensures that an input object is where it needs to be
+#' for a module's source script to be executed. Returns TRUE if all is well.
+#'
+#' If the \code{moduleInput}'s vessel is a \code{fileVessel}
+#' containing a relative 'ref' the inputObject is copied to the
+#' current working directory as 'ref'.
+#'
+#' @param input \code{moduleInput} object
+#' @param inputObject resource to be supplied as input
+#'
+#' @return boolean
+resolveInputObject <- function(input, inputObject) {
+    vessel <- input$vessel
+    type <- switch(
+        class(vessel)[[1]],
+        internalVessel = "internal",
+        fileVessel = "file"
+    )
+    class(input) <- type
+    UseMethod("resolveInputObject", object = input)
+}
+
 #' Execute a \code{module}'s source(s)
 #'
 #' Execute the scripts contained in or referenced by a \code{module}'s sources.
@@ -472,15 +510,8 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' @export
 runModule <- function(module, inputObjects = list(),
                       targetDirectory = getwd()) {
-    ## check that module inputs are provided by inputObjects
-    inputs <- module$inputs
-    inputNames <- names(module$inputs)
-    objectNames <- names(inputObjects)
-    for (i in inputNames) {
-        if (!(i %in% objectNames)) {
-            stop("module input '", i, "' has not been provided")
-        }
-    }
+    ## TODO: check that module inputs are provided by inputObjects
+    ## though this may more properly be a validation function
     
     ## ensure targetDirectory exists
     targetDirectory <- file.path(targetDirectory)

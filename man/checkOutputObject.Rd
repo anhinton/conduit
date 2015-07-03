@@ -4,7 +4,7 @@
 \alias{checkOutputObject}
 \title{Checks a module output object has been created.}
 \usage{
-checkOutputObject(output, internalExtension)
+checkOutputObject(output, language, outputDirectory = getwd())
 }
 \arguments{
 \item{output}{\code{moduleOutput} object}

@@ -4,12 +4,12 @@
 \alias{internalInputScript}
 \title{prepare internal input script}
 \usage{
-internalInputScript(symbol, inputObject)
+internalInputScript(inputObject, symbol)
 }
 \arguments{
-\item{symbol}{character string with class set to language of module script}
-
 \item{inputObject}{file location of serialised language object}
+
+\item{symbol}{character string with class set to language of module script}
 }
 \value{
 character vector of script to ensure input
