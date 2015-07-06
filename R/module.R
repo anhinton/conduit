@@ -525,15 +525,20 @@ runModule <- function(module, inputObjects = list(),
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
 
-    ## run this module with the appropriate Language Support
-    class(module) <- module$language
+    ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
-    objects <- executeScript(module, inputObjects)
 
-    ## FIXME:
+    ## prepare a script file for execution
+    script <- prepareScript(module, inputObjects)
+    class(script) <- module$language
 
-    objects <- lapply(outputs, checkOutputObject, language, getwd())
+    ## execute script file
+    try(executeScript(script))
+
+    ## check for outputs
+    language <- module$language
+    objects <- lapply(module$outputs, checkOutputObject, language, getwd())
     return(objects)
 }
 
