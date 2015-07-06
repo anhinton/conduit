@@ -4,6 +4,7 @@ context("ensure module inputs will be satisfied")
 test_that(
     "absolute fileVessel refs are resolved",
     {
+        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <-
@@ -17,6 +18,7 @@ test_that(
 test_that(
     "relative fileVessel refs are resolved",
     {
+        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <- moduleInput("good", fileVessel("test1"), ioFormat("text file"))
@@ -27,6 +29,7 @@ test_that(
 test_that(
     "internalVessel inputs are resolved",
     {
+        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <- moduleInput("fantastic",
