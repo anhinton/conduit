@@ -196,8 +196,12 @@ prepareScript <- function(module, inputObjects) {
     outputScript <- unlist(outputScript, use.names = FALSE)
 
     ## moduleScript combines the scripts in correct order
-    moduleScript <- c(inputScript, sourceScript, outputScript)
-
+    moduleScript <- switch(
+        language,
+        python = c("import os", "import pickle",
+            inputScript, sourceScript, outputScript),
+        c(inputScript, sourceScript, outputScript))
+    
     ## write script file to disk
     
     scriptPath <- paste0("script", scriptExtension(language))
