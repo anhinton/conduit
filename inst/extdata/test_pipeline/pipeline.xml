@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description></description>
+  <component name="module1" ref="module1.xml" type="module"/>
+  <component name="module2" ref="module2.xml" type="module"/>
+  <pipe>
+    <start component="module1" output="x"/>
+    <end component="module2" input="numbers"/>
+  </pipe>
+</pipeline>
