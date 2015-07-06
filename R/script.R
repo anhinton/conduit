@@ -1,18 +1,3 @@
-##' prepare internal input script
-#'
-#' @param inputObject file location of serialised language object
-#' @param symbol character string with class set to language of module script
-#'
-#' @return character vector of script to ensure input
-internalInputScript <- function (inputObject, symbol) {
-    UseMethod("internalInputScript")
-}
-
-#' create script to create internal output
-internalOutputScript <- function (symbol) {
-    UseMethod("internalOutputScript")
-}
-
 #' Extract a module's source script from a scriptVessel
 extractModuleSource.scriptVessel <- function(moduleSource) {
     script <- moduleSource$vessel$value
@@ -102,6 +87,129 @@ sourceOrder <- function(sources) {
     unorderedOrdered <- which(is.na(orderValues))
     ## negative < 0 < unordered < positive
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
+}
+
+#' prepare script to resolve internal input
+#'
+#' @param symbol character string with class set to language of module script
+#' @param inputObject file location of serialised language object
+#'
+#' @return character vector of script to ensure input
+internalInputScript <- function(symbol, inputObject) {
+    UseMethod("internalInputScript", object = symbol)
+}
+
+#' prepare script to resolve internal output
+#'
+#' @param symbol character string with class set to language of module script
+#'
+#' @return character vector of script to ensure input
+internalOutputScript <- function (symbol) {
+    UseMethod("internalOutputScript")
+}
+
+#' Prepare script to create inputs
+#'
+#' @param input input name
+#' @param inputObject object to be supplied as input
+#' @param language module language
+#'
+#' @return Script as character vector
+prepareScriptInput <- function(input, inputObject, language) {
+    type <- class(input$vessel)[1]
+    script <- switch(
+        type,
+        internalVessel = {
+            symbol <- input$vessel$symbol
+            class(symbol) <- language
+            internalInputScript(symbol, inputObject)
+        },
+        NULL)
+    return(script)
+}
+
+#' Prepare script to create outputs
+#'
+#' @param output output name
+#' @param language module language
+#'
+#' @return Script as character vector
+prepareScriptOutput <- function(output, language) {
+    type <- class(output$vessel)[1]
+    script <- switch(
+        type,
+        internalVessel = {
+            symbol <- output$vessel$symbol
+            class(symbol) <- language
+            internalOutputScript(symbol)
+        },
+        NULL)
+    return(script)
+}
+
+#' Prepare a script for executing a module in its language.
+#'
+#' @details Resolves the module's internal inputs and creates a script
+#' file from the supplied \code{module},
+#'
+#' @param module \code{module} object
+#' @param inputObjects Named list of input objects
+#' 
+#' @return Script filename
+prepareScript <- function(module, inputObjects) {
+    language <- module$language
+    
+    ## sort sources into correct order
+    sources <- module$sources
+    sources <- lapply(sourceOrder(sources),
+                      function (x, sources) {
+                          sources[[x]]
+                      }, sources)
+
+    ## sourceScript contains the module's source(s) to be evaluated
+    sourceScript <-
+        lapply(
+            sources,
+            function (moduleSource) {
+                class(moduleSource) <- class(moduleSource$vessel)
+                script <- extractModuleSource(moduleSource)
+                return(script)
+            })
+    sourceScript <- unlist(sourceScript, use.names = FALSE)
+
+    ## inputScript loads the module's designated inputs
+    inputs <- module$inputs
+    inputScript <-
+        lapply(
+            inputs,
+            function (input, inputObjects, language) {
+                resource <- getElement(inputObjects, input$name)
+                script <- prepareScriptInput(input, inputObject, language)
+                return(script)
+            }, inputObjects, language)
+    inputScript <- unlist(inputScript, use.names = FALSE)
+
+    ## outputScript loads the module's designated outputs
+    outputs <- module$outputs
+    outputScript <-
+        lapply(outputs, prepareScriptOutput, language)
+    outputScript <- unlist(outputScript, use.names = FALSE)
+
+    ## moduleScript combines the scripts in correct order
+    moduleScript <- c(inputScript, sourceScript, outputScript)
+
+    ## write script file to disk
+    
+    scriptPath <- paste0("script", scriptExtension(language))
+    scriptFile <- file(scriptPath)
+    writeLines(moduleScript, scriptFile)
+    close(scriptFile)
+
+    if (file.exists(scriptPath)) {
+        return(scriptPath)
+    } else {
+        stop("unable to create script file")
+    }
 }
 
 #' Execute a module source scripts.

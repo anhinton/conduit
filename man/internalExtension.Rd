@@ -2,7 +2,7 @@
 % Please edit documentation in R/tools.R
 \name{internalExtension}
 \alias{internalExtension}
-\title{Returns the correct file extension for a platform's 'internal' files}
+\title{Returns the correct file extension for a language's 'internal' files}
 \usage{
 internalExtension(language)
 }
@@ -10,9 +10,9 @@ internalExtension(language)
 \item{language}{language name}
 }
 \value{
-files exension as character as ".EXT"
+file exension as character as ".EXT"
 }
 \description{
-Returns the correct file extension for a platform's 'internal' files
+Returns the correct file extension for a language's 'internal' files
 }
 

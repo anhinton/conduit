@@ -2,11 +2,17 @@
 % Please edit documentation in R/script.R
 \name{internalOutputScript}
 \alias{internalOutputScript}
-\title{create script to create internal output}
+\title{prepare script to resolve internal output}
 \usage{
 internalOutputScript(symbol)
 }
+\arguments{
+\item{symbol}{character string with class set to language of module script}
+}
+\value{
+character vector of script to ensure input
+}
 \description{
-create script to create internal output
+prepare script to resolve internal output
 }
 

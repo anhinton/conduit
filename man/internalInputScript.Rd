@@ -2,19 +2,19 @@
 % Please edit documentation in R/script.R
 \name{internalInputScript}
 \alias{internalInputScript}
-\title{prepare internal input script}
+\title{prepare script to resolve internal input}
 \usage{
-internalInputScript(inputObject, symbol)
+internalInputScript(symbol, inputObject)
 }
 \arguments{
-\item{inputObject}{file location of serialised language object}
-
 \item{symbol}{character string with class set to language of module script}
+
+\item{inputObject}{file location of serialised language object}
 }
 \value{
 character vector of script to ensure input
 }
 \description{
-prepare internal input script
+prepare script to resolve internal input
 }
 
