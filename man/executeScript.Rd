@@ -2,25 +2,20 @@
 % Please edit documentation in R/script.R
 \name{executeScript}
 \alias{executeScript}
-\title{Execute a module source scripts.}
+\title{Execute a prepared module script file.}
 \usage{
-executeScript(module, inputObjects)
+executeScript(script)
 }
 \arguments{
-\item{module}{\code{module} object}
-
-\item{inputObjects}{Named list of input objects}
+\item{script}{script file to be executed}
 }
 \value{
-FIXME: nothing meaningful
+named list of \code{moduleOutput} objects
 }
 \description{
-Execute module source scripts in the language given by
-\code{module$language}.
+Execute a prepared module script file.
 }
-\details{
-A module's inputs and outputs objects are calculated, and a
-script is placed in the working directory. The function then attemps to
-execute this script using the specified language.
+\seealso{
+\code{runModule}
 }
 

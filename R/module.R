@@ -530,6 +530,10 @@ runModule <- function(module, inputObjects = list(),
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
     objects <- executeScript(module, inputObjects)
+
+    ## FIXME:
+
+    objects <- lapply(outputs, checkOutputObject, language, getwd())
     return(objects)
 }
 

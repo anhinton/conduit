@@ -183,7 +183,7 @@ prepareScript <- function(module, inputObjects) {
         lapply(
             inputs,
             function (input, inputObjects, language) {
-                resource <- getElement(inputObjects, input$name)
+                inputObject <- getElement(inputObjects, input$name)
                 script <- prepareScriptInput(input, inputObject, language)
                 return(script)
             }, inputObjects, language)
@@ -212,19 +212,13 @@ prepareScript <- function(module, inputObjects) {
     }
 }
 
-#' Execute a module source scripts.
+#' Execute a prepared module script file.
 #'
-#' Execute module source scripts in the language given by
-#' \code{module$language}. 
+#' @param script script file to be executed
 #'
-#' @details A module's inputs and outputs objects are calculated, and a
-#' script is placed in the working directory. The function then attemps to
-#' execute this script using the specified language.
-#'
-#' @param module \code{module} object
-#' @param inputObjects Named list of input objects
+#' @seealso \code{runModule}
 #' 
-#' @return FIXME: nothing meaningful
-executeScript <- function(module, inputObjects) {
+#' @return named list of \code{moduleOutput} objects
+executeScript <- function(script) {
     UseMethod("executeScript")
 }
