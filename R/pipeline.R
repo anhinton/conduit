@@ -297,17 +297,6 @@ exportPipeline <- function(pipeline, targetDirectory) {
 
 ## functions to run a loaded PIPELINE
 
-#' Returns the correct file extension for a platform's 'internal' files
-#'
-#' @param platform platform name
-#' @return files exension as character as ".EXT"
-internalExtension <- function(platform) {
-    extension <- switch(platform,
-                        R = ".rds",
-                        shell = ".txt")
-    extension
-}
-
 #' Match a pipe's input name to an output object
 #'
 #' @param pipe \code{pipe} describing match

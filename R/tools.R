@@ -24,3 +24,15 @@ is_length1_char <- function(x) {
     }
     return(value)
 }
+
+#' Returns the correct file extension for a platform's 'internal' files
+#'
+#' @param language language name
+#' @return files exension as character as ".EXT"
+internalExtension <- function(language) {
+    extension <- switch(language,
+                        R = ".rds",
+                        python = ".pickle",
+                        shell = ".txt")
+    extension
+}
