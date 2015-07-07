@@ -533,9 +533,9 @@ runModule <- function(module, inputObjects = list(),
     on.exit(setwd(oldwd))
 
     ## resolve input objects
-    for (i in inputObjects) {
-        input <- getElement(module$inputs, names(i)[1])
-        
+    for (i in module$inputs) {
+        resolved <- resolveInput(i, inputObjects)
+        if (!resolved) stop("Input ", i$name, " cannot be resolved")
     }
 
     ## prepare a script file for execution
