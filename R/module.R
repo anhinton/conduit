@@ -417,12 +417,14 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
-resolveInputObject.internal <- function(input, inputObject) {
+resolveInput.internal <- function(input, inputObjects) {
+    inputObject <- getElement(inputObjects, input$name)
     return(file.exists(inputObject))
 }
 
-resolveInputObject.file <- function(input, inputObject) {
+resolveInput.file <- function(input, inputObjects) {
     ref <- input$vessel$ref
+    inputObject <- getElement(inputObjects, input$name)
     if (dirname(ref) == ".") {
         ##  create a copy of resource at ref
         file.copy(from = inputObject, to = ref, overwrite = TRUE)
@@ -441,18 +443,19 @@ resolveInputObject.file <- function(input, inputObject) {
 #' current working directory as 'ref'.
 #'
 #' @param input \code{moduleInput} object
-#' @param inputObject resource to be supplied as input
+#' @param inputObjects resources to be supplied as inputs
 #'
 #' @return boolean
-resolveInputObject <- function(input, inputObject) {
-    vessel <- input$vessel
+resolveInput <- function(moduleInput, inputObjects) {
+    type <- class(moduleInput$vessel)[[1]]
     type <- switch(
-        class(vessel)[[1]],
+        type,
         internalVessel = "internal",
-        fileVessel = "file"
+        fileVessel = "file",
+        stop("unknown input vessel")
     )
     class(input) <- type
-    UseMethod("resolveInputObject", object = input)
+    UseMethod("resolveInput", object = input)
 }
 
 #' Execute a \code{module}'s source(s)
@@ -528,6 +531,12 @@ runModule <- function(module, inputObjects = list(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
+
+    ## resolve input objects
+    for (i in inputObjects) {
+        input <- getElement(module$inputs, names(i)[1])
+        
+    }
 
     ## prepare a script file for execution
     script <- prepareScript(module, inputObjects)
