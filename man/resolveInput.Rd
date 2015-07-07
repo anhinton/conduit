@@ -7,9 +7,9 @@
 resolveInput(moduleInput, inputObjects)
 }
 \arguments{
-\item{inputObjects}{resources to be supplied as inputs}
+\item{moduleInput}{\code{moduleInput} object}
 
-\item{input}{\code{moduleInput} object}
+\item{inputObjects}{resources to be supplied as inputs}
 }
 \value{
 boolean
