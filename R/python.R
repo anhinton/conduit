@@ -1,6 +1,7 @@
 ### Platform support for python platform
 
-#' prepare internal input script for python language
+#' @describeIn internalInputScript prepare internal input script for
+#' python language
 internalInputScript.python <- function (symbol, inputObject) {
     script <- c(paste0("with open('", inputObject,
                        "', 'rb') as f:"),
@@ -8,14 +9,15 @@ internalInputScript.python <- function (symbol, inputObject) {
     return(script)
 }
 
-#' create script to create internal output for language = "python"
+#' @describeIn internalOutputScript create script to create internal
+#' output for language = "python"
 internalOutputScript.python <- function (symbol) {
     script <- c(paste0("with open('", symbol, ".pickle', 'wb') as f:"),
                 paste0("\tpickle.dump(", symbol, ", f)"))
     return(script)
 }
 
-#' Execute a script in the "python" language
+#' @describeIn executeScript Execute a script in the "python" language
 executeScript.python <- function(script) {
     ## batch the script file in a python session
     systemCall <-

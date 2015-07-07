@@ -1,10 +1,12 @@
-#' Extract a module's source script from a scriptVessel
+#' @describeIn extractModuleSource Extract a module's source script
+#' from a scriptVessel
 extractModuleSource.scriptVessel <- function(moduleSource) {
     script <- moduleSource$vessel$value
     return(script)
 }
 
-#' Extract a module's source script from a fileVessel
+#' @describeIn extractModuleSource Extract a module's source script
+#' from a fileVessel
 extractModuleSource.fileVessel <- function(moduleSource) {
     script <- readLines(moduleSource$vessel$ref)
     return(script)

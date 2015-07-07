@@ -417,11 +417,13 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
+#' @describeIn resolveInput Resolve internal input object
 resolveInput.internal <- function(moduleInput, inputObjects) {
     inputObject <- getElement(inputObjects, moduleInput$name)
     return(file.exists(inputObject))
 }
 
+#' @describeIn resolveInput Resolve file input object
 resolveInput.file <- function(moduleInput, inputObjects) {
     ref <- moduleInput$vessel$ref
     inputObject <- getElement(inputObjects, moduleInput$name)
@@ -470,7 +472,8 @@ resolveInput <- function(moduleInput, inputObjects) {
 #' }
 #'
 #' If the \code{module} has inputs the \code{inputObjects} list must
-#' have a named absolute file location for each input.
+#' have a named absolute file location for each input (except for
+#' inputs from \code{fileVessel}s with absolute 'ref's).
 #'
 #' \code{targetDirectory} must exist or the function will return an error.
 #'
@@ -490,7 +493,7 @@ resolveInput <- function(moduleInput, inputObjects) {
 #' 		       package = "conduit")
 #' mod1 <- loadModule("createGraph", 
 #' 		      ref = mod1xml)
-#' runModule(module = mod1)
+#' runModule(module = mod1, targetDirectory = tempdir())
 #' 
 #' ## run a module with inputs
 #' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
@@ -508,7 +511,8 @@ resolveInput <- function(moduleInput, inputObjects) {
 #'     list(myGraph = normalizePath(file.path("modules", "createGraph", 
 #'                                            "directedGraph.rds")))
 #'
-#' runModule(module = mod2, inputObjects = mod2inputs)
+#' runModule(module = mod2, inputObjects = mod2inputs,
+#'           targetDirectory = tempdir())
 #' 
 #' @export
 runModule <- function(module, inputObjects = list(),

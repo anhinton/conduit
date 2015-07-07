@@ -422,19 +422,19 @@ graphPipeline <- function(pipeline) {
 #'                                     package = "conduit"))
 #'
 #' ## run the pipeline
-#' runPipeline(simpleGraph)
+#' runPipeline(simpleGraph, targetDirectory = tempdir())
 #'
 #' ## python language example
 #' pythonExample <- loadPipeline("pythonExample",
 #'                               system.file("extdata", "pythonExample",
 #'                                           "pipeline.xml", package="conduit"))
-#' runPipeline(pythonExample)
+#' runPipeline(pythonExample, targetDirectory = tempdir())
 #'
 #' ## shell language example
 #' shellExample <- loadPipeline("shellExample",
 #'                              system.file("extdata", "shellExample",
 #'                                          "pipeline.xml", package="conduit"))
-#' runPipeline(shellExample)
+#' runPipeline(shellExample, targetDirectory = tempdir())
 #' 
 #' @export
 runPipeline <- function(pipeline, targetDirectory = getwd()) {

@@ -25,7 +25,8 @@ This function:
 }
 
 If the \code{module} has inputs the \code{inputObjects} list must
-have a named absolute file location for each input.
+have a named absolute file location for each input (except for
+inputs from \code{fileVessel}s with absolute 'ref's).
 
 \code{targetDirectory} must exist or the function will return an error.
 
@@ -38,7 +39,7 @@ mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
 		       package = "conduit")
 mod1 <- loadModule("createGraph",
 		      ref = mod1xml)
-runModule(module = mod1)
+runModule(module = mod1, targetDirectory = tempdir())
 
 ## run a module with inputs
 mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
@@ -56,7 +57,8 @@ mod2inputs <-
     list(myGraph = normalizePath(file.path("modules", "createGraph",
                                            "directedGraph.rds")))
 
-runModule(module = mod2, inputObjects = mod2inputs)
+runModule(module = mod2, inputObjects = mod2inputs,
+          targetDirectory = tempdir())
 }
 \seealso{
 \code{module}, \code{moduleSource}
