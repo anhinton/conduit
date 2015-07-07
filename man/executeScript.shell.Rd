@@ -4,24 +4,9 @@
 \alias{executeScript.shell}
 \title{Execute a script in the "shell" language}
 \usage{
-\method{executeScript}{shell}(module, inputObjects)
-}
-\arguments{
-\item{module}{\code{module} object}
-
-\item{inputObjects}{Named list of input objects}
-}
-\value{
-named list of \code{moduleOutput} objects
+\method{executeScript}{shell}(script)
 }
 \description{
 Execute a script in the "shell" language
-}
-\details{
-Creates a .sh script file from the supplied \code{module},
-taking specific input file paths from \code{inputs}.
-
-Writes script to \code{modulePath}, then attempts to execute the
-script in this location.
 }
 
