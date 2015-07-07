@@ -417,6 +417,49 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
+#' @describeIn resolveInput Resolve internal input object
+resolveInput.internal <- function(moduleInput, inputObjects) {
+    inputObject <- getElement(inputObjects, moduleInput$name)
+    return(file.exists(inputObject))
+}
+
+#' @describeIn resolveInput Resolve file input object
+resolveInput.file <- function(moduleInput, inputObjects) {
+    ref <- moduleInput$vessel$ref
+    inputObject <- getElement(inputObjects, moduleInput$name)
+    if (dirname(ref) == ".") {
+        ##  create a copy of resource at ref
+        file.copy(from = inputObject, to = ref, overwrite = TRUE)
+        return(file.exists(ref))
+    }
+    return(file.exists(ref))
+}
+
+#' Resolve input object
+#'
+#' This function ensures that an input object is where it needs to be
+#' for a module's source script to be executed. Returns TRUE if all is well.
+#'
+#' If the \code{moduleInput}'s vessel is a \code{fileVessel}
+#' containing a relative 'ref' the inputObject is copied to the
+#' current working directory as 'ref'.
+#'
+#' @param moduleInput \code{moduleInput} object
+#' @param inputObjects resources to be supplied as inputs
+#'
+#' @return boolean
+resolveInput <- function(moduleInput, inputObjects) {
+    type <- class(moduleInput$vessel)[[1]]
+    type <- switch(
+        type,
+        internalVessel = "internal",
+        fileVessel = "file",
+        stop("unknown input vessel")
+    )
+    class(moduleInput) <- type
+    UseMethod("resolveInput", object = moduleInput)
+}
+
 #' Execute a \code{module}'s source(s)
 #'
 #' Execute the scripts contained in or referenced by a \code{module}'s sources.
@@ -429,7 +472,8 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' }
 #'
 #' If the \code{module} has inputs the \code{inputObjects} list must
-#' have a named absolute file location for each input.
+#' have a named absolute file location for each input (except for
+#' inputs from \code{fileVessel}s with absolute 'ref's).
 #'
 #' \code{targetDirectory} must exist or the function will return an error.
 #'
@@ -449,7 +493,7 @@ saveModule <- function(module, targetDirectory = getwd(),
 #' 		       package = "conduit")
 #' mod1 <- loadModule("createGraph", 
 #' 		      ref = mod1xml)
-#' runModule(module = mod1)
+#' runModule(module = mod1, targetDirectory = tempdir())
 #' 
 #' ## run a module with inputs
 #' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
@@ -467,19 +511,15 @@ saveModule <- function(module, targetDirectory = getwd(),
 #'     list(myGraph = normalizePath(file.path("modules", "createGraph", 
 #'                                            "directedGraph.rds")))
 #'
-#' runModule(module = mod2, inputObjects = mod2inputs)
+#' runModule(module = mod2, inputObjects = mod2inputs,
+#'           targetDirectory = tempdir())
 #' 
 #' @export
 runModule <- function(module, inputObjects = list(),
                       targetDirectory = getwd()) {
-    ## check that module inputs are provided by inputObjects
-    inputs <- module$inputs
-    inputNames <- names(module$inputs)
-    objectNames <- names(inputObjects)
-    for (i in inputNames) {
-        if (!(i %in% objectNames)) {
-            stop("module input '", i, "' has not been provided")
-        }
+    ## fail if not given a module
+    if (class(module) != "module"){
+        stop("'module' is not a 'module' object")
     }
     
     ## ensure targetDirectory exists
@@ -494,11 +534,26 @@ runModule <- function(module, inputObjects = list(),
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
 
-    ## run this module with the appropriate Language Support
-    class(module) <- module$language
+    ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
-    objects <- executeScript(module, inputObjects)
+
+    ## resolve input objects
+    for (i in module$inputs) {
+        resolved <- resolveInput(i, inputObjects)
+        if (!resolved) stop("Input ", i$name, " cannot be resolved")
+    }
+
+    ## prepare a script file for execution
+    script <- prepareScript(module, inputObjects)
+    class(script) <- module$language
+
+    ## execute script file
+    try(executeScript(script))
+
+    ## check for outputs
+    language <- module$language
+    objects <- lapply(module$outputs, checkOutputObject, language, getwd())
     return(objects)
 }
 

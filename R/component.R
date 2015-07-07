@@ -72,7 +72,6 @@ exportComponent <- function(component, targetDirectory=getwd()) {
 #'
 #' @return output object
 outputObject <- function(output, language, outputDirectory) {
-    name <- output$name
     vessel <- output$vessel
     type <- class(vessel)[[1]]
     outputObject <-
