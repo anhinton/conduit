@@ -62,11 +62,9 @@ internalVessel <- function(symbol) {
 #'   \item{from where a \code{moduleSource} is to be retrieved}
 #' }
 #'
-#' \code{ref} (and \code{path}, if given), must be character vectors of
-#' length 1.
+#' \code{ref} must be a character vector of length 1.
 #'
 #' @param ref Absolute or relative location of file
-#' @param path Optional search path for locating file
 #'
 #' @return \code{fileVessel}, \code{vessel} list object
 #'
@@ -78,16 +76,11 @@ internalVessel <- function(symbol) {
 #' data_file <- fileVessel(ref="~/myFiles/data.csv")
 #'  
 #' @export
-fileVessel <- function(ref, path = NULL) {
+fileVessel <- function(ref) {
     if (!is_length1_char(ref)) {
         stop("'ref' is not a length 1 character vector")
     }
-    if (!is.null(path)) {
-        if (!is_length1_char(path)) {
-            stop("'path' is not a length 1 character vector")
-        }
-    }
-    fileVessel <- list(ref = ref, path = path)
+    fileVessel <- list(ref = ref)
     class(fileVessel) <- c("fileVessel", "vessel")
     return(fileVessel)
 }

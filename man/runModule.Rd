@@ -39,23 +39,17 @@ mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
 		       package = "conduit")
 mod1 <- loadModule("createGraph",
 		      ref = mod1xml)
-runModule(module = mod1, targetDirectory = tempdir())
+(outputs1 <- runModule(module = mod1, targetDirectory = tempdir()))
 
 ## run a module with inputs
 mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
 		          package = "conduit")
 mod2 <- loadModule("layoutGraph", ref = mod2xml)
 
-## mod1 output locations
-names(mod1$outputs)
-list.files(path = file.path("modules", mod1$name),
-           pattern = paste0("^directedGraph"), full.names = TRUE)
-
 ## mod2 input names
 names(mod2$inputs)
-mod2inputs <-
-    list(myGraph = normalizePath(file.path("modules", "createGraph",
-                                           "directedGraph.rds")))
+mod2inputs <- outputs1$directedGraph$object
+names(mod2inputs) <- names(mod2$inputs)
 
 runModule(module = mod2, inputObjects = mod2inputs,
           targetDirectory = tempdir())

@@ -4,12 +4,10 @@
 \alias{fileVessel}
 \title{Create a \code{fileVessel} object.}
 \usage{
-fileVessel(ref, path = NULL)
+fileVessel(ref)
 }
 \arguments{
 \item{ref}{Absolute or relative location of file}
-
-\item{path}{Optional search path for locating file}
 }
 \value{
 \code{fileVessel}, \code{vessel} list object
@@ -31,8 +29,7 @@ These can be used to specify:
   \item{from where a \code{moduleSource} is to be retrieved}
 }
 
-\code{ref} (and \code{path}, if given), must be character vectors of
-length 1.
+\code{ref} must be a character vector of length 1.
 }
 \examples{
 data_file <- fileVessel(ref="~/myFiles/data.csv")

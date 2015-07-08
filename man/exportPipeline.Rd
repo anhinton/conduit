@@ -28,16 +28,26 @@ no matter what the \code{pipeline} name.
 }
 \examples{
 ## create a pipeline
-mod1 <- module(name = "setX", platform = "R",
+mod1 <- module(name = "setX", language = "R",
                description = "sets the value of x",
-               outputs = list(moduleOutput(name = "x", type = "internal",
-					   format = "R character string")),
-               sources = list(moduleSource(value = "x <- \\"set\\"")))
-mod2 <- module("showY", platform = "R",
+               outputs = list(
+                   moduleOutput(
+                       name = "x",
+                       vessel = internalVessel("x"),
+                       format = ioFormat("R character string"))),
+               sources = list(
+                   moduleSource(
+                       vessel = scriptVessel("x <- \\"set\\""))))
+mod2 <- module("showY", language = "R",
                description = "displays the value of Y",
-               inputs = list(moduleInput(name = "y", type = "internal",
-                                         format = "R character string")),
-               sources = list(moduleSource(value = "print(y)")))
+               inputs = list(
+                   moduleInput(
+                       name = "y",
+                       vessel = internalVessel("y"),
+                       format = ioFormat("R character string"))),
+               sources = list(
+                   moduleSource(
+                       vessel = scriptVessel("print(y)"))))
 pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2),
                    pipes = list(pipe("setX", "x", "showY", "y")))
 outputDir <- tempdir()

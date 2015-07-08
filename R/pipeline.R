@@ -242,16 +242,26 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 #'
 #' @examples
 #' ## create a pipeline
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
-#' mod2 <- module("showY", platform = "R",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
 #' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2), 
 #'                    pipes = list(pipe("setX", "x", "showY", "y")))
 #' outputDir <- tempdir()
@@ -528,18 +538,28 @@ pipe <- function (startComponent, startOutput,
 #'
 #' @examples
 #' ## create a pipeline with one module
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
 #' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1))
 #' ## create a new module
-#' mod2 <- module("showY", platform = "R",
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
 #' ## add new module to pipeline
 #' pline1 <- addComponent(mod2, pline1)
 #' 
@@ -566,16 +586,26 @@ addComponent <- function(newComponent, pipeline) {
 #'
 #' @examples
 #' ## create a pipeline with two modules
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
-#' mod2 <- module("showY", platform = "R",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
 #' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
 #' ## create a pipe
 #' pipe1 <- pipe("setX", "x",
@@ -616,16 +646,27 @@ addPipe <- function(newPipe, pipeline) {
 #'
 #' @examples
 #' ## create some modules
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
-#' mod2 <- module("showY", platform = "R",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
 #' ## create a pipe
 #' pipe1 <- pipe("setX", "x",
 #'               "showY", "y")
