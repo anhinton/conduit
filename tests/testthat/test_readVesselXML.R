@@ -4,8 +4,7 @@ context("read vessel XML")
 ref1 <- "data.csv"
 fileXML1 <- vesselToXML(fileVessel(ref1))
 ref2 <- "different.csv"
-path2 <- "~/Documents/data"
-fileXML2 <- vesselToXML(fileVessel(ref2, path2))
+fileXML2 <- vesselToXML(fileVessel(ref2))
 symbol <- "data_good"
 internalXML <- vesselToXML(internalVessel(symbol))
 value <- c("x <- 1:10",
