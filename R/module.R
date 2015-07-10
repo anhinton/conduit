@@ -457,6 +457,33 @@ resolveInput <- function(moduleInput, inputObjects) {
     UseMethod("resolveInput", object = moduleInput)
 }
 
+#' Parse a module's host
+#'
+#' @details Default user = 'conduit', default port = '22'.
+#'
+#' @param host module host as character string
+#'
+#' @return list of user, address, port
+parseModuleHost <- function(host) {
+    if (grepl("@", host)) {
+        pieces <- strsplit(host, "@")[[1]]
+        user <- pieces[1]
+        address <- pieces[2]
+    } else {
+        user <- "conduit"
+        address <- pieces[2]
+    }
+    if (grepl(":", address)) {
+        pieces <- strsplit(address, ":")[[1]]
+        address <- pieces[1]
+        port <- pieces[2]
+    } else {
+        port <- "22"
+    }
+    host <- list(user = user, address = address, port = port)
+    return(host)
+}
+
 #' Execute a \code{module}'s source(s)
 #'
 #' Execute the scripts contained in or referenced by a \code{module}'s sources.
