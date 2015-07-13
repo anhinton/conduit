@@ -21,6 +21,17 @@ executeScript.R <- function(script) {
         switch(Sys.info()["sysname"],
                Linux = "Rscript",
                stop("conduit does not support R on your system"))
-    arguments <- c(script)
-    system2(systemCall, arguments)
+    scriptPath <- script$scriptPath
+    host <- script$host
+    if (is.null(host)) {
+        system2(systemCall, scriptPath)
+    } else {
+        system2(
+            "ssh",
+            c("-i", defaultIdfile,
+              "-p", host$port,
+              paste0(host$user, "@", host$address),
+              paste("'cd", dirname(scriptPath), ";",
+                    systemCall, basename(scriptPath), "'")))
+    }
 }

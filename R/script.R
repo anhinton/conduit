@@ -149,6 +149,9 @@ prepareScriptOutput <- function(output, language) {
     return(script)
 }
 
+#' Default idfile for ssh to remote hosts
+defaultIdfile <- system.file("conduit.key", package = "conduit")    
+
 #' Prepare a script for executing a module in its language.
 #'
 #' @details Resolves the module's internal inputs and creates a script
@@ -157,9 +160,17 @@ prepareScriptOutput <- function(output, language) {
 #' @param module \code{module} object
 #' @param inputObjects Named list of input objects
 #' 
-#' @return Script filename
+#' @return List of scriptPath and host
 prepareScript <- function(module, inputObjects) {
     language <- module$language
+
+    host <- module$host
+    host <-
+        if (is.null(host)) {
+            NULL
+        } else {
+            parseModuleHost(host)
+        }
     
     ## sort sources into correct order
     sources <- module$sources
@@ -211,11 +222,26 @@ prepareScript <- function(module, inputObjects) {
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    if (file.exists(scriptPath)) {
-        return(scriptPath)
-    } else {
-        stop("unable to create script file")
+    if (!is.null(host)) {
+        idfile <- defaultIdfile
+        user <- host$user
+        address <- host$address
+        port <- host$port
+        remotePath <- file.path(tempfile(pattern = "module"), scriptPath)
+        ## create module directory on remote machine
+        system2("ssh", c("-i", idfile, "-p", port, paste0(user, "@", address),
+                         paste0("'mkdir -p ", dirname(remotePath), "'")))
+        ## copy script to module directory
+        args <- c("-i", idfile,
+                  "-P", port,
+                  scriptPath,
+                  paste0(user, "@", address, ":", remotePath))
+        system2("scp", args)
+        scriptPath <- remotePath
     }
+    script <- list(scriptPath = scriptPath, host = host)
+    class(script) <- module$language
+    return(script)
 }
 
 #' Execute a prepared module script file.
