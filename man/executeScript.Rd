@@ -7,11 +7,11 @@
 \alias{executeScript.shell}
 \title{Execute a prepared module script file.}
 \usage{
-\method{executeScript}{R}(script)
+\method{executeScript}{R}(scriptPath, host)
 
 \method{executeScript}{python}(script)
 
-executeScript(script)
+executeScript(scriptPath, host)
 
 \method{executeScript}{shell}(script)
 }

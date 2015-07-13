@@ -6,16 +6,18 @@
 \alias{resolveInput.internal}
 \title{Resolve input object}
 \usage{
-\method{resolveInput}{internal}(moduleInput, inputObjects)
+\method{resolveInput}{internal}(moduleInput, inputObjects, host)
 
-\method{resolveInput}{file}(moduleInput, inputObjects)
+\method{resolveInput}{file}(moduleInput, inputObjects, host)
 
-resolveInput(moduleInput, inputObjects)
+resolveInput(moduleInput, inputObjects, host)
 }
 \arguments{
 \item{moduleInput}{\code{moduleInput} object}
 
 \item{inputObjects}{resources to be supplied as inputs}
+
+\item{host}{module host}
 }
 \value{
 boolean

@@ -414,19 +414,76 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
+#' Copy a file to remote host
+#'
+#' @param file file to copy
+#' @param host host list
+#' @param idfile login credentials
+#'
+#' @return 0 if successful
+fileToHost <- function(file, host, idfile = defaultIdfile) {
+    user <- host$user
+    address <- host$address
+    port <- host$port
+    directory <- host$dir
+    
+    args <- c("-i", idfile,
+              "-P", port,
+              file,
+              paste0(user, "@", address, ":", directory))
+    result <- system2("scp", args)
+    return(result)
+}
+
+#' Fetch file from remote host
+fetchFromHost <- function(file, host, idfile = defaultIdfile) {
+    user <- host$user
+    address <- host$address
+    port <- host$port
+    directory <- host$dir
+
+    args <- c("-i", idfile,
+              "-P", port,
+              paste0(user, "@", address, ":",
+                     file.path(directory, file, fsep = "/")),
+              ".")
+    result <- system2("scp", args)
+    return(result)
+}
+
 #' @describeIn resolveInput Resolve internal input object
-resolveInput.internal <- function(moduleInput, inputObjects) {
+resolveInput.internal <- function(moduleInput, inputObjects, host) {
     inputObject <- getElement(inputObjects, moduleInput$name)
+
+    ## copy inputObject to host
+    if (!is.null(host)) {
+        host_result <- fileToHost(inputObject, host)
+        if (host_result != 0) {
+            stop("Unable to copy ", inputObject, " to host ",
+                 buildModuleHost(host))
+        }
+    }
+    
     return(file.exists(inputObject))
 }
 
 #' @describeIn resolveInput Resolve file input object
-resolveInput.file <- function(moduleInput, inputObjects) {
+resolveInput.file <- function(moduleInput, inputObjects, host) {
     ref <- moduleInput$vessel$ref
     inputObject <- getElement(inputObjects, moduleInput$name)
+
+    ## copy to module directory if ref is relative
     if (dirname(ref) == ".") {
         ##  create a copy of resource at ref
         file.copy(from = inputObject, to = ref, overwrite = TRUE)
+        ## copy file to host
+        if (!is.null(host)) {
+            host_result <- fileToHost(ref, host)
+            if (host_result != 0) {
+                stop("Unable to copy ", ref, " to host ",
+                     buildModuleHost(host))
+            }
+        }
         return(file.exists(ref))
     }
     return(file.exists(ref))
@@ -443,9 +500,10 @@ resolveInput.file <- function(moduleInput, inputObjects) {
 #'
 #' @param moduleInput \code{moduleInput} object
 #' @param inputObjects resources to be supplied as inputs
+#' @param host module host
 #'
 #' @return boolean
-resolveInput <- function(moduleInput, inputObjects) {
+resolveInput <- function(moduleInput, inputObjects, host) {
     type <- class(moduleInput$vessel)[[1]]
     type <- switch(
         type,
@@ -455,6 +513,46 @@ resolveInput <- function(moduleInput, inputObjects) {
     )
     class(moduleInput) <- type
     UseMethod("resolveInput", object = moduleInput)
+}
+
+#' Checks a module output object has been created.
+#'
+#' @details Will produce an error if the object does not exist.
+#'
+#' @param output \code{moduleOutput} object
+#' @param language module language
+#' @param host host list
+#' @param internalExtension file extension for serialized internal language
+#' object
+#'
+#' @return named list containing:
+#' \itemize{
+#'   \item name: object name
+#'   \item type: object vessel type
+#'   \item object: output object
+#' }
+resolveOutput <- function (output, language, host,
+                           outputDirectory = getwd()) {
+    name <- output$name
+    vessel <- output$vessel
+    type <- class(vessel)[[1]]
+    object <- outputObject(output, language, outputDirectory)
+    if (!is.null(host)) {
+        result <- fetchFromHost(object, host)
+        if (result != 0) {
+            stop("Unable to fetch ", object, " from host ",
+                 buildModuleHost(host))
+        }
+    }
+    object <- try(normalizePath(object))
+
+    if (type == "internalVessel" || type == "fileVessel") {
+        if (!file.exists(object)) {
+            stop(paste0("output object '", name, "' does not exist"))
+        }
+    }
+    object <- list(name = name, type = type, object = object)
+    return(object)
 }
 
 #' Parse a module's host
@@ -481,6 +579,13 @@ parseModuleHost <- function(host) {
         port <- "22"
     }
     host <- list(user = user, address = address, port = port)
+    return(host)
+}
+
+#' Build a host string from a parsed host list
+buildModuleHost <- function (parsedHost) {
+    host <- paste0(parsedHost$user, "@", parsedHost$address, ":",
+                   parsedHost$port)
     return(host)
 }
 
@@ -555,23 +660,27 @@ runModule <- function(module, inputObjects = list(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
+    
+    ## prepare a script file for execution
+    script <- prepareScript(module, inputObjects)
+
+    scriptPath <- script$scriptPath
+    host <- script$host
 
     ## resolve input objects
     for (i in module$inputs) {
-        resolved <- resolveInput(i, inputObjects)
+        resolved <- resolveInput(i, inputObjects, host)
         if (!resolved) stop("Input ", i$name, " cannot be resolved")
     }
 
-    ## prepare a script file for execution
-    script <- prepareScript(module, inputObjects)
-    class(script) <- module$language
-
     ## execute script file
-    try(executeScript(script))
+    exec_result <- executeScript(scriptPath, host)
+    if (exec_result != 0) {
+        stop("Unable to execute ", scriptPath, " on host ",
+             buildModuleHost(host))
+    }
 
-    ## check for outputs
-    language <- module$language
-    objects <- lapply(module$outputs, checkOutputObject, language, getwd())
+    objects <- lapply(module$outputs, resolveOutput, module$language, host)
     return(objects)
 }
 

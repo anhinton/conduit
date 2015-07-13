@@ -23,36 +23,6 @@ extractModuleSource <- function(moduleSource) {
     UseMethod("extractModuleSource")
 }
 
-#' Checks a module output object has been created.
-#'
-#' @details Will produce an error if the object does not exist.
-#'
-#' @param output \code{moduleOutput} object
-#' @param internalExtension file extension for serialized internal language
-#' object
-#'
-#' @return named list containing:
-#' \itemize{
-#'   \item name: object name
-#'   \item type: object vessel type
-#'   \item object: output object
-#' }
-checkOutputObject <- function (output, language, outputDirectory = getwd()) {
-    name <- output$name
-    vessel <- output$vessel
-    type <- class(vessel)[[1]]
-    object <- outputObject(output, language, outputDirectory)
-    object <- try(normalizePath(object))
-
-    if (type == "internalVessel" || type == "fileVessel") {
-        if (!file.exists(object)) {
-            stop(paste0("output object '", name, "' does not exist"))
-        }
-    }
-    object <- list(name = name, type = type, object = object)
-    return(object)
-}
-
 #' Determines running order for \code{moduleSource}s.
 #'
 #' @details Order goes negative < 0 < no order given < positive.
@@ -172,6 +142,7 @@ prepareScript <- function(module, inputObjects) {
         } else {
             parseModuleHost(host)
         }
+    host <- c(host, dir = tempfile(pattern = "module"))
     
     ## sort sources into correct order
     sources <- module$sources
@@ -228,20 +199,28 @@ prepareScript <- function(module, inputObjects) {
         user <- host$user
         address <- host$address
         port <- host$port
-        remotePath <- file.path(tempfile(pattern = "module"), scriptPath)
+        directory <- host$dir
         ## create module directory on remote machine
-        system2("ssh", c("-i", idfile, "-p", port, paste0(user, "@", address),
-                         paste0("'mkdir -p ", dirname(remotePath), "'")))
+        dir_result <-
+            system2("ssh", c("-i", idfile, "-p", port,
+                             paste0(user, "@", address),
+                             paste0("'mkdir -p ", directory, "'")))
+        if (dir_result != 0) {
+            stop("Unable to create output directory on host ",
+                 user, "@", address, ":", port)
+        }
+
         ## copy script to module directory
-        args <- c("-i", idfile,
-                  "-P", port,
-                  scriptPath,
-                  paste0(user, "@", address, ":", remotePath))
-        system2("scp", args)
-        scriptPath <- remotePath
+        script_result <- fileToHost(scriptPath, host)
+        if (script_result != 0) {
+            stop("Unable to copy ", scriptPath, " to host ",
+                 user, "@", address, ":", port)
+        }
+        
+        scriptPath <- file.path(directory, scriptPath, fsep = "/")
     }
+    class(scriptPath) <- module$language
     script <- list(scriptPath = scriptPath, host = host)
-    class(script) <- module$language
     return(script)
 }
 
@@ -252,6 +231,6 @@ prepareScript <- function(module, inputObjects) {
 #' @seealso \code{runModule}
 #' 
 #' @return named list of \code{moduleOutput} objects
-executeScript <- function(script) {
+executeScript <- function(scriptPath, host) {
     UseMethod("executeScript")
 }
