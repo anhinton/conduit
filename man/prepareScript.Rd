@@ -12,7 +12,8 @@ prepareScript(module, inputObjects)
 \item{inputObjects}{Named list of input objects}
 }
 \value{
-Script filename
+List object containg scriptPath and host, with class set to
+module$language.
 }
 \description{
 Prepare a script for executing a module in its language.

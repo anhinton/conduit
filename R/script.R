@@ -160,7 +160,8 @@ defaultIdfile <- system.file("conduit.key", package = "conduit")
 #' @param module \code{module} object
 #' @param inputObjects Named list of input objects
 #' 
-#' @return List of scriptPath and host
+#' @return List object containg scriptPath and host, with class set to
+#' module$language.
 prepareScript <- function(module, inputObjects) {
     language <- module$language
 
