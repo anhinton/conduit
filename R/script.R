@@ -134,15 +134,7 @@ defaultIdfile <- system.file("conduit.key", package = "conduit")
 #' module$language.
 prepareScript <- function(module, inputObjects) {
     language <- module$language
-
-    host <- module$host
-    host <-
-        if (is.null(host)) {
-            NULL
-        } else {
-            parseModuleHost(host)
-        }
-    host <- c(host, dir = tempfile(pattern = "module"))
+    onRemoteHost <- !is.null(module$host)
     
     ## sort sources into correct order
     sources <- module$sources
@@ -167,11 +159,14 @@ prepareScript <- function(module, inputObjects) {
     inputScript <-
         lapply(
             inputs,
-            function (input, inputObjects, language) {
+            function (input, inputObjects, onRemoteHost, language) {
                 inputObject <- getElement(inputObjects, input$name)
+                ## if module is run on remote host, serialized internalVessel
+                ## will be placed in output directory
+                if(onRemoteHost) { inputObject <- basename(inputObject) }
                 script <- prepareScriptInput(input, inputObject, language)
                 return(script)
-            }, inputObjects, language)
+            }, inputObjects, onRemoteHost, language)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
@@ -194,34 +189,8 @@ prepareScript <- function(module, inputObjects) {
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    if (!is.null(host)) {
-        idfile <- defaultIdfile
-        user <- host$user
-        address <- host$address
-        port <- host$port
-        directory <- host$dir
-        ## create module directory on remote machine
-        dir_result <-
-            system2("ssh", c("-i", idfile, "-p", port,
-                             paste0(user, "@", address),
-                             paste0("'mkdir -p ", directory, "'")))
-        if (dir_result != 0) {
-            stop("Unable to create output directory on host ",
-                 user, "@", address, ":", port)
-        }
-
-        ## copy script to module directory
-        script_result <- fileToHost(scriptPath, host)
-        if (script_result != 0) {
-            stop("Unable to copy ", scriptPath, " to host ",
-                 user, "@", address, ":", port)
-        }
-        
-        scriptPath <- file.path(directory, scriptPath, fsep = "/")
-    }
     class(scriptPath) <- module$language
-    script <- list(scriptPath = scriptPath, host = host)
-    return(script)
+    return(scriptPath)
 }
 
 #' Execute a prepared module script file.
@@ -231,6 +200,6 @@ prepareScript <- function(module, inputObjects) {
 #' @seealso \code{runModule}
 #' 
 #' @return named list of \code{moduleOutput} objects
-executeScript <- function(scriptPath, host) {
+executeScript <- function(script, host) {
     UseMethod("executeScript")
 }

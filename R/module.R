@@ -414,6 +414,25 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
+#' Create module output directory on host
+#'
+#' @param host remote host list
+#'
+#' @return 0 if success
+createHostDirectory <- function(host) {
+    user <- host$user
+    address <- host$address
+    port <- host$port
+    directory <- host$directory
+    idfile <- host$idfile
+    args <- c("-i", idfile,
+              "-p", port,
+              paste0(user, "@", address),
+              paste("'mkdir -p", directory, "'"))
+    result <- system2("ssh", args)
+    return(result)
+}
+
 #' Copy a file to remote host
 #'
 #' @param file file to copy
@@ -425,7 +444,7 @@ fileToHost <- function(file, host, idfile = defaultIdfile) {
     user <- host$user
     address <- host$address
     port <- host$port
-    directory <- host$dir
+    directory <- host$directory
     
     args <- c("-i", idfile,
               "-P", port,
@@ -538,9 +557,10 @@ resolveOutput <- function (output, language, host,
     type <- class(vessel)[[1]]
     object <- outputObject(output, language, outputDirectory)
     if (!is.null(host)) {
-        result <- fetchFromHost(object, host)
+        remote_object <- basename(object)
+        result <- fetchFromHost(remote_object, host)
         if (result != 0) {
-            stop("Unable to fetch ", object, " from host ",
+            stop("Unable to fetch ", remote_object, " from host ",
                  buildModuleHost(host))
         }
     }
@@ -664,9 +684,32 @@ runModule <- function(module, inputObjects = list(),
     ## prepare a script file for execution
     script <- prepareScript(module, inputObjects)
 
-    scriptPath <- script$scriptPath
-    host <- script$host
+    ## determine host details
+    host <- module$host
+    host <- if (!is.null(host)) {
+        c(parseModuleHost(host),
+          directory = tempfile(pattern = "module"),
+          idfile = defaultIdfile)
+    }
 
+    ## prepare remote host
+    if (!is.null(host)) {
+        ## create output directory on host
+        dir_result <- createHostDirectory(host)
+        if (dir_result != 0) {
+            stop("Unable to create output directory on host ",
+                 buildModuleHost(host))
+        }
+        
+        ## copy script file to host
+        script_result <- fileToHost(script, host)
+        if (script_result != 0) {
+            stop("Unable to copy ", script, " to host ",
+                 buildModuleHost(host))
+        }
+    }
+
+    
     ## resolve input objects
     for (i in module$inputs) {
         resolved <- resolveInput(i, inputObjects, host)
@@ -674,9 +717,9 @@ runModule <- function(module, inputObjects = list(),
     }
 
     ## execute script file
-    exec_result <- executeScript(scriptPath, host)
+    exec_result <- executeScript(script, host)
     if (exec_result != 0) {
-        stop("Unable to execute ", scriptPath, " on host ",
+        stop("Unable to execute ", script, " on host ",
              buildModuleHost(host))
     }
 

@@ -80,12 +80,12 @@ outputObject <- function(output, language, outputDirectory) {
                    paste0(vessel$symbol, internalExtension(language)),
                fileVessel = vessel$ref,
                stop("vessel type not defined"))
-    ## if (dirname(outputObject) == ".") {
-    ##     outputObject <- file.path(outputDirectory, outputObject)
-    ## }
-    ## if (file.exists(outputObject)) {
-    ##     outputObject <- try(normalizePath(outputObject))
-    ## }
+    if (dirname(outputObject) == ".") {
+        outputObject <- file.path(outputDirectory, outputObject)
+    }
+    if (file.exists(outputObject)) {
+        outputObject <- try(normalizePath(outputObject))
+    }
     return(outputObject)
 }
 
