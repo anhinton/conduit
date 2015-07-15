@@ -690,7 +690,9 @@ runModule <- function(module, inputObjects = list(),
     host <- module$host
     host <- if (!is.null(host)) {
         c(parseModuleHost(host),
-          directory = tempfile(pattern = "module"),
+          directory =
+              file.path("/tmp", sessionID, 
+                        basename(tempfile("module")), fsep="/"),
           idfile = defaultIdfile)
     }
 
