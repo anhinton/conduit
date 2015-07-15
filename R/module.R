@@ -352,7 +352,7 @@ moduleToXML <- function (module,
                              attrs = c(language = module$language,
                                  host = module$host),
                              namespaceDefinitions = namespaceDefinitions)
-    host <- newXMLNoe("host", children = module$host)
+    host <- newXMLNode("host", children = module$host)
     description <- newXMLNode("description", children = module$description)
     inputs <- lapply(module$inputs, moduleIOToXML)
     outputs <- lapply(module$outputs, moduleIOToXML)
