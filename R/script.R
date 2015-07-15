@@ -196,10 +196,11 @@ prepareScript <- function(module, inputObjects) {
 #' Execute a prepared module script file.
 #'
 #' @param script script file to be executed
+#' @param host list of host details
 #'
 #' @seealso \code{runModule}
 #' 
 #' @return named list of \code{moduleOutput} objects
-executeScript <- function(script, host) {
+executeScript <- function(script, host = NULL) {
     UseMethod("executeScript")
 }

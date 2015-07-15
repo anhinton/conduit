@@ -156,6 +156,7 @@ readModuleXML <- function (name, xml) {
 
     module <- module(name = name,
                      language = language,
+                     host = host,
                      description = description,
                      inputs = inputs,
                      sources = sources,
@@ -351,6 +352,7 @@ moduleToXML <- function (module,
                              attrs = c(language = module$language,
                                  host = module$host),
                              namespaceDefinitions = namespaceDefinitions)
+    host <- newXMLNoe("host", children = module$host)
     description <- newXMLNode("description", children = module$description)
     inputs <- lapply(module$inputs, moduleIOToXML)
     outputs <- lapply(module$outputs, moduleIOToXML)
@@ -719,8 +721,10 @@ runModule <- function(module, inputObjects = list(),
     ## execute script file
     exec_result <- executeScript(script, host)
     if (exec_result != 0) {
-        stop("Unable to execute ", script, " on host ",
-             buildModuleHost(host))
+        stop("Unable to execute ", script,
+             if (!is.null(host)) {
+                 paste0(" on host ", buildModuleHost(host))
+             })
     }
 
     objects <- lapply(module$outputs, resolveOutput, module$language, host)
