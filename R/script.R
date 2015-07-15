@@ -119,9 +119,6 @@ prepareScriptOutput <- function(output, language) {
     return(script)
 }
 
-#' Default idfile for ssh to remote hosts
-defaultIdfile <- system.file("conduit.key", package = "conduit")    
-
 #' Prepare a script for executing a module in its language.
 #'
 #' @details Resolves the module's internal inputs and creates a script
