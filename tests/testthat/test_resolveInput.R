@@ -33,7 +33,7 @@ test_that(
             list(good = system.file(
                      "extdata", "simpleGraph", "createGraph.xml",
                      package = "conduit"))
-        expect_true(resolveInput(input, inputObjects))
+        expect_true(resolveInput(input, inputObjects, host = NULL))
     })
 
 test_that(
@@ -48,5 +48,5 @@ test_that(
         filename <- tempfile("testRDS", fileext=".rds")
         saveRDS(1:10, filename)
         inputObjects <- list(fantastic = filename)
-        expect_true(resolveInput(input, inputObjects))
+        expect_true(resolveInput(input, inputObjects, host = NULL))
     })

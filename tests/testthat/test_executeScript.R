@@ -14,8 +14,7 @@ test_that(
                                    package = "conduit"))
         inputObjects <- NULL
         script <- prepareScript(module1, inputObjects)
-        class(script) <- module1$language
-        expect_equal(executeScript(script), 0)
+        expect_equal(executeScript(script = script, host = NULL), 0)
     })
 
 test_that(
@@ -37,8 +36,7 @@ test_that(
                     ioFormat("python list"))))
         inputObjects <- NULL
         script <- prepareScript(module2, inputObjects)
-        class(script) <- module2$language
-        expect_equal(executeScript(script), 0)
+        expect_equal(executeScript(script = script, host = NULL), 0)
     })
 
 test_that(
@@ -60,6 +58,5 @@ test_that(
                     ioFormat("shell environment variable"))))
         inputObjects <- NULL
         script <- prepareScript(module3, inputObjects)
-        class(script) <- module3$language
-        expect_equal(executeScript(script), 0)
+        expect_equal(executeScript(script = script, host = NULL), 0)
     })
