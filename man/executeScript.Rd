@@ -9,14 +9,16 @@
 \usage{
 \method{executeScript}{R}(script, host)
 
-\method{executeScript}{python}(script)
+\method{executeScript}{python}(script, host)
 
-executeScript(script, host)
+executeScript(script, host = NULL)
 
-\method{executeScript}{shell}(script)
+\method{executeScript}{shell}(script, host)
 }
 \arguments{
 \item{script}{script file to be executed}
+
+\item{host}{list of host details}
 }
 \value{
 named list of \code{moduleOutput} objects
