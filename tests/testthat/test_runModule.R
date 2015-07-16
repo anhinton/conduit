@@ -38,7 +38,15 @@ test_that(
 
         ## test script creation
         expect_match(prepareScript(module, inputObjects),
-                     "script.R")      
+                     "script.R")
+
+        ## module with remote host uses relative refs for serialized
+        ## internalVessel input files
+        module$host <- "conduit@127.0.0.1:2222"
+        script <- prepareScript(module, inputObjects)
+        inputLine <- readLines(script)[1]
+        expect_true(grepl(basename(inputObjects[[1]]), inputLine))
+        expect_false(grepl(dirname(inputObjects[[1]]), inputLine))
     })
 
 ## test parseModuleHost
