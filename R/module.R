@@ -600,7 +600,11 @@ parseModuleHost <- function(host) {
     } else {
         port <- "22"
     }
-    host <- list(user = user, address = address, port = port)
+    directory =
+        file.path("/tmp", sessionID, basename(tempfile("module")), fsep="/")
+    idfile = defaultIdfile
+    host <- list(user = user, address = address, port = port,
+                 directory = directory, idfile = idfile)
     return(host)
 }
 
@@ -688,13 +692,7 @@ runModule <- function(module, inputObjects = list(),
 
     ## determine host details
     host <- module$host
-    host <- if (!is.null(host)) {
-        c(parseModuleHost(host),
-          directory =
-              file.path("/tmp", sessionID, 
-                        basename(tempfile("module")), fsep="/"),
-          idfile = defaultIdfile)
-    }
+    host <- if (!is.null(host)) parseModuleHost(host)
 
     ## prepare remote host
     if (!is.null(host)) {

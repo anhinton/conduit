@@ -17,11 +17,11 @@ internalOutputScript.R <- function (symbol) {
 #' @describeIn executeScript Execute a script in the "R" language
 executeScript.R <- function(script, host) {
     ## batch the script file in an R session
-    systemCall <-
-        switch(Sys.info()["sysname"],
-               Linux = "Rscript",
-               stop("conduit does not support R on your system"))
     if (is.null(host)) {
+        systemCall <-
+            switch(Sys.info()["sysname"],
+                   Linux = "Rscript",
+                   stop("conduit does not support R on your system"))
         system2(systemCall, script)
     } else {
         user <- host$user
@@ -35,7 +35,7 @@ executeScript.R <- function(script, host) {
               "-p", port,
               paste0(user, "@", address),
               paste("'cd", directory, ";",
-                    systemCall, script, "'")))
+                    "Rscript", script, "'")))
         return(exec_result)
     }
 }

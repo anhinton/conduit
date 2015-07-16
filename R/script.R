@@ -197,7 +197,7 @@ prepareScript <- function(module, inputObjects) {
 #'
 #' @seealso \code{runModule}
 #' 
-#' @return named list of \code{moduleOutput} objects
+#' @return 0 if successful
 executeScript <- function(script, host = NULL) {
     UseMethod("executeScript")
 }
