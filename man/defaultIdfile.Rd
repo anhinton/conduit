@@ -3,14 +3,18 @@
 \docType{data}
 \name{defaultIdfile}
 \alias{defaultIdfile}
-\title{Default idfile for ssh to remote hosts}
+\title{Default idfile for ssh to remote hosts.}
 \format{\preformatted{ chr "/home/ashley/uoastorage/openapi/conduit/inst/conduit.key"
 }}
 \usage{
 defaultIdfile
 }
 \description{
-Default idfile for ssh to remote hosts
+Availabe at \code{system.file("conduit.key", package = "conduit")}
+}
+\details{
+Corresponding public key at
+\code{system.file("conduit.key.pub", package = "conduit")}
 }
 \keyword{datasets}
 

@@ -3,14 +3,17 @@
 \docType{data}
 \name{sessionID}
 \alias{sessionID}
-\title{Conduit session ID}
-\format{\preformatted{ chr "conduit15c5641ae30e"
+\title{Probably unique conduit session ID}
+\format{\preformatted{ chr "conduit616a461dadd8"
 }}
 \usage{
 sessionID
 }
 \description{
-Conduit session ID
+Probably unique conduit session ID
+}
+\seealso{
+\code{parseModuleHost}
 }
 \keyword{datasets}
 

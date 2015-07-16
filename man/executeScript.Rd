@@ -21,7 +21,7 @@ executeScript(script, host = NULL)
 \item{host}{list of host details}
 }
 \value{
-named list of \code{moduleOutput} objects
+0 if successful
 }
 \description{
 Execute a prepared module script file.

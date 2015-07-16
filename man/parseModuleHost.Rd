@@ -10,12 +10,23 @@ parseModuleHost(host)
 \item{host}{module host as character string}
 }
 \value{
-list of user, address, port
+list of \itemize{
+  \item user
+  \item address
+  \item port
+  \item directory
+  \item idfile}
 }
 \description{
-Parse a module's host
+Parse the the host attribute from a \code{module} object.
 }
 \details{
 Default user = 'conduit', default port = '22'.
+
+\code{directory} slot is filled by a random output directory to be
+created on the remote host at \code{/tmp/{sessionID}/}
+}
+\seealso{
+\code{sessionID}
 }
 

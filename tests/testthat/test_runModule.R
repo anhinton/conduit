@@ -38,7 +38,32 @@ test_that(
 
         ## test script creation
         expect_match(prepareScript(module, inputObjects),
-                     "script.R")
+                     "script.R")      
+    })
+
+## test parseModuleHost
+test_that(
+    "parseModuleHost() works",
+    {
+        host <- "conduit@server:666"
+        parsedHost <- parseModuleHost(host)
+        expect_match(names(parsedHost), "user", all=F)
+        expect_match(names(parsedHost), "address", all=F)
+        expect_match(names(parsedHost), "port", all=F)
+        expect_match(names(parsedHost), "directory", all=F)
+        expect_match(names(parsedHost), "idfile", all=F)
+        expect_match(parsedHost$user, "conduit")
+        expect_match(parsedHost$address, "server")
+        expect_match(parsedHost$port, "666")
+        expect_match(parsedHost$directory, paste0("^/tmp/", sessionID))
+        expect_match(parsedHost$idfile, defaultIdfile)
+
+        ## no username or host given
+        host <- "6.6.6.6"
+        parsedHost <- parseModuleHost(host)
+        expect_match(parsedHost$user, "conduit")
+        expect_match(parsedHost$address, "6.6.6.6")
+        expect_match(parsedHost$port, "22")
     })
 
 ## test resolveInput()

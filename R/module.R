@@ -579,11 +579,23 @@ resolveOutput <- function (output, language, host,
 
 #' Parse a module's host
 #'
+#' Parse the the host attribute from a \code{module} object.
+#'
 #' @details Default user = 'conduit', default port = '22'.
+#'
+#' \code{directory} slot is filled by a random output directory to be
+#' created on the remote host at \code{/tmp/{sessionID}/}
 #'
 #' @param host module host as character string
 #'
-#' @return list of user, address, port
+#' @seealso \code{sessionID}
+#'
+#' @return list of \itemize{
+#'   \item user
+#'   \item address
+#'   \item port
+#'   \item directory
+#'   \item idfile}
 parseModuleHost <- function(host) {
     if (grepl("@", host)) {
         pieces <- strsplit(host, "@")[[1]]
@@ -591,7 +603,7 @@ parseModuleHost <- function(host) {
         address <- pieces[2]
     } else {
         user <- "conduit"
-        address <- pieces[2]
+        address <- host
     }
     if (grepl(":", address)) {
         pieces <- strsplit(address, ":")[[1]]
