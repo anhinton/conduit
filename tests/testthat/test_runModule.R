@@ -1,6 +1,159 @@
 library(conduit)
-context("run modules")
+context("execute modules")
 
+## test prepareScript
+test_that(
+    "R script file is created",
+    {
+        skip_on_cran()
+
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        
+        ## create RDS file for input
+        input_object <- 1:10
+        filename <- tempfile()
+        saveRDS(input_object, filename)
+        inputObjects <- list(a = filename)
+
+        ## create module
+        module <-
+            module(
+                "testy",
+                "R",
+                inputs =
+                    list(moduleInput(
+                        "a",
+                        internalVessel("onetoten"),
+                        ioFormat("R numeric vector"))),
+                sources =
+                    list(moduleSource(
+                        scriptVessel(
+                            "top <- head(onetoten)"))),
+                outputs =
+                    list(moduleOutput(
+                        "b",
+                        internalVessel("top"),
+                        ioFormat("R character vector"))))
+
+        ## test script creation
+        expect_match(prepareScript(module, inputObjects),
+                     "script.R")
+    })
+
+## test resolveInput()
+test_that(
+    "absolute fileVessel refs are resolved",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        input <-
+            moduleInput(
+                "great",
+                fileVessel(
+                    system.file("extdata", "simpleGraph", "createGraph.xml",
+                                package = "conduit")),
+                ioFormat("text file"))
+        inputObjects <- NULL
+        expect_true(resolveInput(input, inputObjects))
+    })
+
+test_that(
+    "relative fileVessel refs are resolved",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        input <-
+            moduleInput(
+                "good",
+                fileVessel("test2"),               
+                ioFormat("text file"))
+        inputObjects <-
+            list(good = system.file(
+                     "extdata", "simpleGraph", "createGraph.xml",
+                     package = "conduit"))
+        expect_true(resolveInput(input, inputObjects, host = NULL))
+    })
+
+test_that(
+    "internalVessel inputs are resolved",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        input <- moduleInput("fantastic",
+                             internalVessel("y"),
+                             ioFormat("R numeric vector"))
+        filename <- tempfile("testRDS", fileext=".rds")
+        saveRDS(1:10, filename)
+        inputObjects <- list(fantastic = filename)
+        expect_true(resolveInput(input, inputObjects, host = NULL))
+    })
+
+## test executeScript
+test_that(
+    "executeScript.R works",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        module1 <-
+            loadModule("module1",
+                       system.file("extdata", "test_pipeline",
+                                   "module1.xml",
+                                   package = "conduit"))
+        inputObjects <- NULL
+        script <- prepareScript(module1, inputObjects)
+        expect_equal(executeScript(script = script, host = NULL), 0)
+    })
+
+test_that(
+    "executeScript.python works",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        module2 <- module(
+            "module2",
+            "python",
+            sources = list(
+                moduleSource(
+                    scriptVessel("x = [1, 2, 3, 5, 10]"))),
+            outputs = list(
+                moduleOutput(
+                    "x",
+                    internalVessel("x"),
+                    ioFormat("python list"))))
+        inputObjects <- NULL
+        script <- prepareScript(module2, inputObjects)
+        expect_equal(executeScript(script = script, host = NULL), 0)
+    })
+
+test_that(
+    "executeScript.shell works",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        module3 <- module(
+            "module3",
+            "shell",
+            sources = list(
+                moduleSource(
+                    scriptVessel("x=\"lemon duds\"]"))),
+            outputs = list(
+                moduleOutput(
+                    "x",
+                    internalVessel("x"),
+                    ioFormat("shell environment variable"))))
+        inputObjects <- NULL
+        script <- prepareScript(module3, inputObjects)
+        expect_equal(executeScript(script = script, host = NULL), 0)
+    })
+
+## test runModule()
 targ = tempdir()
 
 createGraph <- loadModule(
