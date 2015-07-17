@@ -32,6 +32,9 @@ inputs from \code{fileVessel}s with absolute 'ref's).
 
 This function creates a directory called \sQuote{modules} in
 the \code{targetDirectory} if it does not already exist.
+
+If \code{module$host} is not NULL the remote host must exist and be
+accessible by conduit or this function will fail.
 }
 \examples{
 ## run a module with no inputs

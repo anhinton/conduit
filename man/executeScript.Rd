@@ -7,22 +7,28 @@
 \alias{executeScript.shell}
 \title{Execute a prepared module script file.}
 \usage{
-\method{executeScript}{R}(script)
+\method{executeScript}{R}(script, host)
 
-\method{executeScript}{python}(script)
+\method{executeScript}{python}(script, host)
 
-executeScript(script)
+executeScript(script, host = NULL)
 
-\method{executeScript}{shell}(script)
+\method{executeScript}{shell}(script, host)
 }
 \arguments{
 \item{script}{script file to be executed}
+
+\item{host}{list of host details}
 }
 \value{
-named list of \code{moduleOutput} objects
+0 if successful
 }
 \description{
 Execute a prepared module script file.
+}
+\details{
+If \code{host} is provided script will be executed on
+remote host in \code{host$directory}.
 }
 \section{Methods (by class)}{
 \itemize{

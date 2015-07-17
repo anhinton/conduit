@@ -18,12 +18,27 @@ internalOutputScript.python <- function (symbol) {
 }
 
 #' @describeIn executeScript Execute a script in the "python" language
-executeScript.python <- function(script) {
+executeScript.python <- function(script, host) {    
     ## batch the script file in a python session
-    systemCall <-
-        switch(Sys.info()["sysname"],
-               Linux = "python",
-               stop("conduit does not support python on your system"))
-    arguments <- c(script)
-    system2(systemCall, arguments)
+    if (is.null(host)) {
+        systemCall <-
+            switch(Sys.info()["sysname"],
+                   Linux = "python",
+                   stop("conduit does not support python on your system"))    
+        system2(systemCall, script)
+    } else {
+        user <- host$user
+        address <- host$address
+        port <- host$port
+        directory <- host$directory
+        idfile <- host$idfile
+        exec_result <- system2(
+            "ssh",
+            c("-i", idfile,
+              "-p", port,
+              paste0(user, "@", address),
+              paste("'cd", directory, ";",
+                    "python", script, "'")))
+        return(exec_result)
+    }
 }

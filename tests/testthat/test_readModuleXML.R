@@ -1,6 +1,111 @@
 library(conduit)
 context("read module XML")
 
+## read <format> XML
+value1 <- "R data job"
+type1 <- "text"
+format1XML <- ioFormatToXML(ioFormat(value1, type1))
+
+test_that("readIOFormatXML fails for incorrect node name", {
+    notAFormat <- newXMLNode(name = "notAFormat")
+    expect_error(readIOFormatXML(notAFormat),
+                 "ioFormat XML is invalid")
+})
+
+test_that("readIOFormatXML creates appropriate ioFormat objects", {
+    format1 <- readIOFormatXML(format1XML)
+    expect_match(class(format1), "ioFormat")
+    expect_match(format1$type, "text")
+})
+
+## read <input> and <output> XML
+name1 <- "data"
+type1 <- "input"
+vessel1 <- internalVessel("myData")
+format1 <- ioFormat("R data")
+inputXML1 <- moduleIOToXML(moduleIO(name1, type1, vessel1, format1))
+
+name2 <- "graph"
+type2 <- "output"
+vessel2 <- fileVessel("graph.dot")
+format2 <- ioFormat("graphviz dot file")
+outputXML2 <- moduleIOToXML(moduleIO(name2, type2, vessel2, format2))
+
+test_that("readModuleIOXML fails for invalid named XML", {
+    notIO <- XML::newXMLNode("notInput")
+    expect_error(readModuleIOXML(notIO),
+                 "moduleIO XML is invalid")
+})
+
+test_that("readModuleIOXML creates appropriate inputs", {
+    input1 <- readModuleIOXML(inputXML1)
+    expect_match(class(input1)[2], "moduleIO")
+    expect_match(input1$type, type1)
+})
+
+test_that("readModuleIOXML creates appropriate outputs", {
+    output2 <- readModuleIOXML(outputXML2)
+    expect_match(class(output2)[2], "moduleIO")
+    expect_match(output2$type, type2)
+})
+
+## read <source> XML
+file1 <- fileVessel("abs.csv")
+order1 <- 9
+sourceXML1 <- moduleSourceToXML(moduleSource(file1, order1))
+
+script2 <- scriptVessel(c("x", "b", "92 / 2"))
+sourceXML2 <- moduleSourceToXML(moduleSource(script2))
+
+test_that("readModuleSourceXML fails for invalid XML", {
+    notSource <- XML::newXMLNode("notSource")
+    expect_error(readModuleSourceXML(notSource),
+                 "moduleSource XML is invalid")
+})
+
+test_that("readModuleSourceXML creates appropriate objects", {
+    fileSource <- readModuleSourceXML(sourceXML1)
+    expect_match(class(fileSource), "moduleSource")
+    expect_equal(fileSource$order, order1)
+    scriptSource <- readModuleSourceXML(sourceXML2)
+    expect_match(class(scriptSource), "moduleSource")
+})
+
+## read vessel XML - <internal>, <file>
+ref1 <- "data.csv"
+fileXML1 <- vesselToXML(fileVessel(ref1))
+ref2 <- "different.csv"
+fileXML2 <- vesselToXML(fileVessel(ref2))
+symbol <- "data_good"
+internalXML <- vesselToXML(internalVessel(symbol))
+value <- c("x <- 1:10",
+           "y <- rnorm(10, 0, 1)",
+           "plot(x, y)")
+scriptXML <- vesselToXML(scriptVessel(value))
+
+test_that("readVesselXML fails for unknown type", {
+    nonVessel <- XML::newXMLNode(name = "notAVessel")
+    expect_error(readVesselXML(nonVessel),
+                 "'vessel' xml unknown type")
+})
+
+test_that("readVesselXML creates appropriate vessel objects", {
+    ## fileXML1
+    fileVessel1 <- readVesselXML(fileXML1)
+    expect_match(class(fileVessel1), "fileVessel", all=F)
+    expect_match(class(fileVessel1), "vessel", all=F)
+    fileVessel2 <- readVesselXML(fileXML2)
+    expect_match(class(fileVessel2), "fileVessel", all=F)
+    expect_match(class(fileVessel2), "vessel", all=F)
+    internalVessel <- readVesselXML(internalXML)
+    expect_match(class(internalVessel), "internalVessel", all=F)
+    expect_match(class(internalVessel), "vessel", all=F)
+    scriptVessel <- readVesselXML(scriptXML)
+    expect_match(class(scriptVessel), "scriptVessel", all=F)
+    expect_match(class(scriptVessel), "vessel", all=F)
+})
+
+## read <module> XML
 moduleXml <-
     moduleToXML(
         module(
@@ -24,4 +129,36 @@ test_that("readModuleXML creates appropriate module object", {
     module <- readModuleXML(name = "first", xml = moduleXml)
     expect_match(class(module), "module")
     expect_match(module$name, "first")
+})
+
+## load module from XML file
+test_that("loadModule() fails for non-existent file", {
+    skip_on_cran()
+    expect_error(
+        loadModule(
+            name = "failtest",
+            ref = tempfile(pattern = "doesnotexits",
+                tmpdir = tempdir())),
+        "Unable to load module")
+})
+
+test_that("loadModule() handles ref, no path", {
+    skip_on_cran()
+    ref1 <- system.file("extdata", "simpleGraph", "createGraph.xml",
+                        package = "conduit")
+    dir1 <- dirname(ref1)
+    mod1 <- loadModule(name = "mod1",
+                       ref = ref1)
+    expect_match(class(mod1), "module")
+    expect_match(attr(mod1, "location"), dir1)
+})
+
+test_that("loadModule() handles ref and path", {
+    skip_on_cran()
+    ref2 <- "layoutGraph.xml"
+    path2 <- system.file("extdata", "simpleGraph", package = "conduit")
+    dir2 <-  system.file("extdata", "simpleGraph", package = "conduit")
+    mod2 <- loadModule("mod2", ref2, path2)
+    expect_match(class(mod2), "module")
+    expect_match(attr(mod2, "location"), dir2)
 })

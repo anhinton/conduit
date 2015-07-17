@@ -6,16 +6,18 @@
 \alias{resolveInput.internal}
 \title{Resolve input object}
 \usage{
-\method{resolveInput}{internal}(moduleInput, inputObjects)
+\method{resolveInput}{internal}(moduleInput, inputObjects, host)
 
-\method{resolveInput}{file}(moduleInput, inputObjects)
+\method{resolveInput}{file}(moduleInput, inputObjects, host)
 
-resolveInput(moduleInput, inputObjects)
+resolveInput(moduleInput, inputObjects, host)
 }
 \arguments{
 \item{moduleInput}{\code{moduleInput} object}
 
 \item{inputObjects}{resources to be supplied as inputs}
+
+\item{host}{module host}
 }
 \value{
 boolean
@@ -25,9 +27,14 @@ This function ensures that an input object is where it needs to be
 for a module's source script to be executed. Returns TRUE if all is well.
 }
 \details{
-If the \code{moduleInput}'s vessel is a \code{fileVessel}
-containing a relative 'ref' the inputObject is copied to the
-current working directory as 'ref'.
+If the \code{moduleInput$vessel} is any of \itemize{
+  \item{a \code{fileVessel} containing a relative \code{ref}}
+  \item{an \code{internalVessel}, and \code{host} is not NULL}}
+the \code{inputObject} corresponding to \code{moduleInput$name} is copied
+to the current working directory.
+
+If \code{host} is not NULL this \code{moduleInput} is also copied
+to the module output directory on the remote host.
 }
 \section{Methods (by class)}{
 \itemize{

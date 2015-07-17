@@ -23,36 +23,6 @@ extractModuleSource <- function(moduleSource) {
     UseMethod("extractModuleSource")
 }
 
-#' Checks a module output object has been created.
-#'
-#' @details Will produce an error if the object does not exist.
-#'
-#' @param output \code{moduleOutput} object
-#' @param internalExtension file extension for serialized internal language
-#' object
-#'
-#' @return named list containing:
-#' \itemize{
-#'   \item name: object name
-#'   \item type: object vessel type
-#'   \item object: output object
-#' }
-checkOutputObject <- function (output, language, outputDirectory = getwd()) {
-    name <- output$name
-    vessel <- output$vessel
-    type <- class(vessel)[[1]]
-    object <- outputObject(output, language, outputDirectory)
-    object <- try(normalizePath(object))
-
-    if (type == "internalVessel" || type == "fileVessel") {
-        if (!file.exists(object)) {
-            stop(paste0("output object '", name, "' does not exist"))
-        }
-    }
-    object <- list(name = name, type = type, object = object)
-    return(object)
-}
-
 #' Determines running order for \code{moduleSource}s.
 #'
 #' @details Order goes negative < 0 < no order given < positive.
@@ -157,9 +127,11 @@ prepareScriptOutput <- function(output, language) {
 #' @param module \code{module} object
 #' @param inputObjects Named list of input objects
 #' 
-#' @return Script filename
+#' @return List object containg scriptPath and host, with class set to
+#' module$language.
 prepareScript <- function(module, inputObjects) {
     language <- module$language
+    onRemoteHost <- !is.null(module$host)
     
     ## sort sources into correct order
     sources <- module$sources
@@ -184,11 +156,14 @@ prepareScript <- function(module, inputObjects) {
     inputScript <-
         lapply(
             inputs,
-            function (input, inputObjects, language) {
+            function (input, inputObjects, onRemoteHost, language) {
                 inputObject <- getElement(inputObjects, input$name)
+                ## if module is run on remote host, serialized internalVessel
+                ## will be placed in output directory
+                if(onRemoteHost) { inputObject <- basename(inputObject) }
                 script <- prepareScriptInput(input, inputObject, language)
                 return(script)
-            }, inputObjects, language)
+            }, inputObjects, onRemoteHost, language)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
@@ -211,20 +186,21 @@ prepareScript <- function(module, inputObjects) {
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    if (file.exists(scriptPath)) {
-        return(scriptPath)
-    } else {
-        stop("unable to create script file")
-    }
+    class(scriptPath) <- module$language
+    return(scriptPath)
 }
 
 #' Execute a prepared module script file.
 #'
+#' @details If \code{host} is provided script will be executed on
+#' remote host in \code{host$directory}.
+#'
 #' @param script script file to be executed
+#' @param host list of host details
 #'
 #' @seealso \code{runModule}
 #' 
-#' @return named list of \code{moduleOutput} objects
-executeScript <- function(script) {
+#' @return 0 if successful
+executeScript <- function(script, host = NULL) {
     UseMethod("executeScript")
 }
