@@ -2,11 +2,23 @@
 % Please edit documentation in R/module.R
 \name{fetchFromHost}
 \alias{fetchFromHost}
-\title{Fetch file from remote host}
+\title{Fetch file from remote host.}
 \usage{
-fetchFromHost(file, host, idfile = defaultIdfile)
+fetchFromHost(file, host)
+}
+\arguments{
+\item{file}{file path}
+
+\item{host}{host list}
+}
+\value{
+0 if successful
 }
 \description{
-Fetch file from remote host
+Fetch file from remote host.
+}
+\details{
+copies file at \code{file} from remote directory
+\code{host$directory} to the current working directory.
 }
 

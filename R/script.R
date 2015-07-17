@@ -192,6 +192,9 @@ prepareScript <- function(module, inputObjects) {
 
 #' Execute a prepared module script file.
 #'
+#' @details If \code{host} is provided script will be executed on
+#' remote host in \code{host$directory}.
+#'
 #' @param script script file to be executed
 #' @param host list of host details
 #'

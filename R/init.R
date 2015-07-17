@@ -6,9 +6,7 @@
 #' \code{system.file("conduit.key.pub", package = "conduit")}
 defaultIdfile <- system.file("conduit.key", package = "conduit")
 
-#' Probably unique conduit session ID
-#'
-#' @seealso \code{parseModuleHost}
+## Probably unique conduit session ID
 sessionID <- basename(tempfile("conduit"))
 
 #' Character used to separate search paths

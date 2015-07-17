@@ -13,8 +13,7 @@ resolveOutput(output, language, host, outputDirectory = getwd())
 
 \item{host}{host list}
 
-\item{internalExtension}{file extension for serialized internal language
-object}
+\item{outputDirectory}{location of module output files}
 }
 \value{
 named list containing:
@@ -29,5 +28,8 @@ Checks a module output object has been created.
 }
 \details{
 Will produce an error if the object does not exist.
+
+If \code{host} is not NULL the function attempts to copy the output object
+across from the remote host and into the current working directory.
 }
 

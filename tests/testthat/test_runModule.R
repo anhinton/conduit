@@ -1,6 +1,16 @@
 library(conduit)
 context("execute modules")
 
+targ = tempdir()
+createGraph <- loadModule(
+    "createGraph",
+    system.file("extdata", "simpleGraph", "createGraph.xml",
+                package = "conduit"))
+layoutGraph <- loadModule(
+    "layoutGraph",
+    system.file("extdata", "simpleGraph", "layoutGraph.xml",
+                package = "conduit"))
+
 ## test prepareScript
 test_that(
     "R script file is created",
@@ -73,6 +83,7 @@ test_that(
         expect_match(parsedHost$address, "6.6.6.6")
         expect_match(parsedHost$port, "22")
     })
+          
 
 ## test resolveInput()
 test_that(
@@ -187,18 +198,6 @@ test_that(
     })
 
 ## test runModule()
-targ = tempdir()
-
-createGraph <- loadModule(
-    "createGraph",
-    system.file("extdata", "simpleGraph", "createGraph.xml",
-                package = "conduit"))
-layoutGraph <- loadModule(
-    "layoutGraph",
-    system.file("extdata", "simpleGraph", "layoutGraph.xml",
-                package = "conduit"))
-    
-
 test_that(
     "runModule() fails when not given a 'module' object",
     {

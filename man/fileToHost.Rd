@@ -2,7 +2,7 @@
 % Please edit documentation in R/module.R
 \name{fileToHost}
 \alias{fileToHost}
-\title{Copy a file to remote host}
+\title{Copy a file to remote module host}
 \usage{
 fileToHost(file, host, idfile = defaultIdfile)
 }
@@ -17,6 +17,13 @@ fileToHost(file, host, idfile = defaultIdfile)
 0 if successful
 }
 \description{
-Copy a file to remote host
+Copy a file to remote module host
+}
+\details{
+copies file at \code{file} to remote directory
+\code{host$directory}.
+}
+\seealso{
+\code{runModule}
 }
 

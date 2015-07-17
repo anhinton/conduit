@@ -2,7 +2,7 @@
 % Please edit documentation in R/module.R
 \name{createHostDirectory}
 \alias{createHostDirectory}
-\title{Create module output directory on host}
+\title{Creates module output directory on host}
 \usage{
 createHostDirectory(host)
 }
@@ -13,6 +13,12 @@ createHostDirectory(host)
 0 if success
 }
 \description{
-Create module output directory on host
+Creates module output directory on host
+}
+\details{
+Directory to be created is given by \code{host$directory}
+}
+\seealso{
+\code{runModule}
 }
 

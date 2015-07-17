@@ -26,6 +26,10 @@ executeScript(script, host = NULL)
 \description{
 Execute a prepared module script file.
 }
+\details{
+If \code{host} is provided script will be executed on
+remote host in \code{host$directory}.
+}
 \section{Methods (by class)}{
 \itemize{
 \item \code{R}: Execute a script in the "R" language

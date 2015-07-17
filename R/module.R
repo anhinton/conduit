@@ -416,9 +416,13 @@ saveModule <- function(module, targetDirectory = getwd(),
 
 ## RUNNING A MODULE
 
-#' Create module output directory on host
+#' Creates module output directory on host
+#'
+#' @details Directory to be created is given by \code{host$directory}
 #'
 #' @param host remote host list
+#'
+#' @seealso \code{runModule}
 #'
 #' @return 0 if success
 createHostDirectory <- function(host) {
@@ -435,11 +439,16 @@ createHostDirectory <- function(host) {
     return(result)
 }
 
-#' Copy a file to remote host
+#' Copy a file to remote module host
+#'
+#' @details copies file at \code{file} to remote directory
+#' \code{host$directory}.
 #'
 #' @param file file to copy
 #' @param host host list
 #' @param idfile login credentials
+#'
+#' @seealso \code{runModule}
 #'
 #' @return 0 if successful
 fileToHost <- function(file, host, idfile = defaultIdfile) {
@@ -456,12 +465,21 @@ fileToHost <- function(file, host, idfile = defaultIdfile) {
     return(result)
 }
 
-#' Fetch file from remote host
-fetchFromHost <- function(file, host, idfile = defaultIdfile) {
+#' Fetch file from remote host.
+#'
+#' @details copies file at \code{file} from remote directory
+#' \code{host$directory} to the current working directory.
+#'
+#' @param file file path
+#' @param host host list
+#'
+#' @return 0 if successful
+fetchFromHost <- function(file, host) {
     user <- host$user
     address <- host$address
     port <- host$port
-    directory <- host$dir
+    directory <- host$directory
+    idfile <- host$idfile
 
     args <- c("-i", idfile,
               "-P", port,
@@ -515,9 +533,14 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
 #' This function ensures that an input object is where it needs to be
 #' for a module's source script to be executed. Returns TRUE if all is well.
 #'
-#' If the \code{moduleInput}'s vessel is a \code{fileVessel}
-#' containing a relative 'ref' the inputObject is copied to the
-#' current working directory as 'ref'.
+#' @details If the \code{moduleInput$vessel} is any of \itemize{
+#'   \item{a \code{fileVessel} containing a relative \code{ref}}
+#'   \item{an \code{internalVessel}, and \code{host} is not NULL}}
+#' the \code{inputObject} corresponding to \code{moduleInput$name} is copied
+#' to the current working directory.
+#'
+#' If \code{host} is not NULL this \code{moduleInput} is also copied
+#' to the module output directory on the remote host.
 #'
 #' @param moduleInput \code{moduleInput} object
 #' @param inputObjects resources to be supplied as inputs
@@ -540,11 +563,13 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #'
 #' @details Will produce an error if the object does not exist.
 #'
+#' If \code{host} is not NULL the function attempts to copy the output object
+#' across from the remote host and into the current working directory.
+#'
 #' @param output \code{moduleOutput} object
 #' @param language module language
 #' @param host host list
-#' @param internalExtension file extension for serialized internal language
-#' object
+#' @param outputDirectory location of module output files
 #'
 #' @return named list containing:
 #' \itemize{
@@ -646,6 +671,9 @@ buildModuleHost <- function (parsedHost) {
 #'
 #' This function creates a directory called \sQuote{modules} in
 #' the \code{targetDirectory} if it does not already exist.
+#'
+#' If \code{module$host} is not NULL the remote host must exist and be
+#' accessible by conduit or this function will fail.
 #'
 #' @param module \code{module} object
 #' @param inputObjects Named list of input objects
