@@ -140,9 +140,13 @@ fetchRef <- function (file) {
 }
 
 fetchRef.https <- function (file) {
-    RCurl::getURL(file)
+    con = url(file, method = "libcurl")
+    on.exit(close(con))
+    readLines(con)
 }
 
 fetchRef.default <- function (file) {
+    con = file(file)
+    on.exit(close(con))
     readLines(file)
 }

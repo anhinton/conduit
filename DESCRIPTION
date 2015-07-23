@@ -10,12 +10,11 @@ Authors@R: c(person(given="Ashley Noel", family="Hinton",
     email="p.murrell@auckland.ac.nz", role="aut"))
 Description: Manage and run OpenAPI pipelines and modules
 License: GPL (>= 3)
-Depends: methods
+Depends: R (>= 3.2.0), methods
 Imports: 
     XML,
     graph,
-    RBGL,
-    RCurl
+    RBGL
 Suggests: 
     Rgraphviz,
     gridGraphviz,
