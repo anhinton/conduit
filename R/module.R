@@ -14,6 +14,7 @@ readVesselXML <- function (xml) {
                script = xmlValue(xml),
                internal = xmlAttrs(xml),
                file = xmlAttrs(xml),
+               url = xmlAttrs(xml),
                stop("'vessel' xml unknown type"))    
     vessel <-
         switch(type,
@@ -21,6 +22,8 @@ readVesselXML <- function (xml) {
                    ref = content[["ref"]]),
                internal = internalVessel(
                    symbol = content[["symbol"]]),
+               url = urlVessel(
+                   ref = content[["ref"]]),
                script = scriptVessel(readLines(textConnection(content))))
     return(vessel)
 }
@@ -69,7 +72,7 @@ readModuleIOXML <- function (xml) {
     ## create vessel object:
     ## determine which child has an appropriate vessel name
     vesselChild <-
-        which(names(children) %in% c("internal", "file"))
+        which(names(children) %in% c("internal", "file", "url"))
     vessel <- readVesselXML(children[[vesselChild]])
 
     ## create moduleIO object
@@ -241,6 +244,7 @@ vesselToXML <- function (vessel,
         class(vessel)[1],
         fileVessel = "file",
         internalVessel = "internal",
+        urlVessel = "url",
         scriptVessel = "script",
         stop("'vessel' is of unknown type")) # if vessel type not recognised
 

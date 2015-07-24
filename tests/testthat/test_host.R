@@ -21,7 +21,7 @@ test_module <- module(
 test_that(
     "createHostDirectory() works",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         result1 <- createHostDirectory(host1)
         expect_equal(result1, 0)
@@ -34,7 +34,7 @@ test_that(
 test_that(
     "fileToHost() works",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         result1 <- fileToHost(file1, host1)
         expect_equal(result1, 0)
@@ -47,7 +47,7 @@ test_that(
 test_that(
     "resolveInput() works for remote module hosts",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -69,7 +69,7 @@ test_that(
 test_that(
     "executeScript.R works",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -87,7 +87,7 @@ test_that(
 test_that(
     "executeScript.python works",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -111,7 +111,7 @@ test_that(
 test_that(
     "executeScript.shell works",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -136,7 +136,7 @@ test_that(
 test_that(
     "fetchFromHost() works",
     {
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         mypath <- tempfile()
         dir.create(mypath)
@@ -163,7 +163,7 @@ test_that(
         createGraph$host <- layoutGraph$host
     
 
-        #skip("requires conduit host at conduit@127.0.0.1:2222")
+        skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         ## run the createGraph module
         output1 <- createGraph$outputs[[1]]

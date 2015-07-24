@@ -31,6 +31,12 @@ vessel2 <- fileVessel("graph.dot")
 format2 <- ioFormat("graphviz dot file")
 outputXML2 <- moduleIOToXML(moduleIO(name2, type2, vessel2, format2))
 
+name3 <- "url"
+type3 <- "input"
+vessel3 <- urlVessel("http://github.com/anhinton/conduit")
+format3 <- ioFormat("html file")
+inputXML3 <- moduleIOToXML(moduleIO(name3, type3, vessel3, format3))
+
 test_that("readModuleIOXML fails for invalid named XML", {
     notIO <- XML::newXMLNode("notInput")
     expect_error(readModuleIOXML(notIO),
@@ -41,6 +47,9 @@ test_that("readModuleIOXML creates appropriate inputs", {
     input1 <- readModuleIOXML(inputXML1)
     expect_match(class(input1)[2], "moduleIO")
     expect_match(input1$type, type1)
+    input3 <- readModuleIOXML(inputXML3)
+    expect_match(class(input3)[2], "moduleIO")
+    expect_match(input3$type, type3)
 })
 
 test_that("readModuleIOXML creates appropriate outputs", {
@@ -71,17 +80,7 @@ test_that("readModuleSourceXML creates appropriate objects", {
     expect_match(class(scriptSource), "moduleSource")
 })
 
-## read vessel XML - <internal>, <file>
-ref1 <- "data.csv"
-fileXML1 <- vesselToXML(fileVessel(ref1))
-ref2 <- "different.csv"
-fileXML2 <- vesselToXML(fileVessel(ref2))
-symbol <- "data_good"
-internalXML <- vesselToXML(internalVessel(symbol))
-value <- c("x <- 1:10",
-           "y <- rnorm(10, 0, 1)",
-           "plot(x, y)")
-scriptXML <- vesselToXML(scriptVessel(value))
+## read vessel XML - <internal>, <file>, <url>
 
 test_that("readVesselXML fails for unknown type", {
     nonVessel <- XML::newXMLNode(name = "notAVessel")
@@ -89,20 +88,49 @@ test_that("readVesselXML fails for unknown type", {
                  "'vessel' xml unknown type")
 })
 
-test_that("readVesselXML creates appropriate vessel objects", {
-    ## fileXML1
-    fileVessel1 <- readVesselXML(fileXML1)
-    expect_match(class(fileVessel1), "fileVessel", all=F)
-    expect_match(class(fileVessel1), "vessel", all=F)
-    fileVessel2 <- readVesselXML(fileXML2)
-    expect_match(class(fileVessel2), "fileVessel", all=F)
-    expect_match(class(fileVessel2), "vessel", all=F)
-    internalVessel <- readVesselXML(internalXML)
-    expect_match(class(internalVessel), "internalVessel", all=F)
-    expect_match(class(internalVessel), "vessel", all=F)
-    scriptVessel <- readVesselXML(scriptXML)
-    expect_match(class(scriptVessel), "scriptVessel", all=F)
-    expect_match(class(scriptVessel), "vessel", all=F)
+test_that(
+    "readVesselXML creates appropriate fileVessel objects", {
+        ref1 <- "data.csv"
+        fileXML1 <- vesselToXML(fileVessel(ref1))
+        ref2 <- "different.csv"
+        fileXML2 <- vesselToXML(fileVessel(ref2))
+        ## fileXML1
+        fileVessel1 <- readVesselXML(fileXML1)
+        expect_match(class(fileVessel1), "fileVessel", all=F)
+        expect_match(class(fileVessel1), "vessel", all=F)
+        ## fileXML2
+        fileVessel2 <- readVesselXML(fileXML2)
+        expect_match(class(fileVessel2), "fileVessel", all=F)
+        expect_match(class(fileVessel2), "vessel", all=F)
+    })
+
+test_that(
+    "readVesselXML creates appropriate internalVessel objects", {
+        symbol <- "data_good"
+        internalXML <- vesselToXML(internalVessel(symbol))
+        internalVessel <- readVesselXML(internalXML)
+        expect_match(class(internalVessel), "internalVessel", all=F)
+        expect_match(class(internalVessel), "vessel", all=F)
+    })
+
+test_that(
+    "readVesselXML creates appropriate urlVessel objects", {
+        url <- "https://github.com/anhinton/conduit"
+        urlXML <- vesselToXML(urlVessel(url))
+        urlVessel <- readVesselXML(urlXML)
+        expect_match(class(urlVessel), "urlVessel", all=F)
+        expect_match(class(urlVessel), "vessel", all=F)
+    })
+
+test_that(
+    "readVesselXML creates appropriate scriptVessel objects", {
+        value <- c("x <- 1:10",
+                   "y <- rnorm(10, 0, 1)",
+                   "plot(x, y)")
+        scriptXML <- vesselToXML(scriptVessel(value))
+        scriptVessel <- readVesselXML(scriptXML)
+        expect_match(class(scriptVessel), "scriptVessel", all=F)
+        expect_match(class(scriptVessel), "vessel", all=F)
 })
 
 ## read <module> XML

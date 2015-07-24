@@ -36,7 +36,7 @@ test_that("fileVessel stops when 'ref' is not length 1 char", {
                  "'ref' is not a length 1 character vector")
 })
 
-test_that("'fileVector' slots are right type and length", {
+test_that("'fileVessel' slots are right type and length", {
     expect_true(is_length1_char(testFile$ref))
 })
 
@@ -47,6 +47,29 @@ test_that("'fileVessel' objects contain appropriate slots", {
 test_that("'fileVessel' object has class c(\"fileVessel\", \"vessel\")", {
     expect_match(class(testFile)[1], "^fileVessel$")
     expect_match(class(testFile)[2], "^vessel$")
+})
+
+## urlVessel creation
+testURL <- urlVessel("http://github.com/anhinton/conduit")
+
+test_that("urlVessel stops when 'ref' is not length 1 char", {
+    expect_error(urlVessel(c("ref1", "ref1")),
+                 "'ref' is not a length 1 character vector")
+    expect_error(urlVessel(666),
+                 "'ref' is not a length 1 character vector")
+})
+
+test_that("'urlVessel' slots are right type and length", {
+    expect_true(is_length1_char(testURL$ref))
+})
+
+test_that("urlVessel objects contain appropriate slots", {
+    expect_match(names(testURL), "^ref$", all=F)
+})
+
+test_that("urlVessel object has class c(\"urlVessel\", \"vessel\")", {
+    expect_match(class(testURL)[1], "^urlVessel$")
+    expect_match(class(testURL)[2], "^vessel$")
 })
 
 ## scriptVessel creation
@@ -81,51 +104,64 @@ test_that(paste0("'scriptVessel' object has class",
 })
 
 ## create vessel XML
-testInternal <- internalVessel("important_data")
-internalXML <- vesselToXML(testInternal)
-testFile1 <- fileVessel(ref="file.csv")
-fileXML1 <- vesselToXML(testFile1)
-testFile2 <- fileVessel(ref="file.csv")
-fileXML2 <- vesselToXML(testFile2)
-rawScript <- c("x <- 1:10", "y <- rnorm(10, 0, 1)", "plot(x, y)")
-testScript <- scriptVessel(rawScript)
-scriptXML <- vesselToXML(testScript)
-testUndefined <- vector("list", 6)
-class(testUndefined) <- c("undefined", "vessel")
 
-test_that("vesselToXML fails for non-vessels", {
-    expect_error(vesselToXML(vector("list", 6)),
-                "'vessel' is not a 'vessel'")
-    expect_error(vesselToXML(testUndefined),
-                 "'vessel' is of unknown type")
+test_that(
+    "vesselToXML fails for non-vessels", {
+        testUndefined <- vector("list", 6)
+        class(testUndefined) <- c("undefined", "vessel")
+        expect_error(vesselToXML(vector("list", 6)),
+                     "'vessel' is not a 'vessel'")
+        expect_error(vesselToXML(testUndefined),
+                     "'vessel' is of unknown type")
+    })
+
+test_that(
+    "vesselToXML outputs correct internalVessel XML", {
+        testInternal <- internalVessel("important_data")
+        internalXML <- vesselToXML(testInternal)
+        expect_match(xmlName(internalXML), "internal")
+        expect_match(xmlAttrs(internalXML), "important_data")
+        expect_match(names(xmlAttrs(internalXML)), "symbol")
+    })
+
+test_that(
+    "vesselToXML outputs correct fileVessel XML", {
+        testFile1 <- fileVessel(ref="file.csv")
+        fileXML1 <- vesselToXML(testFile1)
+        testFile2 <- fileVessel(ref="file.csv")
+        fileXML2 <- vesselToXML(testFile2)
+        expect_match(xmlName(fileXML1), "file")
+        expect_match(xmlAttrs(fileXML1), "file.csv")
+        expect_match(names(xmlAttrs(fileXML1)), "ref")
+        expect_match(xmlName(fileXML2), "file")
+        expect_match(xmlAttrs(fileXML2), "file.csv", all=F)
 })
 
-test_that("vesselToXML outputs correct internalVessel XML", {
-    expect_match(xmlName(internalXML), "internal")
-    expect_match(xmlAttrs(internalXML), "important_data")
-    expect_match(names(xmlAttrs(internalXML)), "symbol")
+test_that(
+    "vesselToXML outputs correct urlVessel XML", {
+        testURL1 <- urlVessel(ref="https://github.com/anhinton/conduit")
+        urlXML1 <- vesselToXML(testURL1)
+        expect_match(xmlName(urlXML1), "url")
+        expect_match(xmlAttrs(urlXML1), "https://github.com/anhinton/conduit")
+        expect_match(names(xmlAttrs(urlXML1)), "ref")
 })
 
-test_that("vesselToXML outputs correct fileVessel XML", {
-    expect_match(xmlName(fileXML1), "file")
-    expect_match(xmlAttrs(fileXML1), "file.csv")
-    expect_match(names(xmlAttrs(fileXML1)), "ref")
-    expect_match(xmlName(fileXML2), "file")
-    expect_match(xmlAttrs(fileXML2), "file.csv", all=F)
-})
-
-test_that("vesselToXML outputs correct scriptVessel XML", {
-    expect_match(xmlName(scriptXML), "script")
-    scriptValue <- xmlChildren(scriptXML)[[1]]
-    expect_match(class(scriptValue), "XMLInternalCDataNode",
-                 all=F)
-    expect_match(class(scriptValue), "XMLInternalNode",
-                 all=F)
-    expect_match(class(scriptValue), "XMLAbstractNode",
-                 all=F)
-    parsedValue <- readLines(textConnection(xmlValue(scriptValue)))
-    expect_true(all(rawScript == parsedValue))
-})
+test_that(
+    "vesselToXML outputs correct scriptVessel XML", {
+        rawScript <- c("x <- 1:10", "y <- rnorm(10, 0, 1)", "plot(x, y)")
+        testScript <- scriptVessel(rawScript)
+        scriptXML <- vesselToXML(testScript)
+        expect_match(xmlName(scriptXML), "script")
+        scriptValue <- xmlChildren(scriptXML)[[1]]
+        expect_match(class(scriptValue), "XMLInternalCDataNode",
+                     all=F)
+        expect_match(class(scriptValue), "XMLInternalNode",
+                     all=F)
+        expect_match(class(scriptValue), "XMLAbstractNode",
+                     all=F)
+        parsedValue <- readLines(textConnection(xmlValue(scriptValue)))
+        expect_true(all(rawScript == parsedValue))
+    })
 
 ## create ioFormat objects
 text_format <- ioFormat(value="R data frame", type="text")
