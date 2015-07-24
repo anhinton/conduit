@@ -445,6 +445,15 @@ graphPipeline <- function(pipeline) {
 #'                              system.file("extdata", "shellExample",
 #'                                          "pipeline.xml", package="conduit"))
 #' runPipeline(shellExample, targetDirectory = tempdir())
+#'
+#' ## A pipeline with a module run on a remote host
+#' \dontrun{
+#'   irisplots_host_pipeline <- loadPipeline(
+#'       "irisplots_host_pipeline",
+#'       system.file("extdata", "irisplots_host", "pipeline.xml",
+#'       package = "conduit"))
+#'   runPipeline(irisplots_host_pipeline, targetDirectory = tempdir())
+#' }
 #' 
 #' @export
 runPipeline <- function(pipeline, targetDirectory = getwd()) {
