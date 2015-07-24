@@ -6,6 +6,9 @@
 #' \code{system.file("conduit.key.pub", package = "conduit")}
 defaultIdfile <- system.file("conduit.key", package = "conduit")
 
+## Correct file permissions for remote host key
+Sys.chmod(system.file("conduit.key", package = "conduit"), mode = "0400")
+
 ## Probably unique conduit session ID
 sessionID <- basename(tempfile("conduit"))
 
