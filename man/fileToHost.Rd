@@ -4,7 +4,7 @@
 \alias{fileToHost}
 \title{Copy a file to remote module host}
 \usage{
-fileToHost(file, host, idfile = defaultIdfile)
+fileToHost(file, host, idfile = get("defaultIdfile", envir = .conduit.global))
 }
 \arguments{
 \item{file}{file to copy}

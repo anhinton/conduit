@@ -68,7 +68,6 @@ readComponentNode <- function (node, location) {
 #' @return \code{pipeline} object
 #' @import XML
 readPipelineXML <- function(name, xml, location = getwd()) {
-    ## pipelinePath <- paste0(pipelineDir, pathSep)
     nodes <- xmlChildren(xml)
     
     ## extract description

@@ -451,7 +451,8 @@ createHostDirectory <- function(host) {
 #' @seealso \code{runModule}
 #'
 #' @return 0 if successful
-fileToHost <- function(file, host, idfile = defaultIdfile) {
+fileToHost <- function(file, host,
+                       idfile = get("defaultIdfile", envir = .conduit.global)) {
     user <- host$user
     address <- host$address
     port <- host$port
@@ -613,8 +614,6 @@ resolveOutput <- function (output, language, host,
 #'
 #' @param host module host as character string
 #'
-#' @seealso \code{sessionID}
-#'
 #' @return list of \itemize{
 #'   \item user
 #'   \item address
@@ -638,8 +637,9 @@ parseModuleHost <- function(host) {
         port <- "22"
     }
     directory =
-        file.path("/tmp", sessionID, basename(tempfile("module")), fsep="/")
-    idfile = defaultIdfile
+        file.path("/tmp", get("sessionID", envir = .conduit.global),
+                  basename(tempfile("module")), fsep="/")
+    idfile = get("defaultIdfile", envir = .conduit.global)
     host <- list(user = user, address = address, port = port,
                  directory = directory, idfile = idfile)
     return(host)

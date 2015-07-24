@@ -26,7 +26,4 @@ Default user = 'conduit', default port = '22'.
 \code{directory} slot is filled by a random output directory to be
 created on the remote host at \code{/tmp/{sessionID}/}
 }
-\seealso{
-\code{sessionID}
-}
 

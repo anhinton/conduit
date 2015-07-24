@@ -11,7 +11,7 @@ NULL
 #' @param s Search paths string
 #' @return A list of paths
 splitPaths <- function(s) {
-    strsplit(s, pathSep, fixed=TRUE)[[1]]
+    strsplit(s, get("pathSep", envir = .conduit.global), fixed=TRUE)[[1]]
 }
 
 #' Amend search paths
@@ -29,13 +29,20 @@ splitPaths <- function(s) {
 #' @param newPaths Character string of paths to be added
 #' @param pathsToAmend Character string of paths to be amended
 #' @return Character string of amended search paths
-amendSearchPaths <- function(newPaths, pathsToAmend = defaultSearchPaths) {
+amendSearchPaths <-
+    function(newPaths,
+             pathsToAmend = get("defaultSearchPaths",
+                 envir = .conduit.global)) {
     amendedPaths <- 
-        ## if newPaths starts with pathSep, append to pathsToAmend
-        if (grepl(paste0("^[", pathSep, "]"), newPaths)) {
+        ## if newPaths starts with get("pathSep", envir = .conduit.global),
+        ## append to pathsToAmend
+        if (grepl(paste0("^[", get("pathSep", envir = .conduit.global), "]"),
+                  newPaths)) {
             paste0(pathsToAmend, newPaths)
-            ## else if newPaths ends with pathSep, prepend to pathsToAmend
-        } else if (grepl(paste0("[", pathSep, "]$"), newPaths)) {
+            ## else if newPaths ends with
+            ## get("pathSep", envir = .conduit.global), prepend to pathsToAmend
+        } else if (grepl(paste0("[", get("pathSep", envir = .conduit.global),
+                                "]$"), newPaths)) {
             paste0(newPaths, pathsToAmend)
             ## else return only newPaths
         } else {
@@ -75,7 +82,7 @@ findFile <- function (ref, path = NULL, location = getwd()) {
     } else {
         searchPaths <-
             if (is.null(path)) {
-                defaultSearchPaths
+                get("defaultSearchPaths", envir = .conduit.global)
             } else {
                 amendSearchPaths(path)
             }

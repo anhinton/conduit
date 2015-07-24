@@ -73,8 +73,11 @@ test_that(
         expect_match(parsedHost$user, "conduit")
         expect_match(parsedHost$address, "server")
         expect_match(parsedHost$port, "666")
-        expect_match(parsedHost$directory, paste0("^/tmp/", sessionID))
-        expect_match(parsedHost$idfile, defaultIdfile)
+        expect_match(parsedHost$directory,
+                     paste0("^/tmp/", get("sessionID",
+                                          envir = .conduit.global)))
+        expect_match(parsedHost$idfile,
+                     get("defaultIdfile", envir = .conduit.global))
 
         ## no username or host given
         host <- "6.6.6.6"

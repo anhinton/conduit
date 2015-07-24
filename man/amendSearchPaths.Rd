@@ -4,7 +4,8 @@
 \alias{amendSearchPaths}
 \title{Amend search paths}
 \usage{
-amendSearchPaths(newPaths, pathsToAmend = defaultSearchPaths)
+amendSearchPaths(newPaths, pathsToAmend = get("defaultSearchPaths", envir =
+  .conduit.global))
 }
 \arguments{
 \item{newPaths}{Character string of paths to be added}
