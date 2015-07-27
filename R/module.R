@@ -533,6 +533,19 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
     return(file.exists(ref))
 }
 
+#' @describeIn resolveInput Resolve URL input object
+resolveInput.url <- function(moduleInput, inputObjects, host) {
+    name <- moduleInput$name
+    url <- moduleInput$vessel$ref
+    if (name %in% names(inputObjects)) {
+        inputObject <- getElement(inputObjects, name)
+        if (url != inputObject) {
+            stop(url, " and ", inputObject, " do not match")
+        }
+    }
+    return(RCurl::url.exists(url))
+}
+
 #' Resolve input object
 #'
 #' This function ensures that an input object is where it needs to be
@@ -547,17 +560,22 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
 #' If \code{host} is not NULL this \code{moduleInput} is also copied
 #' to the module output directory on the remote host.
 #'
+#' If \code{moduleInput$vessel} is a \code{urlVessel} produces error if
+#' URL specified in \code{inputObjects} does not match URL in
+#' \code{moduleInput}.
+#' 
 #' @param moduleInput \code{moduleInput} object
 #' @param inputObjects resources to be supplied as inputs
 #' @param host module host
 #'
-#' @return boolean
+#' @return TRUE if successful
 resolveInput <- function(moduleInput, inputObjects, host) {
     type <- class(moduleInput$vessel)[[1]]
     type <- switch(
         type,
         internalVessel = "internal",
         fileVessel = "file",
+	urlVessel = "url",
         stop("unknown input vessel")
     )
     class(moduleInput) <- type

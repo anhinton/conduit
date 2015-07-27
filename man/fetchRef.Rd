@@ -4,13 +4,14 @@
 \alias{fetchRef}
 \title{Read the contents of a referenced file}
 \usage{
-fetchRef(file)
+fetchRef(ref)
 }
 \arguments{
-\item{file}{character vector containing resolved ref location}
+\item{ref}{character vector containing resolved ref location}
 }
 \value{
-Character vector containing the contents of \code{file}
+Character vector containing the contents of resource at
+\code{ref}
 }
 \description{
 Read the contents of a referenced file

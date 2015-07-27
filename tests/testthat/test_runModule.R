@@ -138,6 +138,32 @@ test_that(
         inputObjects <- list(fantastic = filename)
         expect_true(resolveInput(input, inputObjects, host = NULL))
     })
+test_that(
+    "urlVessel inputs are resolved",
+    {
+        skip_on_cran()
+        moduleInput1 <- moduleInput(
+            "inp1",
+            urlVessel("http://cran.stat.auckland.ac.nz/"),
+            ioFormat("HTML file"))
+        inputObjects1 <- list()
+        expect_true(resolveInput(moduleInput1, inputObjects1, host = NULL))
+
+        moduleInput2 <- moduleInput(
+            "inp1",
+            urlVessel("NOT.A.REAL.URL"),
+            ioFormat("HTML file"))
+        expect_false(resolveInput(moduleInput2, inputObjects1, host = NULL))
+        
+        moduleInput3 <- moduleInput(
+            "inp1",
+            urlVessel("http://cran.stat.auckland.ac.nz/"),
+            ioFormat("HTML file"))
+        inputObjects3 <-
+            list(inp1 = "http://cran.stat.auckland.ac.nz/SUBFOLDER")
+        expect_error(resolveInput(moduleInput3, inputObjects3, host = NULL),
+                     "url")
+     })
 
 ## test executeScript
 test_that(
