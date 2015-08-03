@@ -65,30 +65,6 @@ exportComponent <- function(component, targetDirectory=getwd()) {
     saveXML(componentDoc, componentFilePath)
 }
 
-#' return output object produced by a module output
-#'
-#' @param output \code{moduleOutput} object
-#' @param outputDirectory file location for module execution
-#'
-#' @return output object
-outputObject <- function(output, language, outputDirectory) {
-    vessel <- output$vessel
-    type <- class(vessel)[[1]]
-    outputObject <-
-        switch(type,
-               internalVessel =
-                   paste0(vessel$symbol, internalExtension(language)),
-               fileVessel = vessel$ref,
-               stop("vessel type not defined"))
-    if (dirname(outputObject) == ".") {
-        outputObject <- file.path(outputDirectory, outputObject)
-    }
-    if (file.exists(outputObject)) {
-        outputObject <- try(normalizePath(outputObject))
-    }
-    return(outputObject)
-}
-
 #' calculate output objects produced by a module
 calculateOutputs.module <- function(componentValue, outputDirectory) {
     language <- componentValue$language

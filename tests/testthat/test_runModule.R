@@ -226,6 +226,48 @@ test_that(
         expect_equal(executeScript(script = script, host = NULL), 0)
     })
 
+test_that(
+    "outputObject() behaves",
+    {
+        ## outputObject(output, language, outputDirectory)
+        lang = "R"
+        outdir <- tempdir()
+        
+        ## works for internalVessel
+        symbol <- "x"
+        internal_output <- moduleOutput(
+            "internal", internalVessel(symbol), ioFormat("nonsense"))
+        expect_match(outputObject(internal_output, lang, outdir),
+                     file.path(outdir,
+                               paste0(symbol,
+                                      internalExtension(lang))))
+
+        ## works for urlVessel
+        url <- "https://github.com/anhinton/conduit"
+        url_output <- moduleOutput(
+            "url", urlVessel(url), ioFormat("HTML file"))
+        expect_match(outputObject(url_output, lang, outdir),
+                     url)
+        
+        ## works for fileVessel
+        file <- "output.csv"
+        file_output <- moduleOutput(
+            "file", fileVessel(file), ioFormat("CSV file"))
+        expect_match(outputObject(file_output, lang, outdir),
+                     file.path(outdir, file))
+        
+        ## fails for unknown vessel type
+        not_a_real_output <- internal_output
+        class(not_a_real_output$vessel)[1] <- "dudeVssl"
+        expect_error(outputObject(not_a_real_output,
+                                  lang, outdir),
+                     "vessel type not defined")
+    })
+
+test_that(
+    "resolveOutput() behaves well",
+    {})
+
 ## test runModule()
 test_that(
     "runModule() fails when not given a 'module' object",

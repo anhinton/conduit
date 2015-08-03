@@ -582,6 +582,34 @@ resolveInput <- function(moduleInput, inputObjects, host) {
     UseMethod("resolveInput", object = moduleInput)
 }
 
+#' return output object produced by a module output
+#'
+#' @param output \code{moduleOutput} object
+#' @param language module script language
+#' @param outputDirectory file location for module execution
+#'
+#' @return output object
+outputObject <- function(output, language, outputDirectory) {
+    vessel <- output$vessel
+    type <- class(vessel)[[1]]
+    outputObject <-
+        switch(type,
+               internalVessel =
+                   paste0(vessel$symbol, internalExtension(language)),
+               urlVessel=,
+               fileVessel = vessel$ref,
+               stop("vessel type not defined"))
+    if (type == "internalVessel" || type == "fileVessel") {
+        if (dirname(outputObject) == ".") {
+            outputObject <- file.path(outputDirectory, outputObject)
+        }
+        if (file.exists(outputObject)) {
+            outputObject <- normalizePath(outputObject)
+        }
+    }
+    return(outputObject)
+}
+
 #' Checks a module output object has been created.
 #'
 #' @details Will produce an error if the object does not exist.
@@ -606,17 +634,16 @@ resolveOutput <- function (output, language, host,
     vessel <- output$vessel
     type <- class(vessel)[[1]]
     object <- outputObject(output, language, outputDirectory)
-    if (!is.null(host)) {
-        remote_object <- basename(object)
-        result <- fetchFromHost(remote_object, host)
-        if (result != 0) {
-            stop("Unable to fetch ", remote_object, " from host ",
-                 buildModuleHost(host))
-        }
-    }
-    object <- try(normalizePath(object))
 
     if (type == "internalVessel" || type == "fileVessel") {
+        if (!is.null(host)) {
+            remote_object <- basename(object)
+            result <- fetchFromHost(remote_object, host)
+            if (result != 0) {
+                stop("Unable to fetch ", remote_object, " from host ",
+                     buildModuleHost(host))
+            }
+        }
         if (!file.exists(object)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
