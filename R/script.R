@@ -12,11 +12,21 @@ extractModuleSource.fileVessel <- function(moduleSource) {
     return(script)
 }
 
+#' @describeIn extractModuleSource Extract a module's source script
+#' from a urlVessel
+extractModuleSource.urlVessel <- function(moduleSource) {
+    ref <- RCurl::getURL(moduleSource$vessel$ref)
+    con <- textConnection(ref)
+    on.exit(close(con))
+    script <- readLines(con)
+    return(script)
+}
+
 #' Extract a module's source script
 #'
 #' @param vessel Vessel indicating source script location
 #'
-#' @return character vector of source scrip
+#' @return character vector of source script
 #'
 #' @seealso \code{executeScript}
 extractModuleSource <- function(moduleSource) {

@@ -6,12 +6,7 @@
     <format formatType="text">R data frame</format>
   </input>
   <source>
-    <script><![CDATA[library(R2HTML)
-outfile <- HTMLInitFile(outdir = "/var/www/conduit", filename = "xfiles_season_1", Title = "The X Files Season 1")
-HTML("<h1>The X Files Season 1</h1>", outfile)
-HTML(season1, outfile, row.names = FALSE)
-HTML("Source: <a href=\"https://en.wikipedia.org/wiki/List_of_The_X-Files_episodes\">https://en.wikipedia.org/wiki/List_of_The_X-Files_episodes</a>", outfile)
-HTMLEndFile(outfile)]]></script>
+    <url ref="http://127.0.0.1:8080/season1_html.R"/>
   </source>
   <output name="season1_html">
     <url ref="http://127.0.0.1:8080/xfiles_season_1.html"/>

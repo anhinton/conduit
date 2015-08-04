@@ -11,6 +11,48 @@ layoutGraph <- loadModule(
     system.file("extdata", "simpleGraph", "layoutGraph.xml",
                 package = "conduit"))
 
+## test extractModuleSource()
+test_that(
+    "extractModuleSource() works",
+    {
+        script <- c("Sys.info()", "sessionInfo()", "getwd()")
+        file <- tempfile()
+        
+        ## scriptVessel source
+        inline_source <- moduleSource(
+            scriptVessel(script))
+        class(inline_source) <- class(inline_source$vessel)
+        source_script <- extractModuleSource(inline_source)
+        expect_equal(length(source_script), 3)
+        expect_match(class(source_script), "character")
+        expect_match(source_script[2], "^sessionInfo[(][)]")
+
+        ##
+        skip_on_cran()
+        writeLines(script, file)
+        file_source <- moduleSource(
+            fileVessel(file))
+        class(file_source) <- class(file_source$vessel)
+        source_script <- extractModuleSource(file_source)
+        expect_equal(length(source_script), 3)
+        expect_match(class(source_script), "character")
+        expect_match(source_script[3], "^getwd[(][)]")        
+    })
+
+test_that(
+    "extractModuleSource() works for <url> sources",
+    {
+        skip("requires test conduit web server at http://127.0.0.1:8080/")
+        skip_on_cran()
+        url_source <- moduleSource(
+            urlVessel("http://127.0.0.1:8080/testing/season1_html.R"))
+        class(url_source) <- class(url_source$vessel)
+        source_script <- extractModuleSource(url_source)
+        expect_equal(length(source_script), 10)
+        expect_match(class(source_script), "character")
+        expect_match(source_script[1], "^library[(]R2HTML[)]")
+    })
+
 ## test prepareScript
 test_that(
     "R script file is created",
