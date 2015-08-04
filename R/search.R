@@ -140,20 +140,22 @@ resolveRef <- function (ref, path = NULL, location = getwd()) {
 #'
 #' @seealso \code{resolveRef}
 #' 
-#' @param file character vector containing resolved ref location
-#' @return Character vector containing the contents of \code{file}
-fetchRef <- function (file) {
+#' @param ref character vector containing resolved ref location
+#' 
+#' @return Character vector containing the contents of resource at
+#' \code{ref}
+fetchRef <- function (ref) {
     UseMethod("fetchRef")
 }
 
-fetchRef.https <- function (file) {
-    con = url(file, method = "libcurl")
+fetchRef.https <- function (ref) {
+    con = textConnectionurl(RCurl::getURL(ref))
     on.exit(close(con))
     readLines(con)
 }
 
-fetchRef.default <- function (file) {
-    con = file(file)
+fetchRef.default <- function (ref) {
+    con = file(ref)
     on.exit(close(con))
-    readLines(file)
+    readLines(ref)
 }

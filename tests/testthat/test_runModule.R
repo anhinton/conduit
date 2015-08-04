@@ -138,6 +138,32 @@ test_that(
         inputObjects <- list(fantastic = filename)
         expect_true(resolveInput(input, inputObjects, host = NULL))
     })
+test_that(
+    "urlVessel inputs are resolved",
+    {
+        skip_on_cran()
+        moduleInput1 <- moduleInput(
+            "inp1",
+            urlVessel("http://cran.stat.auckland.ac.nz/"),
+            ioFormat("HTML file"))
+        inputObjects1 <- list()
+        expect_true(resolveInput(moduleInput1, inputObjects1, host = NULL))
+
+        moduleInput2 <- moduleInput(
+            "inp1",
+            urlVessel("NOT.A.REAL.URL"),
+            ioFormat("HTML file"))
+        expect_false(resolveInput(moduleInput2, inputObjects1, host = NULL))
+        
+        moduleInput3 <- moduleInput(
+            "inp1",
+            urlVessel("http://cran.stat.auckland.ac.nz/"),
+            ioFormat("HTML file"))
+        inputObjects3 <-
+            list(inp1 = "http://cran.stat.auckland.ac.nz/SUBFOLDER")
+        expect_error(resolveInput(moduleInput3, inputObjects3, host = NULL),
+                     "url")
+     })
 
 ## test executeScript
 test_that(
@@ -198,6 +224,83 @@ test_that(
         inputObjects <- NULL
         script <- prepareScript(module3, inputObjects)
         expect_equal(executeScript(script = script, host = NULL), 0)
+    })
+
+test_that(
+    "outputObject() behaves",
+    {
+        ## outputObject(output, language, outputDirectory)
+        lang = "R"
+        outdir <- tempdir()
+        
+        ## works for internalVessel
+        symbol <- "x"
+        internal_output <- moduleOutput(
+            "internal", internalVessel(symbol), ioFormat("nonsense"))
+        expect_match(outputObject(internal_output, lang, outdir),
+                     file.path(outdir,
+                               paste0(symbol,
+                                      internalExtension(lang))))
+
+        ## works for urlVessel
+        url <- "https://github.com/anhinton/conduit"
+        url_output <- moduleOutput(
+            "url", urlVessel(url), ioFormat("HTML file"))
+        expect_match(outputObject(url_output, lang, outdir),
+                     url)
+        
+        ## works for fileVessel
+        file <- "output.csv"
+        file_output <- moduleOutput(
+            "file", fileVessel(file), ioFormat("CSV file"))
+        expect_match(outputObject(file_output, lang, outdir),
+                     file.path(outdir, file))
+        
+        ## fails for unknown vessel type
+        not_a_real_output <- internal_output
+        class(not_a_real_output$vessel)[1] <- "dudeVssl"
+        expect_error(outputObject(not_a_real_output,
+                                  lang, outdir),
+                     "vessel type not defined")
+    })
+
+## resolveOutput() successes are tested implicitly by runModule()
+## the following tests failures
+test_that(
+    "resolveOutput() works on local machine",
+    {
+        skip_on_cran()
+        lang = "R"
+        host = parseModuleHost("cronduit@not.a.real.server:11")
+        outdir <- tempdir()
+        symbol <- tempfile()
+        internal_output <- moduleOutput(
+            "internal", internalVessel(symbol), ioFormat("nonsense"))
+        file <- tempfile()
+        file_output <- moduleOutput(
+            "file", fileVessel(file), ioFormat("CSV file"))
+        url <- "http://not.a.real.server/at/all"
+        url_output <- moduleOutput(
+            "url", urlVessel(url), ioFormat("html file"))
+
+        ## throws error when object does not exist
+        ## urlVessel
+        expect_error(resolveOutput(url_output, lang, NULL, outdir),
+                     "output object '")
+        ## internalVessel
+        expect_error(resolveOutput(internal_output, lang, NULL, outdir),
+                     "output object '")
+        ## fileVessel
+        expect_error(resolveOutput(file_output, lang, NULL, outdir),
+                     "output object '")        
+        
+        ## throws error when unable to fetch from host
+        ## internalVessel
+        expect_error(resolveOutput(internal_output, lang, host, outdir),
+                     "Unable to fetch ")
+        ## fileVessel
+        expect_error(resolveOutput(file_output, lang, host, outdir),
+                     "Unable to fetch ")
     })
 
 ## test runModule()

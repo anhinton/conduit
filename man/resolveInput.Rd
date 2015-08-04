@@ -4,11 +4,14 @@
 \alias{resolveInput}
 \alias{resolveInput.file}
 \alias{resolveInput.internal}
+\alias{resolveInput.url}
 \title{Resolve input object}
 \usage{
 \method{resolveInput}{internal}(moduleInput, inputObjects, host)
 
 \method{resolveInput}{file}(moduleInput, inputObjects, host)
+
+\method{resolveInput}{url}(moduleInput, inputObjects, host)
 
 resolveInput(moduleInput, inputObjects, host)
 }
@@ -20,7 +23,7 @@ resolveInput(moduleInput, inputObjects, host)
 \item{host}{module host}
 }
 \value{
-boolean
+TRUE if successful
 }
 \description{
 This function ensures that an input object is where it needs to be
@@ -35,11 +38,17 @@ to the current working directory.
 
 If \code{host} is not NULL this \code{moduleInput} is also copied
 to the module output directory on the remote host.
+
+If \code{moduleInput$vessel} is a \code{urlVessel} produces error if
+URL specified in \code{inputObjects} does not match URL in
+\code{moduleInput}.
 }
 \section{Methods (by class)}{
 \itemize{
 \item \code{internal}: Resolve internal input object
 
 \item \code{file}: Resolve file input object
+
+\item \code{url}: Resolve URL input object
 }}
 

@@ -14,6 +14,7 @@ readVesselXML <- function (xml) {
                script = xmlValue(xml),
                internal = xmlAttrs(xml),
                file = xmlAttrs(xml),
+               url = xmlAttrs(xml),
                stop("'vessel' xml unknown type"))    
     vessel <-
         switch(type,
@@ -21,6 +22,8 @@ readVesselXML <- function (xml) {
                    ref = content[["ref"]]),
                internal = internalVessel(
                    symbol = content[["symbol"]]),
+               url = urlVessel(
+                   ref = content[["ref"]]),
                script = scriptVessel(readLines(textConnection(content))))
     return(vessel)
 }
@@ -69,7 +72,7 @@ readModuleIOXML <- function (xml) {
     ## create vessel object:
     ## determine which child has an appropriate vessel name
     vesselChild <-
-        which(names(children) %in% c("internal", "file"))
+        which(names(children) %in% c("internal", "file", "url"))
     vessel <- readVesselXML(children[[vesselChild]])
 
     ## create moduleIO object
@@ -241,6 +244,7 @@ vesselToXML <- function (vessel,
         class(vessel)[1],
         fileVessel = "file",
         internalVessel = "internal",
+        urlVessel = "url",
         scriptVessel = "script",
         stop("'vessel' is of unknown type")) # if vessel type not recognised
 
@@ -529,6 +533,19 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
     return(file.exists(ref))
 }
 
+#' @describeIn resolveInput Resolve URL input object
+resolveInput.url <- function(moduleInput, inputObjects, host) {
+    name <- moduleInput$name
+    url <- moduleInput$vessel$ref
+    if (name %in% names(inputObjects)) {
+        inputObject <- getElement(inputObjects, name)
+        if (url != inputObject) {
+            stop(url, " and ", inputObject, " do not match")
+        }
+    }
+    return(RCurl::url.exists(url))
+}
+
 #' Resolve input object
 #'
 #' This function ensures that an input object is where it needs to be
@@ -543,21 +560,54 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
 #' If \code{host} is not NULL this \code{moduleInput} is also copied
 #' to the module output directory on the remote host.
 #'
+#' If \code{moduleInput$vessel} is a \code{urlVessel} produces error if
+#' URL specified in \code{inputObjects} does not match URL in
+#' \code{moduleInput}.
+#' 
 #' @param moduleInput \code{moduleInput} object
 #' @param inputObjects resources to be supplied as inputs
 #' @param host module host
 #'
-#' @return boolean
+#' @return TRUE if successful
 resolveInput <- function(moduleInput, inputObjects, host) {
     type <- class(moduleInput$vessel)[[1]]
     type <- switch(
         type,
         internalVessel = "internal",
         fileVessel = "file",
+	urlVessel = "url",
         stop("unknown input vessel")
     )
     class(moduleInput) <- type
     UseMethod("resolveInput", object = moduleInput)
+}
+
+#' return output object produced by a module output
+#'
+#' @param output \code{moduleOutput} object
+#' @param language module script language
+#' @param outputDirectory file location for module execution
+#'
+#' @return output object
+outputObject <- function(output, language, outputDirectory) {
+    vessel <- output$vessel
+    type <- class(vessel)[[1]]
+    outputObject <-
+        switch(type,
+               internalVessel =
+                   paste0(vessel$symbol, internalExtension(language)),
+               urlVessel=,
+               fileVessel = vessel$ref,
+               stop("vessel type not defined"))
+    if (type == "internalVessel" || type == "fileVessel") {
+        if (dirname(outputObject) == ".") {
+            outputObject <- file.path(outputDirectory, outputObject)
+        }
+        if (file.exists(outputObject)) {
+            outputObject <- normalizePath(outputObject)
+        }
+    }
+    return(outputObject)
 }
 
 #' Checks a module output object has been created.
@@ -569,7 +619,7 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #'
 #' @param output \code{moduleOutput} object
 #' @param language module language
-#' @param host host list
+#' @param host host list created by \code{parseModuleList}
 #' @param outputDirectory location of module output files
 #'
 #' @return named list containing:
@@ -584,18 +634,22 @@ resolveOutput <- function (output, language, host,
     vessel <- output$vessel
     type <- class(vessel)[[1]]
     object <- outputObject(output, language, outputDirectory)
-    if (!is.null(host)) {
-        remote_object <- basename(object)
-        result <- fetchFromHost(remote_object, host)
-        if (result != 0) {
-            stop("Unable to fetch ", remote_object, " from host ",
-                 buildModuleHost(host))
-        }
-    }
-    object <- try(normalizePath(object))
 
     if (type == "internalVessel" || type == "fileVessel") {
+        if (!is.null(host)) {
+            remote_object <- basename(object)
+            result <- fetchFromHost(remote_object, host)
+            if (result != 0) {
+                stop("Unable to fetch ", remote_object, " from host ",
+                     buildModuleHost(host))
+            }
+        }
         if (!file.exists(object)) {
+            stop(paste0("output object '", name, "' does not exist"))
+        }
+    }
+    if (type == "urlVessel") {
+        if (!RCurl::url.exists(object)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
     }

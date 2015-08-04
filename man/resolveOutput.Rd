@@ -11,7 +11,7 @@ resolveOutput(output, language, host, outputDirectory = getwd())
 
 \item{language}{module language}
 
-\item{host}{host list}
+\item{host}{host list created by \code{parseModuleList}}
 
 \item{outputDirectory}{location of module output files}
 }
