@@ -264,9 +264,44 @@ test_that(
                      "vessel type not defined")
     })
 
+## resolveOutput() successes are tested implicitly by runModule()
+## the following tests failures
 test_that(
-    "resolveOutput() behaves well",
-    {})
+    "resolveOutput() works on local machine",
+    {
+        skip_on_cran()
+        lang = "R"
+        host = parseModuleHost("cronduit@not.a.real.server:11")
+        outdir <- tempdir()
+        symbol <- tempfile()
+        internal_output <- moduleOutput(
+            "internal", internalVessel(symbol), ioFormat("nonsense"))
+        file <- tempfile()
+        file_output <- moduleOutput(
+            "file", fileVessel(file), ioFormat("CSV file"))
+        url <- "http://not.a.real.server/at/all"
+        url_output <- moduleOutput(
+            "url", urlVessel(url), ioFormat("html file"))
+
+        ## throws error when object does not exist
+        ## urlVessel
+        expect_error(resolveOutput(url_output, lang, NULL, outdir),
+                     "output object '")
+        ## internalVessel
+        expect_error(resolveOutput(internal_output, lang, NULL, outdir),
+                     "output object '")
+        ## fileVessel
+        expect_error(resolveOutput(file_output, lang, NULL, outdir),
+                     "output object '")        
+        
+        ## throws error when unable to fetch from host
+        ## internalVessel
+        expect_error(resolveOutput(internal_output, lang, host, outdir),
+                     "Unable to fetch ")
+        ## fileVessel
+        expect_error(resolveOutput(file_output, lang, host, outdir),
+                     "Unable to fetch ")
+    })
 
 ## test runModule()
 test_that(

@@ -619,7 +619,7 @@ outputObject <- function(output, language, outputDirectory) {
 #'
 #' @param output \code{moduleOutput} object
 #' @param language module language
-#' @param host host list
+#' @param host host list created by \code{parseModuleList}
 #' @param outputDirectory location of module output files
 #'
 #' @return named list containing:
@@ -645,6 +645,11 @@ resolveOutput <- function (output, language, host,
             }
         }
         if (!file.exists(object)) {
+            stop(paste0("output object '", name, "' does not exist"))
+        }
+    }
+    if (type == "urlVessel") {
+        if (!RCurl::url.exists(object)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
     }
