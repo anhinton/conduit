@@ -4,11 +4,14 @@
 \alias{extractModuleSource}
 \alias{extractModuleSource.fileVessel}
 \alias{extractModuleSource.scriptVessel}
+\alias{extractModuleSource.urlVessel}
 \title{Extract a module's source script}
 \usage{
 \method{extractModuleSource}{scriptVessel}(moduleSource)
 
 \method{extractModuleSource}{fileVessel}(moduleSource)
+
+\method{extractModuleSource}{urlVessel}(moduleSource)
 
 extractModuleSource(moduleSource)
 }
@@ -16,7 +19,7 @@ extractModuleSource(moduleSource)
 \item{vessel}{Vessel indicating source script location}
 }
 \value{
-character vector of source scrip
+character vector of source script
 }
 \description{
 Extract a module's source script
@@ -28,6 +31,9 @@ from a scriptVessel
 
 \item \code{fileVessel}: Extract a module's source script
 from a fileVessel
+
+\item \code{urlVessel}: Extract a module's source script
+from a urlVessel
 }}
 \seealso{
 \code{executeScript}

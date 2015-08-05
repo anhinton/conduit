@@ -149,7 +149,7 @@ fetchRef <- function (ref) {
 }
 
 fetchRef.https <- function (ref) {
-    con = textConnectionurl(RCurl::getURL(ref))
+    con <- textConnection(RCurl::getURL(ref))
     on.exit(close(con))
     readLines(con)
 }
