@@ -42,7 +42,7 @@ test_that(
 test_that(
     "extractModuleSource() works for <url> sources",
     {
-        #skip("requires test conduit web server at http://127.0.0.1:8080/")
+        skip("requires test conduit web server at http://127.0.0.1:8080/")
         skip_on_cran()
         url_source <- moduleSource(
             urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
