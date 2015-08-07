@@ -8,7 +8,12 @@ extractModuleSource.scriptVessel <- function(moduleSource) {
 #' @describeIn extractModuleSource Extract a module's source script
 #' from a fileVessel
 extractModuleSource.fileVessel <- function(moduleSource) {
-    script <- readLines(moduleSource$vessel$ref)
+    vessel <- moduleSource$vessel
+    ref <- vessel$ref
+    path <- vessel$path
+    location <- moduleSource$location
+    file <- findFile(ref, path, location)
+    script <- readLines(file)
     return(script)
 }
 
@@ -142,6 +147,7 @@ prepareScriptOutput <- function(output, language) {
 prepareScript <- function(module, inputObjects) {
     language <- module$language
     onRemoteHost <- !is.null(module$host)
+    location <- attr(module, "location")
     
     ## sort sources into correct order
     sources <- module$sources
@@ -154,11 +160,12 @@ prepareScript <- function(module, inputObjects) {
     sourceScript <-
         lapply(
             sources,
-            function (moduleSource) {
+            function (moduleSource, location) {
                 class(moduleSource) <- class(moduleSource$vessel)
+                moduleSource$location <- location
                 script <- extractModuleSource(moduleSource)
                 return(script)
-            })
+            }, location)
     sourceScript <- unlist(sourceScript, use.names = FALSE)
 
     ## inputScript loads the module's designated inputs
