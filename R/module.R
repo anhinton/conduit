@@ -1207,5 +1207,6 @@ module <- function(name, language, host=NULL,
                    outputs = outputs,
                    sources = sources)
     class(module) <- "module"
+    attr(module, "location") <- getwd()
     module
 }
