@@ -6,7 +6,7 @@
     <format formatType="text">R data frame</format>
   </input>
   <source>
-    <url ref="http://127.0.0.1:8080/season1_html.R"/>
+    <url ref="http://127.0.0.1:8080/urlTesting/season1_html.R"/>
   </source>
   <output name="season1_html">
     <url ref="http://127.0.0.1:8080/xfiles_season_1.html"/>
