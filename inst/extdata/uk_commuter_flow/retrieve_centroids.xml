@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <description>retrive centroids data - http://blogs.casa.ucl.ac.uk/category/r-spatial/</description>
+  <input name="centroids">
+    <url ref="http://ingrid.geog.ucl.ac.uk/~james/msoa_popweightedcentroids.csv"/>
+    <format formatType="text">CSV file</format>
+  </input>
+  <source>
+    <script><![CDATA[download.file("http://ingrid.geog.ucl.ac.uk/~james/msoa_popweightedcentroids.csv", "msoa_popweightedcentroids.csv")]]></script>
+  </source>
+  <output name="centroids">
+    <file ref="msoa_popweightedcentroids.csv"/>
+    <format formatType="text">CSV file</format>
+  </output>
+</module>

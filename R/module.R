@@ -800,8 +800,8 @@ runModule <- function(module, inputObjects = list(),
         ## copy script file to host
         script_result <- fileToHost(script, host)
         if (script_result != 0) {
-            stop("Unable to copy ", script, " to host ",
-                 buildModuleHost(host))
+            stop(paste0("Unable to copy ", script, " to host ",
+                 buildModuleHost(host)))
         }
     }
 
@@ -809,7 +809,7 @@ runModule <- function(module, inputObjects = list(),
     ## resolve input objects
     for (i in module$inputs) {
         resolved <- resolveInput(i, inputObjects, host)
-        if (!resolved) stop("Input ", i$name, " cannot be resolved")
+        if (!resolved) stop(paste0("Input '", i$name, "' cannot be resolved"))
     }
 
     ## execute script file

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description></description>
+  <component name="extract_flow_data" ref="extract_flow_data.xml" type="module"/>
+  <component name="retrieve_centroids" ref="retrieve_centroids.xml" type="module"/>
+  <component name="set_coords" ref="set_coords.xml" type="module"/>
+  <component name="uk_flow_graphic" ref="uk_flow_graphic.xml" type="module"/>
+  <pipe>
+    <start component="extract_flow_data" output="data"/>
+    <end component="set_coords" input="data"/>
+  </pipe>
+  <pipe>
+    <start component="retrieve_centroids" output="centroids"/>
+    <end component="set_coords" input="locations"/>
+  </pipe>
+  <pipe>
+    <start component="set_coords" output="trips"/>
+    <end component="uk_flow_graphic" input="trips"/>
+  </pipe>
+</pipeline>
