@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <description>extract R code from blog post http://spatial.ly/2015/03/mapping-flows/ (actually from mirror at http://blogs.casa.ucl.ac.uk/category/r-spatial/)</description>
+  <input name="blog">
+    <url ref="http://blogs.casa.ucl.ac.uk/category/r-spatial/"/>
+    <format formatType="text">html file</format>
+  </input>
+  <source>
+    <script><![CDATA[library(XML)
+library(RCurl)
+
+## extract source article from category feed
+source_lines <-
+    readLines("http://blogs.casa.ucl.ac.uk/category/r-spatial/")
+heading <- grep("<h1 class=\"entry-title\">[[:print:]]*http://spatial.ly/2015/03/mapping-flows/", source_lines)
+start <- grep("^[ ]*<article", source_lines)
+start <- start[start < heading]
+start <- start[length(start)]
+end <- grep("</article>", source_lines)
+end <- end[end > start][1]
+source_lines <- source_lines[start:end]
+
+## save a local copy of the article
+writeLines(source_lines, "source_lines.txt")
+
+## extract code chunks
+code_start <- grep("<code>", source_lines)
+code_end <- grep("</code>", source_lines)
+code_lines <- lapply(seq_along(code_start),
+                     function (i, start, end) {
+                         seq(start[i] + 1, end[i] - 1)
+                     }, code_start, code_end)
+
+code <- lapply(code_lines,
+               function(x, src) {
+                   c(gsub("<br />", "", src[x]), "")
+               }, source_lines)
+
+## save code chunks as R scripts
+data_script <- unlist(code[2:5])
+writeLines(data_script, "data_script.R")
+graphics_script <- unlist(code[c(1, 6:10)])[-c(1, 3)]
+writeLines(graphics_script, "graphics_script.R")]]></script>
+  </source>
+  <output name="raw_source">
+    <file ref="source_lines.txt"/>
+    <format formatType="text">txt file</format>
+  </output>
+  <output name="data_script">
+    <file ref="data_script.R"/>
+    <format formatType="text">R script</format>
+  </output>
+  <output name="graphics_script">
+    <file ref="graphics_script.R"/>
+    <format formatType="text">R script</format>
+  </output>
+</module>

@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <module xmlns="http://www.openapi.org/2014/" language="R">
   <description>Add plottable co-ordinates to UK census data on commuter flow - http://blogs.casa.ucl.ac.uk/category/r-spatial/</description>
+  <input name="data_script">
+    <file ref="data_script.R"/>
+    <format formatType="text">R script</format>
+  </input>
   <input name="data">
     <file ref="wu03ew_v1.csv"/>
     <format formatType="text">csv file</format>
@@ -10,18 +14,7 @@
     <format formatType="text">csv file</format>
   </input>
   <source>
-    <script><![CDATA[input<-read.table("wu03ew_v1.csv", sep=",", header=T)
-
-input<- input[,1:3]
-names(input)<- c("origin", "destination","total")
-
-centroids<- read.csv("msoa_popweightedcentroids.csv")
-
-or.xy<- merge(input, centroids, by.x="origin", by.y="Code")
-names(or.xy)<- c("origin", "destination", "trips", "o_name", "oX", "oY")
-dest.xy<-  merge(or.xy, centroids, by.x="destination", by.y="Code")
-names(dest.xy)<- c("origin", "destination", "trips", "o_name", "oX", "oY","d_name", "dX", "dY")
-]]></script>
+    <script><![CDATA[eval(parse(text = readLines("data_script.R")))]]></script>
   </source>
   <output name="trips">
     <internal symbol="dest.xy"/>

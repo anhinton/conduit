@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
 <pipeline xmlns="http://www.openapi.org/2014/">
-  <description></description>
+  <description>Run the R code found in the blog post http://spatial.ly/2015/03/mapping-flows/ (actually from mirror at http://blogs.casa.ucl.ac.uk/category/r-spatial/) to produce a plot of UK commuter flows</description>
+  <component name="extract_scripts" ref="extract_scripts.xml" type="module"/>
   <component name="extract_flow_data" ref="extract_flow_data.xml" type="module"/>
   <component name="retrieve_centroids" ref="retrieve_centroids.xml" type="module"/>
   <component name="set_coords" ref="set_coords.xml" type="module"/>
   <component name="uk_flow_graphic" ref="uk_flow_graphic.xml" type="module"/>
+  <pipe>
+    <start component="extract_scripts" output="data_script"/>
+    <end component="set_coords" input="data_script"/>
+  </pipe>
   <pipe>
     <start component="extract_flow_data" output="data"/>
     <end component="set_coords" input="data"/>
@@ -12,6 +17,10 @@
   <pipe>
     <start component="retrieve_centroids" output="centroids"/>
     <end component="set_coords" input="locations"/>
+  </pipe>
+  <pipe>
+    <start component="extract_scripts" output="graphics_script"/>
+    <end component="uk_flow_graphic" input="graphics_script"/>
   </pipe>
   <pipe>
     <start component="set_coords" output="trips"/>
