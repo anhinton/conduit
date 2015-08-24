@@ -11,6 +11,14 @@
     <end component="set_coords" input="data_script"/>
   </pipe>
   <pipe>
+    <start component="extract_scripts" output="wu03ew_v1.csv.zip"/>
+    <end component="extract_flow_data" input="wu03ew_v1.csv.zip"/>
+  </pipe>
+  <pipe>
+    <start component="extract_scripts" output="msoa_popweightedcentroids.csv"/>
+    <end component="retrieve_centroids" input="centroids"/>
+  </pipe>
+  <pipe>
     <start component="extract_flow_data" output="data"/>
     <end component="set_coords" input="data"/>
   </pipe>
