@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description>This pipeline executes the UK commuter flow mapping script from https://procomun.wordpress.com/2015/04/14/mapping-flows-in-r-with-data-table-and-lattice/, using the data provided by http://spatial.ly/2015/03/mapping-flows/</description>
+  <component name="extract_flow_data" ref="extract_flow_data.xml" type="module"/>
+  <component name="retrieve_centroids" ref="retrieve_centroids.xml" type="module"/>
+  <component name="extract_script" ref="extract_script.xml" type="module"/>
+  <component name="mapping_flows" ref="mapping_flows.xml" type="module"/>
+  <pipe>
+    <start component="extract_flow_data" output="data"/>
+    <end component="mapping_flows" input="wu03ew_v1.csv"/>
+  </pipe>
+  <pipe>
+    <start component="retrieve_centroids" output="centroids"/>
+    <end component="mapping_flows" input="msoa_popweightedcentroids.csv"/>
+  </pipe>
+  <pipe>
+    <start component="extract_script" output="script"/>
+    <end component="mapping_flows" input="script"/>
+  </pipe>
+</pipeline>
