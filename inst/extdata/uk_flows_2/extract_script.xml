@@ -7,7 +7,8 @@
   </input>
   <source>
     <script><![CDATA[## extract gist url from blog
-page <- readLines("https://procomun.wordpress.com/2015/04/14/mapping-flows-in-r-with-data-table-and-lattice/")
+library(RCurl)
+page <- readLines(textConnection(getURL("https://procomun.wordpress.com/2015/04/14/mapping-flows-in-r-with-data-table-and-lattice/")))
 line <- page[grep("<script[[:print:]]*gist.github.com", page)]
 gist_url <- strsplit(line, "src=\"")[[1]][2]
 gist_url <- strsplit(gist_url, ".js\"")[[1]][1]
