@@ -600,7 +600,7 @@ outputObject <- function(output, language, outputDirectory) {
                fileVessel = vessel$ref,
                stop("vessel type not defined"))
     if (type == "internalVessel" || type == "fileVessel") {
-        if (dirname(outputObject) == ".") {
+        if (!is_absolute(outputObject)) {
             outputObject <- file.path(outputDirectory, outputObject)
         }
         if (file.exists(outputObject)) {

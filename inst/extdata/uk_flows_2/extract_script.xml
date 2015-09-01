@@ -21,6 +21,6 @@ repo <- git2r::clone(url = gist_url, local_path = local_path)]]></script>
   </source>
   <output name="script">
     <file ref="gist/mappingFlows.R"/>
-    <format formatType="text">txt file</format>
+    <format formatType="text">R script</format>
   </output>
 </module>

@@ -48,3 +48,15 @@ scriptExtension <- function(language) {
                         shell = ".sh")
     extension
 }
+
+#' Tests if a file path is absolute
+#'
+#' @param path file path
+#' @return TRUE if absolute
+is_absolute <- function (path) {
+    if (dirname(path) == ".") return(FALSE)
+    if (regexpr("^~", path) != -1) return(TRUE)
+    if (regexpr("^/", path) != -1) return(TRUE)
+    if (regexpr("^[[:alpha:]]+:(/|\\\\)", path) != -1) return(TRUE)
+    else return(FALSE)
+}
