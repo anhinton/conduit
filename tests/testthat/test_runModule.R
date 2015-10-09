@@ -167,6 +167,27 @@ test_that(
     })
 
 test_that(
+    "fileVessel inputs with search paths are resolved",
+    {
+        skip_on_cran()
+        oldwd <- setwd(tempdir())
+        on.exit(setwd(oldwd))
+        input <-
+            moduleInput("okay",
+                        fileVessel(ref = "layoutGraph.xml",
+                                   path = system.file("extdata", "simpleGraph",
+                                                      package = "conduit")),
+                        ioFormat("text file"))
+        inputObjects <-
+            list(okay = system.file(
+                     "extdata", "simpleGraph", "createGraph.xml",
+                     package = "conduit"))
+        expect_error(resolveInput(input, inputObjects, host = NULL),
+                     "file search path AND")
+        expect_true(resolveInput(input, list(), host = NULL))
+    })
+
+test_that(
     "internalVessel inputs are resolved",
     {
         skip_on_cran()

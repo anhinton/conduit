@@ -18,8 +18,15 @@ readVesselXML <- function (xml) {
                stop("'vessel' xml unknown type"))    
     vessel <-
         switch(type,
-               file = fileVessel(
-                   ref = content[["ref"]]),
+               file = {
+                   ref = content[["ref"]]
+                   path = if ("path" %in% names(content)) {
+                       content[["path"]]
+                   } else {
+                       NULL
+                   }
+                   fileVessel(ref = ref, path = path)
+               },
                internal = internalVessel(
                    symbol = content[["symbol"]]),
                url = urlVessel(
@@ -514,7 +521,13 @@ resolveInput.internal <- function(moduleInput, inputObjects, host) {
 #' @describeIn resolveInput Resolve file input object
 resolveInput.file <- function(moduleInput, inputObjects, host) {
     ref <- moduleInput$vessel$ref
+    path <- moduleInput$vessel$path
     inputObject <- getElement(inputObjects, moduleInput$name)
+    if (!is.null(inputObject) && !is.null(path))
+        stop("file search path AND file object provided")
+    if (!is.null(path)) {
+        inputObject <- findFile(ref, path)
+    } 
 
     ## copy to module directory if ref is relative
     if (dirname(ref) == ".") {

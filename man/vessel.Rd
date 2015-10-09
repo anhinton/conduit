@@ -10,7 +10,7 @@
 \usage{
 internalVessel(symbol)
 
-fileVessel(ref)
+fileVessel(ref, path = NULL)
 
 urlVessel(ref)
 
@@ -21,6 +21,8 @@ scriptVessel(value)
 
 \item{ref}{Absolute or relative location of file for
 \code{fileVessel}, URL for \code{urlVessel}}
+
+\item{path}{search path(s) for fileVessel$ref}
 
 \item{value}{Module script as character vector}
 }

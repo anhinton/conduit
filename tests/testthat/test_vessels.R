@@ -27,26 +27,36 @@ test_that(paste0("'internalVessel' object has class",
 })
 
 ## fileVessel creation
-testFile <- fileVessel("myFile.txt")
+testFile <- fileVessel("myFile.txt") # just a ref
+testPath <- fileVessel(ref="myFile.txt", path = tempdir()) # ref and path
 
-test_that("fileVessel stops when 'ref' is not length 1 char", {
+test_that("fileVessel stops for invalid arguments", {
     expect_error(fileVessel(c("ref1", "ref1")),
                  "'ref' is not a length 1 character vector")
     expect_error(fileVessel(666),
                  "'ref' is not a length 1 character vector")
+    expect_error(fileVessel(ref = "ref", path = c("ref1", "ref1")),
+                 "'path' is not a length 1 character vector")
+    expect_error(fileVessel(ref = "ref", path = 666),
+                 "'path' is not a length 1 character vector")
 })
 
 test_that("'fileVessel' slots are right type and length", {
     expect_true(is_length1_char(testFile$ref))
+    expect_true(is_length1_char(testPath$path))
 })
 
 test_that("'fileVessel' objects contain appropriate slots", {
     expect_match(names(testFile), "^ref$", all=F)
+    expect_match(names(testPath), "^ref$", all=F)
+    expect_match(names(testPath), "^path$", all=F)
 })
 
 test_that("'fileVessel' object has class c(\"fileVessel\", \"vessel\")", {
     expect_match(class(testFile)[1], "^fileVessel$")
     expect_match(class(testFile)[2], "^vessel$")
+    expect_match(class(testPath)[1], "^fileVessel$")
+    expect_match(class(testPath)[2], "^vessel$")
 })
 
 ## urlVessel creation
