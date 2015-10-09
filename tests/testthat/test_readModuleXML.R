@@ -94,6 +94,9 @@ test_that(
         fileXML1 <- vesselToXML(fileVessel(ref1))
         ref2 <- "different.csv"
         fileXML2 <- vesselToXML(fileVessel(ref2))
+        ref3 <- "file.txt"
+        path3 <- tempfile()
+        pathXML <- vesselToXML(fileVessel(ref3, path3))
         ## fileXML1
         fileVessel1 <- readVesselXML(fileXML1)
         expect_match(class(fileVessel1), "fileVessel", all=F)
@@ -102,6 +105,10 @@ test_that(
         fileVessel2 <- readVesselXML(fileXML2)
         expect_match(class(fileVessel2), "fileVessel", all=F)
         expect_match(class(fileVessel2), "vessel", all=F)
+        ## pathXML
+        pathVessel <- readVesselXML(pathXML)
+        expect_match(class(pathVessel), "fileVessel", all=F)
+        expect_match(class(pathVessel), "vessel", all=F)
     })
 
 test_that(

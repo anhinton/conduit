@@ -22,7 +22,8 @@
 #'
 #' @param symbol symbol name of internal object
 #' @param ref Absolute or relative location of file for
-#' \code{fileVessel}, URL for \code{urlVessel}
+#'     \code{fileVessel}, URL for \code{urlVessel}
+#' @param path search path(s) for fileVessel$ref
 #' @param value Module script as character vector
 #' 
 #' @return \code{vessel} list object
@@ -55,11 +56,14 @@ internalVessel <- function(symbol) {
 
 #' @export
 #' @rdname vessel
-fileVessel <- function(ref) {
+fileVessel <- function(ref, path = NULL) {
     if (!is_length1_char(ref)) {
         stop("'ref' is not a length 1 character vector")
     }
-    fileVessel <- list(ref = ref)
+    if (!is.null(path) && !is_length1_char(path)) {
+        stop("'path' is not a length 1 character vector")
+    }
+    fileVessel <- list(ref = ref, path = path)
     class(fileVessel) <- c("fileVessel", "vessel")
     return(fileVessel)
 }
