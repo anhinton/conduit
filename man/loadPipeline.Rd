@@ -24,6 +24,9 @@ Reads an XML file given by \code{ref} and \code{path} and interprets to
 produce a \code{pipeline}.
 }
 \details{
+If the pipeline XML file is not valid OpenAPI module XML this
+function will return an error.
+
 If \code{path} is not set and conduit needs to search for the file the
 default search paths are used.
 }
