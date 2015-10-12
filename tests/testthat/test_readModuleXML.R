@@ -154,12 +154,6 @@ moduleXml <-
                 moduleOutput("output", fileVessel("out.file"),
                              ioFormat("text file")))))
 
-test_that("readModuleXML fails for invalid XML", {
-    notModule <- XML::newXMLNode("notModule")
-    expect_error(readModuleXML(xml = notModule),
-                 "module XML is invalid")
-})
-
 test_that("readModuleXML creates appropriate module object", {
     module <- readModuleXML(name = "first", xml = moduleXml)
     expect_match(class(module), "module")
@@ -175,6 +169,17 @@ test_that("loadModule() fails for non-existent file", {
             ref = tempfile(pattern = "doesnotexits",
                 tmpdir = tempdir())),
         "Unable to load module")
+})
+
+test_that("loadModule() fails for invalid module XML", {
+    pipeline <- system.file("extdata", "invalidPipeline.xml",
+                            package = "conduit")
+    expect_error(loadModule("pipeline", ref = pipeline),
+                 "module XML is invalid")
+    invMod <- system.file("extdata", "invalidModule.xml",
+                          package = "conduit")
+    expect_error(loadModule("invMod", ref = invMod),
+                 "module XML is invalid")
 })
 
 test_that("loadModule() handles ref, no path", {

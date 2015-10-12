@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description>This pipeline is invalid.</description>
+  <description>Because it has two descriptions.</description>
+  <component name="plotGraph" ref="plotGraph.xml" type="module"/>
+  <component name="createGraph" ref="createGraph.xml" type="module"/>
+  <component name="layoutGraph" ref="layoutGraph.xml" type="module"/>
+  <pipe>
+    <start component="createGraph" output="directedGraph"/>
+    <end component="layoutGraph" input="myGraph"/>
+  </pipe>
+  <pipe>
+    <start component="layoutGraph" output="Ragraph"/>
+    <end component="plotGraph" input="Ragraph"/>
+  </pipe>
+</pipeline>

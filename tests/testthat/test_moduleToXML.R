@@ -168,7 +168,9 @@ test_that("saveModule produces appropriate XML file", {
     name <- "lazerbeast.xml"
     xmlOutput1 <- saveModule(mod2, targ)
     expect_true(file.exists(xmlOutput1))
+    expect_true(isValidXML(xmlOutput1, type = "module"))
     xmlOutput2 <- saveModule(mod2, targ, name)
     expect_true(file.exists(xmlOutput2))
+    expect_true(isValidXML(xmlOutput2, type = "module"))
     expect_match(basename(xmlOutput2), name)
 })

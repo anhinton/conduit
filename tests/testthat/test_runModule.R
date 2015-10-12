@@ -1,6 +1,10 @@
 library(conduit)
 context("execute modules")
 
+## skip tests which require a module host machine
+## requires conduit host at conduit@127.0.0.1:2222
+skip <- TRUE
+
 targ = tempdir()
 createGraph <- loadModule(
     "createGraph",
@@ -42,7 +46,8 @@ test_that(
 test_that(
     "extractModuleSource() works for <url> sources",
     {
-        skip("requires test conduit web server at http://127.0.0.1:8080/")
+        if (skip)
+            skip("requires test conduit web server at http://127.0.0.1:8080/")
         skip_on_cran()
         url_source <- moduleSource(
             urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
