@@ -124,9 +124,6 @@ readModuleSourceXML <- function (xml) {
 #' 
 #' @import XML
 readModuleXML <- function (name, xml) {
-    if (xmlName(xml) != "module") {
-        stop("module XML is invalid")
-    }
     attrs <- xmlAttrs(xml)
     language <- attrs[["language"]]
     host <-
@@ -179,8 +176,11 @@ readModuleXML <- function (name, xml) {
 #' Reads an XML file given by \code{ref} and \code{path} and interprets to
 #' produce a \code{module}.
 #'
-#' If \code{path} is not set and conduit needs to search for the file the
-#' default search paths are used.
+#' If the module XML file is not valid OpenAPI module XML this
+#' function will return and error.
+#'
+#' If \code{path} is not set and conduit needs to search for the file
+#' the default search paths are used.
 #' 
 #' @param name Name of module
 #' @param ref Module location or filename
@@ -214,7 +214,9 @@ loadModule <- function(name, ref, path = NULL,
             problem <- c(paste0("Unable to load module '", name, "'\n"),
                          err)
             stop(problem)
-        })    
+        })
+    if (!isValidXML(file, "module"))
+        stop(paste0("'", file, "': module XML is invalid"))
     rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
 
@@ -371,7 +373,7 @@ moduleToXML <- function (module,
     moduleRoot <-
         addChildren(moduleRoot,
                     kids=list(description, inputs, sources,
-                        outputs))
+                              outputs))
     return(moduleRoot)
 }
 
@@ -418,9 +420,11 @@ saveModule <- function(module, targetDirectory = getwd(),
         stop("no such target directory")
     }
     moduleDoc <-
-        newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=moduleToXML(module,
-                      namespaceDefinitions="http://www.openapi.org/2014/"))
+        newXMLDoc(
+            namespaces="http://www.openapi.org/2014",
+            node=moduleToXML(
+                module,
+                namespaceDefinitions="http://www.openapi.org/2014/"))
     moduleFilePath <- file.path(targetDirectory, filename)
     saveXML(moduleDoc, moduleFilePath)
 }
