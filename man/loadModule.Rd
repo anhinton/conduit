@@ -25,7 +25,7 @@ produce a \code{module}.
 }
 \details{
 If the module XML file is not valid OpenAPI module XML this
-function will return and error.
+function will return an error.
 
 If \code{path} is not set and conduit needs to search for the file
 the default search paths are used.
