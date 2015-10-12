@@ -1,5 +1,27 @@
 ### Functions for validating modules and pipelines
 
+#' Check module and pipeline XML for validity
+#'
+#' Check validity of an XML document against an XML Schema.
+#'
+#' Default schema is pipeline.xsd, which includes module.xsd.
+#'
+#' @param xml XML document to be validated
+#' @param schema XML Schema to validate against
+#'
+#' @return TRUE if valid
+#' @import XML
+isValidXML <-function (xml,
+                       schema = system.file("xmlSchema", "pipeline.xsd",
+                                             package = "conduit")) {
+    value <- xmlSchemaValidate(schema, xml)
+    if (value$status == 0) {
+        TRUE
+    } else {
+        FALSE
+    }    
+}
+
 #' Validate a pipe
 #'
 #' @return Logical value, TRUE if valid
