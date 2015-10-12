@@ -106,6 +106,9 @@ readPipelineXML <- function(name, xml, location = getwd()) {
 #' Reads an XML file given by \code{ref} and \code{path} and interprets to
 #' produce a \code{pipeline}.
 #'
+#' If the pipeline XML file is not valid OpenAPI module XML this
+#' function will return an error.
+#'
 #' If \code{path} is not set and conduit needs to search for the file the
 #' default search paths are used.
 #' 
@@ -131,6 +134,8 @@ loadPipeline <- function(name, ref, path = NULL,
                          err)
             stop(problem)
         })
+    if (!isValidXML(file, "pipeline"))
+        stop(paste0("'", file, "': module XML is invalid"))    
     location <- dirname(file)
     rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
