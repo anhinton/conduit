@@ -6,15 +6,15 @@
 #'
 #' Default schema is pipeline.xsd, which includes module.xsd.
 #'
-#' @param xml XML document to be validated
-#' @param schema XML Schema to validate against
+#' @param file XML file to be validated
+#' @param type \dQuote{module} of \dQuote{pipeline}
 #'
 #' @return TRUE if valid
 #' @import XML
-isValidXML <-function (xml,
-                       schema = system.file("xmlSchema", "pipeline.xsd",
-                                             package = "conduit")) {
-    value <- xmlSchemaValidate(schema, xml)
+isValidXML <-function (file, type) {
+    schema <- system.file("xmlSchema", paste0(type, ".xsd"),
+                          package = "conduit")
+    value <- xmlSchemaValidate(schema, file)
     if (value$status == 0) {
         TRUE
     } else {
