@@ -684,20 +684,42 @@ resolveOutput <- function (output, language, host,
 #' created on the remote host at \code{/tmp/{sessionID}/}
 #'
 #' @param host module host as character string
+#' @param idfile authentication key
 #'
 #' @return list of \itemize{
 #'   \item user
+#'   \item password
 #'   \item address
 #'   \item port
 #'   \item directory
 #'   \item idfile}
-parseModuleHost <- function(host) {
+parseModuleHost <- function(host,
+                            idfile = get("defaultIdfile",
+                                         envir = .conduit.global)) {
+    scheme = "ssh"
+    if (grepl("://", host)) {
+        pieces <- strsplit(host, "://")[[1]]
+        scheme <- pieces[1]
+        if (scheme != "ssh") {
+            stop("Only SSH scheme supported for module hosts")
+        }
+        host <- pieces[2]
+    }
     if (grepl("@", host)) {
         pieces <- strsplit(host, "@")[[1]]
-        user <- pieces[1]
+        auth <- pieces[1]
         address <- pieces[2]
+        if(grepl(":", auth)) {
+            pieces <- strsplit(auth, ":")[[1]]
+            user <- pieces[1]
+            password <- pieces[2]
+        } else {
+            user <- auth
+            password <- ""
+        }
     } else {
         user <- "conduit"
+        password <- ""
         address <- host
     }
     if (grepl(":", address)) {
@@ -707,12 +729,17 @@ parseModuleHost <- function(host) {
     } else {
         port <- "22"
     }
-    directory =
-        file.path("/tmp", get("sessionID", envir = .conduit.global),
-                  basename(tempfile("module")), fsep="/")
-    idfile = get("defaultIdfile", envir = .conduit.global)
-    host <- list(user = user, address = address, port = port,
-                 directory = directory, idfile = idfile)
+    if (grepl("/", port)) {
+        split <- regexpr("/", port)
+        directory <- substr(port, split, nchar(port))
+        port <- substr(port, 1, split - 1)
+    } else {
+        directory <-
+            file.path("/tmp", get("sessionID", envir = .conduit.global),
+                      basename(tempfile("module")), fsep="/")
+    }
+    host <- list(user = user, password = password, address = address,
+                 port = port, directory = directory, idfile = idfile)
     return(host)
 }
 

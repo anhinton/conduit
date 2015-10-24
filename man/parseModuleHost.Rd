@@ -4,14 +4,17 @@
 \alias{parseModuleHost}
 \title{Parse a module's host}
 \usage{
-parseModuleHost(host)
+parseModuleHost(host, idfile = get("defaultIdfile", envir = .conduit.global))
 }
 \arguments{
 \item{host}{module host as character string}
+
+\item{idfile}{authentication key}
 }
 \value{
 list of \itemize{
   \item user
+  \item password
   \item address
   \item port
   \item directory
