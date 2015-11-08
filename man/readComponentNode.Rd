@@ -4,7 +4,7 @@
 \alias{readComponentNode}
 \title{Parse a component \code{xmlNode} and return a \code{component}.}
 \usage{
-readComponentNode(node, location)
+readComponentNode(node, location = getwd())
 }
 \arguments{
 \item{node}{An \code{xmlNode} named \dQuote{component}.}

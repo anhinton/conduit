@@ -123,7 +123,7 @@ readModuleSourceXML <- function (xml) {
 #' @return \code{module} object
 #' 
 #' @import XML
-readModuleXML <- function (name, xml) {
+readModuleXML <- function (name, xml, location = getwd()) {
     attrs <- xmlAttrs(xml)
     language <- attrs[["language"]]
     host <-
@@ -167,7 +167,8 @@ readModuleXML <- function (name, xml) {
                      description = description,
                      inputs = inputs,
                      sources = sources,
-                     outputs = outputs)
+                     outputs = outputs,
+                     location = location)
     return(module)
 }
 
@@ -1105,6 +1106,10 @@ moduleSource <- function(vessel, order = NULL) {
 #' of objects created using \code{moduleInput}, \code{moduleOutput}, and
 #' \code{moduleSource} respectively.
 #'
+#' Module \sQuote{location} defaults to current working
+#' directory. This can be set to indicate the location of the module
+#' XML file, and its supporting files.
+#'
 #' @param name Name of module
 #' @param language Language name
 #' @param host Machine on which module is to be run
@@ -1112,6 +1117,7 @@ moduleSource <- function(vessel, order = NULL) {
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
 #' @param sources List of \code{moduleSource} objects
+#' @param location file directory where module xml and files are found
 #' 
 #' @return \code{module} list containing:
 #' \itemize{
@@ -1163,7 +1169,8 @@ moduleSource <- function(vessel, order = NULL) {
 #' @export
 module <- function(name, language, host=NULL,
                    description=NULL,
-                   inputs=NULL, outputs=NULL, sources=NULL) {
+                   inputs=NULL, outputs=NULL, sources=NULL,
+                   location = getwd()) {
     ## check arguments for errors
 
     ## check 'name'
@@ -1251,6 +1258,6 @@ module <- function(name, language, host=NULL,
                    outputs = outputs,
                    sources = sources)
     class(module) <- "module"
-    attr(module, "location") <- getwd()
+    attr(module, "location") <- location
     module
 }
