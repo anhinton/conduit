@@ -6,7 +6,7 @@
 #' @param location file directory of invoking pipeline/module xml (optional)
 #' @return \code{component} object
 #' @import XML
-readComponentNode <- function (node, location) {
+readComponentNode <- function (node, location = getwd()) {
     name <- getXMLAttr(node, "name")
     ref <- getXMLAttr(node, "ref")
     component <-
@@ -23,7 +23,9 @@ readComponentNode <- function (node, location) {
                 stop("A component must be a module or a pipeline")
             }
             value <- switch(type,
-                            module = readModuleXML(name, rawValue),
+                            module = readModuleXML(name = name,
+                                                   xml = rawValue,
+                                                   location = location),
                             pipeline = readPipelineXML(name, rawValue,
                                                        location))
             component(name = name, type = type, value = value)
@@ -49,7 +51,9 @@ readComponentNode <- function (node, location) {
             rawXML <- fetchRef(file)
             xml <- xmlRoot(xmlParse(rawXML))
             value <- switch(type,
-                            module = readModuleXML(name, xml),
+                            module = readModuleXML(name = name,
+                                                   xml = xml,
+                                                   location = location),
                             ## FIXME: I bet loading a pipeline won't work
                             pipeline = readPipelineXML(name, xml, location))
             component(name=name, ref=ref, path=path, type=type, value=value)

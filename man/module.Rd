@@ -5,7 +5,7 @@
 \title{Create a \code{module} object}
 \usage{
 module(name, language, host = NULL, description = NULL, inputs = NULL,
-  outputs = NULL, sources = NULL)
+  outputs = NULL, sources = NULL, location = getwd())
 }
 \arguments{
 \item{name}{Name of module}
@@ -21,6 +21,8 @@ module(name, language, host = NULL, description = NULL, inputs = NULL,
 \item{outputs}{List of \code{moduleOutput} objects}
 
 \item{sources}{List of \code{moduleSource} objects}
+
+\item{location}{file directory where module xml and files are found}
 }
 \value{
 \code{module} list containing:
@@ -41,6 +43,10 @@ Creates a module object which can be executed in conduit.
 \code{inputs}, \code{outputs}, and \code{sources} should be lists
 of objects created using \code{moduleInput}, \code{moduleOutput}, and
 \code{moduleSource} respectively.
+
+Module \sQuote{location} defaults to current working
+directory. This can be set to indicate the location of the module
+XML file, and its supporting files.
 }
 \examples{
 ## create a module with one output and one source
