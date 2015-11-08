@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description>Create a scatter matrix from the iris data using R and python modules</description>
+  <component name="iris_df" ref="iris_df.xml" type="module"/>
+  <component name="dftocsv" ref="dftocsv.xml" type="module"/>
+  <component name="Rscatter" ref="Rscatter.xml" type="module"/>
+  <component name="pythonScatter" ref="pythonScatter.xml" type="module"/>
+  <pipe>
+    <start component="iris_df" output="iris_df"/>
+    <end component="dftocsv" input="x"/>
+  </pipe>
+  <pipe>
+    <start component="iris_df" output="iris_df"/>
+    <end component="Rscatter" input="x"/>
+  </pipe>
+  <pipe>
+    <start component="dftocsv" output="x.csv"/>
+    <end component="pythonScatter" input="data.csv"/>
+  </pipe>
+</pipeline>

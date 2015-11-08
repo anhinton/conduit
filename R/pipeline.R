@@ -6,7 +6,7 @@
 #' @param location file directory of invoking pipeline/module xml (optional)
 #' @return \code{component} object
 #' @import XML
-readComponentNode <- function (node, location) {
+readComponentNode <- function (node, location = getwd()) {
     name <- getXMLAttr(node, "name")
     ref <- getXMLAttr(node, "ref")
     component <-
@@ -23,8 +23,9 @@ readComponentNode <- function (node, location) {
                 stop("A component must be a module or a pipeline")
             }
             value <- switch(type,
-                            module = readModuleXML(name, rawValue,
-                                                   location),
+                            module = readModuleXML(name = name,
+                                                   xml = rawValue,
+                                                   location = location),
                             pipeline = readPipelineXML(name, rawValue,
                                                        location))
             component(name = name, type = type, value = value)
@@ -50,7 +51,9 @@ readComponentNode <- function (node, location) {
             rawXML <- fetchRef(file)
             xml <- xmlRoot(xmlParse(rawXML))
             value <- switch(type,
-                            module = readModuleXML(name, xml, location),
+                            module = readModuleXML(name = name,
+                                                   xml = xml,
+                                                   location = location),
                             ## FIXME: I bet loading a pipeline won't work
                             pipeline = readPipelineXML(name, xml, location))
             component(name=name, ref=ref, path=path, type=type, value=value)
@@ -69,7 +72,6 @@ readComponentNode <- function (node, location) {
 #' @return \code{pipeline} object
 #' @import XML
 readPipelineXML <- function(name, xml, location = getwd()) {
-    ## pipelinePath <- paste0(pipelineDir, pathSep)
     nodes <- xmlChildren(xml)
     
     ## extract description
@@ -108,6 +110,9 @@ readPipelineXML <- function(name, xml, location = getwd()) {
 #' Reads an XML file given by \code{ref} and \code{path} and interprets to
 #' produce a \code{pipeline}.
 #'
+#' If the pipeline XML file is not valid OpenAPI module XML this
+#' function will return an error.
+#'
 #' If \code{path} is not set and conduit needs to search for the file the
 #' default search paths are used.
 #' 
@@ -133,6 +138,8 @@ loadPipeline <- function(name, ref, path = NULL,
                          err)
             stop(problem)
         })
+    if (!isValidXML(file, "pipeline"))
+        stop(paste0("'", file, "': module XML is invalid"))    
     location <- dirname(file)
     rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
@@ -243,16 +250,26 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
 #'
 #' @examples
 #' ## create a pipeline
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
-#' mod2 <- module("showY", platform = "R",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
 #' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2), 
 #'                    pipes = list(pipe("setX", "x", "showY", "y")))
 #' outputDir <- tempdir()
@@ -298,18 +315,19 @@ exportPipeline <- function(pipeline, targetDirectory) {
 
 ## functions to run a loaded PIPELINE
 
-#' Returns the correct file extension for a platform's 'internal' files
+#' Match a pipe's input name to an output object
 #'
-#' @param platform platform name
-#' @return files exension as character as ".EXT"
-internalExtension <- function(platform) {
-    extension <- switch(platform,
-                        R = ".rds",
-                        shell = ".txt")
-    extension
+#' @param pipe \code{pipe} describing match
+#' @param outputObjects named list of output objects
+#'
+#' @return named input list
+matchInput <- function (pipe, outputObjects) {
+    component <- getElement(outputObjects, pipe$start$component)
+    object <- getElement(component, pipe$start$output)
+    return(object)
 }
 
-#' Returns a named list of input addresses
+#' Returns a named list of input objects
 #'
 #' \code{inputsList} returns a named list of absolute file locations for
 #' components' inputs.
@@ -318,46 +336,38 @@ internalExtension <- function(platform) {
 #'
 #' @param pipes List of \code{pipe}s
 #' @param components List of \code{component}s
-#' @param pipelinePath Absolute file path to originatin \code{pipeline}
+#' @param pipelinePath Absolute file path to originating \code{pipeline}
 #' XML file
+#' 
 #' @return named list of file locations by input names
-inputsList <- function(pipes, components, pipelinePath) {
-    inputNames <-
-        lapply(pipes,
-               function (x) {
+inputObjects <- function(pipes, components, pipelinePath) {
+    ## calculate component output paths
+    componentPaths <- lapply(components, componentPath, pipelinePath)
+
+    ## extract actual objects
+    componentValues <-
+        lapply(
+            components,
+            function(component) {
+                value <- component$value
+                return(value)
+            })                            
+
+    ## calculate component output objects
+    outputObjects <- lapply(componentValues,
+           function (value, componentPaths) {
+               path <- getElement(componentPaths, value$name)
+               output <- calculateOutputs(value, path)
+           }, componentPaths)
+
+    ## match output objects to input names
+    inputObjects <- lapply(pipes, matchInput, outputObjects)
+    names(inputObjects) <- 
+        sapply(pipes,
+               function(x) {
                    paste(x$end$component, x$end$input, sep=".")
                })
-    inputsList <-
-        lapply(pipes,
-               function (x, components, pipelinePath) {
-                   endComponent <- components[[x$end$component]]
-                   platform <- endComponent$value$platform[["name"]]
-                   type <- endComponent$value$inputs[[x$end$input]][["type"]]
-                   ## FIXME: this assumes the start component is a module
-                   ## and can be found in a "modules" folder. Needs to account
-                   ## for pipelines
-                   if (type == "internal") {
-                       input <- file.path(pipelinePath, "modules",
-                                          x$start$component,
-                                          paste(x$start$output,
-                                                internalExtension(platform),
-                                                sep=""))
-                   } else if (type == "external") {
-                       startComponent <- components[[x$start$component]]
-                       ref <-
-                           startComponent$value$outputs[[x$start$output]]["ref"]
-                       path <- startComponent$value$path
-                       input <- if (dirname(ref) == ".") {
-                           file.path(pipelinePath, "modules",
-                                     x$start$component, ref)
-                       } else {
-                           findFile(ref)
-                       }
-                   }
-                   input
-               }, components, pipelinePath)
-    names(inputsList) <- inputNames
-    inputsList
+    return(inputObjects)
 }
 
 #' Create a \code{graphNEL} node-and-edge graph of a pipeline
@@ -397,10 +407,11 @@ graphPipeline <- function(pipeline) {
 #'
 #' Executes a \code{pipeline}'s \code{component}s.
 #' 
-#' @details This function creates a directory called \code{pipeline$name} in
-#' \file{pipelines}, in the working directory. If the directory \file{pipelines}
-#' does not exist in the working directory it will be created. Working files
-#' and output from the pipeline's \code{components} will be stored in the
+#' @details This function creates a directory called
+#' \code{pipeline$name} in \file{pipelines}, in the
+#' \code{targetDirectory}. If the directory \file{pipelines} does not
+#' exist in this directory it will be created. Working files and
+#' output from the pipeline's \code{components} will be stored in the
 #' named directory.
 #'
 #' First the function will determine the order in which its components are to
@@ -410,13 +421,16 @@ graphPipeline <- function(pipeline) {
 #' The function then produces a list of inputs required by the
 #' \code{component}s, and resolves the (intended) location of these.
 #'
-#' Finally the function executes each \code{component}, in the order determined,
-#' by passing each component and the inputs list to \code{runComponent}.
+#' Finally the function executes each \code{component} in the 
+#' determined order.
 #'
 #' @param pipeline A \code{pipeline} object
-#' @return Meaningless list. TODO: fix what \code{runPipeline},
-#' \code{runModule}, \code{runPlatform} return.
-#' @seealso \code{pipeline}, \code{runComponent}
+#' @param targetDirectory File path for pipeline output
+#' 
+#' @return Named list of \code{component} output objects
+#' 
+#' @seealso More about \code{pipeline} objects, run single \code{module}
+#' objects with \code{runModule}.
 #'
 #' @examples
 #' simpleGraph <-
@@ -424,21 +438,46 @@ graphPipeline <- function(pipeline) {
 #'                  ref = system.file("extdata", "simpleGraph",
 #'                                    "simpleGraph-pipeline.xml",
 #'                                     package = "conduit"))
-#' ## run example in temp directory
-#' oldwd <- setwd(tempdir())
 #'
 #' ## run the pipeline
-#' runPipeline(simpleGraph)
-#' ## observe results
-#' list.files(file.path(tempdir(), "pipelines"), recursive = TRUE)
-#' setwd(oldwd)
+#' runPipeline(simpleGraph, targetDirectory = tempdir())
+#'
+#' ## python language example
+#' pythonExample <- loadPipeline("pythonExample",
+#'                               system.file("extdata", "pythonExample",
+#'                                           "pipeline.xml", package="conduit"))
+#' runPipeline(pythonExample, targetDirectory = tempdir())
+#'
+#' ## shell language example
+#' shellExample <- loadPipeline("shellExample",
+#'                              system.file("extdata", "shellExample",
+#'                                          "pipeline.xml", package="conduit"))
+#' runPipeline(shellExample, targetDirectory = tempdir())
+#'
+#' ## A pipeline with a module run on a remote host
+#' \dontrun{
+#'   irisplots_host_pipeline <- loadPipeline(
+#'       "irisplots_host_pipeline",
+#'       system.file("extdata", "irisplots_host", "pipeline.xml",
+#'       package = "conduit"))
+#'   runPipeline(irisplots_host_pipeline, targetDirectory = tempdir())
+#' }
 #' 
 #' @export
-runPipeline <- function(pipeline) {
+runPipeline <- function(pipeline, targetDirectory = getwd()) {
+    ## ensure targetDirectory exists
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
+    
     ## create directory for pipeline output
-    if (!file.exists("pipelines")) dir.create("pipelines")
+    targetDirectory <- file.path(targetDirectory, "pipelines")
+    if (!file.exists(targetDirectory)) {
+        dir.create(targetDirectory)
+    }
     pipelineName <- componentName(pipeline)
-    pipelinePath <- file.path("pipelines", pipelineName)
+    pipelinePath <- file.path(targetDirectory, pipelineName)
     if (file.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
@@ -454,34 +493,27 @@ runPipeline <- function(pipeline) {
     componentOrder <- RBGL::tsort(componentGraph)
 
     ## resolve inputs
-    inputs <- inputsList(pipeline$pipes, pipeline$components,
-                         pipelinePath)
+    inputObjects <- inputObjects(pipes = pipeline$pipes,
+                                 components = pipeline$components,
+                                 pipelinePath = pipelinePath)
 
-    ## execute components in order determined by componentOrder
-    x <-
-        lapply(componentOrder,
-               function (x, pipeline, inputs, pipelinePath) {
-                   ## select inputs for this component and strip out
-                   ## component name
-
-                   ## FIXME: selecting inputs from inputsList seems a little
-                   ## inelegant. Possibly calculating all input locations
-                   ## before anything is run is the reason for this.
-                   ## What else shall we try?
-
-                   ## FIXME: this could be a helper function called something
-                   ## like resolveComponentInputs()
-                   whichInputs <-
-                       grepl(paste0("^", x,"[.]"),
-                             names(inputs))
-                   inputs <- inputs[whichInputs]
-                   names(inputs) <-
-                       gsub(paste0("^", x,"[.]"), "",
-                            names(inputs))
-                   
-                   ## run the beast
-                   runComponent(x, pipeline, inputs, pipelinePath)
-               }, pipeline, inputs, pipelinePath)
+    ## execute components in order determinde by componentOrder
+    outputObjects <-
+        lapply(
+            componentOrder,
+            function(componentName, pipeline, inputObjects, pipelinePath) {
+                whichInputs <- grepl(paste0("^", componentName, "[.]"),
+                                     names(inputObjects))
+                inputObjects <- inputObjects[whichInputs]
+                names(inputObjects) <-
+                    gsub(paste0("^", componentName, "[.]"), "",
+                         names(inputObjects))
+                outputObjects <- runComponent(componentName, pipeline,
+                                              inputObjects, pipelinePath)
+                return(outputObjects)
+            }, pipeline, inputObjects, pipelinePath)
+    names(outputObjects) <- componentOrder
+    return(outputObjects)
 }
 
 ## creating new pipelines
@@ -523,18 +555,28 @@ pipe <- function (startComponent, startOutput,
 #'
 #' @examples
 #' ## create a pipeline with one module
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
 #' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1))
 #' ## create a new module
-#' mod2 <- module("showY", platform = "R",
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
 #' ## add new module to pipeline
 #' pline1 <- addComponent(mod2, pline1)
 #' 
@@ -561,16 +603,26 @@ addComponent <- function(newComponent, pipeline) {
 #'
 #' @examples
 #' ## create a pipeline with two modules
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
-#' mod2 <- module("showY", platform = "R",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
 #' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
 #' ## create a pipe
 #' pipe1 <- pipe("setX", "x",
@@ -582,16 +634,6 @@ addComponent <- function(newComponent, pipeline) {
 addPipe <- function(newPipe, pipeline) {
     pipeline$pipes <- c(pipeline$pipes, list(newPipe))
     pipeline
-}
-
-#' return the name of a component
-#'
-#' Returns the name of a \code{module} or \code{pipeline}
-#'
-#' @param component \code{module} or \code{pipeline} object
-#' @return character value
-componentName <- function (component) {
-    component$name
 }
 
 #' Create a pipeline
@@ -612,24 +654,36 @@ componentName <- function (component) {
 #' \item{description}{character value}
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
-#' @seealso \code{loadPipeline} for loading a pipeline from an XML souce,
-#' \code{module} for information on module objects, \code{runPipeline} for
-#' executing all of a pipeline's components, \code{runComponent} for executing
-#' individual components, \code{pipe} for pipes, and \code{addPipe} and
-#' \code{addComponent} for modifying pipelines.
+#' @seealso \code{loadPipeline} for loading a pipeline from an XML
+#' souce, \code{module} for information on module objects,
+#' \code{runPipeline} for executing all of a pipeline's components,
+#' \code{runModule} for executing individual \code{module} objects,
+#' \code{pipe} for pipes, and \code{addPipe} and \code{addComponent}
+#' for modifying pipelines.
 #'
 #' @examples
 #' ## create some modules
-#' mod1 <- module(name = "setX", platform = "R",
+#' mod1 <- module(name = "setX", language = "R",
 #'                description = "sets the value of x",
-#'                outputs = list(moduleOutput(name = "x", type = "internal",
-#' 					   format = "R character string")),
-#'                sources = list(moduleSource(value = "x <- \"set\"")))
-#' mod2 <- module("showY", platform = "R",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
-#'                inputs = list(moduleInput(name = "y", type = "internal",
-#'                                          format = "R character string")),
-#'                sources = list(moduleSource(value = "print(y)")))
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
+#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
 #' ## create a pipe
 #' pipe1 <- pipe("setX", "x",
 #'               "showY", "y")

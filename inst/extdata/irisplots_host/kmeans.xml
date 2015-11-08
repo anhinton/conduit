@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R" host="conduit@127.0.0.1:2222">
+  <description/>
+  <input name="data">
+    <internal symbol="data"/>
+    <format formatType="text">R data frame</format>
+  </input>
+  <source>
+    <script><![CDATA[clusters <- kmeans(data, 3)]]></script>
+  </source>
+  <output name="clusters">
+    <internal symbol="clusters"/>
+    <format formatType="text">R kmeans object</format>
+  </output>
+</module>

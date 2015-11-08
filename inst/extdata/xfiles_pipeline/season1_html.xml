@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R" host="conduit@127.0.0.1:2222">
+  <description/>
+  <input name="season1">
+    <internal symbol="season1"/>
+    <format formatType="text">R data frame</format>
+  </input>
+  <source>
+    <url ref="http://127.0.0.1:8080/urlTesting/season1_html.R"/>
+  </source>
+  <output name="season1_html">
+    <url ref="http://127.0.0.1:8080/xfiles_season_1.html"/>
+    <format formatType="text">html file</format>
+  </output>
+</module>

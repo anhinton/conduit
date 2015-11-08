@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <description>Run the first example from STATS 330 lecture 3, returning three plots as PDFs</description>
+  <input name="source_script">
+    <url ref="https://www.stat.auckland.ac.nz/~stats330/lects/330_Lecture3_2015.R"/>
+    <format formatType="text">R script</format>
+  </input>
+  <input name="data">
+    <url ref="https://www.stat.auckland.ac.nz/~stats330/datasets.dir/hb1.csv"/>
+    <format formatType="text">CSV file</format>
+  </input>
+  <source>
+    <script><![CDATA[full_script <- readLines(url("https://www.stat.auckland.ac.nz/~stats330/lects/330_Lecture3_2015.R", method = "libcurl"))
+full_script[19] <- "exchange = read.csv(url(\"https://www.stat.auckland.ac.nz/~stats330/datasets.dir/hb1.csv\", method = \"libcurl\"))"
+subset <- full_script[16:46]
+eval(parse(text = subset))]]></script>
+  </source>
+  <output name="exchange_rate">
+    <file ref="Rplots.pdf"/>
+    <format formatType="text">PDF file</format>
+  </output>
+  <output name="data_dens">
+    <file ref="data_dens.pdf"/>
+    <format formatType="text">PDF file</format>
+  </output>
+  <output name="normal_dens">
+    <file ref="normal_dens.pdf"/>
+    <format formatType="text">PDF file</format>
+  </output>
+  <output name="qqplot">
+    <file ref="qqplot.pdf"/>
+    <format formatType="text">PDF file</format>
+  </output>
+</module>

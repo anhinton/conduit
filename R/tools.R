@@ -12,3 +12,51 @@ getXMLAttr <- function(xmlNode, attrName) {
         NULL
     }
 }
+
+#' Checks whether \code{x} is a length 1 character vector
+#'
+#' @param x vector to be checked
+#' @return logical, TRUE if \code{x} is length 1 char
+is_length1_char <- function(x) {
+    value <- FALSE
+    if (length(x) == 1 && is.character(x)) {
+        value <- TRUE
+    }
+    return(value)
+}
+
+#' Returns the correct file extension for a language's 'internal' files
+#'
+#' @param language language name
+#' @return file exension as character as ".EXT"
+internalExtension <- function(language) {
+    extension <- switch(language,
+                        R = ".rds",
+                        python = ".pickle",
+                        shell = ".txt")
+    extension
+}
+
+#' Returns the correct file extension for a language's script files
+#'
+#' @param language language name
+#' @return file extension as character ".EXT"
+scriptExtension <- function(language) {    
+    extension <- switch(language,
+                        R = ".R",
+                        python = ".python",
+                        shell = ".sh")
+    extension
+}
+
+#' Tests if a file path is absolute
+#'
+#' @param path file path
+#' @return TRUE if absolute
+is_absolute <- function (path) {
+    if (dirname(path) == ".") return(FALSE)
+    if (regexpr("^~", path) != -1) return(TRUE)
+    if (regexpr("^/", path) != -1) return(TRUE)
+    if (regexpr("^[[:alpha:]]+:(/|\\\\)", path) != -1) return(TRUE)
+    else return(FALSE)
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description></description>
+  <component name="irisdata" ref="irisdata.xml" type="module"/>
+  <component name="kmeans" ref="kmeans.xml" type="module"/>
+  <component name="scattermatrix" ref="scattermatrix.xml" type="module"/>
+  <pipe>
+    <start component="irisdata" output="data"/>
+    <end component="kmeans" input="data"/>
+  </pipe>
+  <pipe>
+    <start component="irisdata" output="data"/>
+    <end component="scattermatrix" input="data"/>
+  </pipe>
+  <pipe>
+    <start component="kmeans" output="clusters"/>
+    <end component="scattermatrix" input="clusters"/>
+  </pipe>
+</pipeline>

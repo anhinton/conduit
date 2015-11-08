@@ -1,18 +1,22 @@
 Package: conduit
 Type: Package
-Title: Prototype glue system for openapi
-Version: 0.1-1
-Date: 2015-02-18
+Title: A prototype glue system for OpenAPI
+Version: 0.2
+Date: 2015-11-08
 Authors@R: c(person(given="Ashley Noel", family="Hinton",
     email="ahin017@aucklanduni.ac.nz",
     role=c("cre","aut")),
     person(given="Paul", family="Murrell",
-    email="p.murrell@auckland.ac.nz", role="aut"))
+    email="p.murrell@auckland.ac.nz", role="ctb"))
 Description: Manage and run OpenAPI pipelines and modules
 License: GPL (>= 3)
-Depends: methods
+Depends: R (>= 3.2.2), methods
 Imports:
+    RCurl,
     XML,
     graph,
-    RBGL,
-    RCurl
+    RBGL
+Suggests: 
+    Rgraphviz,
+    gridGraphviz,
+    testthat
