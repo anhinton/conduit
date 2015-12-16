@@ -31,8 +31,8 @@ pipeline(name, description = "", components = list(), modules = list(),
 This functions create a new \code{pipeline} object.
 }
 \details{
-If \code{components} is empty the \code{modules} and
-\code{pipelines} arguments will be used to create the pipeline.
+\code{components}, \code{modules} and \code{pipelines} are
+    combined into a single list of components.
 }
 \examples{
 ## create some modules
@@ -67,10 +67,10 @@ pline1 <- pipeline(name = "ex_pipeline",
 }
 \seealso{
 \code{loadPipeline} for loading a pipeline from an XML
-souce, \code{module} for information on module objects,
-\code{runPipeline} for executing all of a pipeline's components,
-\code{runModule} for executing individual \code{module} objects,
-\code{pipe} for pipes, and \code{addPipe} and \code{addComponent}
-for modifying pipelines.
+    souce, \code{module} for information on module objects,
+    \code{runPipeline} for executing all of a pipeline's
+    components, \code{runModule} for executing individual
+    \code{module} objects, \code{pipe} for pipes, and
+    \code{addPipe} and \code{addComponent} for modifying pipelines.
 }
 

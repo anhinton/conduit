@@ -640,8 +640,8 @@ addPipe <- function(newPipe, pipeline) {
 #'
 #' This functions create a new \code{pipeline} object.
 #'
-#' @details If \code{components} is empty the \code{modules} and
-#' \code{pipelines} arguments will be used to create the pipeline.
+#' @details \code{components}, \code{modules} and \code{pipelines} are
+#'     combined into a single list of components.
 #'
 #' @param name \code{pipeline} name
 #' @param description \code{pipeline} description
@@ -649,17 +649,19 @@ addPipe <- function(newPipe, pipeline) {
 #' @param modules list of \code{module} objects
 #' @param pipelines list of \code{pipeline} objects
 #' @param pipes list of \code{pipe} objects
+
 #' @return \code{pipeline} list containing:
 #' \item{name}{character value}
 #' \item{description}{character value}
 #' \item{components}{list of \code{module}s and \code{pipeline}s}
 #' \item{pipes}{list of \code{pipe}s}
+
 #' @seealso \code{loadPipeline} for loading a pipeline from an XML
-#' souce, \code{module} for information on module objects,
-#' \code{runPipeline} for executing all of a pipeline's components,
-#' \code{runModule} for executing individual \code{module} objects,
-#' \code{pipe} for pipes, and \code{addPipe} and \code{addComponent}
-#' for modifying pipelines.
+#'     souce, \code{module} for information on module objects,
+#'     \code{runPipeline} for executing all of a pipeline's
+#'     components, \code{runModule} for executing individual
+#'     \code{module} objects, \code{pipe} for pipes, and
+#'     \code{addPipe} and \code{addComponent} for modifying pipelines.
 #'
 #' @examples
 #' ## create some modules
@@ -695,21 +697,39 @@ addPipe <- function(newPipe, pipeline) {
 #' @export
 pipeline <- function (name, description="", components=list(),
                       modules=list(), pipelines=list(), pipes=list()) {
-    if (!length(components)) {
-        components <- c(modules, pipelines)
-    } 
-    names(components) <- sapply(components, componentName)
-    components <-
-        lapply(components, function(c) {
-            if (class(c) == "component") {
-                component <- c
-            } else {
-                component <- component(name = c$name, value = c, path = c$pathq)
-            }
-            component
-        })
+    components <- c(components, modules, pipelines)
+    if (!length(components)) stop("no components provided")
+    names(components) <- sapply(components, getName)
     pipeline <- list(name=name, description=description,
                      components=components, pipes=pipes)
     class(pipeline) <- "pipeline"
     pipeline
+}
+
+#' @rdname getComponents
+#'
+#' @export
+getComponents.pipeline <- function(x) {
+    x$components
+}
+
+#' @rdname getName
+#'
+#' @export
+getName.pipeline <- function(x) {
+    x$name
+}
+
+#' @rdname getPipes
+#'
+#' @export
+getPipes.pipeline <- function(x) {
+    x$pipes
+}
+
+#' @rdname getDescription
+#'
+#' @export
+getDescription.pipeline <- function(x) {
+    x$description
 }

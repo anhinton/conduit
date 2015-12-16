@@ -1261,3 +1261,17 @@ module <- function(name, language, host=NULL,
     attr(module, "location") <- location
     module
 }
+
+#' @rdname getName
+#'
+#' @export
+getName.module <- function(x) {
+    x$name
+}
+
+#' @rdname getDescription
+#'
+#' @export
+getDescription.module <- function(x) {
+    x$description
+}
