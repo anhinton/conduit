@@ -2,7 +2,7 @@
 % Please edit documentation in R/pipeline.R
 \name{addComponent}
 \alias{addComponent}
-\title{Add a new component to a pipeline}
+\title{Creates a \code{pipe} object}
 \usage{
 addComponent(newComponent, pipeline)
 }
@@ -10,12 +10,29 @@ addComponent(newComponent, pipeline)
 \item{newComponent}{\code{pipeline} or \code{module} object to be added}
 
 \item{pipeline}{\code{pipeline} to be amended}
+
+\item{startComponent}{Name of start component}
+
+\item{startOutput}{Name of start output}
+
+\item{endComponent}{Name of end module}
+
+\item{endInput}{Name of end input
+Add a new component to a pipeline
+
+This function adds a new \code{component} to a \code{pipeline}.}
 }
 \value{
 \code{pipeline} object
 }
 \description{
-This function adds a new \code{component} to a \code{pipeline}.
+Constructor method for a \code{pipe} object which connects the
+\code{startComponent}'s \code{startOutput} to the
+\code{endComponent}'s \code{endInput}.
+}
+\details{
+Accessor methods are defined to extract \code{start} and \code{end}
+elements.
 }
 \examples{
 ## create a pipeline with one module

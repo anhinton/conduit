@@ -3,7 +3,7 @@
 \name{getPipes}
 \alias{getPipes}
 \alias{getPipes.pipeline}
-\title{S3 generic to extract pipes from object}
+\title{Extract pipes from object}
 \usage{
 getPipes(x)
 
@@ -13,6 +13,10 @@ getPipes(x)
 \item{x}{object}
 }
 \description{
-S3 generic to extract pipes from object
+Extract pipes from object
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{pipeline}: Returns list of \code{pipe} objects
+}}
 

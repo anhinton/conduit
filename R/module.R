@@ -1262,16 +1262,16 @@ module <- function(name, language, host=NULL,
     module
 }
 
-#' @rdname getName
+#' @describeIn getName
 #'
-#' @export
+#' Returns module name
 getName.module <- function(x) {
     x$name
 }
 
-#' @rdname getDescription
+#' @describeIn getDescription
 #'
-#' @export
+#' Returns module description
 getDescription.module <- function(x) {
     x$description
 }

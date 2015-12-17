@@ -3,7 +3,7 @@
 \name{getComponents}
 \alias{getComponents}
 \alias{getComponents.pipeline}
-\title{S3 generic to extract components from object}
+\title{Extract components from object}
 \usage{
 getComponents(x)
 
@@ -13,6 +13,10 @@ getComponents(x)
 \item{x}{object}
 }
 \description{
-S3 generic to extract components from object
+Extract components from object
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{pipeline}: Returns list of \code{component} objects
+}}
 

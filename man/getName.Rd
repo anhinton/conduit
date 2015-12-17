@@ -2,20 +2,31 @@
 % Please edit documentation in R/generic.R, R/module.R, R/pipeline.R
 \name{getName}
 \alias{getName}
+\alias{getName.component}
 \alias{getName.module}
 \alias{getName.pipeline}
-\title{S3 generic to extract object name}
+\title{Extract object name}
 \usage{
 getName(x)
 
 \method{getName}{module}(x)
 
 \method{getName}{pipeline}(x)
+
+\method{getName}{component}(x)
 }
 \arguments{
 \item{x}{object}
 }
 \description{
-S3 generic to extract object name
+Extract object name
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{module}: Returns module name
+
+\item \code{pipeline}: Returns pipeline name
+
+\item \code{component}: Returns component name
+}}
 

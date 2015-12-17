@@ -4,7 +4,7 @@
 \alias{getDescription}
 \alias{getDescription.module}
 \alias{getDescription.pipeline}
-\title{S3 generic to extract object description}
+\title{Extract object description}
 \usage{
 getDescription(x)
 
@@ -16,6 +16,12 @@ getDescription(x)
 \item{x}{object}
 }
 \description{
-S3 generic to extract object description
+Extract object description
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{module}: Returns module description
+
+\item \code{pipeline}: Returns pipeline description
+}}
 

@@ -1,17 +1,13 @@
 #' Extract components from object
 #'
 #' @param x object
-#'
-#' @export
 getComponents <- function(x) {
-    UseMethod("components")
+    UseMethod("getComponents")
 }
 
 #' Extract object name
 #'
 #' @param x object
-#'
-#' @export
 getName <- function(x) {
     UseMethod("getName")
 }
@@ -19,8 +15,6 @@ getName <- function(x) {
 #' Extract pipes from object
 #'
 #' @param x object
-#'
-#' @export
 getPipes <- function(x) {
     UseMethod("getPipes")
 }
@@ -28,8 +22,6 @@ getPipes <- function(x) {
 #' Extract object description
 #'
 #' @param x object
-#'
-#' @export
 getDescription <- function(x) {
     UseMethod("getDescription")
 }

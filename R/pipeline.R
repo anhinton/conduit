@@ -1,4 +1,209 @@
-### load, save, run and create pipelines
+#' Create a pipeline
+#'
+#' This functions create a new \code{pipeline} object.
+#'
+#' @param name \code{pipeline} name
+#' @param description \code{pipeline} description
+#' @param components list of \code{module} and \code{pipeline} objects
+#' @param pipes list of \code{pipe} objects
+#' 
+#' @return \code{pipeline} list containing:
+#' \item{name}{character value}
+#' \item{description}{character value}
+#' \item{components}{list of \code{module}s and \code{pipeline}s}
+#' \item{pipes}{list of \code{pipe}s}
+#'
+#' @seealso \code{loadPipeline} for loading a pipeline from an XML
+#'     souce, \code{module} for information on module objects,
+#'     \code{runPipeline} for executing all of a pipeline's
+#'     components, \code{runModule} for executing individual
+#'     \code{module} objects, \code{pipe} for pipes, and
+#'     \code{addPipe} and \code{addComponent} for modifying pipelines.
+#'
+#' @examples
+#' ## create some modules
+#' mod1 <- module(name = "setX", language = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(
+#'                    moduleOutput(
+#'                        name = "x",
+#'                        vessel = internalVessel("x"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("x <- \"set\""))))
+#' mod2 <- module("showY", language = "R",
+#'                description = "displays the value of Y",
+#'                inputs = list(
+#'                    moduleInput(
+#'                        name = "y",
+#'                        vessel = internalVessel("y"),
+#'                        format = ioFormat("R character string"))),
+#'                sources = list(
+#'                    moduleSource(
+#'                        vessel = scriptVessel("print(y)"))))
+#' pline1 <- pipeline(name = "trivialpipeline", components = list(mod1, mod2))
+#' ## create a pipe
+#' pipe1 <- pipe("setX", "x",
+#'               "showY", "y")
+#' ## create a pipeline
+#' pline1 <- pipeline(name = "ex_pipeline",
+#'                    components = list(mod1, mod2), 
+#'                    pipes = list(pipe1))
+#' 
+#' @export
+pipeline <- function (name,
+                      description = NULL,
+                      components = list(),
+                      pipes = list()) {
+    ## check arguments for errors
+
+    ## check 'name'
+    if (!is_length1_char(name))
+        stop("'name' is not a length 1 character vector")
+    
+
+    ## check 'description'
+    if (!is.null(description) && !is.character(description))
+        stop("'description' is not a character object")
+    
+    ## check 'components'
+    if (!inherits(components, what = "list")) 
+        stop("components must be provided in a list")
+    if (!length(components)) stop("no components provided")
+    if (!all(sapply(components, inherits, what = c("module", "pipeline"))))
+        stop("components must be module or pipeline objects")
+    
+    ## check 'pipes'
+    if (!inherits(pipes, what = "list")) 
+        stop("pipes must be provided in a list")
+    if (!all(sapply(pipes, inherits, what = "pipe")))
+        stop("pipes must be pipe objects")    
+
+    names(components) <- sapply(components, getName)
+    pipeline <- list(name=name, description = description,
+                     components = components, pipes = pipes)
+    class(pipeline) <- "pipeline"
+    pipeline
+}
+
+#' @describeIn getComponents
+#'
+#' Returns list of \code{component} objects
+getComponents.pipeline <- function(x) {
+    x$components
+}
+
+#' @describeIn getName
+#'
+#' Returns pipeline name
+getName.pipeline <- function(x) {
+    x$name
+}
+
+#' @describeIn getPipes
+#'
+#' Returns list of \code{pipe} objects
+getPipes.pipeline <- function(x) {
+    x$pipes
+}
+
+#' @describeIn getDescription
+#'
+#' Returns pipeline description
+getDescription.pipeline <- function(x) {
+    x$description
+}
+
+#' @return The constructor returns a \code{pipe} object connecting
+#'     \code{startComponentName}.\code{startOutputName} to
+#'     \code{endComponentName}.\code{endInputName}
+#' 
+#' @seealso \code{pipeline}, \code{addPipe}
+#'
+#' @examples
+#' pipe1 <- pipe(startComponent = "setX", startOutput = "x",
+#'               endComponent = "showY", endInput = "y")
+#' 
+#' @export
+pipe <- function (startComponent, startOutput,
+                  endComponent, endInput) {
+    if (!all(sapply(
+             list(startComponent, startOutput, endComponent, endInput),
+             is_length1_char))) {
+        stop("arguments should be length 1 character values")
+    }
+    start <- list(component = startComponent, output = startOutput)
+    end <- list(component = endComponent, input = endInput)
+    pipe <- list(start = start, end = end)
+    class(pipe) <- "pipe"
+    pipe
+}
+
+#' Return \code{pipe} start list
+#'
+#' @param x \code{pipe} object
+#'
+#' @return list containing \code{component} and \code{output}
+start.pipe <- function(x) {
+    x$start
+}
+
+#' Return \code{pipe} end list
+#'
+#' @param x \code{pipe} object
+#' 
+#' @return list containing \code{component} and \code{input}
+end.pipe <- function(x) {
+    x$end
+}
+
+#' Create a component object
+#'
+#' Create a \code{component} object for use in a \code{pipeline}.
+#'
+#' @details A component contains either a \code{pipeline} or
+#'     \code{module} object, or a \code{vessel} object which
+#'     references and object which can be loaded as one of these.
+#'
+#' The object passed to \code{value} can be any type of vessel except
+#' \code{internalVessel} or \code{scriptVessel}.
+#'
+#' @param name Name of component
+#' @param type Character value; \dQuote{pipeline} or \dQuote{module}
+#' @param value \code{vessel}, \code{pipeline} or \code{module} object
+#' 
+#' @return \code{component} list containing:
+#' \describe{
+#'   \item{name}{component name}
+#'   \item{type}{component type}
+#'   \item{value}{\code{vessel}, \code{pipeline} or \code{module} object}
+#' }
+#' 
+#' @seealso \code{pipeline}, \code{module}
+component <- function(name,
+                      type=NULL,
+                      value=NULL) {
+    if (!is_length1_char(name)) stop("'name' is not a length 1 char value")
+    if (!inherits(value, c("vessel", "module", "pipeline")))
+        stop("'value' object invalid")
+    if (!is.null(type) && !identical(type, class(value)))
+        stop("'type' does not match value type")
+    if (is.null(type)) type <- class(value)
+    if (!(type %in% c("module", "pipeline")))
+        stop("type is invalid")
+    
+    component <- list(name = name, type = type, value = value)
+    class(component) <- "component"
+    component
+}
+
+#' @describeIn getName
+#'
+#' Returns component name
+getName.component <- function (x) {
+    x$name
+}
 
 #' Parse a component \code{xmlNode} and return a \code{component}.
 #'
@@ -520,29 +725,18 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 
 #' Creates a \code{pipe} object
 #'
-#' Creates a \code{pipe} object which connects the \code{startComponent}'s
-#' \code{startOutput} to the \code{endComponent}'s \code{endInput}.
+#' Constructor method for a \code{pipe} object which connects the
+#' \code{startComponent}'s \code{startOutput} to the
+#' \code{endComponent}'s \code{endInput}.
+#'
+#' Accessor methods are defined to extract \code{start} and \code{end}
+#' elements.
 #'
 #' @param startComponent Name of start component
 #' @param startOutput Name of start output
 #' @param endComponent Name of end module
 #' @param endInput Name of end input
-#' @return \code{pipe} connecting \code{startComponentName}.\code{startOutputName} to \code{endComponentName}.\code{endInputName}
-#' @seealso \code{pipeline}, \code{addPipe}
-#'
-#' @examples
-#' pipe1 <- pipe(startComponent = "setX", startOutput = "x",
-#'               endComponent = "showY", endInput = "y")
-#' 
-#' @export
-pipe <- function (startComponent, startOutput,
-                  endComponent, endInput) {
-    start <- list(component=startComponent, output=startOutput)
-    end <- list(component=endComponent, input=endInput)
-    pipe <- list(start=start, end=end)
-    class(pipe) <- "pipe"
-    pipe
-}
+
 
 #' Add a new component to a pipeline
 #'
@@ -636,100 +830,3 @@ addPipe <- function(newPipe, pipeline) {
     pipeline
 }
 
-#' Create a pipeline
-#'
-#' This functions create a new \code{pipeline} object.
-#'
-#' @details \code{components}, \code{modules} and \code{pipelines} are
-#'     combined into a single list of components.
-#'
-#' @param name \code{pipeline} name
-#' @param description \code{pipeline} description
-#' @param components list of \code{module} and \code{pipeline} objects
-#' @param modules list of \code{module} objects
-#' @param pipelines list of \code{pipeline} objects
-#' @param pipes list of \code{pipe} objects
-
-#' @return \code{pipeline} list containing:
-#' \item{name}{character value}
-#' \item{description}{character value}
-#' \item{components}{list of \code{module}s and \code{pipeline}s}
-#' \item{pipes}{list of \code{pipe}s}
-
-#' @seealso \code{loadPipeline} for loading a pipeline from an XML
-#'     souce, \code{module} for information on module objects,
-#'     \code{runPipeline} for executing all of a pipeline's
-#'     components, \code{runModule} for executing individual
-#'     \code{module} objects, \code{pipe} for pipes, and
-#'     \code{addPipe} and \code{addComponent} for modifying pipelines.
-#'
-#' @examples
-#' ## create some modules
-#' mod1 <- module(name = "setX", language = "R",
-#'                description = "sets the value of x",
-#'                outputs = list(
-#'                    moduleOutput(
-#'                        name = "x",
-#'                        vessel = internalVessel("x"),
-#'                        format = ioFormat("R character string"))),
-#'                sources = list(
-#'                    moduleSource(
-#'                        vessel = scriptVessel("x <- \"set\""))))
-#' mod2 <- module("showY", language = "R",
-#'                description = "displays the value of Y",
-#'                inputs = list(
-#'                    moduleInput(
-#'                        name = "y",
-#'                        vessel = internalVessel("y"),
-#'                        format = ioFormat("R character string"))),
-#'                sources = list(
-#'                    moduleSource(
-#'                        vessel = scriptVessel("print(y)"))))
-#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
-#' ## create a pipe
-#' pipe1 <- pipe("setX", "x",
-#'               "showY", "y")
-#' ## create a pipeline
-#' pline1 <- pipeline(name = "ex_pipeline",
-#'                    modules = list(mod1, mod2), 
-#'                    pipes = list(pipe1))
-#' 
-#' @export
-pipeline <- function (name, description="", components=list(),
-                      modules=list(), pipelines=list(), pipes=list()) {
-    components <- c(components, modules, pipelines)
-    if (!length(components)) stop("no components provided")
-    names(components) <- sapply(components, getName)
-    pipeline <- list(name=name, description=description,
-                     components=components, pipes=pipes)
-    class(pipeline) <- "pipeline"
-    pipeline
-}
-
-#' @rdname getComponents
-#'
-#' @export
-getComponents.pipeline <- function(x) {
-    x$components
-}
-
-#' @rdname getName
-#'
-#' @export
-getName.pipeline <- function(x) {
-    x$name
-}
-
-#' @rdname getPipes
-#'
-#' @export
-getPipes.pipeline <- function(x) {
-    x$pipes
-}
-
-#' @rdname getDescription
-#'
-#' @export
-getDescription.pipeline <- function(x) {
-    x$description
-}

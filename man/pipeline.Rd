@@ -4,8 +4,7 @@
 \alias{pipeline}
 \title{Create a pipeline}
 \usage{
-pipeline(name, description = "", components = list(), modules = list(),
-  pipelines = list(), pipes = list())
+pipeline(name, description = NULL, components = list(), pipes = list())
 }
 \arguments{
 \item{name}{\code{pipeline} name}
@@ -13,10 +12,6 @@ pipeline(name, description = "", components = list(), modules = list(),
 \item{description}{\code{pipeline} description}
 
 \item{components}{list of \code{module} and \code{pipeline} objects}
-
-\item{modules}{list of \code{module} objects}
-
-\item{pipelines}{list of \code{pipeline} objects}
 
 \item{pipes}{list of \code{pipe} objects}
 }
@@ -29,10 +24,6 @@ pipeline(name, description = "", components = list(), modules = list(),
 }
 \description{
 This functions create a new \code{pipeline} object.
-}
-\details{
-\code{components}, \code{modules} and \code{pipelines} are
-    combined into a single list of components.
 }
 \examples{
 ## create some modules
@@ -56,13 +47,13 @@ mod2 <- module("showY", language = "R",
                sources = list(
                    moduleSource(
                        vessel = scriptVessel("print(y)"))))
-pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
+pline1 <- pipeline(name = "trivialpipeline", components = list(mod1, mod2))
 ## create a pipe
 pipe1 <- pipe("setX", "x",
               "showY", "y")
 ## create a pipeline
 pline1 <- pipeline(name = "ex_pipeline",
-                   modules = list(mod1, mod2),
+                   components = list(mod1, mod2),
                    pipes = list(pipe1))
 }
 \seealso{
