@@ -1,3 +1,68 @@
+#' Create a component object
+#'
+#' Create a \code{component} object for use in a \code{pipeline}.
+#'
+#' @details A component contains either a \code{pipeline} or
+#'     \code{module} object in its \code{value} output. Optionally it
+#'     can contain a \code{fileVessel} or \code{urlVessel} in its
+#'     \code{vessel} element, referencing the resource from which the
+#'     component was loaded.
+#'
+#' @param name Name of component
+#' @param vessel \code{fileVessel} or \code{urlVessel}
+#' @param value \code{pipeline} or \code{module} object
+#' 
+#' @return \code{component} list containing:
+#'   \item{name}{component name}
+#'   \item{vessel}{source vessel}
+#'   \item{value}{\code{pipeline} or \code{module} object}
+#' 
+#' @seealso \code{pipeline}, \code{module}
+component <- function(name,
+                      vessel = NULL,
+                      value) {
+    if (missing(name)) name <- getName(value)
+    if (!is_length1_char(name)) stop("'name' is not a length 1 char value")
+    if (!inherits(value, c("module", "pipeline")))
+        stop("invalid 'value'")
+    if (!is.null(vessel) &&
+        !inherits(vessel, what = c("fileVessel", "urlVessel"))) {
+        stop("invalid 'vessel'")
+    }
+    
+    component <- list(name = name, vessel = vessel, value = value)
+    class(component) <- "component"
+    component
+}
+
+#' @describeIn getName
+#'
+#' Returns component name
+getName.component <- function (x) {
+    x$name
+}
+
+#' @describeIn getType
+#'
+#' Returns component type
+getType.component <- function(x) {
+    class(getValue(x))
+}
+
+#' @describeIn getVessel
+#'
+#' Returns component vessel
+getVessel.component <- function(x) {
+    x$vessel
+}
+
+#' @describeIn getValue
+#'
+#' Returns module or pipeline object
+getValue.component <- function(x) {
+    x$value
+}
+
 ### Functions for exporting, running and creating components
 
 #' Convert a component to XML

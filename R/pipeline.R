@@ -71,7 +71,8 @@ pipeline <- function (name,
     if (!inherits(components, what = "list")) 
         stop("components must be provided in a list")
     if (!length(components)) stop("no components provided")
-    if (!all(sapply(components, inherits, what = c("module", "pipeline"))))
+    if (!all(sapply(components, inherits,
+                    what = c("component", "module", "pipeline"))))
         stop("components must be module or pipeline objects")
     
     ## check 'pipes'
@@ -80,7 +81,17 @@ pipeline <- function (name,
     if (!all(sapply(pipes, inherits, what = "pipe")))
         stop("pipes must be pipe objects")    
 
+    ## convert module and pipelines to component objects
+    components <- lapply(
+        components,
+        function (c) {
+            if(!inherits(c, "component")) {
+                c <- component(name = getName(c), value = c)
+            }
+            c
+        })
     names(components) <- sapply(components, getName)
+    
     pipeline <- list(name=name, description = description,
                      components = components, pipes = pipes)
     class(pipeline) <- "pipeline"
@@ -115,95 +126,6 @@ getDescription.pipeline <- function(x) {
     x$description
 }
 
-#' @return The constructor returns a \code{pipe} object connecting
-#'     \code{startComponentName}.\code{startOutputName} to
-#'     \code{endComponentName}.\code{endInputName}
-#' 
-#' @seealso \code{pipeline}, \code{addPipe}
-#'
-#' @examples
-#' pipe1 <- pipe(startComponent = "setX", startOutput = "x",
-#'               endComponent = "showY", endInput = "y")
-#' 
-#' @export
-pipe <- function (startComponent, startOutput,
-                  endComponent, endInput) {
-    if (!all(sapply(
-             list(startComponent, startOutput, endComponent, endInput),
-             is_length1_char))) {
-        stop("arguments should be length 1 character values")
-    }
-    start <- list(component = startComponent, output = startOutput)
-    end <- list(component = endComponent, input = endInput)
-    pipe <- list(start = start, end = end)
-    class(pipe) <- "pipe"
-    pipe
-}
-
-#' Return \code{pipe} start list
-#'
-#' @param x \code{pipe} object
-#'
-#' @return list containing \code{component} and \code{output}
-start.pipe <- function(x) {
-    x$start
-}
-
-#' Return \code{pipe} end list
-#'
-#' @param x \code{pipe} object
-#' 
-#' @return list containing \code{component} and \code{input}
-end.pipe <- function(x) {
-    x$end
-}
-
-#' Create a component object
-#'
-#' Create a \code{component} object for use in a \code{pipeline}.
-#'
-#' @details A component contains either a \code{pipeline} or
-#'     \code{module} object, or a \code{vessel} object which
-#'     references and object which can be loaded as one of these.
-#'
-#' The object passed to \code{value} can be any type of vessel except
-#' \code{internalVessel} or \code{scriptVessel}.
-#'
-#' @param name Name of component
-#' @param type Character value; \dQuote{pipeline} or \dQuote{module}
-#' @param value \code{vessel}, \code{pipeline} or \code{module} object
-#' 
-#' @return \code{component} list containing:
-#' \describe{
-#'   \item{name}{component name}
-#'   \item{type}{component type}
-#'   \item{value}{\code{vessel}, \code{pipeline} or \code{module} object}
-#' }
-#' 
-#' @seealso \code{pipeline}, \code{module}
-component <- function(name,
-                      type=NULL,
-                      value=NULL) {
-    if (!is_length1_char(name)) stop("'name' is not a length 1 char value")
-    if (!inherits(value, c("vessel", "module", "pipeline")))
-        stop("'value' object invalid")
-    if (!is.null(type) && !identical(type, class(value)))
-        stop("'type' does not match value type")
-    if (is.null(type)) type <- class(value)
-    if (!(type %in% c("module", "pipeline")))
-        stop("type is invalid")
-    
-    component <- list(name = name, type = type, value = value)
-    class(component) <- "component"
-    component
-}
-
-#' @describeIn getName
-#'
-#' Returns component name
-getName.component <- function (x) {
-    x$name
-}
 
 #' Parse a component \code{xmlNode} and return a \code{component}.
 #'

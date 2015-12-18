@@ -25,3 +25,24 @@ getPipes <- function(x) {
 getDescription <- function(x) {
     UseMethod("getDescription")
 }
+
+#' Retrieve object type
+#'
+#' @param x object
+getType <- function(x) {
+    UseMethod("getType")
+}
+
+#' Retrieve object vessel
+#'
+#' @param x object
+getVessel <- function(x) {
+    UseMethod("getVessel")
+}
+
+#' Retrieve object value
+#'
+#' @param x object
+getValue <- function(x) {
+    UseMethod("getValue")
+}
