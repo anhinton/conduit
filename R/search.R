@@ -110,6 +110,18 @@ findFile <- function (ref, path = NULL, location = getwd()) {
     result
 }
 
+resolveVessel <- function(vessel, location) {
+    UseMethod("resolveVessel")
+}
+
+resolveVessel.fileVessel <- function(vessel, location = getwd()) {
+    resolveRef(vessel$ref, vessel$path, location = location)
+}
+
+resolveVessel.urlVessel <- function(vessel, location) {
+    resolveRef(vessel$ref)
+}
+
 #' Resolves a full path for a given ref and path
 #'
 #' @param ref address/filename of referenced file

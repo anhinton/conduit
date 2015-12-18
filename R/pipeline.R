@@ -126,112 +126,6 @@ getDescription.pipeline <- function(x) {
     x$description
 }
 
-
-#' Parse a component \code{xmlNode} and return a \code{component}.
-#'
-#' @param node An \code{xmlNode} named \dQuote{component}.
-#' @param location file directory of invoking pipeline/module xml (optional)
-#' @return \code{component} object
-#' @import XML
-readComponentNode <- function (node, location = getwd()) {
-    name <- getXMLAttr(node, "name")
-    ref <- getXMLAttr(node, "ref")
-    component <-
-        if (is.null(ref)) {
-            rawValue <- xmlChildren(node)[[1]] # only first component node
-                                               # counts
-            ## check if the component has any content
-            if (is.null(rawValue)) {
-                stop(paste("Component", name, "is empty!"))
-            }
-            type <- names(node)[[1]]
-            ## check for appropriate types
-            if (type != "module" && type != "pipeline") {
-                stop("A component must be a module or a pipeline")
-            }
-            value <- switch(type,
-                            module = readModuleXML(name = name,
-                                                   xml = rawValue,
-                                                   location = location),
-                            pipeline = readPipelineXML(name, rawValue,
-                                                       location))
-            component(name = name, type = type, value = value)
-        } else {
-            path <- getXMLAttr(node, "path")
-            ## ## if a path is not given assume this means the xml file
-            ## ## is found in the same directory as the pipeline xml
-            ## if (is.null(path)) path <- pipelinePath
-            type <- getXMLAttr(node, "type")
-            ## if type is not 'module' or 'pipeline' then something is wrong
-            if (type != "module" && type != "pipeline") {
-                stop("A component must be a module or a pipeline")
-            }
-            file <- tryCatch(
-                resolveRef(ref, path, location),
-                error = function(err) {
-                    problem <-
-                        c(paste0("Unable to locate component '", name, "'\n"),
-                          err)
-                    stop(problem)
-                })
-            location <- dirname(file)
-            rawXML <- fetchRef(file)
-            xml <- xmlRoot(xmlParse(rawXML))
-            value <- switch(type,
-                            module = readModuleXML(name = name,
-                                                   xml = xml,
-                                                   location = location),
-                            ## FIXME: I bet loading a pipeline won't work
-                            pipeline = readPipelineXML(name, xml, location))
-            component(name=name, ref=ref, path=path, type=type, value=value)
-            ## FIXME: can't handle anon/inline components
-        }
-    ## path <-
-    ## FIXME: need to check whether module or pipeline
-    component
-}
-
-#' Parse pipeline XML and return a pipeline object
-#'
-#' @param name Pipeline name
-#' @param xml Pipeline \code{XMLNode}
-#' @param location file directory of invoking pipeline/module xml (optional)
-#' @return \code{pipeline} object
-#' @import XML
-readPipelineXML <- function(name, xml, location = getwd()) {
-    nodes <- xmlChildren(xml)
-    
-    ## extract description
-    descNode <- nodes$description
-    description <- xmlValue(descNode)
-
-    ## extract components
-    componentNodes <- nodes[names(nodes) == "component"]
-    components <- lapply(componentNodes, readComponentNode, location)
-    names(components) <-
-        sapply(components, componentName)
-    ## FIXME: need to address inline components
-    
-    ## extract pipes
-    pipeNodes <- nodes[names(nodes) == "pipe"]
-    pipes <-
-        lapply(pipeNodes,
-               function (x) {
-                   start <- xmlChildren(x)$start
-                   startComponent <- xmlAttrs(start)[["component"]]
-                   startOutput <- xmlAttrs(start)[["output"]]
-                   end <- xmlChildren(x)$end
-                   endComponent <- xmlAttrs(end)[["component"]]
-                   endInput <- xmlAttrs(end)[["input"]]
-                   pipe(startComponent=startComponent,
-                        startOutput=startOutput,
-                        endComponent=endComponent,
-                        endInput=endInput)
-               })    
-    pipeline(name=name, description=description,
-             components=components, pipes=pipes)
-}
-
 #' Load a pipeline from an XML file
 #'
 #' Reads an XML file given by \code{ref} and \code{path} and interprets to
@@ -247,10 +141,14 @@ readPipelineXML <- function(name, xml, location = getwd()) {
 #' @param ref Path to XML file
 #' @param path Search path (optional)
 #' @param namespaces Namespaces used in XML document
+#' 
 #' @return \code{pipeline} list
+#' 
 #' @seealso \code{pipeline}
+#' 
 #' @export
 #' @import XML
+#' 
 #' @examples
 #' pln1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
 #'                        package = "conduit")
@@ -272,6 +170,99 @@ loadPipeline <- function(name, ref, path = NULL,
     xml <- xmlRoot(xmlParse(rawXML))
     pipeline <- readPipelineXML(name, xml, location)
     pipeline
+}
+
+#' Parse pipeline XML and return a pipeline object
+#'
+#' @param name Pipeline name
+#' @param xml Pipeline \code{XMLNode}
+#' @param location file directory of invoking pipeline/module xml (optional)
+#' @return \code{pipeline} object
+#' @import XML
+readPipelineXML <- function(name, xml, location = getwd()) {
+    nodes <- xmlChildren(xml)
+    
+    ## extract description
+    descNode <- nodes$description
+    description <- xmlValue(descNode)
+
+    ## extract components
+    
+    components <- xpathApply(
+        doc = xml, path = "//d:component", fun = readComponentNode,
+        location = location,
+        namespaces = c(d = getDefaultNamespace(xml, simplify = TRUE)))
+    names(components) <- sapply(components, getName)
+    
+    ## extract pipes
+    pipes <- xpathApply(
+        doc = xml, path = "//d:pipe", fun = readPipeXML,
+        namespaces = c(d = getDefaultNamespace(xml, simplify = TRUE)))
+
+    pipeline(name=name, description=description,
+             components=components, pipes=pipes)
+}
+
+#' Parse a component \code{xmlNode} and return a \code{component}.
+#'
+#' @param node An \code{xmlNode} named \code{component}.
+#' @param location file directory of invoking pipeline/module xml (optional)
+#' 
+#' @return \code{component} object
+#' 
+#' @import XML
+readComponentNode <- function (node, location = getwd()) {
+    attrs <- xmlAttrs(node)
+    name <- attrs[["name"]]
+    child <- xmlChildren(node)[[1]] # only one child element allowed
+    childType <- names(node)[[1]]
+
+    ## extract vessel
+    vessel <- switch(
+        EXPR = childType,
+        file = , url = readVesselXML(child),
+        NULL
+    )
+
+    ## fetch component XML
+    xml <- switch(
+        EXPR = childType,
+        file = , url = {
+            ref <- resolveVessel(vessel, location = location)
+            rawXML <- fetchRef(ref)
+            xmlRoot(xmlParse(rawXML))
+        },
+        module =, pipeline = child
+    )
+
+    ## set type
+    type <- if ("type" %in% names(attrs)) {
+        attrs[["type"]]
+    } else {
+        xmlName(xml)
+    }
+
+    ## read value from xml
+    value <- switch(
+        EXPR = type,
+        module = readModuleXML(name = name, xml = xml, location = location),
+        pipeline = readPipelineXML(name = name, xml = xml, location = location)
+    )
+    
+    component(name = name, vessel = vessel, value = value)
+}
+
+readPipeXML <- function(node) {
+    start <- xmlChildren(node)$start
+    startComponent <- xmlAttrs(start)[["component"]]
+    startOutput <- xmlAttrs(start)[["output"]]
+    end <- xmlChildren(node)$end
+    endComponent <- xmlAttrs(end)[["component"]]
+    endInput <- xmlAttrs(end)[["input"]]
+    pipe(startComponent=startComponent,
+         startOutput=startOutput,
+         endComponent=endComponent,
+         endInput=endInput)
 }
 
 ## functions to write a pipeline (and its modules) to XML files
