@@ -156,17 +156,16 @@ getDescription.pipeline <- function(x) {
 loadPipeline <- function(name, ref, path = NULL,
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## fetch pipeline XML from disk
-    file <- tryCatch(
-        resolveRef(ref, path),
+    rawXML <- tryCatch(
+        fetchVessel(fileVessel(ref, path)),
         error = function(err) {
-            problem <- c(paste0("Unable to load module '", name, "'\n"),
+            problem <- c(paste0("Unable to load pipeline '", name, "'\n"),
                          err)
             stop(problem)
         })
-    if (!isValidXML(file, "pipeline"))
+    if (!isValidXML(rawXML, "pipeline"))
         stop(paste0("'", file, "': module XML is invalid"))    
-    location <- dirname(file)
-    rawXML <- fetchRef(file)
+    location <- attr(rawXML, "location")
     xml <- xmlRoot(xmlParse(rawXML))
     pipeline <- readPipelineXML(name, xml, location)
     pipeline
@@ -228,8 +227,7 @@ readComponentNode <- function (node, location = getwd()) {
     xml <- switch(
         EXPR = childType,
         file = , url = {
-            ref <- resolveVessel(vessel, location = location)
-            rawXML <- fetchRef(ref)
+            rawXML <- fetchVessel(vessel, location)
             xmlRoot(xmlParse(rawXML))
         },
         module =, pipeline = child

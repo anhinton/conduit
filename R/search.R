@@ -110,64 +110,39 @@ findFile <- function (ref, path = NULL, location = getwd()) {
     result
 }
 
-resolveVessel <- function(vessel, location) {
-    UseMethod("resolveVessel")
-}
-
-resolveVessel.fileVessel <- function(vessel, location = getwd()) {
-    resolveRef(vessel$ref, vessel$path, location = location)
-}
-
-resolveVessel.urlVessel <- function(vessel, location) {
-    resolveRef(vessel$ref)
-}
-
-#' Resolves a full path for a given ref and path
+#' Returns the contents of a resource referenced by a \code{vessel} object.
 #'
-#' @param ref address/filename of referenced file
-#' @param path file paths to search
-#' @param location file directory of invoking pipeline/module xml
+#' @param vessel \code{vessel} object
+#' @param location file path of parent object containing vessel
 #'
-#' @return character string of resolved ref with class set to
-#' appropriate read method
-resolveRef <- function (ref, path = NULL, location = getwd()) {
-    if (grepl("^ *https://", ref)) {
-        ref <- ref
-        class(ref) <- "https"
-    } else if (grepl("^ *http://", ref)) {
-        ref <- ref
-        class(ref) <- "http"
-    } else {
-        ref <- findFile(ref, path, location)
-        class(ref) <- "file"
-    }
-    return(ref)
+#' @return character vector of file contents
+fetchVessel <- function(vessel, location = getwd()) {
+    if (!inherits(vessel, "vessel")) stop("not a vessel object")
+    UseMethod("fetchVessel")
 }
 
-#' Read the contents of a referenced file
-#' 
-#' @details \code{file} should be the result of the function
-#' \code{resolveRef}. The class of this object determines which read
-#' method is used.
+#' @describeIn fetchVessel
 #'
-#' @seealso \code{resolveRef}
-#' 
-#' @param ref character vector containing resolved ref location
-#' 
-#' @return Character vector containing the contents of resource at
-#' \code{ref}
-fetchRef <- function (ref) {
-    UseMethod("fetchRef")
+#' Return the text of a file resource
+#'
+#' @return The character vector resulting from a \code{fileVessel}
+#'     object will have an attribute, \code{location}, which contains
+#'     the path to the original file object.
+fetchVessel.fileVessel <- function(vessel, location = getwd()) {
+    file <- findFile(ref = vessel$ref, path = vessel$path,
+                     location = location)
+    con = file(file)
+    on.exit(close(con))
+    content <- readLines(file)
+    attr(content, "location") <- dirname(file)
+    content
 }
 
-fetchRef.https <- function (ref) {
-    con <- textConnection(RCurl::getURL(ref))
+#' @describeIn fetchVessel
+#'
+#' Return the text of a URL resource
+fetchVessel.urlVessel <- function(vessel, location = getwd()) {
+    con <- textConnection(RCurl::getURL(vessel$ref))
     on.exit(close(con))
     readLines(con)
-}
-
-fetchRef.default <- function (ref) {
-    con = file(ref)
-    on.exit(close(con))
-    readLines(ref)
 }

@@ -7,7 +7,7 @@
 readComponentNode(node, location = getwd())
 }
 \arguments{
-\item{node}{An \code{xmlNode} named \dQuote{component}.}
+\item{node}{An \code{xmlNode} named \code{component}.}
 
 \item{location}{file directory of invoking pipeline/module xml (optional)}
 }

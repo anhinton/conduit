@@ -209,24 +209,22 @@ readModuleXML <- function (name, xml, location = getwd()) {
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
     ## fetch module XML from disk
-    file <- tryCatch(
-        resolveRef(ref, path),
+    rawXML <- tryCatch(
+        fetchVessel(fileVessel(ref, path)),
         error = function(err) {
             problem <- c(paste0("Unable to load module '", name, "'\n"),
                          err)
             stop(problem)
         })
-    if (!isValidXML(file, "module"))
+    if (!isValidXML(rawXML, "module"))
         stop(paste0("'", file, "': module XML is invalid"))
-    rawXML <- fetchRef(file)
     xml <- xmlRoot(xmlParse(rawXML))
 
     ## create module object
     module <- readModuleXML(name, xml)
 
     ## store location of originating module file
-    location <- dirname(file)
-    attr(module, "location") <- location
+    attr(module, "location") <- attr(rawXML, "location")
     
     return(module)
 }
