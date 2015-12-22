@@ -176,30 +176,47 @@ loadPipeline <- function(name, ref, path = NULL,
 #' @param name Pipeline name
 #' @param xml Pipeline \code{XMLNode}
 #' @param location file directory of invoking pipeline/module xml (optional)
+#' 
 #' @return \code{pipeline} object
+#' 
 #' @import XML
 readPipelineXML <- function(name, xml, location = getwd()) {
     nodes <- xmlChildren(xml)
+    namespace <- getDefaultNamespace(xml, simplify = TRUE)
     
     ## extract description
     descNode <- nodes$description
     description <- xmlValue(descNode)
 
     ## extract components
-    
+        
     components <- xpathApply(
-        doc = xml, path = "//d:component", fun = readComponentNode,
+        doc = xml,
+        path = if (length(namespace)) {
+                   "//d:component"
+               } else {
+                   "//component"
+               },
+        fun = readComponentNode,
         location = location,
-        namespaces = c(d = getDefaultNamespace(xml, simplify = TRUE)))
+        namespaces = c(d = namespace))
     names(components) <- sapply(components, getName)
     
     ## extract pipes
     pipes <- xpathApply(
-        doc = xml, path = "//d:pipe", fun = readPipeXML,
-        namespaces = c(d = getDefaultNamespace(xml, simplify = TRUE)))
+        doc = xml,
+        path = if (length(namespace)) {
+                   "//d:pipe"
+               } else {
+                   "//pipe"
+               },
+        fun = readPipeXML,
+        namespaces = c(d = namespace))
 
-    pipeline(name=name, description=description,
-             components=components, pipes=pipes)
+    pipeline <- pipeline(name=name, description=description,
+                         components=components, pipes=pipes)
+    attr(pipeline, "location") <- location
+    pipeline
 }
 
 #' Parse a component \code{xmlNode} and return a \code{component}.
@@ -228,7 +245,12 @@ readComponentNode <- function (node, location = getwd()) {
         EXPR = childType,
         file = , url = {
             rawXML <- fetchVessel(vessel, location)
-            xmlRoot(xmlParse(rawXML))
+            ## update location if applicable
+            if (!is.null(attr(rawXML, "location")))
+                location <- attr(rawXML, "location")
+            xml <- xmlRoot(xmlParse(rawXML))
+            attr(xml, "location") <- attr(xml, "location")
+            xml
         },
         module =, pipeline = child
     )
@@ -250,6 +272,11 @@ readComponentNode <- function (node, location = getwd()) {
     component(name = name, vessel = vessel, value = value)
 }
 
+#' Create \code{pipe} object from pipe XML
+#'
+#' @param node pipe node
+#'
+#' @return \code{pipe} object
 readPipeXML <- function(node) {
     start <- xmlChildren(node)$start
     startComponent <- xmlAttrs(start)[["component"]]

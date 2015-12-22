@@ -1,9 +1,22 @@
 library(conduit)
 context("create vessel objects")
 
-## internalVessel creation
-
 testInternal <- internalVessel("important_data")
+file <- system.file("extdata", "simpleGraph", "createGraph.xml",
+                    package = "conduit")
+
+testFile <- fileVessel(ref = file) # just a ref
+testPath <- fileVessel(ref = basename(file),
+                       path = dirname(file)) # ref and path
+testURL <-
+    urlVessel(ref = "https://raw.githubusercontent.com/anhinton/conduit/master/README.md")
+testScript1 <- scriptVessel("important_data")
+testScript2 <- scriptVessel(c("take a little code",
+                              "add a little more",
+                              "cross your fingers"))
+text_format <- ioFormat(value="R data frame", type="text")
+
+## internalVessel creation
 
 test_that("internalVessel stops when 'symbol' is not length 1 char", {
     expect_error(internalVessel(character(2)),
@@ -27,9 +40,6 @@ test_that(paste0("'internalVessel' object has class",
 })
 
 ## fileVessel creation
-testFile <- fileVessel("myFile.txt") # just a ref
-testPath <- fileVessel(ref="myFile.txt", path = tempdir()) # ref and path
-
 test_that("fileVessel stops for invalid arguments", {
     expect_error(fileVessel(c("ref1", "ref1")),
                  "'ref' is not a length 1 character vector")
@@ -60,8 +70,6 @@ test_that("'fileVessel' object has class c(\"fileVessel\", \"vessel\")", {
 })
 
 ## urlVessel creation
-testURL <- urlVessel("http://github.com/anhinton/conduit")
-
 test_that("urlVessel stops when 'ref' is not length 1 char", {
     expect_error(urlVessel(c("ref1", "ref1")),
                  "'ref' is not a length 1 character vector")
@@ -83,11 +91,6 @@ test_that("urlVessel object has class c(\"urlVessel\", \"vessel\")", {
 })
 
 ## scriptVessel creation
-testScript1 <- scriptVessel("important_data")
-testScript2 <- scriptVessel(c("take a little code",
-                              "add a little more",
-                              "cross your fingers"))
-
 test_that("scriptVessel stops when 'value' is not character vector", {
     expect_error(scriptVessel(numeric(2)),
                  "'value' is not a character vector")
@@ -174,8 +177,6 @@ test_that(
     })
 
 ## create ioFormat objects
-text_format <- ioFormat(value="R data frame", type="text")
-
 test_that("ioFormat fails for invalid arguments", {
     expect_error(ioFormat(type=character(2), value="CSV file"),
                  "'type' is not a length 1 character")
@@ -197,4 +198,22 @@ test_that("'ioFormat' contains appropriate slots", {
 
 test_that("'ioFormat' object has class \"ioFormat\"", {
     expect_match(class(text_format), "^ioFormat$")
+})
+
+test_that("fetchVessel returns correctly", {
+    ## error for incorrect object
+    expect_error(fetchVessel(file), "not a vessel object")
+
+    ## fileVessel
+    result1 <- fetchVessel(testFile)
+    expect_true(inherits(result1, "character"))
+    expect_match(attr(result1, "location"), dirname(file))
+    result2 <- fetchVessel(testPath)
+    expect_true(inherits(result2, "character"))
+    expect_match(attr(result2, "location"), dirname(file))
+
+    ## urlVessel
+    skip_on_cran()
+    result3 <- fetchVessel(testURL)
+    expect_true(inherits(result3, "character"))
 })
