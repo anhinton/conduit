@@ -678,12 +678,13 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 
 #' Add a new component to a pipeline
 #'
-#' This function adds a new \code{component} to a \code{pipeline}.
+#' This function adds a new \code{module} or \code{pipeline} to a
+#' \code{pipeline}'s components.
 #'
 #' @param newComponent \code{pipeline} or \code{module} object to be added
 #' @param pipeline \code{pipeline} to be amended
 #' @return \code{pipeline} object
-#' @seealso \code{pipeline}, \code{component}, \code{module}
+#' @seealso \code{pipeline}, \code{module}
 #'
 #' @examples
 #' ## create a pipeline with one module
@@ -697,7 +698,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("x <- \"set\""))))
-#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1))
+#' pline1 <- pipeline(name = "trivialpipeline", components = list(mod1))
 #' ## create a new module
 #' mod2 <- module("showY", language = "R",
 #'                description = "displays the value of Y",
@@ -714,13 +715,14 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #' 
 #' @export
 addComponent <- function(newComponent, pipeline) {
-    name <- componentName(newComponent)
-    if (class(newComponent) != "component") {
-        newComponent <- component(name, value=newComponent)
-    }
-    componentNames <- c(names(pipeline$components), name)    
-    pipeline$components <- c(pipeline$components, temp=list(newComponent))
-    names(pipeline$components) <- componentNames
+    name <- getName(newComponent)
+    oldComponents <- getComponents(pipeline)
+    componentNames <- c(names(oldComponents), name)
+    pipes <- getPipes(p1)
+    pipeline <- pipeline(name = getName(pipeline),
+                         description = getDescription(pipeline),
+                         components = c(oldComponents, list(newComponent)),
+                         pipes = pipes)
     pipeline
 }
 
