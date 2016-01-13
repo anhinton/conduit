@@ -147,7 +147,7 @@ test_that("component object is correctly formed", {
     expect_match(getType(comp2), class(pline1))
 })
 
-test_that("amending component to pipeline works correctly", {
+test_that("amending a pipeline works correctly", {
     ## add a module
     p1 <- addComponent(newComponent = mod1, pipeline = pline1)
     expect_equal(length(getComponents(pline1)) + 1,
@@ -165,4 +165,11 @@ test_that("amending component to pipeline works correctly", {
     expect_equal(length(getComponents(p2)) + 1,
                  length(getComponents(p3)))
     expect_match(names(getComponents(p3)), getName(comp1), all = FALSE)
+
+    ## add a pipe
+    pipe1 <- pipe("a", "b", "d", "f")
+    p4 <- addPipe(newPipe = pipe1, pipeline = p3)
+    expect_equal(length(getPipes(p3)) + 1,
+                 length(getPipes(p4)))
+    expect_true(any(sapply(getPipes(p4), identical, pipe1)))
 })

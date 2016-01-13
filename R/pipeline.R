@@ -757,7 +757,7 @@ addComponent <- function(newComponent, pipeline) {
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("print(y)"))))
-#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
+#' pline1 <- pipeline(name = "trivialpipeline", components = list(mod1, mod2))
 #' ## create a pipe
 #' pipe1 <- pipe("setX", "x",
 #'               "showY", "y")
@@ -766,7 +766,9 @@ addComponent <- function(newComponent, pipeline) {
 #' 
 #' @export
 addPipe <- function(newPipe, pipeline) {
-    pipeline$pipes <- c(pipeline$pipes, list(newPipe))
+    pipeline <- pipeline(name = getName(pipeline),
+                         components = getComponents(pipeline),
+                         pipes = c(getPipes(pipeline), list(newPipe)))
     pipeline
 }
 

@@ -39,7 +39,7 @@ mod2 <- module("showY", language = "R",
                sources = list(
                    moduleSource(
                        vessel = scriptVessel("print(y)"))))
-pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2))
+pline1 <- pipeline(name = "trivialpipeline", components = list(mod1, mod2))
 ## create a pipe
 pipe1 <- pipe("setX", "x",
               "showY", "y")
