@@ -40,3 +40,20 @@ start.pipe <- function(x) {
 end.pipe <- function(x) {
     x$end
 }
+
+#' Convert a pipe to XML
+pipeToXML <- function(pipe, namespaceDefinitions = NULL) {
+    start <- start(pipe)
+    end <- end(pipe)
+    startAttrs <- c(component = start$component,
+                    output = start$output)
+    endAttrs <- c(component =end$component,
+                  input = end$input)
+    pipeXML <- newXMLNode("pipe")
+    pipeXML <-
+        addChildren(
+            node = pipeXML,
+            kids=list(newXMLNode(name = "start", attrs=startAttrs),
+                      newXMLNode(name = "end", attrs=endAttrs)))
+    pipeXML
+}

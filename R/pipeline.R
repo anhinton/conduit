@@ -298,45 +298,22 @@ readPipeXML <- function(node) {
 #' @param namespaceDefinitions XML namespaces as character vector
 #' 
 #' @return \code{XMLNode} object
-pipelineToXML <- function(pipeline, namespaceDefinitions=NULL) {
+pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
+    components <- getComponents(pipeline)
+    pipes <- getPipes(pipeline)
+    description <- getDescription(pipeline)
     pipelineRoot <- newXMLNode("pipeline",
                                namespaceDefinitions=namespaceDefinitions)
-    description <- newXMLNode("description", pipeline$description)
-    components <-
-        lapply(pipeline$components,
-               function(c) {
-                   componentRoot <-
-                       newXMLNode("component",
-                                  attrs=c(name=c$name))
-                   if (is.null(c$ref)) {
-                       componentXML <- componentToXML(c)
-                       componentRoot <-
-                           addChildren(componentRoot,
-                                       kids=list(componentXML))
-                   } else {
-                       xmlAttrs(componentRoot) <-
-                           c(ref  = c$ref,
-                             path = c$path,
-                             type = c$type)
-                   }
-                   componentRoot
-               })
-    pipes <-
-        lapply(pipeline$pipes,
-               function (p) {
-                   startAttrs <- c("component"=p$start$component,
-                                   "output"=p$start$output)
-                   endAttrs <- c("component"=p$end$component,
-                                 "input"=p$end$input)
-                   pipe <- newXMLNode("pipe")
-                   pipe <-
-                       addChildren(pipe,
-                                   kids=list(
-                                       newXMLNode("start", attrs=startAttrs),
-                                       newXMLNode("end", attrs=endAttrs)))
-               })
-    pipelineRoot <- addChildren(pipelineRoot,
-                                kids=list(description, components, pipes))
+    descXML <- newXMLNode("description", description)
+    componentXML <-
+        lapply(X = components,
+               FUN = componentToXML,
+               namespaceDefinitions = namespaceDefinitions)
+    pipeXML <-
+        lapply(pipes, pipeToXML, namespaceDefinitions = namespaceDefinitions)
+    pipelineRoot <- addChildren(
+        node = pipelineRoot,
+        kids = c(list(descXML), componentXML, pipeXML))
     pipelineRoot
 }
 
