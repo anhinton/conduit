@@ -92,6 +92,8 @@ componentToXML <- function(component, namespaceDefinitions = NULL) {
             vesselToXML(vessel)
         }
     componentRoot <- addChildren(componentRoot, kids = list(valueXML))
+    if (!is.null(vessel))
+        xmlAttrs(componentRoot, append = TRUE) <-  c(type = type)
     componentRoot
 }
 
