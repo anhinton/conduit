@@ -718,7 +718,7 @@ addComponent <- function(newComponent, pipeline) {
     name <- getName(newComponent)
     oldComponents <- getComponents(pipeline)
     componentNames <- c(names(oldComponents), name)
-    pipes <- getPipes(p1)
+    pipes <- getPipes(pipeline)
     pipeline <- pipeline(name = getName(pipeline),
                          description = getDescription(pipeline),
                          components = c(oldComponents, list(newComponent)),
