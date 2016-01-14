@@ -74,13 +74,25 @@ getValue.component <- function(x) {
 #' @param namespaceDefinitions As named character vector
 #' 
 #' @return \code{xmlNode} object
-componentToXML <- function(component, namespaceDefinitions=NULL) {
+#'
+#' @import XML
+componentToXML <- function(component, namespaceDefinitions = NULL) {
+    name <- getName(component)
+    vessel <- getVessel(component)
     type <- getType(component)
-    value <- getValue(component)
-    xml <- switch(type,
-                  module = moduleToXML(value, namespaceDefinitions),
-                  pipeline = pipelineToXML(value, namespaceDefinitions))
-    xml
+    value <- getValue(component)    
+    componentRoot <- newXMLNode("component", attrs = c(name = name))
+    valueXML <-
+        if(is.null(vessel)) {
+            switch(
+                type,
+                module = moduleToXML(value, namespaceDefinitions),
+                pipeline = pipelineToXML(value, namespaceDefinitions))
+        } else {
+            vesselToXML(vessel)
+        }
+    componentRoot <- addChildren(componentRoot, kids = list(valueXML))
+    componentRoot
 }
 
 #' Export a component to an XML file
