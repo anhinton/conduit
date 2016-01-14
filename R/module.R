@@ -1273,3 +1273,10 @@ getName.module <- function(x) {
 getDescription.module <- function(x) {
     x$description
 }
+
+#' @describeIn getLanguage
+#'
+#' Returns module language
+getLanguage.module <- function(x) {
+    x$language
+}

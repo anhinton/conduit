@@ -46,3 +46,10 @@ getVessel <- function(x) {
 getValue <- function(x) {
     UseMethod("getValue")
 }
+
+#' Retrieve object language
+#'
+#' @param x object
+getLanguage <- function(x) {
+    UseMethod("getLanguage")
+}
