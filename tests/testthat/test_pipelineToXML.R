@@ -1,9 +1,11 @@
 library(conduit)
 context("convert pipelines to XML")
 
+library(XML)
 m1 <- module("m1", "R")
 c1 <- component(value = m1)
-p1 <- pipeline("p1", components = list(m1))
+desc = "mock pipeline"
+p1 <- pipeline("p1", description = desc, components = list(m1))
 c2 <- component(value = p1)
 fv <- fileVessel("pipeline.xml")
 c3 <- component(vessel = fv, value = p1)
@@ -30,4 +32,19 @@ test_that("componentToXML() creates appropriate XML", {
     expect_match(getName(c3), xmlAttrs(c3XML)[["name"]])
     expect_match(getType(c3), xmlAttrs(c3XML)[["type"]])
     expect_match(xmlName(child3), "file")
+})
+
+test_that("pipelineToXML() works as expected", {
+    pipelineXML <- pipelineToXML(p1)
+    expect_match(xmlName(pipelineXML), "pipeline")
+    expect_equal(length(getComponents(p1)),
+                 length(getNodeSet(pipelineXML, "/pipeline/component")))
+    expect_equal(length(getPipes(p1)),
+                 length(getNodeSet(pipelineXML, "/pipeline/pipe")))
+    expect_equal(
+        length(xmlValue(getNodeSet(pipelineXML, "/pipeline/description")[[1]])),
+        1)
+    expect_match(
+        xmlValue(getNodeSet(pipelineXML, "/pipeline/description")[[1]]),
+        getDescription(p1))
 })

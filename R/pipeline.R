@@ -298,6 +298,8 @@ readPipeXML <- function(node) {
 #' @param namespaceDefinitions XML namespaces as character vector
 #' 
 #' @return \code{XMLNode} object
+#'
+#' @import XML
 pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
     components <- getComponents(pipeline)
     pipes <- getPipes(pipeline)
