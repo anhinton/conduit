@@ -42,6 +42,13 @@ end.pipe <- function(x) {
 }
 
 #' Convert a pipe to XML
+#'
+#' @param pipe \code{pipe} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{xmlNode} object
+#'
+#' @import XML
 pipeToXML <- function(pipe, namespaceDefinitions = NULL) {
     start <- start(pipe)
     end <- end(pipe)

@@ -6,6 +6,14 @@
 \usage{
 pipeToXML(pipe, namespaceDefinitions = NULL)
 }
+\arguments{
+\item{pipe}{\code{pipe} object}
+
+\item{namespaceDefinitions}{XML namespaces as character vector}
+}
+\value{
+\code{xmlNode} object
+}
 \description{
 Convert a pipe to XML
 }
