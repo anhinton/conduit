@@ -12,9 +12,11 @@ exportComponent(component, targetDirectory = getwd())
 \item{targetDirectory}{File path for pipeline output}
 }
 \value{
-Resulting file path
+\code{component} object
 }
 \description{
-Export a component to an XML file
+Saves an XML of the component in the
+\code{targetDirectory}. Returns a component object to be used by a
+\code{pipeline} XML file also in \code{targetDirectory}.
 }
 

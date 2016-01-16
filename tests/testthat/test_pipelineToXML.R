@@ -9,8 +9,14 @@ pipe1 <- pipe("a", "b", "1", "2")
 p1 <- pipeline("p1", description = desc, components = list(m1),
                pipes = list(pipe1))
 c2 <- component(value = p1)
-fv <- fileVessel("pipeline.xml")
+p2file <- system.file("extdata", "simpleGraph",
+                      "simpleGraph-pipeline.xml",
+                      package = "conduit")
+fv <- fileVessel(p2file)
+p2 <- loadPipeline("p2", p2file) 
 c3 <- component(vessel = fv, value = p1)
+c4 <- component(vessel = urlVessel("http://openapi.org"),
+                value = module("m4", "R"))
 
 test_that("componentToXML() creates appropriate XML", {
     ## module component
@@ -66,6 +72,41 @@ test_that("pipelineToXML() works as expected", {
 })
 
 test_that("savePipeline() produces valid pipeline XML file", {
-    xmlFile <- savePipeline(pipeline = p1, targetDirectory = tempdir())
-    expect_true(isValidXML(file = xmlFile, type = "pipeline"))
+    xmlFile1 <- savePipeline(pipeline = p1, targetDirectory = tempdir())
+    expect_match(basename(xmlFile1), "pipeline.xml")
+    expect_true(isValidXML(file = xmlFile1, type = "pipeline"))
+    xmlFile2 <- savePipeline(pipeline = p2, targetDirectory = tempdir(),
+                             filename = "acoolfile.xml")
+    expect_match(basename(xmlFile2), "acoolfile.xml")
+    expect_true(isValidXML(file = xmlFile1, type = "pipeline"))
+})
+
+test_that("exportComponent() generates appropriate objects", {
+    targetDirectory <- file.path(tempdir(), "exportComponent")
+    if (!dir.exists(targetDirectory)) dir.create(targetDirectory)
+
+    ## component with no vessel
+    newC1 <- exportComponent(c1, targetDirectory)
+    expect_true(inherits(newC1, "component"))
+    expect_match(getType(c1), getType(newC1))
+    expect_true(file.exists(
+        file.path(targetDirectory, paste0(getName(newC1), ".xml"))))
+    expect_true(!is.null(getVessel(newC1)))
+
+    ## component with fileVessel
+    newC3 <- exportComponent(c3, targetDirectory)
+    expect_true(inherits(newC3, "component"))
+    expect_match(getType(c3), getType(newC3))
+    expect_true(file.exists(
+        file.path(targetDirectory, paste0(getName(newC3), ".xml"))))
+    expect_true(!is.null(getVessel(newC3)))
+
+    ## component with urlVessel
+    newC4 <- exportComponent(c4, targetDirectory)
+    expect_true(inherits(newC4, "component"))
+    expect_match(getType(c4), getType(newC4))
+    expect_true(!file.exists(
+        file.path(targetDirectory, paste0(getName(newC4), ".xml"))))
+    expect_true(!is.null(getVessel(newC4)))
+    expect_identical(getVessel(c4), getVessel(newC4))
 })

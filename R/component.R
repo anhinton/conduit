@@ -99,30 +99,47 @@ componentToXML <- function(component, namespaceDefinitions = NULL) {
 
 #' Export a component to an XML file
 #'
+#' Saves an XML of the component in the
+#' \code{targetDirectory}. Returns a component object to be used by a
+#' \code{pipeline} XML file also in \code{targetDirectory}.
+#'
 #' @param component \code{component} object
 #' @param targetDirectory File path for pipeline output
-#' @return Resulting file path
-exportComponent <- function(component, targetDirectory=getwd()) {
+#' 
+#' @return \code{component} object
+exportComponent <- function(component, targetDirectory = getwd()) {
     ## stop of targetDirectory doesn't exist
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
 
-    ## create XML 
-    componentDoc <-
-        newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=componentToXML(component,
-                      namespaceDefinitions="http://www.openapi.org/2014/"))
+    name <- getName(component)
+    value <- getValue(component)
+    vessel <- getVessel(component)
+    type <- getType(component)
 
-    filename <- if (is.null(component$ref)) {
-        paste0(component$name, ".xml")
-    } else {
-        component$ref
+    ## save referenced vessel to targetDirectory
+    if (inherits(vessel, "fileVessel")) {
+        fullPath <- findFile(vessel$ref, vessel$path, getLocation(value))
+        oldFilename <- basename(fullPath)
+        newFilename <- paste0(name, ".xml")
+        newPath <- file.path(targetDirectory, newFilename)
+        file.copy(fullPath, newPath)
+        vessel <- fileVessel(ref = newFilename)
+    } else if (is.null(vessel)) {
+        file <- switch(type,
+                       module = saveModule(value,
+                                           targetDirectory,
+                                           paste0(name, ".xml")),
+                       pipeline = savePipeline(value,
+                                               targetDirectory,
+                                               paste0(name, ".xml")))
+        vessel <- fileVessel(ref = basename(file))
     }
-    
-    ## save XML to file
-    componentFilePath <- file.path(targetDirectory, filename)
-    saveXML(componentDoc, componentFilePath)
+
+    ## update component object with fileVessel created in targetDirectory
+    component <- component(vessel = vessel, value = value)
+    component
 }
 
 #' calculate output objects produced by a module
