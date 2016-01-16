@@ -327,6 +327,7 @@ pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
 #'
 #' @param pipeline \code{pipeline} object
 #' @param targetDirectory file location to save output
+#' @param filename new filename
 #' 
 #' @return file path to resulting XML file
 #' 
@@ -344,7 +345,8 @@ pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
 #' @import XML
 #'
 #' @export
-savePipeline <- function(pipeline, targetDirectory=getwd()) {
+savePipeline <- function(pipeline, targetDirectory = getwd(),
+                         filename = "pipeline.xml") {
     if (!file.exists(targetDirectory)) {
         stop(paste0("no such target directory: '", targetDirectory, "'"))
     }
@@ -353,8 +355,7 @@ savePipeline <- function(pipeline, targetDirectory=getwd()) {
                   node=pipelineToXML(pipeline=pipeline,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineFilePath <-
-        file.path(targetDirectory,
-                  "pipeline.xml")
+        file.path(targetDirectory, filename)
     saveXML(pipelineDoc, pipelineFilePath)
 }
 

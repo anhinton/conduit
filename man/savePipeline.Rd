@@ -4,12 +4,14 @@
 \alias{savePipeline}
 \title{Save a pipeline to disk}
 \usage{
-savePipeline(pipeline, targetDirectory = getwd())
+savePipeline(pipeline, targetDirectory = getwd(), filename = "pipeline.xml")
 }
 \arguments{
 \item{pipeline}{\code{pipeline} object}
 
 \item{targetDirectory}{file location to save output}
+
+\item{filename}{new filename}
 }
 \value{
 file path to resulting XML file
