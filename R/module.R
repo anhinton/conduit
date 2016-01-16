@@ -1280,3 +1280,10 @@ getDescription.module <- function(x) {
 getLanguage.module <- function(x) {
     x$language
 }
+
+#' @describeIn getLocation
+#'
+#' Returns location of module XML file
+getLocation.module <- function(x) {
+    attr(x, "location")
+}

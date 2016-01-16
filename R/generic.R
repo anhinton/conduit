@@ -53,3 +53,10 @@ getValue <- function(x) {
 getLanguage <- function(x) {
     UseMethod("getLanguage")
 }
+
+#' Retrieve object location
+#'
+#' @param x object
+getLocation <- function(x) {
+    UseMethod("getLocation")
+}
