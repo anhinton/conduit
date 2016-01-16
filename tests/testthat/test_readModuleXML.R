@@ -190,7 +190,7 @@ test_that("loadModule() handles ref, no path", {
     mod1 <- loadModule(name = "mod1",
                        ref = ref1)
     expect_match(class(mod1), "module")
-    expect_match(attr(mod1, "location"), dir1)
+    expect_match(getLocation(mod1), dir1)
 })
 
 test_that("loadModule() handles ref and path", {
@@ -200,5 +200,5 @@ test_that("loadModule() handles ref and path", {
     dir2 <-  system.file("extdata", "simpleGraph", package = "conduit")
     mod2 <- loadModule("mod2", ref2, path2)
     expect_match(class(mod2), "module")
-    expect_match(attr(mod2, "location"), dir2)
+    expect_match(getLocation(mod2), dir2)
 })

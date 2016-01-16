@@ -126,6 +126,13 @@ getDescription.pipeline <- function(x) {
     x$description
 }
 
+#' @describeIn getLocation
+#'
+#' Returns location of pipeline XML file
+getLocation.pipeline <- function(x) {
+    attr(x, "location")
+}
+
 #' Load a pipeline from an XML file
 #'
 #' Reads an XML file given by \code{ref} and \code{path} and interprets to
