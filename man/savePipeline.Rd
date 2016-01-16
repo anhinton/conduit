@@ -27,9 +27,10 @@ ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
 ppl1 <- loadPipeline("simpleGraph", 
 		        ref = ppl1xml)
 savePipeline(pipeline = ppl1, targetDirectory = targ1)
+
 }
 \seealso{
-\code{pipeline}. For exporting a pipeline and its components see
-\code{exportPipeline}
+\code{pipeline}. For exporting an entire along with its
+    components see \code{exportPipeline}
 }
 

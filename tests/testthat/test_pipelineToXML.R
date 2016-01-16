@@ -64,3 +64,8 @@ test_that("pipelineToXML() works as expected", {
         xmlValue(getNodeSet(pipelineXML, "/pipeline/description")[[1]]),
         getDescription(p1))
 })
+
+test_that("savePipeline() produces valid pipeline XML file", {
+    xmlFile <- savePipeline(pipeline = p1, targetDirectory = tempdir())
+    expect_true(isValidXML(file = xmlFile, type = "pipeline"))
+})

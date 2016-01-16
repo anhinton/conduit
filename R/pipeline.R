@@ -327,9 +327,12 @@ pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
 #'
 #' @param pipeline \code{pipeline} object
 #' @param targetDirectory file location to save output
+#' 
 #' @return file path to resulting XML file
-#' @seealso \code{pipeline}. For exporting a pipeline and its components see
-#' \code{exportPipeline}
+#' 
+#' @seealso \code{pipeline}. For exporting an entire along with its
+#'     components see \code{exportPipeline}
+#' 
 #' @examples
 #' targ1 <- tempdir() 
 #' ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml", 
@@ -337,7 +340,9 @@ pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
 #' ppl1 <- loadPipeline("simpleGraph", 
 #' 		        ref = ppl1xml)
 #' savePipeline(pipeline = ppl1, targetDirectory = targ1)
+#'
 #' @import XML
+#'
 #' @export
 savePipeline <- function(pipeline, targetDirectory=getwd()) {
     if (!file.exists(targetDirectory)) {
