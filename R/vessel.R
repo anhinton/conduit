@@ -110,7 +110,7 @@ fetchVessel <- function(vessel, location = getwd()) {
 #'     the path to the original file object.
 fetchVessel.fileVessel <- function(vessel, location = getwd()) {
     vesselFile <- findFile(ref = vessel$ref, path = vessel$path,
-                     location = location)
+                           location = location)
     con = file(vesselFile)
     on.exit(close(con))
     content <- readLines(vesselFile)
