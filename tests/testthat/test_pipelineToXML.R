@@ -10,7 +10,7 @@ p1 <- pipeline("p1", description = desc, components = list(m1),
                pipes = list(pipe1))
 c2 <- component(value = p1)
 p2file <- system.file("extdata", "simpleGraph",
-                      "simpleGraph-pipeline.xml",
+                      "pipeline.xml",
                       package = "conduit")
 fv <- fileVessel(p2file)
 p2 <- loadPipeline("p2", p2file) 
@@ -82,8 +82,12 @@ test_that("savePipeline() produces valid pipeline XML file", {
 })
 
 test_that("exportComponent() generates appropriate objects", {
-    targetDirectory <- file.path(tempdir(), "exportComponent")
+    targetDirectory <- tempfile("exportComponent")
     if (!dir.exists(targetDirectory)) dir.create(targetDirectory)
+
+    ## fails for non-existent targetDirectory
+    expect_error(exportComponent(c1, tempfile()),
+                 "no such target")
 
     ## component with no vessel
     newC1 <- exportComponent(c1, targetDirectory)
@@ -109,4 +113,29 @@ test_that("exportComponent() generates appropriate objects", {
         file.path(targetDirectory, paste0(getName(newC4), ".xml"))))
     expect_true(!is.null(getVessel(newC4)))
     expect_identical(getVessel(c4), getVessel(newC4))
+})
+
+test_that("exportPipeline() behaves right", {
+    targ <- tempfile("exportPipeline")
+    if (!dir.exists(targ)) dir.create(targ)
+
+    ## fails for non-existent targetDirectory
+    expect_error(exportPipeline(p2, tempfile()),
+                 "Target directory")
+
+    ## exported XML file is full of the right things
+    exportedXML <- exportPipeline(pipeline = p2, targetDirectory = targ)
+    expect_true(file.exists(exportedXML))
+    expect_true(isValidXML(exportedXML, "pipeline"))
+    expect_null({
+        reloaded <- loadPipeline("reloaded", ref = exportedXML)
+        warnings()
+    })
+    expect_true(!identical(getLocation(p2), getLocation(reloaded)))
+    expect_match(getLocation(reloaded),
+                 file.path(targ, getName(p2)))
+    expect_identical(names(getComponents(p2)),
+                     names(getComponents(reloaded)))
+    expect_identical(getPipes(p2), getPipes(reloaded))
+    expect_identical(getDescription(p2), getDescription(reloaded))
 })
