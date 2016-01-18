@@ -368,19 +368,24 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
 
 #' Export a pipeline and its components to disk
 #'
-#' Exports a \code{pipeline} and its referenced \code{component}s to disk as
-#' openapi XML files.
+#' Exports a \code{pipeline} and its referenced \code{component}s to
+#' disk as OpenAPI XML files.
 #'
-#' @details Creates a directory named for the \code{pipeline$name} in
-#' \code{targetDirectory}, then saves \code{pipeline} and \code{component} XML
-#' files in this directory.
+#' @details Creates a directory named for the \code{pipeline} in
+#'     \code{targetDirectory}, then saves \code{pipeline} and
+#'     \code{component} XML files in this directory.
 #'
-#' As at 2014-08-12 the \code{pipeline} is always saved as \file{pipeline.xml}
-#' no matter what the \code{pipeline} name.
+#' The \code{pipeline} is exported as \file{pipeline.xml}, and the
+#' components are exported as \file{COMPONENT_NAME.xml}.
+#'
+#' This functions aims to produce self-contained pipelines with all
+#' components available alongside the pipeline XML file.
 #'
 #' @param pipeline A \code{pipeline} list
 #' @param targetDirectory Output directory path
+#' 
 #' @return A list of the XML file paths written
+#' 
 #' @seealso \code{pipeline}, \code{savePipeline}
 #'
 #' @examples
@@ -405,7 +410,7 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("print(y)"))))
-#' pline1 <- pipeline(name = "trivialpipeline", modules = list(mod1, mod2), 
+#' pline1 <- pipeline(name = "trivialpipeline", components = list(mod1, mod2), 
 #'                    pipes = list(pipe("setX", "x", "showY", "y")))
 #' outputDir <- tempdir()
 #'
@@ -419,33 +424,29 @@ exportPipeline <- function(pipeline, targetDirectory) {
         stop(paste0("Target directory '", targetDirectory, "' does not exist"))
     }
 
+    name <- getName(pipeline)
+    description <- getDescription(pipeline)
+    components <- getComponents(pipeline)
+    pipes <- getPipes(pipeline)
+
     ## create named directory for pipeline XML files
-    pipelineDirectory <- file.path(targetDirectory, componentName(pipeline))
+    pipelineDirectory <- file.path(targetDirectory, name)
     if (!file.exists(pipelineDirectory)) {
         dir.create(pipelineDirectory)
-        ## FIXME: some kind of warning if I delete something?
     }
 
-    ## give all components a ref from name
-    pipeline$components <-
-        lapply(pipeline$components,
-               function (c) {
-                   c$ref <- paste0(c$name, ".xml")
-                   c$path <- NULL
-                   c
-               })
+    ## export components to pipelineDirectory
+    components <- lapply(components,
+                         exportComponent,
+                         targetDirectory = pipelineDirectory)
 
+    ## rebuild pipeline
+    pipeline <- pipeline(name = name, description = description,
+                         components = components, pipes = pipes)
+    
     ## save pipeline to xml file
     pipelineFile <- savePipeline(pipeline, pipelineDirectory)
-
-    ## save components to XML files
-    componentFiles <-
-        lapply(pipeline$components,
-               function (c, pipelineDirectory) {
-                   exportComponent(c, pipelineDirectory)
-               }, pipelineDirectory)
-
-    c(pipeline = pipelineFile, componentFiles)
+    pipelineFile
 }
 
 ## functions to run a loaded PIPELINE
