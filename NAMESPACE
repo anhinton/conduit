@@ -2,6 +2,7 @@
 
 export(addComponent)
 export(addPipe)
+export(component)
 export(exportPipeline)
 export(fileVessel)
 export(internalVessel)
@@ -22,3 +23,4 @@ export(scriptVessel)
 export(urlVessel)
 export(validatePipeline)
 import(XML)
+import(methods)

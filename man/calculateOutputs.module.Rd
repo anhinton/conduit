@@ -6,6 +6,12 @@
 \usage{
 \method{calculateOutputs}{module}(componentValue, outputDirectory)
 }
+\arguments{
+\item{componentValue}{\code{module} object from \code{component}
+\code{value} slot}
+
+\item{outputDirectory}{file location for pipeline execution output}
+}
 \description{
 calculate output objects produced by a module
 }

@@ -18,6 +18,8 @@
 #'   \item{value}{\code{pipeline} or \code{module} object}
 #' 
 #' @seealso \code{pipeline}, \code{module}
+#'
+#' @export
 component <- function(name,
                       vessel = NULL,
                       value) {
@@ -143,6 +145,10 @@ exportComponent <- function(component, targetDirectory = getwd()) {
 }
 
 #' calculate output objects produced by a module
+#'
+#' @param componentValue \code{module} object from \code{component}
+#'     \code{value} slot
+#' @param outputDirectory file location for pipeline execution output
 calculateOutputs.module <- function(componentValue, outputDirectory) {
     language <- componentValue$language
     outputObjects <- lapply(componentValue$outputs, outputObject, language,

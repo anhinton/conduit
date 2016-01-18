@@ -1,5 +1,5 @@
 #' @describeIn extractModuleSource Extract a module's source script
-#' from a scriptVessel
+#'     from a scriptVessel
 extractModuleSource.scriptVessel <- function(moduleSource) {
     script <- moduleSource$vessel$value
     return(script)
@@ -29,7 +29,7 @@ extractModuleSource.urlVessel <- function(moduleSource) {
 
 #' Extract a module's source script
 #'
-#' @param vessel Vessel indicating source script location
+#' @param moduleSource source slot of \code{module} object
 #'
 #' @return character vector of source script
 #'

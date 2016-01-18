@@ -1,3 +1,17 @@
+#' Creates a \code{pipe} object
+#'
+#' Constructor method for a \code{pipe} object which connects the
+#' \code{startComponent}'s \code{startOutput} to the
+#' \code{endComponent}'s \code{endInput}.
+#'
+#' Accessor methods are defined to extract \code{start} and \code{end}
+#' elements.
+#'
+#' @param startComponent Name of start component
+#' @param startOutput Name of start output
+#' @param endComponent Name of end module
+#' @param endInput Name of end input
+#'
 #' @return The constructor returns a \code{pipe} object connecting
 #'     \code{startComponentName}.\code{startOutputName} to
 #'     \code{endComponentName}.\code{endInputName}

@@ -654,21 +654,6 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 
 ## creating new pipelines
 
-#' Creates a \code{pipe} object
-#'
-#' Constructor method for a \code{pipe} object which connects the
-#' \code{startComponent}'s \code{startOutput} to the
-#' \code{endComponent}'s \code{endInput}.
-#'
-#' Accessor methods are defined to extract \code{start} and \code{end}
-#' elements.
-#'
-#' @param startComponent Name of start component
-#' @param startOutput Name of start output
-#' @param endComponent Name of end module
-#' @param endInput Name of end input
-
-
 #' Add a new component to a pipeline
 #'
 #' This function adds a new \code{module} or \code{pipeline} to a
@@ -676,6 +661,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #'
 #' @param newComponent \code{pipeline} or \code{module} object to be added
 #' @param pipeline \code{pipeline} to be amended
+#' 
 #' @return \code{pipeline} object
 #' @seealso \code{pipeline}, \code{module}
 #'

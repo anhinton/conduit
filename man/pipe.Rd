@@ -2,13 +2,32 @@
 % Please edit documentation in R/pipe.R
 \name{pipe}
 \alias{pipe}
+\title{Creates a \code{pipe} object}
 \usage{
 pipe(startComponent, startOutput, endComponent, endInput)
+}
+\arguments{
+\item{startComponent}{Name of start component}
+
+\item{startOutput}{Name of start output}
+
+\item{endComponent}{Name of end module}
+
+\item{endInput}{Name of end input}
 }
 \value{
 The constructor returns a \code{pipe} object connecting
     \code{startComponentName}.\code{startOutputName} to
     \code{endComponentName}.\code{endInputName}
+}
+\description{
+Constructor method for a \code{pipe} object which connects the
+\code{startComponent}'s \code{startOutput} to the
+\code{endComponent}'s \code{endInput}.
+}
+\details{
+Accessor methods are defined to extract \code{start} and \code{end}
+elements.
 }
 \examples{
 pipe1 <- pipe(startComponent = "setX", startOutput = "x",

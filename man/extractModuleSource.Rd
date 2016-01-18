@@ -16,7 +16,7 @@
 extractModuleSource(moduleSource)
 }
 \arguments{
-\item{vessel}{Vessel indicating source script location}
+\item{moduleSource}{source slot of \code{module} object}
 }
 \value{
 character vector of source script
