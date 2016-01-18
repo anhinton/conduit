@@ -157,7 +157,7 @@ getLocation.pipeline <- function(x) {
 #' @import XML
 #' 
 #' @examples
-#' pln1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml",
+#' pln1xml <- system.file("extdata", "simpleGraph", "pipeline.xml",
 #'                        package = "conduit")
 #' pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
 loadPipeline <- function(name, ref, path = NULL,
@@ -343,7 +343,7 @@ pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
 #' 
 #' @examples
 #' targ1 <- tempdir() 
-#' ppl1xml <- system.file("extdata", "simpleGraph", "simpleGraph-pipeline.xml", 
+#' ppl1xml <- system.file("extdata", "simpleGraph", "pipeline.xml", 
 #' 		          package = "conduit")
 #' ppl1 <- loadPipeline("simpleGraph", 
 #' 		        ref = ppl1xml)
@@ -572,7 +572,7 @@ graphPipeline <- function(pipeline) {
 #' simpleGraph <-
 #'     loadPipeline(name = "simpleGraph",
 #'                  ref = system.file("extdata", "simpleGraph",
-#'                                    "simpleGraph-pipeline.xml",
+#'                                    "pipeline.xml",
 #'                                     package = "conduit"))
 #'
 #' ## run the pipeline

@@ -92,7 +92,7 @@ validatePipe <- function(p, components) {
 #' pipel1 <-
 #'     loadPipeline("simpleGraph",
 #'                  system.file("extdata", "simpleGraph",
-#'                              "simpleGraph-pipeline.xml",
+#'                              "pipeline.xml",
 #'                              package = "conduit"))
 #' ## a valid pipeline
 #' validatePipeline(pipel1)

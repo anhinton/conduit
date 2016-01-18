@@ -5,8 +5,8 @@ createGraph.xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
                                package = "conduit")
 layoutGraph.xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
                                package = "conduit")
-`simpleGraph-pipeline.xml` <- system.file("extdata", "simpleGraph",
-                                          "simpleGraph-pipeline.xml",
+pipeline.xml <- system.file("extdata", "simpleGraph",
+                                          "pipeline.xml",
                                           package = "conduit")
 invalidPipeline <- system.file("extdata", "invalidPipeline.xml",
                                package = "conduit")
@@ -15,8 +15,7 @@ invalidPipeline <- system.file("extdata", "invalidPipeline.xml",
 test_that("isValidXML() works for known valid files", {
     expect_true(isValidXML(file = createGraph.xml, type = "module"))
     expect_true(isValidXML(file = layoutGraph.xml, type = "module"))
-    expect_true(isValidXML(file = `simpleGraph-pipeline.xml`,
-                           type = "pipeline"))
+    expect_true(isValidXML(file = pipeline.xml, type = "pipeline"))
 })
 
 test_that("isValidXML() fails for invalid files", {
@@ -24,5 +23,5 @@ test_that("isValidXML() fails for invalid files", {
 })
 
 test_that("isValidXML() fails for incorrect type", {
-    expect_false(isValidXML(`simpleGraph-pipeline.xml`, type = "module"))
+    expect_false(isValidXML(pipeline.xml, type = "module"))
 })

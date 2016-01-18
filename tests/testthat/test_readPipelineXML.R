@@ -30,8 +30,8 @@ fileModuleXML <- c("<component name=\"createGraph\" type=\"module\">",
                    "</component>")
 fileModuleXML <- xmlRoot(xmlParse(fileModuleXML))
 
-pipelineFile <- system.file("extdata", "simpleGraph",
-                            "simpleGraph-pipeline.xml", package = "conduit")
+pipelineFile <- system.file("extdata", "simpleGraph", "pipeline.xml",
+                            package = "conduit")
 filePipelineXML <- c("<component name=\"simpleGraph\" type=\"pipeline\">",
                    paste0("<file ref=\"", pipelineFile, "\"/>"),
                    "</component>")
