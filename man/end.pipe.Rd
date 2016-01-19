@@ -4,10 +4,12 @@
 \alias{end.pipe}
 \title{Return \code{pipe} end list}
 \usage{
-\method{end}{pipe}(x)
+\method{end}{pipe}(x, ...)
 }
 \arguments{
 \item{x}{\code{pipe} object}
+
+\item{...}{additional arguments}
 }
 \value{
 list containing \code{component} and \code{input}

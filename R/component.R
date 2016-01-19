@@ -40,6 +40,8 @@ component <- function(name,
 #' @describeIn getName
 #'
 #' Returns component name
+#'
+#' @export
 getName.component <- function (x) {
     x$name
 }
@@ -47,6 +49,8 @@ getName.component <- function (x) {
 #' @describeIn getType
 #'
 #' Returns component type
+#'
+#' @export
 getType.component <- function(x) {
     class(getValue(x))
 }
@@ -54,6 +58,8 @@ getType.component <- function(x) {
 #' @describeIn getVessel
 #'
 #' Returns component vessel
+#'
+#' @export
 getVessel.component <- function(x) {
     x$vessel
 }
@@ -61,6 +67,8 @@ getVessel.component <- function(x) {
 #' @describeIn getValue
 #'
 #' Returns module or pipeline object
+#'
+#' @export
 getValue.component <- function(x) {
     x$value
 }
@@ -149,6 +157,8 @@ exportComponent <- function(component, targetDirectory = getwd()) {
 #' @param componentValue \code{module} object from \code{component}
 #'     \code{value} slot
 #' @param outputDirectory file location for pipeline execution output
+#'
+#' @export
 calculateOutputs.module <- function(componentValue, outputDirectory) {
     language <- componentValue$language
     outputObjects <- lapply(componentValue$outputs, outputObject, language,

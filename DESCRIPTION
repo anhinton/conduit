@@ -23,20 +23,3 @@ Suggests:
     gridGraphviz,
     testthat
 RoxygenNote: 5.0.1
-Collate:
-    'R.R'
-    'component.R'
-    'fileSystem.R'
-    'generic.R'
-    'init.R'
-    'module.R'
-    'pipe.R'
-    'pipeline.R'
-    'python.R'
-    'python3.R'
-    'script.R'
-    'search.R'
-    'shell.R'
-    'tools.R'
-    'validate.R'
-    'vessel.R'

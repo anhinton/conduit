@@ -90,7 +90,7 @@ pipeline <- function (name,
             }
             c
         })
-    names(components) <- sapply(components, getName)
+    names(components) <- sapply(components, getName.component)
     
     pipeline <- list(name=name, description = description,
                      components = components, pipes = pipes)
@@ -101,6 +101,8 @@ pipeline <- function (name,
 #' @describeIn getComponents
 #'
 #' Returns list of \code{component} objects
+#'
+#' @export
 getComponents.pipeline <- function(x) {
     x$components
 }
@@ -108,6 +110,8 @@ getComponents.pipeline <- function(x) {
 #' @describeIn getName
 #'
 #' Returns pipeline name
+#'
+#' @export
 getName.pipeline <- function(x) {
     x$name
 }
@@ -115,6 +119,8 @@ getName.pipeline <- function(x) {
 #' @describeIn getPipes
 #'
 #' Returns list of \code{pipe} objects
+#'
+#' @export
 getPipes.pipeline <- function(x) {
     x$pipes
 }
@@ -122,6 +128,8 @@ getPipes.pipeline <- function(x) {
 #' @describeIn getDescription
 #'
 #' Returns pipeline description
+#'
+#' @export
 getDescription.pipeline <- function(x) {
     x$description
 }
@@ -129,6 +137,8 @@ getDescription.pipeline <- function(x) {
 #' @describeIn getLocation
 #'
 #' Returns location of pipeline XML file
+#'
+#' @export
 getLocation.pipeline <- function(x) {
     attr(x, "location")
 }
@@ -207,7 +217,7 @@ readPipelineXML <- function(name, xml, location = getwd()) {
         fun = readComponentNode,
         location = location,
         namespaces = c(d = namespace))
-    names(components) <- sapply(components, getName)
+    names(components) <- sapply(components, getName.component)
     
     ## extract pipes
     pipes <- xpathApply(

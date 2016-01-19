@@ -1,6 +1,8 @@
 #' Extract components from object
 #'
 #' @param x object
+#'
+#' @export
 getComponents <- function(x) {
     UseMethod("getComponents")
 }
@@ -8,6 +10,8 @@ getComponents <- function(x) {
 #' Extract object name
 #'
 #' @param x object
+#'
+#' @export
 getName <- function(x) {
     UseMethod("getName")
 }
@@ -15,6 +19,8 @@ getName <- function(x) {
 #' Extract pipes from object
 #'
 #' @param x object
+#'
+#' @export
 getPipes <- function(x) {
     UseMethod("getPipes")
 }
@@ -22,6 +28,8 @@ getPipes <- function(x) {
 #' Extract object description
 #'
 #' @param x object
+#'
+#' @export
 getDescription <- function(x) {
     UseMethod("getDescription")
 }
@@ -29,6 +37,8 @@ getDescription <- function(x) {
 #' Retrieve object type
 #'
 #' @param x object
+#'
+#' @export
 getType <- function(x) {
     UseMethod("getType")
 }
@@ -36,6 +46,8 @@ getType <- function(x) {
 #' Retrieve object vessel
 #'
 #' @param x object
+#'
+#' @export
 getVessel <- function(x) {
     UseMethod("getVessel")
 }
@@ -43,6 +55,8 @@ getVessel <- function(x) {
 #' Retrieve object value
 #'
 #' @param x object
+#'
+#' @export
 getValue <- function(x) {
     UseMethod("getValue")
 }
@@ -50,6 +64,8 @@ getValue <- function(x) {
 #' Retrieve object language
 #'
 #' @param x object
+#'
+#' @export
 getLanguage <- function(x) {
     UseMethod("getLanguage")
 }
@@ -57,6 +73,8 @@ getLanguage <- function(x) {
 #' Retrieve object location
 #'
 #' @param x object
+#'
+#' @export
 getLocation <- function(x) {
     UseMethod("getLocation")
 }

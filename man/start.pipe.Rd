@@ -4,10 +4,12 @@
 \alias{start.pipe}
 \title{Return \code{pipe} start list}
 \usage{
-\method{start}{pipe}(x)
+\method{start}{pipe}(x, ...)
 }
 \arguments{
 \item{x}{\code{pipe} object}
+
+\item{...}{additional arguments}
 }
 \value{
 list containing \code{component} and \code{output}

@@ -1267,6 +1267,8 @@ module <- function(name, language, host=NULL,
 #' @describeIn getName
 #'
 #' Returns module name
+#'
+#' @export
 getName.module <- function(x) {
     x$name
 }
@@ -1274,6 +1276,8 @@ getName.module <- function(x) {
 #' @describeIn getDescription
 #'
 #' Returns module description
+#'
+#' @export
 getDescription.module <- function(x) {
     x$description
 }
@@ -1281,6 +1285,8 @@ getDescription.module <- function(x) {
 #' @describeIn getLanguage
 #'
 #' Returns module language
+#'
+#' @export
 getLanguage.module <- function(x) {
     x$language
 }
@@ -1288,6 +1294,8 @@ getLanguage.module <- function(x) {
 #' @describeIn getLocation
 #'
 #' Returns location of module XML file
+#'
+#' @export
 getLocation.module <- function(x) {
     attr(x, "location")
 }

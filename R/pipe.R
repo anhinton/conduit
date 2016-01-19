@@ -40,18 +40,24 @@ pipe <- function (startComponent, startOutput,
 #' Return \code{pipe} start list
 #'
 #' @param x \code{pipe} object
+#' @param ... additional arguments
 #'
 #' @return list containing \code{component} and \code{output}
-start.pipe <- function(x) {
+#'
+#' @export
+start.pipe <- function(x, ...) {
     x$start
 }
 
 #' Return \code{pipe} end list
 #'
 #' @param x \code{pipe} object
+#' @param ... additional arguments
 #' 
 #' @return list containing \code{component} and \code{input}
-end.pipe <- function(x) {
+#'
+#' @export
+end.pipe <- function(x, ...) {
     x$end
 }
 
