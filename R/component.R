@@ -152,27 +152,31 @@ exportComponent <- function(component, targetDirectory = getwd()) {
     component
 }
 
-#' calculate output objects produced by a module
+#' @describeIn calculateOutputs
 #'
-#' @param componentValue \code{module} object from \code{component}
-#'     \code{value} slot
-#' @param outputDirectory file location for pipeline execution output
+#' calculate \code{output} objects produced by a \code{module}
 #'
 #' @export
-calculateOutputs.module <- function(componentValue, outputDirectory) {
-    language <- componentValue$language
-    outputObjects <- lapply(componentValue$outputs, outputObject, language,
-                            outputDirectory)
-    return(outputObjects)
+calculateOutputs.module <- function(object, outputDirectory) {
+    language <- getLanguage(object)
+    outputs <- lapply(object$outputs, output, language,
+                      outputDirectory)
+    outputs
 }
 
-#' Calculate ouput objects produced by a component
+#' Calculate ouput objects produced by a \code{module} or
+#' \code{pipeline} object
 #'
-#' @param componentValue \code{module} or \code{pipeline} object
+#' @details As at 2016-01-19 a method for \code{pipeline} objects has
+#'     not been implemented.
+#'
+#' @param object \code{module} or \code{pipeline}
 #' @param outputDirectory file location for component outputs
 #'
 #' @return named list of output objects
-calculateOutputs <- function(componentValue, outputDirectory) {
+calculateOutputs <- function(object, outputDirectory) {
+    if (!inherits(object, c("module", "pipeline")))
+        stop("module or pipeline object required")
     UseMethod("calculateOutputs")
 }
 
@@ -209,10 +213,10 @@ componentPath <- function (component, pipelinePath) {
 #' 
 #' @return Named list of output objects
 runComponent <- function(componentName, pipeline, inputObjects = list(),
-                         pipelinePath=getwd()) {
-    component <- pipeline$components[[componentName]]
-    value <- component$value
-    type <- component$type
+                         pipelinePath = getwd()) {
+    component <- getComponents(pipeline)[[componentName]]
+    value <- getValue(component)
+    type <- getType(component)
     result <- switch(type,
                      module = runModule(value, inputObjects, pipelinePath),
                      ## FIXME: running pipelines probably doesn't work

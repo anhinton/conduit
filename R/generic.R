@@ -16,6 +16,13 @@ getName <- function(x) {
     UseMethod("getName")
 }
 
+#' @describeIn getName
+#'
+#' @export
+getName <- function(x) {
+    x$name
+}
+
 #' Extract pipes from object
 #'
 #' @param x object
@@ -50,6 +57,13 @@ getType <- function(x) {
 #' @export
 getVessel <- function(x) {
     UseMethod("getVessel")
+}
+
+#' @describeIn getVessel
+#'
+#' @export
+getVessel.default <- function(x) {
+    x$vessel
 }
 
 #' Retrieve object value

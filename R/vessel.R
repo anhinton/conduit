@@ -132,3 +132,12 @@ fetchVessel.urlVessel <- function(vessel, location = getwd()) {
     on.exit(close(con))
     readLines(con)
 }
+
+#' describeIn getType
+#'
+#' Return the vessel type.
+#'
+#' @export
+getType.vessel <- function(x) {
+    class(x)[[1]]
+}

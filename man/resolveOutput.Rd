@@ -4,23 +4,23 @@
 \alias{resolveOutput}
 \title{Checks a module output object has been created.}
 \usage{
-resolveOutput(output, language, host, outputDirectory = getwd())
+resolveOutput(moduleOutput, language, host, outputDirectory = getwd())
 }
 \arguments{
-\item{output}{\code{moduleOutput} object}
-
 \item{language}{module language}
 
 \item{host}{host list created by \code{parseModuleList}}
 
 \item{outputDirectory}{location of module output files}
+
+\item{output}{\code{moduleOutput} object}
 }
 \value{
 named list containing:
 \itemize{
   \item name: object name
   \item type: object vessel type
-  \item object: output object
+  \item object: \code{output} object
 }
 }
 \description{

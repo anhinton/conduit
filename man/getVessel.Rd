@@ -3,11 +3,14 @@
 \name{getVessel.component}
 \alias{getVessel}
 \alias{getVessel.component}
+\alias{getVessel.default}
 \title{Retrieve object vessel}
 \usage{
 \method{getVessel}{component}(x)
 
 getVessel(x)
+
+\method{getVessel}{default}(x)
 }
 \arguments{
 \item{x}{object}
@@ -18,5 +21,7 @@ Retrieve object vessel
 \section{Methods (by class)}{
 \itemize{
 \item \code{component}: Returns component vessel
+
+\item \code{default}: 
 }}
 

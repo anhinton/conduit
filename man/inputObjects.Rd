@@ -11,8 +11,8 @@ inputObjects(pipes, components, pipelinePath)
 
 \item{components}{List of \code{component}s}
 
-\item{pipelinePath}{Absolute file path to originating \code{pipeline}
-XML file}
+\item{pipelinePath}{Absolute file path to originating
+\code{pipeline} XML file}
 }
 \value{
 named list of file locations by input names

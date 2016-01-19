@@ -7,13 +7,15 @@
 \alias{getName.pipeline}
 \title{Extract object name}
 \usage{
-\method{getName}{component}(x)
+getName.component(x)
 
 getName(x)
 
-\method{getName}{module}(x)
+getName(x)
 
-\method{getName}{pipeline}(x)
+getName.module(x)
+
+getName.pipeline(x)
 }
 \arguments{
 \item{x}{object}
@@ -21,12 +23,14 @@ getName(x)
 \description{
 Extract object name
 }
-\section{Methods (by class)}{
+\section{Functions}{
 \itemize{
-\item \code{component}: Returns component name
+\item \code{getName.component}: Returns component name
 
-\item \code{module}: Returns module name
+\item \code{getName}: 
 
-\item \code{pipeline}: Returns pipeline name
+\item \code{getName.module}: Returns module name
+
+\item \code{getName.pipeline}: Returns pipeline name
 }}
 

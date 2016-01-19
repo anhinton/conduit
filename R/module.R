@@ -598,17 +598,22 @@ resolveInput <- function(moduleInput, inputObjects, host) {
     UseMethod("resolveInput", object = moduleInput)
 }
 
-#' return output object produced by a module output
+#' return \code{output} produced by a \code{moduleOutput}
 #'
 #' @param output \code{moduleOutput} object
 #' @param language module script language
 #' @param outputDirectory file location for module execution
 #'
-#' @return output object
-outputObject <- function(output, language, outputDirectory) {
-    vessel <- output$vessel
-    type <- class(vessel)[[1]]
-    outputObject <-
+#' @return \code{output} object
+#'
+#' @export
+output <- function(moduleOutput, language, outputDirectory) {
+    if (!inherits(moduleOutput, "moduleOutput"))
+        stop("moduleOutput object required")
+    
+    vessel <- getVessel(moduleOutput)
+    type <- getType(vessel)
+    output <-
         switch(type,
                internalVessel =
                    paste0(vessel$symbol, internalExtension(language)),
@@ -616,14 +621,15 @@ outputObject <- function(output, language, outputDirectory) {
                fileVessel = vessel$ref,
                stop("vessel type not defined"))
     if (type == "internalVessel" || type == "fileVessel") {
-        if (!is_absolute(outputObject)) {
-            outputObject <- file.path(outputDirectory, outputObject)
+        if (!is_absolute(output)) {
+            output <- file.path(outputDirectory, output)
         }
-        if (file.exists(outputObject)) {
-            outputObject <- normalizePath(outputObject)
+        if (file.exists(output)) {
+            output <- normalizePath(output)
         }
     }
-    return(outputObject)
+    class(output) <- "output"
+    output
 }
 
 #' Checks a module output object has been created.
@@ -642,14 +648,14 @@ outputObject <- function(output, language, outputDirectory) {
 #' \itemize{
 #'   \item name: object name
 #'   \item type: object vessel type
-#'   \item object: output object
+#'   \item object: \code{output} object
 #' }
-resolveOutput <- function (output, language, host,
+resolveOutput <- function (moduleOutput, language, host,
                            outputDirectory = getwd()) {
-    name <- output$name
-    vessel <- output$vessel
-    type <- class(vessel)[[1]]
-    object <- outputObject(output, language, outputDirectory)
+    name <- getName(moduleOutput)
+    vessel <- getVessel(moduleOutput)
+    type <- getType(vessel)
+    object <- output(moduleOutput, language, outputDirectory)
 
     if (type == "internalVessel" || type == "fileVessel") {
         if (!is.null(host)) {

@@ -4,12 +4,12 @@
 \alias{matchInput}
 \title{Match a pipe's input name to an output object}
 \usage{
-matchInput(pipe, outputObjects)
+matchInput(pipe, outputs)
 }
 \arguments{
 \item{pipe}{\code{pipe} describing match}
 
-\item{outputObjects}{named list of output objects}
+\item{outputs}{named list of output objects}
 }
 \value{
 named input list
