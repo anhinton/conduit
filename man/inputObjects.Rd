@@ -4,12 +4,12 @@
 \alias{inputObjects}
 \title{Returns a named list of input objects}
 \usage{
-inputObjects(pipes, components, pipelinePath)
+inputObjects(pipeList, components, pipelinePath)
 }
 \arguments{
-\item{pipes}{List of \code{pipe}s}
+\item{pipeList}{List of \code{pipe} objects}
 
-\item{components}{List of \code{component}s}
+\item{components}{List of \code{component} objects}
 
 \item{pipelinePath}{Absolute file path to originating
 \code{pipeline} XML file}

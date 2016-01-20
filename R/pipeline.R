@@ -461,16 +461,30 @@ exportPipeline <- function(pipeline, targetDirectory) {
 
 ## functions to run a loaded PIPELINE
 
-#' Match a pipe's input name to an output object
+#' Create an \code{input} object for executing a \code{component} in a
+#' \code{pipeline}.
+#'
+#' @details When a pipeline is executed, conduit must match
+#'     \code{moduleOutput}s to \code{moduleInput}s according to the
+#'     \code{pipe}s. This function matches each \code{moduleInput}
+#'     mentioned in a \code{pipe} to the correct \code{output}.
+#'
+#' \code{outputList} is a list of \code{output} object lists, named
+#' for each component in the originating pipeline.
 #'
 #' @param pipe \code{pipe} describing match
-#' @param outputs named list of output objects
+#' @param outputList named list of \code{output} object lists
 #'
 #' @return named input list
-matchInput <- function (pipe, outputs) {
-    component <- getElement(outputs, pipe$start$component)
-    object <- getElement(component, pipe$start$output)
-    return(object)
+input <- function (pipe, outputList) {
+    if (!inherits(pipe, "pipe"))
+        stop("pipe object require")
+    startComponent <- start(pipe)$component
+    startOutput <- start(pipe)$output
+    componentOutputs <- outputList[[startComponent]]
+    input <- componentOutputs[[startOutput]]
+    class(input) <- "input"
+    input
 }
 
 #' Returns a named list of input objects
@@ -480,24 +494,18 @@ matchInput <- function (pipe, outputs) {
 #' 
 #' List items are named as COMPONENT_NAME.INPUT_NAME
 #'
-#' @param pipes List of \code{pipe}s
-#' @param components List of \code{component}s
+#' @param pipeList List of \code{pipe} objects
+#' @param components List of \code{component} objects
 #' @param pipelinePath Absolute file path to originating
 #'     \code{pipeline} XML file
 #' 
 #' @return named list of file locations by input names
-inputObjects <- function(pipes, components, pipelinePath) {
+inputObjects <- function(pipeList, components, pipelinePath) {
     ## calculate component output paths
     componentPaths <- lapply(components, componentPath, pipelinePath)
 
     ## extract actual objects
-    componentValues <-
-        lapply(
-            components,
-            function(component) {
-                value <- component$value
-                return(value)
-            })                            
+    componentValues <- lapply(components, getValue)
 
     ## calculate component output objects
     outputs <- lapply(componentValues,

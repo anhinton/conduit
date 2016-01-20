@@ -607,11 +607,18 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #' contained in this object is not guaranteed to exist until after
 #' module execution.
 #'
+#' 
+#'
 #' @param output \code{moduleOutput} object
 #' @param language module script language
 #' @param outputDirectory file location for module execution
 #'
-#' @return \code{output} object
+#' @return \code{output} object, varying according to
+#'     \code{moduleOutput}'s \code{vessel} type:
+#'
+#' \item{fileVessel}{absolute file path to output object}
+#' \item{urlVessel}{URL to output object}
+#' \item{internalVessel}{absolute file path to serialized internal object}
 #'
 #' @export
 output <- function(moduleOutput, language, outputDirectory) {

@@ -14,7 +14,12 @@ output(moduleOutput, language, outputDirectory)
 \item{output}{\code{moduleOutput} object}
 }
 \value{
-\code{output} object
+\code{output} object, varying according to
+    \code{moduleOutput}'s \code{vessel} type:
+
+\item{fileVessel}{absolute file path to output object}
+\item{urlVessel}{URL to output object}
+\item{internalVessel}{absolute file path to serialized internal object}
 }
 \description{
 Return the object produced by a module output.
