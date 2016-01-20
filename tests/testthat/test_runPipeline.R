@@ -38,3 +38,16 @@ test_that("calculateOutputs() produces correct output", {
                  "component type not supported")
 })
 
+test_that("componentPath() returns correct output", {
+    ## fails for incorrect object
+    expect_error(calculateOutputs(unclass(comp1)),
+                 "component object")
+
+    ## module-type component
+    path1 <- componentPath(comp1, outdir)
+    expect_identical(path1, file.path(outdir, getName(comp1)))
+
+    ## pipeline-type component
+    path2 <- componentPath(comp2, outdir)
+    expect_identical(path2, file.path(outdir, getName(comp2)))
+})

@@ -503,7 +503,7 @@ inputObjects <- function(pipes, components, pipelinePath) {
     outputs <- lapply(componentValues,
                       function (value, componentPaths) {
                           path <- getElement(componentPaths, value$name)
-                          output <- calculateOutputs(value, path)
+                          calculateOutputs(value, path)
                       }, componentPaths)
     
     ## match output objects to input names

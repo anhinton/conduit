@@ -194,13 +194,10 @@ calculateOutputs <- function(component, outputDirectory) {
 #'
 #' @return output path as character
 componentPath <- function (component, pipelinePath) {
-    path <-
-        switch(
-            class(component$value),
-            module = file.path(pipelinePath, "modules", component$name),
-            stop("Unknown component type")
-        )
-    return(path)
+    if (!inherits(component, "component"))
+        stop("component object require")
+    name <- getName(component)
+    file.path(pipelinePath, name)
 }
 
 #' Run a component
