@@ -491,39 +491,48 @@ input <- function (pipe, outputList) {
 
 #' Returns a named list of input objects
 #'
-#' \code{inputsList} returns a named list of absolute file locations for
-#' components' inputs.
+#' \code{calculateInputs} returns a named list of \code{input} objects
+#' to satisfy component inputs provided by pipes.
 #' 
-#' List items are named as COMPONENT_NAME.INPUT_NAME
+#' List items are named as componentName.inputName
 #'
 #' @param pipeList List of \code{pipe} objects
-#' @param components List of \code{component} objects
+#' @param componentList List of \code{component} objects
 #' @param pipelinePath Absolute file path to originating
 #'     \code{pipeline} XML file
 #' 
-#' @return named list of file locations by input names
-inputObjects <- function(pipeList, components, pipelinePath) {
+#' @return named list of lists of \code{input} objects for each
+#'     component
+calculateInputs <- function(pipeList, componentList, pipelinePath) {
+    if (!all(sapply(pipeList, inherits, what = "pipe")))
+        stop("pipeList must contain pipe objects")
+    if (!all(sapply(componentList, inherits, what = "component")))
+        stop("componentList must contain component objects")
+    
+    ## check that items in componentList are named
+    if (is.null(names(componentList))) {
+        names(componentList) <- sapply(componentList, getName)
+    }
+    
     ## calculate component output paths
-    componentPaths <- lapply(components, componentPath, pipelinePath)
-
-    ## extract actual objects
-    componentValues <- lapply(components, getValue)
+    componentPaths <- lapply(componentList, componentPath, pipelinePath)
 
     ## calculate component output objects
-    outputs <- lapply(componentValues,
-                      function (value, componentPaths) {
-                          path <- getElement(componentPaths, value$name)
-                          calculateOutputs(value, path)
-                      }, componentPaths)
+    outputList <- lapply(componentList,
+                         function (component, componentPaths) {
+                             name <- getName(component)
+                             path <- getElement(componentPaths, name)
+                             calculateOutputs(component, path)
+                         }, componentPaths)
     
     ## match output objects to input names
-    inputObjects <- lapply(pipes, matchInput, outputs)
-    names(inputObjects) <- 
-        sapply(pipes,
+    inputList <- lapply(pipeList, input, outputList)
+    names(inputList) <- 
+        sapply(pipeList,
                function(x) {
-                   paste(x$end$component, x$end$input, sep=".")
+                   paste(end(x)$component, end(x)$input, sep=".")
                })
-    return(inputObjects)
+    inputList
 }
 
 #' Create a \code{graphNEL} node-and-edge graph of a pipeline
