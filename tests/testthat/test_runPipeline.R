@@ -15,8 +15,16 @@ file_output <- moduleOutput(
 mod1 <- module("mod1", language = lang,
                outputs = list(internal_output, url_output, file_output))
 comp1 <- component(value = mod1)
-p1 <- pipeline("p1", components = list(comp1))
-comp2 <- component(value = p1)
+p2 <- pipeline("p2", components = list(comp1))
+comp2 <- component(value = p2)
+mod3 <- module(
+    name = "A", language = "R",
+    outputs = list(
+        moduleOutput("B", fileVessel("myfile"),
+                     ioFormat("text file")),
+        moduleOutput("C", urlVessel("http://localhost"),
+                     ioFormat("html file"))))
+comp3 <- component(value = mod3)
                                  
 
 test_that("calculateOutputs() produces correct output", {
@@ -50,4 +58,26 @@ test_that("componentPath() returns correct output", {
     ## pipeline-type component
     path2 <- componentPath(comp2, outdir)
     expect_identical(path2, file.path(outdir, getName(comp2)))
+})
+
+test_that("input() produces appropriate object", {
+    pipe1 <- pipe("A", "C", "mod1", "url")
+    pipe2 <- pipe("A", "X", "mod1", "file")
+    pipe3 <- pipe("legs", "C", "mod1", "url")
+    outdir <- tempfile("inputTest")
+    outputList <- lapply(list(mod1 = comp1, A = comp3),
+                         calculateOutputs,
+                         outdir)
+    
+    ## fail for incorrect input
+    expect_error(input(unclass(pipe1), outputList), "pipe object required")
+
+    ## fails for missing component or ouptut
+    expect_error(input(pipe2, outputList), "start output does not exist")
+    expect_error(input(pipe3, outputList), "start component does not exist")
+
+    ## returns correct object
+    input1 <- input(pipe1, outputList)
+    expect_true(inherits(input1, "input"))
+    expect_match(input1, getVessel(getValue(comp3)$outputs$C)$ref)
 })

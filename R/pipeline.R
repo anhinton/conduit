@@ -478,11 +478,13 @@ exportPipeline <- function(pipeline, targetDirectory) {
 #' @return named input list
 input <- function (pipe, outputList) {
     if (!inherits(pipe, "pipe"))
-        stop("pipe object require")
+        stop("pipe object required")
     startComponent <- start(pipe)$component
     startOutput <- start(pipe)$output
     componentOutputs <- outputList[[startComponent]]
+    if (is.null(componentOutputs)) stop("start component does not exist")
     input <- componentOutputs[[startOutput]]
+    if (is.null(input)) stop("start output does not exist")
     class(input) <- "input"
     input
 }
