@@ -17,6 +17,12 @@ output(moduleOutput, language, outputDirectory)
 \code{output} object
 }
 \description{
-return \code{output} produced by a \code{moduleOutput}
+Return the object produced by a module output.
+}
+\details{
+This function returns a reference to the object produced by a
+module's output when the module is executed. The reference
+contained in this object is not guaranteed to exist until after
+module execution.
 }
 

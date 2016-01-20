@@ -600,6 +600,13 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 
 #' return \code{output} produced by a \code{moduleOutput}
 #'
+#' Return the object produced by a module output.
+#'
+#' This function returns a reference to the object produced by a
+#' module's output when the module is executed. The reference
+#' contained in this object is not guaranteed to exist until after
+#' module execution.
+#'
 #' @param output \code{moduleOutput} object
 #' @param language module script language
 #' @param outputDirectory file location for module execution
