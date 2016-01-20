@@ -318,24 +318,27 @@ test_that(
         symbol <- "x"
         internal_output <- moduleOutput(
             "internal", internalVessel(symbol), ioFormat("nonsense"))
-        expect_match(output(internal_output, lang, outdir),
-                     file.path(outdir,
-                               paste0(symbol,
-                                      internalExtension(lang))))
+        output1 <- output(internal_output, lang, outdir)
+        expect_true(inherits(output1, "output"))
+        expect_match(
+            output1,
+            file.path(outdir, paste0(symbol, internalExtension(lang))))
 
         ## works for urlVessel
         url <- "https://github.com/anhinton/conduit"
         url_output <- moduleOutput(
             "url", urlVessel(url), ioFormat("HTML file"))
-        expect_match(output(url_output, lang, outdir),
-                     url)
+        output2 <- output(url_output, lang, outdir)
+        expect_true(inherits(output2, "output"))
+        expect_match(output2, url)
         
         ## works for fileVessel
         file <- "output.csv"
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
-        expect_match(output(file_output, lang, outdir),
-                     file.path(outdir, file))
+        output3 <- output(file_output, lang, outdir)
+        expect_true(inherits(output3, "output"))
+        expect_match(output3, file.path(outdir, file))
         
         ## fails for unknown vessel type
         not_a_real_output <- internal_output
