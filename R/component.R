@@ -152,14 +152,15 @@ exportComponent <- function(component, targetDirectory = getwd()) {
     component
 }
 
-#' @describeIn calculateOutputs
+#' Calculate \code{output} objects produced by a \code{module}
 #'
-#' calculate \code{output} objects produced by a \code{module}
+#' @param module \code{module} object
+#' @param outputDirectory file location for outputs
 #'
-#' @export
-calculateOutputs.module <- function(object, outputDirectory) {
-    language <- getLanguage(object)
-    outputs <- lapply(object$outputs, output, language,
+#' @return list of \code{output} objects
+calculateModuleOutputs <- function(module, outputDirectory) {
+    language <- getLanguage(module)
+    outputs <- lapply(module$outputs, output, language,
                       outputDirectory)
     outputs
 }
@@ -173,11 +174,17 @@ calculateOutputs.module <- function(object, outputDirectory) {
 #' @param object \code{module} or \code{pipeline}
 #' @param outputDirectory file location for component outputs
 #'
-#' @return named list of output objects
-calculateOutputs <- function(object, outputDirectory) {
-    if (!inherits(object, c("module", "pipeline")))
-        stop("module or pipeline object required")
-    UseMethod("calculateOutputs")
+#' @return named list of \code{output} objects
+calculateOutputs <- function(component, outputDirectory) {
+    if (!inherits(component, "component"))
+        stop("component object required")
+    type <- getType(component)
+    value <- getValue(component)    
+    outputs <- switch(
+        type,
+        module = calculateModuleOutputs(value, outputDirectory),
+        stop("component type not supported"))
+    outputs
 }
 
 #' Calculate a component's output path
