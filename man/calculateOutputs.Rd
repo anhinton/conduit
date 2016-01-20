@@ -2,22 +2,20 @@
 % Please edit documentation in R/component.R
 \name{calculateOutputs}
 \alias{calculateOutputs}
-\title{Calculate ouput objects produced by a \code{module} or
-\code{pipeline} object}
+\title{Calculate ouput objects produced by a pipeline \code{component}}
 \usage{
 calculateOutputs(component, outputDirectory)
 }
 \arguments{
 \item{outputDirectory}{file location for component outputs}
 
-\item{object}{\code{module} or \code{pipeline}}
+\item{object}{\code{component} object}
 }
 \value{
 named list of \code{output} objects
 }
 \description{
-Calculate ouput objects produced by a \code{module} or
-\code{pipeline} object
+Calculate ouput objects produced by a pipeline \code{component}
 }
 \details{
 As at 2016-01-19 a method for \code{pipeline} objects has

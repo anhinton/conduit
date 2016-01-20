@@ -165,13 +165,12 @@ calculateModuleOutputs <- function(module, outputDirectory) {
     outputs
 }
 
-#' Calculate ouput objects produced by a \code{module} or
-#' \code{pipeline} object
-#'
+#' Calculate ouput objects produced by a pipeline \code{component}
+#' 
 #' @details As at 2016-01-19 a method for \code{pipeline} objects has
 #'     not been implemented.
 #'
-#' @param object \code{module} or \code{pipeline}
+#' @param object \code{component} object
 #' @param outputDirectory file location for component outputs
 #'
 #' @return named list of \code{output} objects
@@ -180,11 +179,11 @@ calculateOutputs <- function(component, outputDirectory) {
         stop("component object required")
     type <- getType(component)
     value <- getValue(component)    
-    outputs <- switch(
+    outputList <- switch(
         type,
         module = calculateModuleOutputs(value, outputDirectory),
         stop("component type not supported"))
-    outputs
+    outputList
 }
 
 #' Calculate a component's output path
