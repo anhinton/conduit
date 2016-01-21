@@ -517,7 +517,7 @@ calculateInputs <- function(pipeList, componentList, pipelinePath) {
     ## calculate component output paths
     componentPaths <- lapply(componentList, componentPath, pipelinePath)
 
-    ## calculate component output objects
+    ## resolve list of component output object lists
     outputList <- lapply(componentList,
                          function (component, componentPaths) {
                              name <- getName(component)
@@ -525,8 +525,9 @@ calculateInputs <- function(pipeList, componentList, pipelinePath) {
                              calculateOutputs(component, path)
                          }, componentPaths)
     
-    ## match output objects to input names
+    ## match output objects to inputs named in pipeList
     inputList <- lapply(pipeList, input, outputList)
+    ## name inputs in inputList for component.input from pipes
     names(inputList) <- 
         sapply(pipeList,
                function(x) {

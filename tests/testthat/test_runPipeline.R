@@ -25,6 +25,9 @@ mod3 <- module(
         moduleOutput("C", urlVessel("http://localhost"),
                      ioFormat("html file"))))
 comp3 <- component(value = mod3)
+simpleGraph <- loadPipeline(
+    name = "simpleGraph",
+    system.file("extdata", "simpleGraph", "pipeline.xml", package = "conduit"))
                                  
 
 test_that("calculateOutputs() produces correct output", {
@@ -34,9 +37,7 @@ test_that("calculateOutputs() produces correct output", {
 
     ## module-type component
     outputs <- calculateOutputs(comp1, outdir)
-    for (i in seq_along(outputs)) {
-        expect_true(inherits(outputs[[i]], "output"))
-    }
+    expect_true(all(lapply(outputs, inherits, what = "output")))
     expect_match(names(outputs), internal_output$name, all = FALSE)
     expect_match(names(outputs), file_output$name, all = FALSE)
     expect_match(names(outputs), url_output$name, all = FALSE)
@@ -80,4 +81,32 @@ test_that("input() produces appropriate object", {
     input1 <- input(pipe1, outputList)
     expect_true(inherits(input1, "input"))
     expect_match(input1, getVessel(getValue(comp3)$outputs$C)$ref)
+})
+
+test_that("calculateInputs() produces appropriate object", {
+    pipeList <- getPipes(simpleGraph)
+    componentList <- getComponents(simpleGraph)
+    pipelinePath <- file.path(tempfile("calculateInputs"), "simpleGraph")
+
+    ## error on incorrect inputs
+    badPipes <- lapply(pipeList, unclass)
+    badComps <- lapply(componentList, unclass)
+    expect_error(calculateInputs(badPipes, componentList,
+                                 pipelinePath),
+                 "pipeList must contain pipe objects")
+    expect_error(calculateInputs(pipeList, badComps,
+                                 pipelinePath),
+                 "componentList must contain component objects")
+
+    ## correct output object
+    inputList <- calculateInputs(pipeList, componentList, pipelinePath)
+    expect_true(all(sapply(inputList, inherits, what = "input")))
+    ## list objects correctly named for pipe component.input
+    expect_true(all(sapply(
+        pipeList,
+        function (x, inputList) {
+            name <- paste(end(x)$component, end(x)$input, sep = ".")
+            name %in% names(inputList)
+        },
+        inputList)))
 })
