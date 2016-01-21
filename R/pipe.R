@@ -4,7 +4,8 @@
 #' \code{startComponent}'s \code{startOutput} to the
 #' \code{endComponent}'s \code{endInput}.
 #'
-#' Accessor methods are defined to extract \code{start} and \code{end}
+#' Accessor methods are defined to extract \code{startComponent},
+#' \code{startOutput}, \code{endComponent} and \code{endInput}
 #' elements.
 #'
 #' @param startComponent Name of start component
@@ -59,6 +60,50 @@ start.pipe <- function(x, ...) {
 #' @export
 end.pipe <- function(x, ...) {
     x$end
+}
+
+#' Return \code{pipe} start component
+#'
+#' @param pipe
+#'
+#' @return name of start component as string
+#'
+#' @export
+startComponent <- function(pipe) {
+    start(pipe)$component
+}
+
+#' Return \code{pipe} start output
+#'
+#' @param pipe
+#'
+#' @return name of start output as string
+#'
+#' @export
+startOutput <- function(pipe) {
+    start(pipe)$output
+}
+
+#' Return \code{pipe} end component
+#'
+#' @param pipe
+#'
+#' @return name of end component as string
+#'
+#' @export
+endComponent <- function(pipe) {
+    end(pipe)$component
+}
+
+#' Return \code{pipe} end input
+#'
+#' @param pipe
+#'
+#' @return name of end input as string
+#'
+#' @export
+endInput <- function(pipe) {
+    end(pipe)$input
 }
 
 #' Convert a pipe to XML

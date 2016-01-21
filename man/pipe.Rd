@@ -26,7 +26,8 @@ Constructor method for a \code{pipe} object which connects the
 \code{endComponent}'s \code{endInput}.
 }
 \details{
-Accessor methods are defined to extract \code{start} and \code{end}
+Accessor methods are defined to extract \code{startComponent},
+\code{startOutput}, \code{endComponent} and \code{endInput}
 elements.
 }
 \examples{
