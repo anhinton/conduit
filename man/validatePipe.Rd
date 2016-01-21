@@ -4,10 +4,10 @@
 \alias{validatePipe}
 \title{Validate a pipe}
 \usage{
-validatePipe(p, components)
+validatePipe(pipe, componentList)
 }
 \arguments{
-\item{p}{\code{pipe} object}
+\item{pipe}{\code{pipe} object}
 
 \item{components}{\code{pipeline} components}
 }
@@ -15,6 +15,13 @@ validatePipe(p, components)
 Logical value, TRUE if valid
 }
 \description{
-Validate a pipe
+Validates a single \code{pipe} against a \code{pipeline}'s
+\code{component}s.
+}
+\details{
+A pipe is valid if its startComponent, startOutput, endComponent
+and endInput can all be matched by name to elements in the
+\code{componentList}. The function should return a warning for each
+invalid element.
 }
 
