@@ -60,6 +60,21 @@ test_that("validatePipe() returns correctly", {
                            componentList = componentList)))
 })
 
+test_that("validatePipeline() returns correctly", {
+    ## check for error when inputs incorrect
+    expect_error(validatePipeline(unclass(simpleGraph)))
+
+    ## FALSE for invalid pipeline
+    componentList <- getComponents(simpleGraph)
+    pipeList <- getPipes(simpleGraph)
+    pipeList[[1]]$end$component <- basename(tempfile())
+    badPipeline <- pipeline("bad", components = componentList,
+                            pipes = pipeList)
+    expect_warning(valid5 <- validatePipeline(badPipeline),
+                   "End component")
+    expect_false(valid5)
+})
+
 test_that("isValidXML() works for known valid files", {
     expect_true(isValidXML(file = createGraph.xml, type = "module"))
     expect_true(isValidXML(file = layoutGraph.xml, type = "module"))

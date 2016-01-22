@@ -10,8 +10,6 @@ validatePipeline(pipeline)
 \item{pipeline}{A \code{pipeline} object}
 }
 \value{
-Logical value, TRUE if valid
-
 logical, TRUE if pipeline passes all validity tests
 }
 \description{

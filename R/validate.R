@@ -109,8 +109,6 @@ validatePipe <- function(pipe, componentList) {
 #'
 #' @seealso \code{pipeline}, \code{pipe}
 #'
-#' @return Logical value, TRUE if valid
-#'
 #' @examples
 #' ## load a pipeline
 #' pipel1 <-
@@ -134,5 +132,5 @@ validatePipeline <- function(pipeline) {
     pipeList <- getPipes(pipeline)
     componentList <- getComponents(pipeline)
     ## check if pipes are valid
-    all(sapply(pipes, validatePipe, components))    
+    all(sapply(pipeList, validatePipe, componentList))    
 }
