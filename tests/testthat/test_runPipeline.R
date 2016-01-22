@@ -37,7 +37,7 @@ test_that("calculateOutputs() produces correct output", {
 
     ## module-type component
     outputs <- calculateOutputs(comp1, outdir)
-    expect_true(all(lapply(outputs, inherits, what = "output")))
+    expect_true(all(sapply(outputs, inherits, what = "output")))
     expect_match(names(outputs), internal_output$name, all = FALSE)
     expect_match(names(outputs), file_output$name, all = FALSE)
     expect_match(names(outputs), url_output$name, all = FALSE)

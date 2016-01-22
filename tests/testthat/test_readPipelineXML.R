@@ -1,8 +1,6 @@
 library(conduit)
 context("read pipeline XML")
 
-library(XML)
-
 startComponent <- "a"
 startOutput <- "b"
 endComponent <- "c"

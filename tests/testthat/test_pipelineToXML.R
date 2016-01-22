@@ -1,7 +1,6 @@
 library(conduit)
 context("convert pipelines to XML")
 
-library(XML)
 m1 <- module("m1", "R")
 c1 <- component(value = m1)
 desc <- "mock pipeline"
