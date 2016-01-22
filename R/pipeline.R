@@ -659,27 +659,27 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
     componentOrder <- RBGL::tsort(componentGraph)
 
     ## resolve inputs
-    inputObjects <- inputObjects(pipes = getPipes(pipeline),
-                                 components = getComponents(pipeline),
-                                 pipelinePath = pipelinePath)
+    inputList <- inputList(pipeLits = getPipes(pipeline),
+                           componentList = getComponents(pipeline),
+                           pipelinePath = pipelinePath)
 
     ## execute components in order determinde by componentOrder
-    outputs <-
+    outputList <-
         lapply(
             componentOrder,
             function(componentName, pipeline, inputObjects, pipelinePath) {
                 whichInputs <- grepl(paste0("^", componentName, "[.]"),
-                                     names(inputObjects))
-                inputObjects <- inputObjects[whichInputs]
-                names(inputObjects) <-
+                                     names(inputList))
+                inputObjects <- inputList[whichInputs]
+                names(inputList) <-
                     gsub(paste0("^", componentName, "[.]"), "",
-                         names(inputObjects))
+                         names(inputList))
                 outputs <- runComponent(componentName, pipeline,
                                         inputObjects, pipelinePath)
                 return(outputs)
             }, pipeline, inputObjects, pipelinePath)
-    names(outputs) <- componentOrder
-    outputs
+    names(outputList) <- componentOrder
+    outputList
 }
 
 ## creating new pipelines
