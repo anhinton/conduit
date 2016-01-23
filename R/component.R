@@ -205,28 +205,25 @@ componentPath <- function (component, pipelinePath) {
 #' \code{runPipeline}.
 #'
 #' @details If the component refers to a \code{module}, the names of
-#' \code{inputs} must match the names the module's input names.
+#'     the elements in \code{inputList} must match the names the
+#'     module's input names.
 #'
 #' \code{pipelinePath} must exist on the filesystem.
 #'
-#' @param componentName Name of component to be executed
-#' @param pipeline \code{pipeline} containing component
-#' @param inputObjects Named list of input objects
+#' @param component \code{component} to be executed
+#' @param inputList Named list of \code{input} objects
 #' @param pipelinePath Pipeline output directory
 #' 
-#' @return Named list of output objects
-runComponent <- function(componentName, pipeline, inputObjects = list(),
+#' @return Named list of \code{output} objects
+runComponent <- function(component, inputList = list(),
                          pipelinePath = getwd()) {
-    component <- getComponents(pipeline)[[componentName]]
+    if (!inherits(component, "component"))
+        stop("component object required")
     value <- getValue(component)
     type <- getType(component)
-    result <- switch(type,
-                     module = runModule(value, inputObjects, pipelinePath),
-                     ## FIXME: running pipelines probably doesn't work
-                     pipeline = runPipeline(value),
-                     ## if type is incorrect
-                     stop(paste0("Component '", component$name,
-                                 "' has an invalid type: '",
-                                 component$type, "'")))
-    result
+    switch(
+        type,
+        module = runModule(value, inputList, pipelinePath),
+        ## FIXME: running pipelines probably doesn't work
+        pipeline = runPipeline(value))
 }

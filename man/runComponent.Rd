@@ -4,20 +4,17 @@
 \alias{runComponent}
 \title{Run a component}
 \usage{
-runComponent(componentName, pipeline, inputObjects = list(),
-  pipelinePath = getwd())
+runComponent(component, inputList = list(), pipelinePath = getwd())
 }
 \arguments{
-\item{componentName}{Name of component to be executed}
+\item{component}{\code{component} to be executed}
 
-\item{pipeline}{\code{pipeline} containing component}
-
-\item{inputObjects}{Named list of input objects}
+\item{inputList}{Named list of \code{input} objects}
 
 \item{pipelinePath}{Pipeline output directory}
 }
 \value{
-Named list of output objects
+Named list of \code{output} objects
 }
 \description{
 This function executes a single pipeline component with \code{runModule} or
@@ -25,7 +22,8 @@ This function executes a single pipeline component with \code{runModule} or
 }
 \details{
 If the component refers to a \code{module}, the names of
-\code{inputs} must match the names the module's input names.
+    the elements in \code{inputList} must match the names the
+    module's input names.
 
 \code{pipelinePath} must exist on the filesystem.
 }

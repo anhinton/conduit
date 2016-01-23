@@ -128,3 +128,30 @@ test_that("graphPipeline() produces appropriate object", {
     expect_match(RBGL::tsort(graph1)[3],
                  "plotGraph")
 })
+
+test_that("runComponent() returns correctly", {
+    skip_on_cran()
+    componentList <- getComponents(simpleGraph)
+    pipelinePath <- tempfile("runComponent")
+    if (!dir.exists(pipelinePath))
+        dir.create(pipelinePath)
+    
+    ## fails for invalid input
+    expect_error(runComponent(unclass(componentList[[1]]),
+                              pipelinePath = pipelinePath))
+
+    ## component with no inputs
+    result1 <- runComponent(componentList[["createGraph"]],
+                            pipelinePath = pipelinePath)
+    expect_equal(length(result1), 1)
+    expect_true(inherits(result1[[1]]$object, "output"))
+    expect_true(file.exists(result1[[1]]$object))
+
+    ## component with inputs
+    result2 <- runComponent(componentList[["layoutGraph"]],
+                            list(myGraph = result1[[1]]$object),
+                            pipelinePath)
+    expect_equal(length(result2), 1)
+    expect_true(inherits(result2[[1]]$object, "output"))
+    expect_true(file.exists(result2[[1]]$object))
+})
