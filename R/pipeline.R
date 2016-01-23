@@ -586,27 +586,18 @@ graphPipeline <- function(pipeline) {
 #'
 #' Executes a \code{pipeline}'s \code{component}s.
 #' 
-#' @details This function creates a directory called
-#' \code{pipeline$name} in \file{pipelines}, in the
-#' \code{targetDirectory}. If the directory \file{pipelines} does not
-#' exist in this directory it will be created. Working files and
-#' output from the pipeline's \code{components} will be stored in the
-#' named directory.
-#'
-#' First the function will determine the order in which its components are to
-#' be run. Note that the \code{pipeline} is not allowed to have any cycles or
-#' the function will fail.
-#'
-#' The function then produces a list of inputs required by the
-#' \code{component}s, and resolves the (intended) location of these.
-#'
-#' Finally the function executes each \code{component} in the 
-#' determined order.
+#' @details This function creates a directory named for
+#'     \code{pipeline}, in a directory called \file{pipelines}, in the
+#'     \code{targetDirectory}
+#'     (\file{targetDirectory/pipelines/$NAME$}). If the directory
+#'     \file{pipelines} does not exist in \code{targetDirectory} it
+#'     will be created. Working files and output from the pipeline's
+#'     \code{component}s will be stored in the named directory.
 #'
 #' @param pipeline A \code{pipeline} object
 #' @param targetDirectory File path for pipeline output
 #' 
-#' @return Named list of \code{component} output objects
+#' @return Named list of \code{output} objects
 #' 
 #' @seealso More about \code{pipeline} objects, run single \code{module}
 #' objects with \code{runModule}.
@@ -644,55 +635,49 @@ graphPipeline <- function(pipeline) {
 #' 
 #' @export
 runPipeline <- function(pipeline, targetDirectory = getwd()) {
-    ## ensure targetDirectory exists
+    if (!inherits(pipeline, "pipeline"))
+        stop("pipeline object required")
     targetDirectory <- file.path(targetDirectory)
     if (!dir.exists(targetDirectory)) {
         stop("no such target directory")
     }
+
+    componentList <- getComponents(pipeline)
+    pipeList <- getPipes(pipeline)
+    name <- getName(pipeline)
     
     ## create directory for pipeline output
-    targetDirectory <- file.path(targetDirectory, "pipelines")
-    if (!dir.exists(targetDirectory)) {
-        dir.create(targetDirectory)
-    }
-    pipelineName <- getName(pipeline)
-    pipelinePath <- file.path(targetDirectory, pipelineName)
+    pipelinePath <- file.path(targetDirectory, "pipelines", name)
     if (dir.exists(pipelinePath))
         unlink(pipelinePath, recursive=TRUE)
     dir.create(pipelinePath, recursive=TRUE)
-    ## inputs will need the full file path
     pipelinePath <- normalizePath(pipelinePath)
 
-    ## validate pipes
+    ## check pipeline is valid
     valid <- validatePipeline(pipeline)
     if (!valid) stop(paste0("Pipeline '", pipelineName, "' is invalid."))
 
-    ## make a graph of the pipeline to determine order
+    ## determine execution order of components
     componentGraph <- graphPipeline(pipeline)
     componentOrder <- RBGL::tsort(componentGraph)
 
     ## resolve inputs
-    inputList <- inputList(pipeLits = getPipes(pipeline),
-                           componentList = getComponents(pipeline),
-                           pipelinePath = pipelinePath)
+    inputList <- calculateInputs(pipeList, componentList, pipelinePath)
 
     ## execute components in order determinde by componentOrder
-    outputList <-
-        lapply(
-            componentOrder,
-            function(componentName, pipeline, inputObjects, pipelinePath) {
-                whichInputs <- grepl(paste0("^", componentName, "[.]"),
-                                     names(inputList))
-                inputObjects <- inputList[whichInputs]
-                names(inputList) <-
-                    gsub(paste0("^", componentName, "[.]"), "",
-                         names(inputList))
-                outputs <- runComponent(componentName, pipeline,
-                                        inputObjects, pipelinePath)
-                return(outputs)
-            }, pipeline, inputObjects, pipelinePath)
-    names(outputList) <- componentOrder
-    outputList
+    lapply(componentList[componentOrder],
+           function(component, inputList, pipelinePath) {
+               name <- getName(component)                
+               whichInputs <- grepl(paste0("^", name, "[.]"),
+                                    names(inputList))
+               inputList <- inputList[whichInputs]
+               names(inputList) <-
+                   gsub(paste0("^", name, "[.]"), "",
+                        names(inputList))
+               runComponent(component, inputList, pipelinePath)
+           },
+           inputList,
+           pipelinePath)
 }
 
 ## creating new pipelines

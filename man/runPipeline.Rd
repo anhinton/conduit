@@ -12,28 +12,19 @@ runPipeline(pipeline, targetDirectory = getwd())
 \item{targetDirectory}{File path for pipeline output}
 }
 \value{
-Named list of \code{component} output objects
+Named list of \code{output} objects
 }
 \description{
 Executes a \code{pipeline}'s \code{component}s.
 }
 \details{
-This function creates a directory called
-\code{pipeline$name} in \file{pipelines}, in the
-\code{targetDirectory}. If the directory \file{pipelines} does not
-exist in this directory it will be created. Working files and
-output from the pipeline's \code{components} will be stored in the
-named directory.
-
-First the function will determine the order in which its components are to
-be run. Note that the \code{pipeline} is not allowed to have any cycles or
-the function will fail.
-
-The function then produces a list of inputs required by the
-\code{component}s, and resolves the (intended) location of these.
-
-Finally the function executes each \code{component} in the 
-determined order.
+This function creates a directory named for
+    \code{pipeline}, in a directory called \file{pipelines}, in the
+    \code{targetDirectory}
+    (\file{targetDirectory/pipelines/$NAME$}). If the directory
+    \file{pipelines} does not exist in \code{targetDirectory} it
+    will be created. Working files and output from the pipeline's
+    \code{component}s will be stored in the named directory.
 }
 \examples{
 simpleGraph <-

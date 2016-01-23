@@ -155,3 +155,23 @@ test_that("runComponent() returns correctly", {
     expect_true(inherits(result2[[1]]$object, "output"))
     expect_true(file.exists(result2[[1]]$object))
 })
+
+test_that("runPipeline() produces expected results", {
+    targetDirectory <- tempfile("runPipeline")
+    if (!dir.exists(targetDirectory))
+        dir.create(targetDirectory)
+    
+    ## fail for invalid input
+    expect_error(runPipeline(unclass(simpleGraph), tempdir()),
+                 "pipeline object required")
+    expect_error(runPipeline(simpleGraph, tempfile()),
+                 "no such target directory")
+
+    ## correct output
+    output1 <- runPipeline(simpleGraph, targetDirectory)
+    expect_equal(length(output1), 3)
+    expect_true(all(sapply(output1,
+                           function(x) inherits(x[[1]]$object, "output"))))
+    expect_true(all(sapply(output1,
+                           function(x) file.exists(x[[1]]$object))))
+})
