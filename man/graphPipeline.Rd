@@ -14,6 +14,13 @@ A \pkg{graph} \code{graphNEL} object
 }
 \description{
 \code{graphPipeline} produces a directed graph of the given
-\code{pipeline} with components as nodes and pipes as directed edges
+\code{pipeline} with components as nodes and pipes as directed edges.
+}
+\details{
+The edges in the resulting graph object are a dumb representation
+of the pipes in a pipeline, i.e. they do not retain output and
+input information. They merely serve to provide on object for a
+topological sort for the purposes of determining the execution
+order of a pipeline's components.
 }
 

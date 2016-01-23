@@ -110,3 +110,21 @@ test_that("calculateInputs() produces appropriate object", {
         },
         inputList)))
 })
+
+test_that("graphPipeline() produces appropriate object", {
+    ## fails for invalid input
+    expect_error(graphPipeline(unclass(simpleGraph)),
+                 "pipeline object required")
+
+    ## expected output
+    graph1 <- graphPipeline(simpleGraph)
+    expect_true(inherits(graph1, "graphNEL"))
+    expect_equal(graph::numNodes(graph1),
+                 length(getComponents(simpleGraph)))
+    expect_equal(graph::numEdges(graph1),
+                 length(getPipes(simpleGraph)))
+    expect_match(RBGL::tsort(graph1)[1],
+                 "createGraph")
+    expect_match(RBGL::tsort(graph1)[3],
+                 "plotGraph")
+})
