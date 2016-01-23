@@ -839,7 +839,7 @@ runModule <- function(module, inputObjects = list(),
     }
     
     ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, "modules", module$name)
+    modulePath <- file.path(targetDirectory, getName(module))
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
