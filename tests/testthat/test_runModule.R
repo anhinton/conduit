@@ -434,7 +434,8 @@ test_that(
 test_that(
     "runModule() succeeds for module with fileVessel input with absolute ref",
     {
-        skip("can't isolate failure when testing via R CMD check")
+        skip(paste("2016-01-25 strange issues around R CMD check, system2, ",
+               "Rscript, and what is returned."))
         absRef <- system.file("extdata", "simpleGraph", "createGraph.xml",
                               package = "conduit")
         moduleName <- "absomod"
@@ -442,7 +443,7 @@ test_that(
         outputName <- "lines"
         outputType <- "internalVessel"
         outputObject <-
-            file.path(targ, "modules", moduleName,
+            file.path(targ, moduleName,
                       paste0(outputName, internalExtension(language)))
         absomod <- module(
             name = moduleName,
@@ -476,6 +477,7 @@ test_that(
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1[[1]]$name, output1$name)
+        expect_true(file.exists(result1[[1]]$object))
 
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
@@ -486,4 +488,5 @@ test_that(
                              inputObjects = inputObjects,
                              targetDirectory = targ)
         expect_match(result2[[1]]$name, output2$name)
+        expect_true(file.exists(result2[[1]]$object))
     })
