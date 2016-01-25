@@ -1,3 +1,0 @@
-[submodule "inst/xmlSchema"]
-	path = inst/xmlSchema
-	url = https://github.com/anhinton/openapiValidation.git

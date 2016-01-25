@@ -1,0 +1,29 @@
+<!ELEMENT module (description?, input*, source*, output*)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT input ((internal|file|url), format)>
+<!ELEMENT source (script|file|url)>
+<!ELEMENT output ((internal|file|url), format)>
+<!ELEMENT internal EMPTY>
+<!ELEMENT file EMPTY>
+<!ELEMENT url EMPTY>
+<!ELEMENT script (#PCDATA)>
+<!ELEMENT format ANY>
+<!ATTLIST module
+	  xmlns CDATA #IMPLIED
+	  language CDATA #REQUIRED
+	  host CDATA #IMPLIED>
+<!ATTLIST input
+	  name ID #REQUIRED>
+<!ATTLIST source
+	  order CDATA #IMPLIED>
+<!ATTLIST output
+	  name ID #REQUIRED>
+<!ATTLIST internal
+	  symbol CDATA #REQUIRED>
+<!ATTLIST file
+	  ref CDATA #REQUIRED
+	  path CDATA #IMPLIED>
+<!ATTLIST url
+	  ref CDATA #REQUIRED>
+<!ATTLIST format
+	  formatType CDATA #IMPLIED>
