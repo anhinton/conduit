@@ -1,86 +1,189 @@
-### Functions for exporting, running and creating components
-
-#' return the name of a component
+#' Create a component object
 #'
-#' Returns the name of a \code{module} or \code{pipeline}
+#' Create a \code{component} object for use in a \code{pipeline}.
 #'
-#' @param component \code{module} or \code{pipeline} object
-#' @return character value
-componentName <- function (component) {
-    component$name
+#' @details A component contains either a \code{pipeline} or
+#'     \code{module} object in its \code{value} output. Optionally it
+#'     can contain a \code{fileVessel} or \code{urlVessel} in its
+#'     \code{vessel} element, referencing the resource from which the
+#'     component was loaded.
+#'
+#' @param name Name of component
+#' @param vessel \code{fileVessel} or \code{urlVessel}
+#' @param value \code{pipeline} or \code{module} object
+#' 
+#' @return \code{component} list containing:
+#'   \item{name}{component name}
+#'   \item{vessel}{source vessel}
+#'   \item{value}{\code{pipeline} or \code{module} object}
+#' 
+#' @seealso \code{pipeline}, \code{module}
+#'
+#' @export
+component <- function(name,
+                      vessel = NULL,
+                      value) {
+    if (missing(name)) name <- getName(value)
+    if (!is_length1_char(name)) stop("'name' is not a length 1 char value")
+    if (!inherits(value, c("module", "pipeline")))
+        stop("invalid 'value'")
+    if (!is.null(vessel) &&
+        !inherits(vessel, what = c("fileVessel", "urlVessel"))) {
+        stop("invalid 'vessel'")
+    }
+    
+    component <- list(name = name, vessel = vessel, value = value)
+    class(component) <- "component"
+    component
 }
+
+#' @describeIn getName
+#'
+#' Returns component name
+#'
+#' @export
+getName.component <- function (x) {
+    x$name
+}
+
+#' @describeIn getType
+#'
+#' Returns component type
+#'
+#' @export
+getType.component <- function(x) {
+    class(getValue(x))
+}
+
+#' @describeIn getVessel
+#'
+#' Returns component vessel
+#'
+#' @export
+getVessel.component <- function(x) {
+    x$vessel
+}
+
+#' @describeIn getValue
+#'
+#' Returns module or pipeline object
+#'
+#' @export
+getValue.component <- function(x) {
+    x$value
+}
+
+### Functions for exporting, running and creating components
 
 #' Convert a component to XML
 #'
 #' Convert a \code{component} object into the corresponding openapi XML
 #' format.
 #'
-#' The \code{component} object \emph{must} have a \code{pipeline} or
-#' \code{module} objects in its \code{value} slot.
-#'
 #' @param component \code{component} object
 #' @param namespaceDefinitions As named character vector
+#' 
 #' @return \code{xmlNode} object
-componentToXML <- function(component, namespaceDefinitions=NULL) {
-    type <- component$type
-    value <- component$value
-    if (class(value) != type) {
-        stop("You have provided a mismatched component object")
-    }
-    ## FIXME: define case when 'ref' is given. THIS FUNCTION ASSUMES
-    ## that the component being passed in has a 'value', which is
-    ## something all components will one day have. However, if a 'ref' is
-    ## provided I want to be dealing with that
-    xml <- switch(type,
-                  module = moduleToXML(value, namespaceDefinitions),
-                  pipeline = pipelineToXML(value, namespaceDefinitions=NULL))
-    xml
+#'
+#' @import XML
+componentToXML <- function(component, namespaceDefinitions = NULL) {
+    name <- getName(component)
+    vessel <- getVessel(component)
+    type <- getType(component)
+    value <- getValue(component)    
+    componentRoot <- newXMLNode("component", attrs = c(name = name))
+    valueXML <-
+        if(is.null(vessel)) {
+            switch(
+                type,
+                module = moduleToXML(value, namespaceDefinitions),
+                pipeline = pipelineToXML(value, namespaceDefinitions))
+        } else {
+            vesselToXML(vessel)
+        }
+    componentRoot <- addChildren(componentRoot, kids = list(valueXML))
+    if (!is.null(vessel))
+        xmlAttrs(componentRoot, append = TRUE) <-  c(type = type)
+    componentRoot
 }
 
 #' Export a component to an XML file
 #'
+#' Saves an XML of the component in the
+#' \code{targetDirectory}. Returns a component object to be used by a
+#' \code{pipeline} XML file also in \code{targetDirectory}.
+#'
 #' @param component \code{component} object
 #' @param targetDirectory File path for pipeline output
-#' @return Resulting file path
-exportComponent <- function(component, targetDirectory=getwd()) {
+#' 
+#' @return \code{component} object
+exportComponent <- function(component, targetDirectory = getwd()) {
     ## stop of targetDirectory doesn't exist
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
 
-    ## create XML 
-    componentDoc <-
-        newXMLDoc(namespaces="http://www.openapi.org/2014",
-                  node=componentToXML(component,
-                      namespaceDefinitions="http://www.openapi.org/2014/"))
+    name <- getName(component)
+    value <- getValue(component)
+    vessel <- getVessel(component)
+    type <- getType(component)
 
-    filename <- if (is.null(component$ref)) {
-        paste0(component$name, ".xml")
-    } else {
-        component$ref
+    ## save referenced vessel to targetDirectory
+    if (inherits(vessel, "fileVessel")) {
+        fullPath <- findFile(vessel$ref, vessel$path, getLocation(value))
+        oldFilename <- basename(fullPath)
+        newFilename <- paste0(name, ".xml")
+        newPath <- file.path(targetDirectory, newFilename)
+        file.copy(fullPath, newPath)
+        vessel <- fileVessel(ref = newFilename)
+    } else if (is.null(vessel)) {
+        file <- switch(type,
+                       module = saveModule(value,
+                                           targetDirectory,
+                                           paste0(name, ".xml")),
+                       pipeline = savePipeline(value,
+                                               targetDirectory,
+                                               paste0(name, ".xml")))
+        vessel <- fileVessel(ref = basename(file))
     }
-    
-    ## save XML to file
-    componentFilePath <- file.path(targetDirectory, filename)
-    saveXML(componentDoc, componentFilePath)
+
+    ## update component object with fileVessel created in targetDirectory
+    component <- component(vessel = vessel, value = value)
+    component
 }
 
-#' calculate output objects produced by a module
-calculateOutputs.module <- function(componentValue, outputDirectory) {
-    language <- componentValue$language
-    outputObjects <- lapply(componentValue$outputs, outputObject, language,
-                            outputDirectory)
-    return(outputObjects)
-}
-
-#' Calculate ouput objects produced by a component
+#' Calculate \code{output} objects produced by a \code{module}
 #'
-#' @param componentValue \code{module} or \code{pipeline} object
+#' @param module \code{module} object
+#' @param outputDirectory file location for outputs
+#'
+#' @return list of \code{output} objects
+calculateModuleOutputs <- function(module, outputDirectory) {
+    language <- getLanguage(module)
+    outputs <- lapply(module$outputs, output, language,
+                      outputDirectory)
+    outputs
+}
+
+#' Calculate ouput objects produced by a pipeline \code{component}
+#' 
+#' @details As at 2016-01-19 a method for \code{pipeline} objects has
+#'     not been implemented.
+#'
+#' @param component \code{component} object
 #' @param outputDirectory file location for component outputs
 #'
-#' @return named list of output objects
-calculateOutputs <- function(componentValue, outputDirectory) {
-    UseMethod("calculateOutputs")
+#' @return named list of \code{output} objects
+calculateOutputs <- function(component, outputDirectory) {
+    if (!inherits(component, "component"))
+        stop("component object required")
+    type <- getType(component)
+    value <- getValue(component)    
+    outputList <- switch(
+        type,
+        module = calculateModuleOutputs(value, outputDirectory),
+        stop("component type not supported"))
+    outputList
 }
 
 #' Calculate a component's output path
@@ -90,13 +193,10 @@ calculateOutputs <- function(componentValue, outputDirectory) {
 #'
 #' @return output path as character
 componentPath <- function (component, pipelinePath) {
-    path <-
-        switch(
-            class(component$value),
-            module = file.path(pipelinePath, "modules", component$name),
-            stop("Unknown component type")
-        )
-    return(path)
+    if (!inherits(component, "component"))
+        stop("component object require")
+    name <- getName(component)
+    file.path(pipelinePath, name)
 }
 
 #' Run a component
@@ -105,88 +205,25 @@ componentPath <- function (component, pipelinePath) {
 #' \code{runPipeline}.
 #'
 #' @details If the component refers to a \code{module}, the names of
-#' \code{inputs} must match the names the module's input names.
+#'     the elements in \code{inputList} must match the names the
+#'     module's input names.
 #'
 #' \code{pipelinePath} must exist on the filesystem.
 #'
-#' @param componentName Name of component to be executed
-#' @param pipeline \code{pipeline} containing component
-#' @param inputObjects Named list of input objects
+#' @param component \code{component} to be executed
+#' @param inputList Named list of \code{input} objects
 #' @param pipelinePath Pipeline output directory
 #' 
-#' @return Named list of output objects
-runComponent <- function(componentName, pipeline, inputObjects = list(),
-                         pipelinePath=getwd()) {
-    component <- pipeline$components[[componentName]]
-    value <- component$value
-    type <- component$type
-    result <- switch(type,
-                     module = runModule(value, inputObjects, pipelinePath),
-                     ## FIXME: running pipelines probably doesn't work
-                     pipeline = runPipeline(value),
-                     ## if type is incorrect
-                     stop(paste0("Component '", component$name,
-                                 "' has an invalid type: '",
-                                 component$type, "'")))
-    result
-}
-
-#' Create a component object
-#'
-#' Create a \code{component} object for use in a \code{pipeline}.
-#'
-#' @details This function requires either a \code{ref}, and possibly a
-#' \code{path}, to an openapi XML file, or a \code{pipeline} or \code{module}
-#' object in \code{value}. Accordingly:
-#'
-#' \itemize{
-#' \item{if \code{ref} is given the resulting component will have
-#' \code{value} coerced to NULL.}
-#'
-#' \item{if no \code{ref} is given the resulting component will have \code{type}
-#' coerced to the class of the \code{value} object.}
-#' }
-#'
-#' If \code{type} is not \dQuote{pipeline} or \dQuote{module} the function
-#' will fail.
-#'
-#' @param name Name of component
-#' @param value \code{pipeline} or \code{module} object
-#' @param type Character value; \dQuote{pipeline} or \dQuote{module}
-#' @param ref xml filename
-#' @param path location of xml file
-#' @return \code{component} list containing:
-#' \item{name}{component name}
-#' \item{ref}{xml filename}
-#' \item{path}{path to xml file}
-#' \item{type}{component type}
-#' \item{value}{\code{pipeline} or \code{module} object}
-#' @seealso \code{pipeline}, \code{module}
-component <- function(name, value=NULL, type=NULL, ref=NULL, path=NULL) {
-    valueClass <- class(value)
-
-    ## fail if no ref of value provided
-    if (is.null(ref) && is.null(value)) {
-        stop("A component must have a ref or a value")
-    }
-    
-    ## if no type specified, set to class of value
-    if (is.null(type)) {
-        type <- valueClass
-    }
-    
-    ## fail if conflicting types given
-    if (valueClass != type) {
-        stop(paste0("Type mismatch! value has type: '", class(value),
-                    "', but `type` is set to: '", type, "'"))
-    }
-    
-    ## if type is not 'module' or 'pipeline' then something is wrong
-    if (type != "module" && type != "pipeline") {
-        stop("A component must be a module or a pipeline")
-    }
-    
-    component <- list(name=name, ref=ref, path=path, type=type, value=value)
-    class(component) <- "component"
-    component
+#' @return Named list of \code{output} objects
+runComponent <- function(component, inputList = list(),
+                         pipelinePath = getwd()) {
+    if (!inherits(component, "component"))
+        stop("component object required")
+    value <- getValue(component)
+    type <- getType(component)
+    switch(
+        type,
+        module = runModule(value, inputList, pipelinePath),
+        ## FIXME: running pipelines probably doesn't work
+        pipeline = runPipeline(value))
 }

@@ -302,39 +302,48 @@ test_that(
     })
 
 test_that(
-    "outputObject() behaves",
+    "output() behaves",
     {
         ## outputObject(output, language, outputDirectory)
         lang = "R"
         outdir <- tempdir()
+
+        ## fails when not given 'moduleOutput' object
+        expect_error(output(list(name = "a", type = "output",
+                                 vessel = urlVessel("http://www.openapi.org"),
+                                 format = "website")),
+                     "moduleOutput object required")
         
         ## works for internalVessel
         symbol <- "x"
         internal_output <- moduleOutput(
             "internal", internalVessel(symbol), ioFormat("nonsense"))
-        expect_match(outputObject(internal_output, lang, outdir),
-                     file.path(outdir,
-                               paste0(symbol,
-                                      internalExtension(lang))))
+        output1 <- output(internal_output, lang, outdir)
+        expect_true(inherits(output1, "output"))
+        expect_match(
+            output1,
+            file.path(outdir, paste0(symbol, internalExtension(lang))))
 
         ## works for urlVessel
         url <- "https://github.com/anhinton/conduit"
         url_output <- moduleOutput(
             "url", urlVessel(url), ioFormat("HTML file"))
-        expect_match(outputObject(url_output, lang, outdir),
-                     url)
+        output2 <- output(url_output, lang, outdir)
+        expect_true(inherits(output2, "output"))
+        expect_match(output2, url)
         
         ## works for fileVessel
         file <- "output.csv"
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
-        expect_match(outputObject(file_output, lang, outdir),
-                     file.path(outdir, file))
+        output3 <- output(file_output, lang, outdir)
+        expect_true(inherits(output3, "output"))
+        expect_match(output3, file.path(outdir, file))
         
         ## fails for unknown vessel type
         not_a_real_output <- internal_output
         class(not_a_real_output$vessel)[1] <- "dudeVssl"
-        expect_error(outputObject(not_a_real_output,
+        expect_error(output(not_a_real_output,
                                   lang, outdir),
                      "vessel type not defined")
     })
@@ -425,14 +434,16 @@ test_that(
 test_that(
     "runModule() succeeds for module with fileVessel input with absolute ref",
     {
-        inputFile <- system.file("extdata", "simpleGraph", "createGraph.xml",
-                                 package = "conduit")
+        skip(paste("2016-01-25 strange issues around R CMD check, system2, ",
+               "Rscript, and what is returned."))
+        absRef <- system.file("extdata", "simpleGraph", "createGraph.xml",
+                              package = "conduit")
         moduleName <- "absomod"
         language = "R"
         outputName <- "lines"
         outputType <- "internalVessel"
         outputObject <-
-            file.path(targ, "modules", moduleName,
+            file.path(targ, moduleName,
                       paste0(outputName, internalExtension(language)))
         absomod <- module(
             name = moduleName,
@@ -440,12 +451,12 @@ test_that(
             inputs = list(
                 moduleInput(
                     name = "file",
-                    vessel = fileVessel(inputFile),
+                    vessel = fileVessel(absRef),
                     format = ioFormat("XML file"))),
             sources = list(
                 moduleSource(
                     scriptVessel(
-                        paste0(outputName, " <- readLines(\"", inputFile,
+                        paste0(outputName, " <- readLines(\"", absRef,
                                "\")")))),
             outputs = list(
                 moduleOutput(
@@ -466,6 +477,7 @@ test_that(
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1[[1]]$name, output1$name)
+        expect_true(file.exists(result1[[1]]$object))
 
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
@@ -476,4 +488,5 @@ test_that(
                              inputObjects = inputObjects,
                              targetDirectory = targ)
         expect_match(result2[[1]]$name, output2$name)
+        expect_true(file.exists(result2[[1]]$object))
     })

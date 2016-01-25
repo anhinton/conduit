@@ -1,5 +1,7 @@
 #' @describeIn extractModuleSource Extract a module's source script
-#' from a scriptVessel
+#'     from a scriptVessel
+#'
+#' @export
 extractModuleSource.scriptVessel <- function(moduleSource) {
     script <- moduleSource$vessel$value
     return(script)
@@ -7,6 +9,8 @@ extractModuleSource.scriptVessel <- function(moduleSource) {
 
 #' @describeIn extractModuleSource Extract a module's source script
 #' from a fileVessel
+#'
+#' @export
 extractModuleSource.fileVessel <- function(moduleSource) {
     vessel <- moduleSource$vessel
     ref <- vessel$ref
@@ -19,6 +23,8 @@ extractModuleSource.fileVessel <- function(moduleSource) {
 
 #' @describeIn extractModuleSource Extract a module's source script
 #' from a urlVessel
+#'
+#' @export
 extractModuleSource.urlVessel <- function(moduleSource) {
     ref <- RCurl::getURL(moduleSource$vessel$ref)
     con <- textConnection(ref)
@@ -29,11 +35,13 @@ extractModuleSource.urlVessel <- function(moduleSource) {
 
 #' Extract a module's source script
 #'
-#' @param vessel Vessel indicating source script location
+#' @param moduleSource source slot of \code{module} object
 #'
 #' @return character vector of source script
 #'
 #' @seealso \code{executeScript}
+#'
+#' @export
 extractModuleSource <- function(moduleSource) {
     UseMethod("extractModuleSource")
 }

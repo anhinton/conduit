@@ -1,3 +1,9 @@
+#' @import methods
+NULL
+
+#' @importFrom stats start end
+NULL
+
 .onLoad <- function(libname, pkgname) {
     initIdfile()
     initSession()

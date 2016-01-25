@@ -8,15 +8,18 @@ Authors@R: c(person(given="Ashley Noel", family="Hinton",
     role=c("cre","aut")),
     person(given="Paul", family="Murrell",
     email="p.murrell@auckland.ac.nz", role="ctb"))
-Description: Manage and run OpenAPI pipelines and modules
+Description: Manage and run OpenAPI pipelines and modules.
 License: GPL (>= 3)
-Depends: R (>= 3.2.2), methods
+Depends:
+    R (>= 3.2.3),
+    methods
 Imports:
     RCurl,
     XML,
     graph,
     RBGL
-Suggests: 
+Suggests:
     Rgraphviz,
     gridGraphviz,
     testthat
+RoxygenNote: 5.0.1
