@@ -181,7 +181,7 @@ loadPipeline <- function(name, ref, path = NULL,
             stop(problem)
         })
     if (!isValidXML(rawXML, "pipeline"))
-        stop(paste0("'", file, "': module XML is invalid"))    
+        stop(paste0("'", ref, "': pipeline XML is invalid"))    
     location <- attr(rawXML, "location")
     xml <- xmlRoot(xmlParse(rawXML))
     pipeline <- readPipelineXML(name, xml, location)

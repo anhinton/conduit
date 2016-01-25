@@ -217,7 +217,7 @@ loadModule <- function(name, ref, path = NULL,
             stop(problem)
         })
     if (!isValidXML(rawXML, "module"))
-        stop(paste0("'", file, "': module XML is invalid"))
+        stop(paste0("'", ref, "': module XML is invalid"))
     xml <- xmlRoot(xmlParse(rawXML))
 
     ## create module object
