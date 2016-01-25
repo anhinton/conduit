@@ -7,13 +7,13 @@
 resolveOutput(moduleOutput, language, host, outputDirectory = getwd())
 }
 \arguments{
+\item{moduleOutput}{\code{moduleOutput} object}
+
 \item{language}{module language}
 
 \item{host}{host list created by \code{parseModuleList}}
 
 \item{outputDirectory}{location of module output files}
-
-\item{output}{\code{moduleOutput} object}
 }
 \value{
 named list containing:

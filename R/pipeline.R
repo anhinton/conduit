@@ -655,7 +655,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 
     ## check pipeline is valid
     valid <- validatePipeline(pipeline)
-    if (!valid) stop(paste0("Pipeline '", pipelineName, "' is invalid."))
+    if (!valid) stop(paste0("Pipeline '", name, "' is invalid."))
 
     ## determine execution order of components
     componentGraph <- graphPipeline(pipeline)

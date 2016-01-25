@@ -170,7 +170,7 @@ calculateModuleOutputs <- function(module, outputDirectory) {
 #' @details As at 2016-01-19 a method for \code{pipeline} objects has
 #'     not been implemented.
 #'
-#' @param object \code{component} object
+#' @param component \code{component} object
 #' @param outputDirectory file location for component outputs
 #'
 #' @return named list of \code{output} objects

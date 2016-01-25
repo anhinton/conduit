@@ -64,7 +64,7 @@ end.pipe <- function(x, ...) {
 
 #' Return \code{pipe} start component
 #'
-#' @param pipe
+#' @param pipe \code{pipe} object
 #'
 #' @return name of start component as string
 #'
@@ -75,7 +75,7 @@ startComponent <- function(pipe) {
 
 #' Return \code{pipe} start output
 #'
-#' @param pipe
+#' @param pipe \code{pipe} object
 #'
 #' @return name of start output as string
 #'
@@ -86,7 +86,7 @@ startOutput <- function(pipe) {
 
 #' Return \code{pipe} end component
 #'
-#' @param pipe
+#' @param pipe \code{pipe} object
 #'
 #' @return name of end component as string
 #'
@@ -97,7 +97,7 @@ endComponent <- function(pipe) {
 
 #' Return \code{pipe} end input
 #'
-#' @param pipe
+#' @param pipe \code{pipe} object
 #'
 #' @return name of end input as string
 #'

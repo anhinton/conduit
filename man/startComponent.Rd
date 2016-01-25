@@ -7,7 +7,7 @@
 startComponent(pipe)
 }
 \arguments{
-\item{pipe}{}
+\item{pipe}{\code{pipe} object}
 }
 \value{
 name of start component as string

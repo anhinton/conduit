@@ -7,11 +7,11 @@
 output(moduleOutput, language, outputDirectory)
 }
 \arguments{
+\item{moduleOutput}{\code{moduleOutput} object}
+
 \item{language}{module script language}
 
 \item{outputDirectory}{file location for module execution}
-
-\item{output}{\code{moduleOutput} object}
 }
 \value{
 \code{output} object, varying according to

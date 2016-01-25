@@ -609,7 +609,7 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #'
 #' 
 #'
-#' @param output \code{moduleOutput} object
+#' @param moduleOutput \code{moduleOutput} object
 #' @param language module script language
 #' @param outputDirectory file location for module execution
 #'
@@ -653,7 +653,7 @@ output <- function(moduleOutput, language, outputDirectory) {
 #' If \code{host} is not NULL the function attempts to copy the output object
 #' across from the remote host and into the current working directory.
 #'
-#' @param output \code{moduleOutput} object
+#' @param moduleOutput \code{moduleOutput} object
 #' @param language module language
 #' @param host host list created by \code{parseModuleList}
 #' @param outputDirectory location of module output files

@@ -133,7 +133,7 @@ fetchVessel.urlVessel <- function(vessel, location = getwd()) {
     readLines(con)
 }
 
-#' describeIn getType
+#' @describeIn getType
 #'
 #' Return the vessel type.
 #'

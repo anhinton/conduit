@@ -33,7 +33,7 @@ isValidXML <-function (file, type) {
 #' invalid element.
 #'
 #' @param pipe \code{pipe} object
-#' @param components \code{pipeline} components
+#' @param componentList \code{pipeline} components
 #'
 #' @return Logical value, TRUE if valid
 validatePipe <- function(pipe, componentList) {

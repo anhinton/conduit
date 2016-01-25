@@ -7,9 +7,9 @@
 calculateOutputs(component, outputDirectory)
 }
 \arguments{
-\item{outputDirectory}{file location for component outputs}
+\item{component}{\code{component} object}
 
-\item{object}{\code{component} object}
+\item{outputDirectory}{file location for component outputs}
 }
 \value{
 named list of \code{output} objects

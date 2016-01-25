@@ -9,7 +9,7 @@ validatePipe(pipe, componentList)
 \arguments{
 \item{pipe}{\code{pipe} object}
 
-\item{components}{\code{pipeline} components}
+\item{componentList}{\code{pipeline} components}
 }
 \value{
 Logical value, TRUE if valid
