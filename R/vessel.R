@@ -89,3 +89,55 @@ scriptVessel <- function(value) {
     class(scriptVessel) <- c("scriptVessel", "vessel")
     return(scriptVessel)
 }
+
+#' Returns the contents of a resource referenced by a \code{vessel} object.
+#'
+#' @param vessel \code{vessel} object
+#' @param location file path of parent object containing vessel
+#'
+#' @return character vector of file contents
+#'
+#' @export
+fetchVessel <- function(vessel, location = getwd()) {
+    if (!inherits(vessel, "vessel")) stop("not a vessel object")
+    UseMethod("fetchVessel")
+}
+
+#' @describeIn fetchVessel
+#'
+#' Return the text of a file resource
+#'
+#' @return The character vector resulting from a \code{fileVessel}
+#'     object will have an attribute, \code{location}, which contains
+#'     the path to the original file object.
+#'
+#' @export
+fetchVessel.fileVessel <- function(vessel, location = getwd()) {
+    vesselFile <- findFile(ref = vessel$ref, path = vessel$path,
+                           location = location)
+    con = file(vesselFile)
+    on.exit(close(con))
+    content <- readLines(vesselFile)
+    attr(content, "location") <- dirname(vesselFile)
+    content
+}
+
+#' @describeIn fetchVessel
+#'
+#' Return the text of a URL resource
+#'
+#' @export
+fetchVessel.urlVessel <- function(vessel, location = getwd()) {
+    con <- textConnection(RCurl::getURL(vessel$ref))
+    on.exit(close(con))
+    readLines(con)
+}
+
+#' @describeIn getType
+#'
+#' Return the vessel type.
+#'
+#' @export
+getType.vessel <- function(x) {
+    class(x)[[1]]
+}

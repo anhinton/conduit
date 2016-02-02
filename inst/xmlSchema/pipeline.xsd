@@ -20,12 +20,13 @@
   </complexType>
 
   <complexType name="ComponentType">
-    <sequence>
-      <element ref="oa:module" minOccurs="0"/>
-    </sequence>
+    <choice>
+      <element ref="oa:module"/>
+      <element ref="oa:pipeline"/>
+      <element ref="oa:file"/>
+      <element ref="oa:url"/>
+    </choice>
     <attribute name="name" type="string" use="required"/>
-    <attribute name="ref" type="string"/>
-    <attribute name="path" type="string"/>
     <attribute name="type" type="oa:ComponentTypeType"/>
   </complexType>
 
