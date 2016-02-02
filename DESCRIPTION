@@ -1,8 +1,8 @@
 Package: conduit
 Type: Package
 Title: A prototype glue system for OpenAPI
-Version: 0.2
-Date: 2015-11-08
+Version: 0.3
+Date: 2016-02-02
 Authors@R: c(person(given="Ashley Noel", family="Hinton",
     email="ahin017@aucklanduni.ac.nz",
     role=c("cre","aut")),
