@@ -3,12 +3,15 @@
 \name{getType.component}
 \alias{getType}
 \alias{getType.component}
+\alias{getType.default}
 \alias{getType.vessel}
 \title{Retrieve object type}
 \usage{
 \method{getType}{component}(x)
 
 getType(x)
+
+\method{getType}{default}(x)
 
 \method{getType}{vessel}(x)
 }
@@ -21,6 +24,8 @@ Retrieve object type
 \section{Methods (by class)}{
 \itemize{
 \item \code{component}: Returns component type
+
+\item \code{default}: 
 
 \item \code{vessel}: Return the vessel type.
 }}

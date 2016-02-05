@@ -605,43 +605,48 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #' This function returns a reference to the object produced by a
 #' module's output when the module is executed. The reference
 #' contained in this object is not guaranteed to exist until after
-#' module execution.
-#'
-#' 
+#' module execution. 
 #'
 #' @param moduleOutput \code{moduleOutput} object
 #' @param language module script language
 #' @param outputDirectory file location for module execution
 #'
-#' @return \code{output} object, varying according to
-#'     \code{moduleOutput}'s \code{vessel} type:
+#' @return \code{output} list object, containing:
 #'
-#' \item{fileVessel}{absolute file path to output object}
-#' \item{urlVessel}{URL to output object}
-#' \item{internalVessel}{absolute file path to serialized internal object}
+#' \item{name}{output name}
+#' \item{moduleOutput}{original \code{moduleOutput} object}
+#' \item{result}{address of output object produced}
 #'
 #' @export
 output <- function(moduleOutput, language, outputDirectory) {
     if (!inherits(moduleOutput, "moduleOutput"))
         stop("moduleOutput object required")
     
+    name <- getName(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
-    output <-
+
+    ## calculate result
+    result <-
         switch(type,
                internalVessel =
                    paste0(vessel$symbol, internalExtension(language)),
                urlVessel=,
-               fileVessel = vessel$ref,
+               fileVessel = getRef(vessel),
                stop("vessel type not defined"))
+
+    ## ensure absolute path
     if (type == "internalVessel" || type == "fileVessel") {
-        if (!is_absolute(output)) {
-            output <- file.path(outputDirectory, output)
-        }
-        if (file.exists(output)) {
-            output <- normalizePath(output)
-        }
+        result <- 
+            if (!is_absolute(result)) {
+                file.path(outputDirectory, result)
+            } else if (file.exists(result)) {
+                normalizePath(result)
+            }
     }
+
+    ## return output object
+    output <-  list(name = name, moduleOutput = moduleOutput, result = result)
     class(output) <- "output"
     output
 }
@@ -650,47 +655,43 @@ output <- function(moduleOutput, language, outputDirectory) {
 #'
 #' @details Will produce an error if the object does not exist.
 #'
-#' If \code{host} is not NULL the function attempts to copy the output object
-#' across from the remote host and into the current working directory.
+#' If \code{host} is not NULL the function attempts to copy the output
+#' object across from the remote host and into the current working
+#' directory.
 #'
 #' @param moduleOutput \code{moduleOutput} object
 #' @param language module language
 #' @param host host list created by \code{parseModuleList}
 #' @param outputDirectory location of module output files
 #'
-#' @return named list containing:
-#' \itemize{
-#'   \item name: object name
-#'   \item type: object vessel type
-#'   \item object: \code{output} object
-#' }
+#' @return \code{output} object
 resolveOutput <- function (moduleOutput, language, host,
                            outputDirectory = getwd()) {
     name <- getName(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
-    object <- output(moduleOutput, language, outputDirectory)
+    output <- output(moduleOutput, language, outputDirectory)
+    result <- getResult(output)
 
     if (type == "internalVessel" || type == "fileVessel") {
         if (!is.null(host)) {
-            remote_object <- basename(object)
+            remote_object <- basename(result)
             result <- fetchFromHost(remote_object, host)
             if (result != 0) {
                 stop("Unable to fetch ", remote_object, " from host ",
                      buildModuleHost(host))
             }
         }
-        if (!file.exists(object)) {
+        if (!file.exists(result)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
     }
     if (type == "urlVessel") {
-        if (!RCurl::url.exists(object)) {
+        if (!RCurl::url.exists(result)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
     }
-    object <- list(name = name, type = type, object = object)
-    return(object)
+    return(output)
 }
 
 #' Parse a module's host

@@ -3,7 +3,10 @@ context("execute modules")
 
 ## skip tests which require a module host machine
 ## requires conduit host at conduit@127.0.0.1:2222
-skip <- TRUE
+skipHost <- TRUE
+
+## skip tests which fail strangely when doing R CMD check
+skipCheck <- TRUE
 
 targ = tempdir()
 createGraph <- loadModule(
@@ -46,7 +49,7 @@ test_that(
 test_that(
     "extractModuleSource() works for <url> sources",
     {
-        if (skip)
+        if (skipHost)
             skip("requires test conduit web server at http://127.0.0.1:8080/")
         skip_on_cran()
         url_source <- moduleSource(
@@ -321,7 +324,7 @@ test_that(
         output1 <- output(internal_output, lang, outdir)
         expect_true(inherits(output1, "output"))
         expect_match(
-            output1,
+            getResult(output1),
             file.path(outdir, paste0(symbol, internalExtension(lang))))
 
         ## works for urlVessel
@@ -330,7 +333,7 @@ test_that(
             "url", urlVessel(url), ioFormat("HTML file"))
         output2 <- output(url_output, lang, outdir)
         expect_true(inherits(output2, "output"))
-        expect_match(output2, url)
+        expect_match(getResult(output2), url)
         
         ## works for fileVessel
         file <- "output.csv"
@@ -338,7 +341,7 @@ test_that(
             "file", fileVessel(file), ioFormat("CSV file"))
         output3 <- output(file_output, lang, outdir)
         expect_true(inherits(output3, "output"))
-        expect_match(output3, file.path(outdir, file))
+        expect_match(getResult(output3), file.path(outdir, file))
         
         ## fails for unknown vessel type
         not_a_real_output <- internal_output
@@ -357,10 +360,10 @@ test_that(
         lang = "R"
         host = parseModuleHost("cronduit@not.a.real.server:11")
         outdir <- tempdir()
-        symbol <- tempfile()
+        symbol <- basename(tempfile())
         internal_output <- moduleOutput(
             "internal", internalVessel(symbol), ioFormat("nonsense"))
-        file <- tempfile()
+        file <- basename(tempfile())
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
         url <- "http://not.a.real.server/at/all"
@@ -434,8 +437,10 @@ test_that(
 test_that(
     "runModule() succeeds for module with fileVessel input with absolute ref",
     {
-        skip(paste("2016-01-25 strange issues around R CMD check, system2, ",
-               "Rscript, and what is returned."))
+        if (skipCheck) {
+            skip(paste("2016-01-25 strange issues around R CMD check,",
+                       "system2, Rscript, and what is returned."))
+        }
         absRef <- system.file("extdata", "simpleGraph", "createGraph.xml",
                               package = "conduit")
         moduleName <- "absomod"
@@ -464,8 +469,7 @@ test_that(
                     vessel = internalVessel(outputName),
                     format = ioFormat("R character vector"))))
         output <- runModule(absomod, targetDirectory = targ)
-        expect_match(output[[1]]$name, outputName)
-        expect_match(output[[1]]$type, outputType)
+        expect_match(getName(output[[1]]), outputName)
         expect_true(file.exists(outputObject))
     })
 
@@ -477,16 +481,16 @@ test_that(
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1[[1]]$name, output1$name)
-        expect_true(file.exists(result1[[1]]$object))
-
+        expect_true(file.exists(getResult(result1[[1]])))
+        
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
-        inputObjects <- list(result1[[1]]$object)
+        inputObjects <- list(getResult(result1[[1]]))
         names(inputObjects) <- layoutGraph$inputs[[1]]$name
         output2 <- layoutGraph$outputs[[1]]
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
         expect_match(result2[[1]]$name, output2$name)
-        expect_true(file.exists(result2[[1]]$object))
+        expect_true(file.exists(getResult(result2[[1]])))
     })

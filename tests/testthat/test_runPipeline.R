@@ -1,6 +1,9 @@
 library(conduit)
 context("execute pipelines")
 
+## skip tests which fail strangely when doing R CMD check
+skipCheck <- TRUE
+
 lang = "R"
 outdir <- tempdir()
 symbol <- "x"
@@ -144,16 +147,17 @@ test_that("runComponent() returns correctly", {
     result1 <- runComponent(componentList[["createGraph"]],
                             pipelinePath = pipelinePath)
     expect_equal(length(result1), 1)
-    expect_true(inherits(result1[[1]]$object, "output"))
-    expect_true(file.exists(result1[[1]]$object))
-
+    expect_true(inherits(result1[[1]], "output"))
+    expect_true(file.exists(getResult(result1[[1]])))
+                            
     ## component with inputs
-    result2 <- runComponent(componentList[["layoutGraph"]],
-                            list(myGraph = result1[[1]]$object),
-                            pipelinePath)
+    result2 <- runComponent(component = componentList[["layoutGraph"]],
+                            inputList = list(
+                                myGraph = getResult(result1[[1]])),
+                            pipelinePath = pipelinePath)
     expect_equal(length(result2), 1)
-    expect_true(inherits(result2[[1]]$object, "output"))
-    expect_true(file.exists(result2[[1]]$object))
+    expect_true(inherits(result2[[1]], "output"))
+    expect_true(file.exists(getResult(result2[[1]])))
 })
 
 test_that("runPipeline() produces expected results", {
@@ -168,12 +172,15 @@ test_that("runPipeline() produces expected results", {
                  "no such target directory")
 
     ## correct output
-    skip(paste("2016-01-25 strange issues around R CMD check, system2, ",
-               "Rscript, and what is returned."))
+    if (skipCheck) {
+        skip(paste("2016-01-25 strange issues around R CMD check,",
+                   "system2, Rscript, and what is returned."))
+    }
     output1 <- runPipeline(simpleGraph, targetDirectory)
     expect_equal(length(output1), 3)
     expect_true(all(sapply(output1,
-                           function(x) inherits(x[[1]]$object, "output"))))
+                           function(x) inherits(x[[1]], "output"))))
     expect_true(all(sapply(output1,
-                           function(x) file.exists(x[[1]]$object))))
+                           function(x) file.exists(getResult(x[[1]])))))
 })
+
