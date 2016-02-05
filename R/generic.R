@@ -107,6 +107,13 @@ getLanguage <- function(x) {
     UseMethod("getLanguage")
 }
 
+#' @describeIn getLanguage
+#'
+#' @export
+getLanguage.default <- function(x) {
+    x$language
+}
+
 #' Retrieve object location
 #'
 #' @param x object

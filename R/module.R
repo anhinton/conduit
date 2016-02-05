@@ -614,7 +614,9 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #' @return \code{output} list object, containing:
 #'
 #' \item{name}{output name}
-#' \item{moduleOutput}{original \code{moduleOutput} object}
+#' \item{format}{\code{ioFormat} object}
+#' \item{vessel}{\code{vessel} object}
+#' \item{language}{module language}
 #' \item{result}{address of output object produced}
 #'
 #' @export
@@ -623,6 +625,7 @@ output <- function(moduleOutput, language, outputDirectory) {
         stop("moduleOutput object required")
     
     name <- getName(moduleOutput)
+    format <- getFormat(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
 
@@ -646,7 +649,8 @@ output <- function(moduleOutput, language, outputDirectory) {
     }
 
     ## return output object
-    output <-  list(name = name, moduleOutput = moduleOutput, result = result)
+    output <-  list(name = name, format = format, vessel = vessel,
+                    language = language, result = result)
     class(output) <- "output"
     output
 }
