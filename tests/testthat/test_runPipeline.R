@@ -146,18 +146,18 @@ test_that("runComponent() returns correctly", {
     ## component with no inputs
     result1 <- runComponent(componentList[["createGraph"]],
                             pipelinePath = pipelinePath)
-    expect_equal(length(result1), 1)
-    expect_true(inherits(result1[[1]], "output"))
-    expect_true(file.exists(getResult(result1[[1]])))
+    expect_equal(length(result1$objects), 1)
+    expect_true(inherits(result1$objects[[1]], "output"))
+    expect_true(file.exists(getResult(result1$objects[[1]])))
                             
     ## component with inputs
     result2 <- runComponent(component = componentList[["layoutGraph"]],
                             inputList = list(
-                                myGraph = getResult(result1[[1]])),
+                                myGraph = getResult(result1$objects[[1]])),
                             pipelinePath = pipelinePath)
-    expect_equal(length(result2), 1)
-    expect_true(inherits(result2[[1]], "output"))
-    expect_true(file.exists(getResult(result2[[1]])))
+    expect_equal(length(result2$objects), 1)
+    expect_true(inherits(result2$objects[[1]], "output"))
+    expect_true(file.exists(getResult(result2$objects[[1]])))
 })
 
 test_that("runPipeline() produces expected results", {
@@ -179,8 +179,8 @@ test_that("runPipeline() produces expected results", {
     output1 <- runPipeline(simpleGraph, targetDirectory)
     expect_equal(length(output1), 3)
     expect_true(all(sapply(output1,
-                           function(x) inherits(x[[1]], "output"))))
+                           function(x) inherits(x$objects[[1]], "output"))))
     expect_true(all(sapply(output1,
-                           function(x) file.exists(getResult(x[[1]])))))
+                           function(x) file.exists(getResult(x$objects[[1]])))))
 })
 

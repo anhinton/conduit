@@ -842,14 +842,9 @@ runModule <- function(module, inputObjects = NULL,
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
-
-    name <- getName(module)
-    description <- getDescription(module)
-    location <- getLocation(module)
-    language <- getLanguage(module)
     
     ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, name)
+    modulePath <- file.path(targetDirectory, getName(module))
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
@@ -898,26 +893,11 @@ runModule <- function(module, inputObjects = NULL,
     }
 
     ## resolve output objects
-    objects <- lapply(module$outputs, resolveOutput, module$language, host)
+    objects <- lapply(module$outputs, resolveOutput,
+                      getLanguage(module), host)
 
-    ## create result module
-    inputList <- lapply(objects, resultInput, modulePath = modulePath)
-    inputList <- inputList[!sapply(inputList, is.null)]
-    sourceList <- lapply(objects, resultSource, language = language,
-                         modulePath = modulePath)
-    sourceList <- sourceList[!sapply(sourceList, is.null)]
-    outputList <- lapply(objects, returnOutput)
-    resultModule <- module(
-        name = name,
-        language = language,
-        description = description,
-        inputs = inputList,
-        sources = sourceList,
-        outputs = outputList)
-    moduleFile <- saveModule(resultModule)
-
-    ## return result module and outputs
-    list(module = resultModule, objects = objects)
+    ## return moduleResult object
+    moduleResult(objects, modulePath, module)
 }
 
 #' Create an \code{ioFormat} object.

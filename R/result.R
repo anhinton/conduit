@@ -1,3 +1,35 @@
+moduleResult <- function(objects, modulePath, module) {
+    name <- getName(module)
+    language <- getLanguage(module)
+    description <- getDescription(module)
+    
+    ## create result module
+    inputList <- lapply(objects, resultInput, modulePath = modulePath)
+    inputList <- inputList[!sapply(inputList, is.null)]
+    sourceList <- lapply(objects, resultSource, language = language,
+                         modulePath = modulePath)
+    sourceList <- sourceList[!sapply(sourceList, is.null)]
+    outputList <- lapply(objects, returnOutput)
+    resultModule <- module(
+        name = name,
+        language = language,
+        description = description,
+        inputs = inputList,
+        sources = sourceList,
+        outputs = outputList)
+    moduleFile <- saveModule(resultModule, targetDirectory = modulePath)
+
+    ## return result module and outputs
+    moduleResult <- list(file = moduleFile, module = resultModule,
+                         objects = objects)
+    class(moduleResult) <- "moduleResult"
+    moduleResult
+}
+
+pipelineResult <- function() {
+    
+}
+
 resultInput <- function(output, modulePath) {
     name <- getName(output)
     vessel <- getVessel(output)

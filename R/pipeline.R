@@ -665,19 +665,21 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
     inputList <- calculateInputs(pipeList, componentList, pipelinePath)
 
     ## execute components in order determinde by componentOrder
-    lapply(componentList[componentOrder],
-           function(component, inputList, pipelinePath) {
-               name <- getName(component)                
-               whichInputs <- grepl(paste0("^", name, "[.]"),
-                                    names(inputList))
-               inputList <- inputList[whichInputs]
-               names(inputList) <-
-                   gsub(paste0("^", name, "[.]"), "",
-                        names(inputList))
-               runComponent(component, inputList, pipelinePath)
-           },
-           inputList,
-           pipelinePath)
+    result <- lapply(
+        componentList[componentOrder],
+        function(component, inputList, pipelinePath) {
+            name <- getName(component)                
+            whichInputs <- grepl(paste0("^", name, "[.]"),
+                                 names(inputList))
+            inputList <- inputList[whichInputs]
+            names(inputList) <-
+                gsub(paste0("^", name, "[.]"), "",
+                     names(inputList))
+            runComponent(component, inputList, pipelinePath)
+        },
+        inputList,
+        pipelinePath)
+    result
 }
 
 ## creating new pipelines

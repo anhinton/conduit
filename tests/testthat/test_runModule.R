@@ -479,17 +479,17 @@ test_that(
         ## run the createGraph module
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
-        expect_match(result1[[1]]$name, output1$name)
-        expect_true(file.exists(getResult(result1[[1]])))
+        expect_match(result1$objects[[1]]$name, output1$name)
+        expect_true(file.exists(getResult(result1$objects[[1]])))
         
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
-        inputObjects <- list(getResult(result1[[1]]))
+        inputObjects <- list(getResult(result1$objects[[1]]))
         names(inputObjects) <- layoutGraph$inputs[[1]]$name
         output2 <- layoutGraph$outputs[[1]]
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
-        expect_match(result2[[1]]$name, output2$name)
-        expect_true(file.exists(getResult(result2[[1]])))
+        expect_match(result2$objects[[1]]$name, output2$name)
+        expect_true(file.exists(getResult(result2$objects[[1]])))
     })
