@@ -2,10 +2,13 @@
 % Please edit documentation in R/generic.R, R/module.R
 \name{getLanguage}
 \alias{getLanguage}
+\alias{getLanguage.default}
 \alias{getLanguage.module}
 \title{Retrieve object language}
 \usage{
 getLanguage(x)
+
+\method{getLanguage}{default}(x)
 
 \method{getLanguage}{module}(x)
 }
@@ -17,6 +20,8 @@ Retrieve object language
 }
 \section{Methods (by class)}{
 \itemize{
+\item \code{default}: 
+
 \item \code{module}: Returns module language
 }}
 

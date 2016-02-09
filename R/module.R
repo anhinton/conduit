@@ -506,7 +506,7 @@ fetchFromHost <- function(file, host) {
 }
 
 #' @describeIn resolveInput Resolve internal input object
-resolveInput.internal <- function(moduleInput, inputObjects, host) {
+resolveInput.internal <- function(moduleInput, inputObjects, host, location) {
     inputObject <- getElement(inputObjects, moduleInput$name)
 
     ## copy inputObject to host
@@ -522,14 +522,13 @@ resolveInput.internal <- function(moduleInput, inputObjects, host) {
 }
 
 #' @describeIn resolveInput Resolve file input object
-resolveInput.file <- function(moduleInput, inputObjects, host) {
-    ref <- moduleInput$vessel$ref
-    path <- moduleInput$vessel$path
+resolveInput.file <- function(moduleInput, inputObjects, host, location) {
+    vessel <- getVessel(moduleInput)
+    ref <- getRef(vessel)
+    path <- vessel$path
     inputObject <- getElement(inputObjects, moduleInput$name)
-    if (!is.null(inputObject) && !is.null(path))
-        stop("file search path AND file object provided")
-    if (!is.null(path)) {
-        inputObject <- findFile(ref, path)
+    if (is.null(inputObject)) {
+        inputObject <- findFile(ref, path, location)
     } 
 
     ## copy to module directory if ref is relative
@@ -546,11 +545,11 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
         }
         return(file.exists(ref))
     }
-    return(file.exists(ref))
+   file.exists(ref)
 }
 
 #' @describeIn resolveInput Resolve URL input object
-resolveInput.url <- function(moduleInput, inputObjects, host) {
+resolveInput.url <- function(moduleInput, inputObjects, host, location) {
     name <- moduleInput$name
     url <- moduleInput$vessel$ref
     if (name %in% names(inputObjects)) {
@@ -583,10 +582,11 @@ resolveInput.url <- function(moduleInput, inputObjects, host) {
 #' @param moduleInput \code{moduleInput} object
 #' @param inputObjects resources to be supplied as inputs
 #' @param host module host
+#' @param location location of originating module file
 #'
 #' @return TRUE if successful
-resolveInput <- function(moduleInput, inputObjects, host) {
-    type <- class(moduleInput$vessel)[[1]]
+resolveInput <- function(moduleInput, inputObjects, host, location) {
+    type <- getType(getVessel(moduleInput))
     type <- switch(
         type,
         internalVessel = "internal",
@@ -830,7 +830,7 @@ buildModuleHost <- function (parsedHost) {
 #'           targetDirectory = tempdir())
 #' 
 #' @export
-runModule <- function(module, inputObjects = list(),
+runModule <- function(module, inputObjects = NULL,
                       targetDirectory = getwd()) {
     ## fail if not given a module
     if (class(module) != "module"){
@@ -842,9 +842,14 @@ runModule <- function(module, inputObjects = list(),
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
+
+    name <- getName(module)
+    description <- getDescription(module)
+    location <- getLocation(module)
+    language <- getLanguage(module)
     
     ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, getName(module))
+    modulePath <- file.path(targetDirectory, name)
     if (file.exists(modulePath))
         unlink(modulePath, recursive=TRUE)
     dir.create(modulePath, recursive=TRUE)
@@ -876,11 +881,10 @@ runModule <- function(module, inputObjects = list(),
                  buildModuleHost(host)))
         }
     }
-
     
     ## resolve input objects
     for (i in module$inputs) {
-        resolved <- resolveInput(i, inputObjects, host)
+        resolved <- resolveInput(i, inputObjects, host, location)
         if (!resolved) stop(paste0("Input '", i$name, "' cannot be resolved"))
     }
 
@@ -893,8 +897,27 @@ runModule <- function(module, inputObjects = list(),
              })
     }
 
+    ## resolve output objects
     objects <- lapply(module$outputs, resolveOutput, module$language, host)
-    return(objects)
+
+    ## create result module
+    inputList <- lapply(objects, resultInput, modulePath = modulePath)
+    inputList <- inputList[!sapply(inputList, is.null)]
+    sourceList <- lapply(objects, resultSource, language = language,
+                         modulePath = modulePath)
+    sourceList <- sourceList[!sapply(sourceList, is.null)]
+    outputList <- lapply(objects, returnOutput)
+    resultModule <- module(
+        name = name,
+        language = language,
+        description = description,
+        inputs = inputList,
+        sources = sourceList,
+        outputs = outputList)
+    moduleFile <- saveModule(resultModule)
+
+    ## return result module and outputs
+    list(module = resultModule, objects = objects)
 }
 
 #' Create an \code{ioFormat} object.

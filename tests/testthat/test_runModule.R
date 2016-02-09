@@ -197,9 +197,8 @@ test_that(
             list(okay = system.file(
                      "extdata", "simpleGraph", "createGraph.xml",
                      package = "conduit"))
-        expect_error(resolveInput(input, inputObjects, host = NULL),
-                     "file search path AND")
-        expect_true(resolveInput(input, list(), host = NULL))
+        expect_true(resolveInput(input, list(), host = NULL,
+                                 location = getwd()))
     })
 
 test_that(

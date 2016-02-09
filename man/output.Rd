@@ -17,7 +17,9 @@ output(moduleOutput, language, outputDirectory)
 \code{output} list object, containing:
 
 \item{name}{output name}
-\item{moduleOutput}{original \code{moduleOutput} object}
+\item{format}{\code{ioFormat} object}
+\item{vessel}{\code{vessel} object}
+\item{language}{module language}
 \item{result}{address of output object produced}
 }
 \description{
