@@ -1,3 +1,81 @@
+#' Return a \code{moduleInput} object for use in a
+#' \code{moduleResult} object.
+#'
+#' This function constructs an appropriate \code{moduleInput} object
+#' from the \code{output} object created when executing a module
+#' source.
+#'
+#' @param output \code{output} object
+#' @param modulePath file path to module output
+#'
+#' @return \code{moduleInput} object or NULL
+resultInput <- function(output, modulePath) {
+    if (!inherits(output, "output"))
+        stop("output object required")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    
+    name <- getName(output)
+    vessel <- getVessel(output)
+    type <- getType(vessel)
+    format <- getFormat(output)
+    switch(type,
+           fileVessel =, internalVessel = {
+               result <- getResult(output)
+               resultref <-
+                   if (dirname(result) == modulePath) {
+                       basename(result)
+                   } else {
+                       gsub(modulePath, ".", result)
+                   }        
+               moduleInput(
+                   name = name,
+                   vessel = fileVessel(ref = resultref),
+                   format = format)
+           })
+}
+
+#' Return a \code{moduleSource} object for use in a
+#' \code{moduleResult} object.
+#'
+#' This function constructs an appropriate \code{moduleSource} object
+#' from the \code{output} object created when executing a module
+#' source.
+#'
+#' @param output \code{output} object
+#' @param modulePath file path to module output
+#'
+#' @return \code{moduleSouce} object or NULL
+resultSource <- function(output, modulePath) {
+    if (!inherits(output, "output"))
+        stop("output object required")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    
+    result <- getResult(output)
+    resultref <-
+        if (dirname(result) == modulePath) {
+            basename(result)
+        } else {
+            gsub(modulePath, ".", result)
+        }
+    input <- moduleInput(name = getName(output), vessel = getVessel(output),
+                         format = getFormat(output))
+    script <- prepareScriptInput(input, inputObject = resultref,
+                                 language = getLanguage(output))
+    if (!is.null(script)) {
+        return(moduleSource(scriptVessel(script)))
+    } else {
+        NULL
+    }
+
+}
+
+returnOutput <- function(output) {
+    moduleOutput(name = getName(output), vessel = getVessel(output),
+                 format = getFormat(output))
+}
+
 moduleResult <- function(objects, modulePath, module) {
     name <- getName(module)
     language <- getLanguage(module)
@@ -6,8 +84,7 @@ moduleResult <- function(objects, modulePath, module) {
     ## create result module
     inputList <- lapply(objects, resultInput, modulePath = modulePath)
     inputList <- inputList[!sapply(inputList, is.null)]
-    sourceList <- lapply(objects, resultSource, language = language,
-                         modulePath = modulePath)
+    sourceList <- lapply(objects, resultSource, modulePath = modulePath)
     sourceList <- sourceList[!sapply(sourceList, is.null)]
     outputList <- lapply(objects, returnOutput)
     resultModule <- module(
@@ -30,47 +107,3 @@ pipelineResult <- function() {
     
 }
 
-resultInput <- function(output, modulePath) {
-    name <- getName(output)
-    vessel <- getVessel(output)
-    type <- getType(vessel)
-    format <- getFormat(output)
-    switch(type,
-           fileVessel =, internalVessel = {
-               result <- getResult(output)
-               resultref <-
-                   if (dirname(result) == modulePath) {
-                       basename(result)
-                   } else {
-                       gsub(modulePath, ".", result)
-                   }        
-               moduleInput(
-                   name = name,
-                   vessel = fileVessel(ref = resultref),
-                   format = format)
-           })
-}
-
-resultSource <- function(output, language, modulePath) {
-    result <- getResult(output)
-    resultref <-
-        if (dirname(result) == modulePath) {
-            basename(result)
-        } else {
-            gsub(modulePath, ".", result)
-        }
-    input <- moduleInput(name = getName(output), vessel = getVessel(output),
-                         format = getFormat(output))
-    script <- prepareScriptInput(input, inputObject = resultref,
-                                 language = language)
-    if (!is.null(script)) {
-        return(moduleSource(scriptVessel(script)))
-    } else {
-        NULL
-    }
-}
-
-returnOutput <- function(output) {
-    moduleOutput(name = getName(output), vessel = getVessel(output),
-                 format = getFormat(output))
-}
