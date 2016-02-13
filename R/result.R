@@ -85,7 +85,24 @@ resultOutput <- function(output) {
                  format = getFormat(output))
 }
 
+#' Produce a \code{moduleResult} object to be returned by
+#' \code{runModule}.
+#'
+#' @param objects list of \code{output} objects
+#' @param modulePath file path to module output
+#' @param module \code{module} object which produced \code{objects}
+#'
+#' @return \code{moduleResult}
+#'
+#' @export
 moduleResult <- function(objects, modulePath, module) {
+    if (any(!sapply(objects, inherits, what = "output")))
+        stop("objects must be 'output' objects")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    if (!inherits(module, "module"))
+        stop("module object required")
+    
     name <- getName(module)
     language <- getLanguage(module)
     description <- getDescription(module)

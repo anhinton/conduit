@@ -3,16 +3,19 @@ context("test module and pipeline return components")
 
 modulePath <- tempfile("moduleResult")
 if (!dir.exists(modulePath)) dir.create(modulePath)
-fileoutput <- output(moduleOutput("f1", fileVessel("f1.txt"),
-                                  ioFormat("text file")),
+f1 <- moduleOutput("f1", fileVessel("f1.txt"),
+                   ioFormat("text file"))
+fileoutput <- output(f1,
                      language = "R",
                      outputDirectory = modulePath)
-urloutput <- output(moduleOutput("u1", urlVessel("http://openapi.net"),
-                                 ioFormat("HTML file")),
+u1 <- moduleOutput("u1", urlVessel("http://openapi.net"),
+                                 ioFormat("HTML file"))
+urloutput <- output(u1,
                     language = "python",
                     outputDirectory = modulePath)
-internaloutput <- output(moduleOutput("i1", internalVessel("x"),
-                                      ioFormat("python array")),
+i1 <- moduleOutput("i1", internalVessel("x"),
+                   ioFormat("python array"))
+internaloutput <- output(i1,
                          language = "python",
                          outputDirectory = modulePath)
 
@@ -83,4 +86,40 @@ test_that("resultOutput() returns correctly", {
     expect_true(inherits(res3, "moduleOutput"))
     expect_match(getType(getVessel(res3)),
                  getType(getVessel(internaloutput)))
+})
+
+test_that("moduleResult() returns correctly", {
+    objects <- list(fileoutput, urloutput, internaloutput)
+    module <- module("m1", "R", outputs = list(f1, u1, i1))
+
+    ## fail for invalid arguments
+    expect_error(moduleResult(list(unclass(objects[[1]]),
+                                   objects[[2]], objects[[3]]),
+                              modulePath,
+                              module),
+                 "objects must be 'output' objects")
+    expect_error(moduleResult(objects,
+                              tempfile(),
+                              module),
+                 "modulePath does not exist")
+    expect_error(moduleResult(objects,
+                              modulePath,
+                              unclass(module)),
+                 "module object required")
+
+    ## correct output
+    res1 <- moduleResult(objects, modulePath, module)
+    expect_true(inherits(res1, "moduleResult"))
+
+    ## module XML file
+    expect_match(names(res1), "file", all = FALSE)
+    expect_true(file.exists(res1$file))
+
+    ## module object
+    expect_match(names(res1), "module", all = FALSE)
+    expect_true(inherits(res1$module, "module"))
+
+    ## output objects
+    expect_match(names(res1), "objects", all = FALSE)
+    expect_true(all(sapply(res1$objects, inherits, what = "output")))
 })
