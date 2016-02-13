@@ -35,6 +35,7 @@ test_that("resultInput() returns correctly", {
     ## returns correctly for internal output
     res3 <- resultInput(internaloutput, modulePath)
     expect_true(inherits(res3, "moduleInput"))
+    expect_match(getType(getVessel(res3)), "fileVessel")
     expect_match(getVessel(res3)$ref,
                  paste0(getVessel(internaloutput)$ref,
                        internalExtension(getLanguage(internaloutput))))
@@ -58,4 +59,28 @@ test_that("resultSource() returns correctly", {
     ## returns correctly for internal output
     res3 <- resultSource(internaloutput, modulePath)
     expect_true(inherits(res3, "moduleSource"))
+})
+
+test_that("resultOutput() returns correctly", {
+    ## fail for invalid arguments
+    expect_error(resultOutput(unclass(fileoutput)),
+                 "output object required")
+
+    ## returns correctly for file output
+    res1 <- resultOutput(fileoutput)
+    expect_true(inherits(res1, "moduleOutput"))
+    expect_match(getType(getVessel(res1)),
+                 getType(getVessel(fileoutput)))
+
+    ## returns correctly for url output
+    res2 <- resultOutput(urloutput)
+    expect_true(inherits(res2, "moduleOutput"))
+    expect_match(getType(getVessel(res2)),
+                 getType(getVessel(urloutput)))
+
+    ## returns correctly for internal output
+    res3 <- resultOutput(internaloutput)
+    expect_true(inherits(res3, "moduleOutput"))
+    expect_match(getType(getVessel(res3)),
+                 getType(getVessel(internaloutput)))
 })

@@ -71,7 +71,16 @@ resultSource <- function(output, modulePath) {
 
 }
 
-returnOutput <- function(output) {
+#' Return a \code{moduleOutput} object for use in a
+#' \code{moduleResult} object.
+#'
+#' @param output \code{output} object
+#'
+#' @return \code{moduleOutput} object
+resultOutput <- function(output) {
+    if (!inherits(output, "output"))
+        stop("output object required")
+    
     moduleOutput(name = getName(output), vessel = getVessel(output),
                  format = getFormat(output))
 }
@@ -86,7 +95,7 @@ moduleResult <- function(objects, modulePath, module) {
     inputList <- inputList[!sapply(inputList, is.null)]
     sourceList <- lapply(objects, resultSource, modulePath = modulePath)
     sourceList <- sourceList[!sapply(sourceList, is.null)]
-    outputList <- lapply(objects, returnOutput)
+    outputList <- lapply(objects, resultOutput)
     resultModule <- module(
         name = name,
         language = language,
