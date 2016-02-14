@@ -6,7 +6,7 @@ context("execute modules")
 skipHost <- TRUE
 
 ## skip tests which fail strangely when doing R CMD check
-skipCheck <- TRUE
+skipCheck <- FALSE
 
 targ = tempdir()
 createGraph <- loadModule(
@@ -412,7 +412,6 @@ test_that(
 test_that(
     "runModule() fails when input cannot be resolved",
     {
-        skip("2016-02-13 while building result testing")
         badInput <- paste0(tempfile(), tempfile())
         module <- module(
             name = "fails",
@@ -468,8 +467,8 @@ test_that(
                     name = outputName,
                     vessel = internalVessel(outputName),
                     format = ioFormat("R character vector"))))
-        output <- runModule(absomod, targetDirectory = targ)
-        expect_match(getName(output[[1]]), outputName)
+        result <- runModule(absomod, targetDirectory = targ)
+        expect_match(getName(result$objects[[1]]), outputName)
         expect_true(file.exists(outputObject))
     })
 
@@ -481,6 +480,7 @@ test_that(
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1$objects[[1]]$name, output1$name)
+        expect_true(inherits(result1, "moduleResult"))
         expect_true(file.exists(getResult(result1$objects[[1]])))
         
         ## run the layoutGraph module, providing the output from
@@ -491,6 +491,7 @@ test_that(
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
+        expect_true(inherits(result2, "moduleResult"))
         expect_match(result2$objects[[1]]$name, output2$name)
         expect_true(file.exists(getResult(result2$objects[[1]])))
     })

@@ -2,7 +2,7 @@ library(conduit)
 context("execute pipelines")
 
 ## skip tests which fail strangely when doing R CMD check
-skipCheck <- TRUE
+skipCheck <- FALSE
 
 lang = "R"
 outdir <- tempdir()

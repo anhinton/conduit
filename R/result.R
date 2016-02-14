@@ -129,6 +129,13 @@ moduleResult <- function(objects, modulePath, module) {
     moduleResult
 }
 
+componentResult <- function (result) {
+    if (!inherits(result, c("moduleResult", "pipelineResult")))
+        stop ("moduleResult or pipelineResult required")
+    class(result) <- c("componentResult", class(result))
+    result
+}
+
 pipelineResult <- function() {
     
 }
