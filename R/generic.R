@@ -154,3 +154,12 @@ getResult <- function(x) {
 getResult.default <- function(x) {
     x$result
 }
+
+#' Export an object to disk.
+#'
+#' @param x object
+#'
+#' @export
+export <- function(x) {
+    UseMethod("export")
+}

@@ -594,13 +594,18 @@ graphPipeline <- function(pipeline) {
 #'     will be created. Working files and output from the pipeline's
 #'     \code{component}s will be stored in the named directory.
 #'
+#' The function returns a \code{pipelineResult} list object,
+#' containing a list of \code{output} objects produced by the
+#' pipeline's components.
+#'
 #' @param pipeline A \code{pipeline} object
 #' @param targetDirectory File path for pipeline output
 #' 
-#' @return Named list of \code{output} objects
+#' @return \code{pipelineResult} object
 #' 
-#' @seealso More about \code{pipeline} objects, run single \code{module}
-#' objects with \code{runModule}.
+#' @seealso \code{pipelineResult} objects. More about \code{pipeline}
+#'     objects, run single \code{module} objects with
+#'     \code{runModule}.
 #'
 #' @examples
 #' simpleGraph <-
