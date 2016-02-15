@@ -160,6 +160,6 @@ getResult.default <- function(x) {
 #' @param x object
 #'
 #' @export
-export <- function(x) {
+export <- function(x, ...) {
     UseMethod("export")
 }

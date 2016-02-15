@@ -215,3 +215,10 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
 #' \item{outputList}{list of \code{output} objects produced by
 #'     module(s)}
 NULL
+
+#' Export a \code{componentResult}
+#'
+#' @param targetDirectory
+export.componentResult <- function(x, targetDirectory = getwd()) {
+    
+}
