@@ -141,11 +141,13 @@ test_that("runComponent() returns correctly", {
     
     ## fails for invalid input
     expect_error(runComponent(unclass(componentList[[1]]),
-                              pipelinePath = pipelinePath))
+                              pipelinePath = pipelinePath),
+                 "component object required")
 
     ## component with no inputs
     result1 <- runComponent(componentList[["createGraph"]],
                             pipelinePath = pipelinePath)
+    expect_true(inherits(result1, "componentResult"))
     expect_equal(length(result1$outputList), 1)
     expect_true(inherits(result1$outputList[[1]], "output"))
     expect_true(file.exists(getResult(result1$outputList[[1]])))
@@ -155,6 +157,7 @@ test_that("runComponent() returns correctly", {
                             inputList = list(
                                 myGraph = getResult(result1$outputList[[1]])),
                             pipelinePath = pipelinePath)
+    expect_true(inherits(result2, "componentResult"))
     expect_equal(length(result2$outputList), 1)
     expect_true(inherits(result2$outputList[[1]], "output"))
     expect_true(file.exists(getResult(result2$outputList[[1]])))

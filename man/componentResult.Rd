@@ -15,26 +15,41 @@ pipelineResult(componentResultList, pipelinePath, pipeline)
 
 \item{modulePath}{file path to module output}
 
-\item{module}{\code{module} object which produced \code{objects}}
+\item{module}{\code{module} object which produced \code{outputList}}
 
-\item{componentResultList}{life}
+\item{componentResultList}{list of \code{componentResult} objects}
 
-\item{pipelinePath}{living}
+\item{pipelinePath}{file path to pipeline output}
 
-\item{pipeline}{the internet}
+\item{pipeline}{\code{pipeline} object which produced
+\code{componentResultList}}
 }
 \value{
-\code{moduleResult} object containing::
-\item{file}{file path to resulting module XML}
-\item{component}{resulting \code{module} object}
-\item{outputList}{list of \code{output} objects produced by module}
+object of class \code{componentResult} and either
+    \code{moduleResult} or \code{componentResult} containing:
+
+\item{file}{file path to resulting module or pipeline XML}
+\item{component}{resulting \code{module} or \code{pipeline} object}
+\item{outputList}{list of \code{output} objects produced by
+    module(s)}
 }
 \description{
 Constructor functions to create \code{componentResult}
     objects.
 }
 \details{
+These functions are used to construct the objects returned
+    by \code{runModule} and \code{runPipeline}.
 
+The \code{moduleResult} constructor takes a list of module
+\code{output} objects created by \code{resolveOutput}, the original
+\code{module}, and the module's output location
+\code{modulePath}. A \code{moduleResult} object is returned.
+
+The \code{pipelineResult} constructor takes a list of
+\code{componentResult} objects produced by \code{runComponent}, the
+original \code{pipeline}, and the pipeline's output location
+\code{pipelinePath}. A \code{pipelineResult} object is returned.
 }
 \section{Functions}{
 \itemize{

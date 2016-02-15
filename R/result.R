@@ -189,17 +189,29 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
 #' @details These functions are used to construct the objects returned
 #'     by \code{runModule} and \code{runPipeline}.
 #'
-#' \code{moduleResult} requires a 
+#' The \code{moduleResult} constructor takes a list of module
+#' \code{output} objects created by \code{resolveOutput}, the original
+#' \code{module}, and the module's output location
+#' \code{modulePath}. A \code{moduleResult} object is returned.
+#'
+#' The \code{pipelineResult} constructor takes a list of
+#' \code{componentResult} objects produced by \code{runComponent}, the
+#' original \code{pipeline}, and the pipeline's output location
+#' \code{pipelinePath}. A \code{pipelineResult} object is returned.
 #'
 #' @param outputList list of \code{output} objects
 #' @param modulePath file path to module output
-#' @param module \code{module} object which produced \code{objects}
-#' @param componentResultList life
-#' @param pipelinePath living
-#' @param pipeline the internet
+#' @param module \code{module} object which produced \code{outputList}
+#' @param componentResultList list of \code{componentResult} objects
+#' @param pipelinePath file path to pipeline output
+#' @param pipeline \code{pipeline} object which produced
+#'     \code{componentResultList}
 #'
-#' @return \code{moduleResult} object containing::
-#' \item{file}{file path to resulting module XML}
-#' \item{component}{resulting \code{module} object}
-#' \item{outputList}{list of \code{output} objects produced by module}
+#' @return object of class \code{componentResult} and either
+#'     \code{moduleResult} or \code{componentResult} containing:
+#' 
+#' \item{file}{file path to resulting module or pipeline XML}
+#' \item{component}{resulting \code{module} or \code{pipeline} object}
+#' \item{outputList}{list of \code{output} objects produced by
+#'     module(s)}
 NULL
