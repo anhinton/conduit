@@ -812,8 +812,8 @@ buildModuleHost <- function (parsedHost) {
 #'
 #' @return a \code{moduleResult} object containing:
 #' \item{file}{file path to resulting module XML}
-#' \item{module}{resulting \code{module} object}
-#' \item{objects}{list of \code{output} objects produced by module}
+#' \item{component}{resulting \code{module} object}
+#' \item{outputList}{list of \code{output} objects produced by module}
 #'
 #' @examples
 #'
@@ -901,11 +901,11 @@ runModule <- function(module, inputObjects = NULL,
     }
 
     ## resolve output objects
-    objects <- lapply(module$outputs, resolveOutput,
-                      getLanguage(module), host)
+    outputList <- lapply(module$outputs, resolveOutput,
+                         getLanguage(module), host)
 
     ## return moduleResult object
-    moduleResult(objects, modulePath, module)
+    moduleResult(outputList, modulePath, module)
 }
 
 #' Create an \code{ioFormat} object.

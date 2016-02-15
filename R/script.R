@@ -203,6 +203,9 @@ prepareScript <- function(module, inputObjects) {
         python = c("import os", "import pickle",
             inputScript, sourceScript, outputScript),
         c(inputScript, sourceScript, outputScript))
+    ## script might be empty
+    if (is.null(moduleScript))
+        moduleScript <- ""
     
     ## write script file to disk
     

@@ -214,17 +214,16 @@ componentPath <- function (component, pipelinePath) {
 #' @param inputList Named list of \code{input} objects
 #' @param pipelinePath Pipeline output directory
 #' 
-#' @return Named list of \code{output} objects
+#' @return \code{componentResult} object
 runComponent <- function(component, inputList = list(),
                          pipelinePath = getwd()) {
     if (!inherits(component, "component"))
         stop("component object required")
     value <- getValue(component)
     type <- getType(component)
-    result <- switch(
+    switch(
         type,
         module = runModule(value, inputList, pipelinePath),
         ## FIXME: running pipelines probably doesn't work
         pipeline = runPipeline(value))
-    componentResult(result)
 }

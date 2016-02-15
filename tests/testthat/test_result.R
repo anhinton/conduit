@@ -2,7 +2,8 @@ library(conduit)
 context("test module and pipeline return components")
 
 modulePath <- tempfile("moduleResult")
-if (!dir.exists(modulePath)) dir.create(modulePath)
+if (!dir.exists(modulePath))
+    dir.create(modulePath)
 f1 <- moduleOutput("f1", fileVessel("f1.txt"),
                    ioFormat("text file"))
 fileoutput <- output(f1,
@@ -18,6 +19,12 @@ i1 <- moduleOutput("i1", internalVessel("x"),
 internaloutput <- output(i1,
                          language = "python",
                          outputDirectory = modulePath)
+pipelinePath <- tempfile("pipelineResult")
+if (!dir.exists(pipelinePath))
+    dir.create(pipelinePath)
+moduleComp <- component(value = module("m1", "R"),
+                        vessel = fileVessel("./m1/m1.xml"))
+compRes1 <- runComponent(moduleComp, pipelinePath = pipelinePath)
 
 test_that("resultInput() returns correctly", {
     ## fails for invalid arguments
@@ -97,7 +104,7 @@ test_that("moduleResult() returns correctly", {
                                    objects[[2]], objects[[3]]),
                               modulePath,
                               module),
-                 "objects must be 'output' objects")
+                 "outputList must be 'output' objects")
     expect_error(moduleResult(objects,
                               tempfile(),
                               module),
@@ -116,10 +123,20 @@ test_that("moduleResult() returns correctly", {
     expect_true(file.exists(res1$file))
 
     ## module object
-    expect_match(names(res1), "module", all = FALSE)
-    expect_true(inherits(res1$module, "module"))
+    expect_match(names(res1), "component", all = FALSE)
+    expect_true(inherits(res1$component, "module"))
 
     ## output objects
-    expect_match(names(res1), "objects", all = FALSE)
+    expect_match(names(res1), "outputList", all = FALSE)
     expect_true(all(sapply(res1$objects, inherits, what = "output")))
+})
+
+test_that("resultComponent() returns correctly", {
+    ## fail for invalid arguments
+    expect_error(resultComponent(unclass(compRes1), pipelinePath))
+    expect_error(resultComponent(compRes1, tempfile()))
+
+    ## module component
+    comp1 <- resultComponent(compRes1, pipelinePath)
+    expect_true(inherits(comp1, "component"))
 })

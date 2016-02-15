@@ -4,14 +4,14 @@
 \alias{component}
 \title{Create a component object}
 \usage{
-component(name, vessel = NULL, value)
+component(value, name = NULL, vessel = NULL)
 }
 \arguments{
+\item{value}{\code{pipeline} or \code{module} object}
+
 \item{name}{Name of component}
 
 \item{vessel}{\code{fileVessel} or \code{urlVessel}}
-
-\item{value}{\code{pipeline} or \code{module} object}
 }
 \value{
 \code{component} list containing:

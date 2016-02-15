@@ -16,8 +16,8 @@ runModule(module, inputObjects = NULL, targetDirectory = getwd())
 \value{
 a \code{moduleResult} object containing:
 \item{file}{file path to resulting module XML}
-\item{module}{resulting \code{module} object}
-\item{objects}{list of \code{output} objects produced by module}
+\item{component}{resulting \code{module} object}
+\item{outputList}{list of \code{output} objects produced by module}
 }
 \description{
 Execute the scripts contained in or referenced by a \code{module}'s sources.

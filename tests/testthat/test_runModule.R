@@ -468,7 +468,7 @@ test_that(
                     vessel = internalVessel(outputName),
                     format = ioFormat("R character vector"))))
         result <- runModule(absomod, targetDirectory = targ)
-        expect_match(getName(result$objects[[1]]), outputName)
+        expect_match(getName(result$outputList[[1]]), outputName)
         expect_true(file.exists(outputObject))
     })
 
@@ -479,19 +479,19 @@ test_that(
         ## run the createGraph module
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
-        expect_match(result1$objects[[1]]$name, output1$name)
+        expect_match(result1$outputList[[1]]$name, output1$name)
         expect_true(inherits(result1, "moduleResult"))
-        expect_true(file.exists(getResult(result1$objects[[1]])))
+        expect_true(file.exists(getResult(result1$outputList[[1]])))
         
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
-        inputObjects <- list(getResult(result1$objects[[1]]))
+        inputObjects <- list(getResult(result1$outputList[[1]]))
         names(inputObjects) <- layoutGraph$inputs[[1]]$name
         output2 <- layoutGraph$outputs[[1]]
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
         expect_true(inherits(result2, "moduleResult"))
-        expect_match(result2$objects[[1]]$name, output2$name)
-        expect_true(file.exists(getResult(result2$objects[[1]])))
+        expect_match(result2$outputList[[1]]$name, output2$name)
+        expect_true(file.exists(getResult(result2$outputList[[1]])))
     })

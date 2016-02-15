@@ -645,7 +645,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
     componentList <- getComponents(pipeline)
     pipeList <- getPipes(pipeline)
     name <- getName(pipeline)
-    
+
     ## create directory for pipeline output
     pipelinePath <- file.path(targetDirectory, "pipelines", name)
     if (dir.exists(pipelinePath))
@@ -665,7 +665,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
     inputList <- calculateInputs(pipeList, componentList, pipelinePath)
 
     ## execute components in order determinde by componentOrder
-    result <- lapply(
+    componentResultList <- lapply(
         componentList[componentOrder],
         function(component, inputList, pipelinePath) {
             name <- getName(component)                
@@ -679,7 +679,9 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
         },
         inputList,
         pipelinePath)
-    result
+
+    ## return pipelineResult object
+    pipelineResult(componentResultList, pipelinePath, pipeline)
 }
 
 ## creating new pipelines

@@ -85,19 +85,31 @@ resultOutput <- function(output) {
                  format = getFormat(output))
 }
 
-#' Produce a \code{moduleResult} object to be returned by
-#' \code{runModule}.
+#' Return a \code{component} object for use in a \code{pipelineResult}
+#' object.
 #'
-#' @param objects list of \code{output} objects
-#' @param modulePath file path to module output
-#' @param module \code{module} object which produced \code{objects}
+#' @param componentResult \code{componentResult} object
 #'
-#' @return \code{moduleResult}
+#' @return \code{component} object
+resultComponent <- function(componentResult, pipelinePath) {
+    if (!inherits(componentResult, "componentResult"))
+        stop("componentResult object require")
+    if (!dir.exists(pipelinePath))
+        stop("pipelinePath does not exist")
+    
+    value <- componentResult$component
+    xmlfile <- gsub(pipelinePath, ".", componentResult$file)
+    vessel <- fileVessel(xmlfile)
+    component(value = value, vessel = vessel)
+}
+
+#' @describeIn componentResult returns the result of running a
+#'     \code{module}
 #'
 #' @export
-moduleResult <- function(objects, modulePath, module) {
-    if (any(!sapply(objects, inherits, what = "output")))
-        stop("objects must be 'output' objects")
+moduleResult <- function(outputList, modulePath, module) {
+    if (any(!sapply(outputList, inherits, what = "output")))
+        stop("outputList must be 'output' objects")
     if (!dir.exists(modulePath))
         stop("modulePath does not exist")
     if (!inherits(module, "module"))
@@ -108,35 +120,86 @@ moduleResult <- function(objects, modulePath, module) {
     description <- getDescription(module)
     
     ## create result module
-    inputList <- lapply(objects, resultInput, modulePath = modulePath)
-    inputList <- inputList[!sapply(inputList, is.null)]
-    sourceList <- lapply(objects, resultSource, modulePath = modulePath)
-    sourceList <- sourceList[!sapply(sourceList, is.null)]
-    outputList <- lapply(objects, resultOutput)
+    moduleInputList <- lapply(outputList, resultInput, modulePath = modulePath)
+    moduleInputList <- moduleInputList[!sapply(moduleInputList, is.null)]
+    moduleSourceList <-
+        lapply(outputList, resultSource, modulePath = modulePath)
+    moduleSourceList <- moduleSourceList[!sapply(moduleSourceList, is.null)]
+    moduleOutputList <- lapply(outputList, resultOutput)
     resultModule <- module(
         name = name,
         language = language,
         description = description,
-        inputs = inputList,
-        sources = sourceList,
-        outputs = outputList)
+        inputs = if (length(moduleInputList)) moduleInputList,
+        sources = if (length(moduleSourceList)) moduleSourceList,
+        outputs = if (length(moduleOutputList)) moduleOutputList)
     moduleFile <- saveModule(resultModule, targetDirectory = modulePath)
 
     ## return result module and outputs
-    moduleResult <- list(file = moduleFile, module = resultModule,
-                         objects = objects)
-    class(moduleResult) <- "moduleResult"
+    moduleResult <- list(file = moduleFile, component = resultModule,
+                         outputList = outputList)
+    class(moduleResult) <- c("moduleResult", "componentResult")
     moduleResult
 }
 
-componentResult <- function (result) {
-    if (!inherits(result, c("moduleResult", "pipelineResult")))
-        stop ("moduleResult or pipelineResult required")
-    class(result) <- c("componentResult", class(result))
-    result
+#' @describeIn componentResult returns the result of running a
+#'     \code{pipeline}
+#'
+#' @export
+pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
+    if (!all(sapply(
+             componentResultList,
+             inherits,
+             what = "componentResult"))) {
+        stop("componentResultList must contain componentResult objects")
+    }
+    if (!dir.exists(pipelinePath))
+        stop("pipelinePath does not exist")
+    if (!inherits(pipeline, "pipeline"))
+        stop("pipeline must be a pipeline object")
+
+    componentList <- lapply(componentResultList, resultComponent,
+                            pipelinePath = pipelinePath)
+
+    outputList <- lapply(
+        componentResultList,
+        function(result) {
+            result$outputList
+        })
+
+    resultPipeline <- pipeline(name = getName(pipeline),
+                               description = getDescription(pipeline),
+                               components = componentList)
+
+    xmlfile <- savePipeline(resultPipeline, targetDirectory = pipelinePath)
+
+    pipelineResult <- list(file = xmlfile, component = resultPipeline,
+                           outputList = outputList)
+    class(pipelineResult) <- c("pipelineResult", "moduleResult")
+    pipelineResult
 }
 
-pipelineResult <- function() {
-    
-}
-
+#' @name componentResult
+#'
+#' @title Create \code{componentResult} objects
+#'
+#' @description Constructor functions to create \code{componentResult}
+#'     objects.
+#'
+#' @details These functions are used to construct the objects returned
+#'     by \code{runModule} and \code{runPipeline}.
+#'
+#' \code{moduleResult} requires a 
+#'
+#' @param outputList list of \code{output} objects
+#' @param modulePath file path to module output
+#' @param module \code{module} object which produced \code{objects}
+#' @param componentResultList life
+#' @param pipelinePath living
+#' @param pipeline the internet
+#'
+#' @return \code{moduleResult} object containing::
+#' \item{file}{file path to resulting module XML}
+#' \item{component}{resulting \code{module} object}
+#' \item{outputList}{list of \code{output} objects produced by module}
+NULL
