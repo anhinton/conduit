@@ -117,6 +117,11 @@ test_that("moduleResult() returns correctly", {
     ## correct output
     res1 <- moduleResult(objects, modulePath, module)
     expect_true(inherits(res1, "moduleResult"))
+    expect_true(inherits(res1, "componentResult"))
+
+    ## name
+    expect_match(names(res1), "name", all = FALSE)
+    expect_match(getName(res1), getName(module))
 
     ## module XML file
     expect_match(names(res1), "file", all = FALSE)
@@ -139,4 +144,59 @@ test_that("resultComponent() returns correctly", {
     ## module component
     comp1 <- resultComponent(compRes1, pipelinePath)
     expect_true(inherits(comp1, "component"))
+})
+
+test_that("pipelineResult() returns correctly", {
+    outputList1 <- list(fileoutput)
+    module1 <- module("m1", "R", outputs = list(f1))
+    modRes1 <- moduleResult(outputList1, modulePath, module1)
+    outputList2 <- list(urloutput)
+    module2 <- module("m2", "python", outputs = list(u1))
+    modRes2 <- moduleResult(outputList2, modulePath, module2)
+    componentResultList <- list(modRes1, modRes2)
+    pipeline <- pipeline("p1", components = list(module1, module1))
+
+    ## fail for invalid arguments
+    expect_error(pipelineResult(list(unclass(modRes1),
+                                     modRes2),
+                                pipelinePath,
+                                pipeline),
+                 "componentResultList must contain componentResult objects")
+    expect_error(pipelineResult(componentResultList, tempfile(), pipeline),
+                 "pipelinePath does not exist")
+    expect_error(pipelineResult(componentResultList, pipelinePath,
+                                unclass(pipeline)),
+                 "pipeline must be a pipeline object")
+
+    ## correct output
+    res1 <- pipelineResult(componentResultList, pipelinePath,
+                           pipeline)
+    expect_true(inherits(res1, "pipelineResult"))
+    expect_true(inherits(res1, "componentResult"))
+
+    ## name
+    expect_match(names(res1), "name", all = FALSE)
+    expect_match(getName(res1), getName(pipeline))
+
+    ## file
+    expect_match(names(res1), "file", all = FALSE)
+    expect_true(file.exists(res1$file))
+
+    ## component
+    expect_match(names(res1), "component", all = FALSE)
+    expect_true(inherits(res1$component, "pipeline"))
+
+    ## componentResultList
+    expect_match(names(res1), "componentResultList", all = FALSE)
+    expect_true(all(sapply(X = res1$componentResultList,
+                           FUN = inherits,
+                           what = "componentResult")))
+    
+    ## outputList
+    expect_match(names(res1), "outputList", all = FALSE)
+    expect_true(all(sapply(
+        X = res1$outputList,
+        FUN = function (x) {
+            sapply(X = x, FUN = inherits, what = "output")
+        })))
 })

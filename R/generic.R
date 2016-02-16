@@ -155,11 +155,17 @@ getResult.default <- function(x) {
     x$result
 }
 
-#' Export an object to disk.
+#' Export OpenAPI objects
+#'
+#' Export OpenAPI objects for sharing.
+#'
+#' This function creates tarball bundles of OpenAPI objects to be
+#' shared and loaded in other sessions.
 #'
 #' @param x object
+#' @param targetDirectory file location
 #'
 #' @export
-export <- function(x, ...) {
+export <- function(x, targetDirectory = getwd()) {
     UseMethod("export")
 }

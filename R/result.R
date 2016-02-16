@@ -136,7 +136,8 @@ moduleResult <- function(outputList, modulePath, module) {
     moduleFile <- saveModule(resultModule, targetDirectory = modulePath)
 
     ## return result module and outputs
-    moduleResult <- list(file = moduleFile, component = resultModule,
+    moduleResult <- list(name = name, file = moduleFile,
+                         component = resultModule,
                          outputList = outputList)
     class(moduleResult) <- c("moduleResult", "componentResult")
     moduleResult
@@ -158,6 +159,8 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
     if (!inherits(pipeline, "pipeline"))
         stop("pipeline must be a pipeline object")
 
+    name <- getName(pipeline)
+
     componentList <- lapply(componentResultList, resultComponent,
                             pipelinePath = pipelinePath)
 
@@ -167,15 +170,17 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
             result$outputList
         })
 
-    resultPipeline <- pipeline(name = getName(pipeline),
+    resultPipeline <- pipeline(name = name,
                                description = getDescription(pipeline),
                                components = componentList)
 
     xmlfile <- savePipeline(resultPipeline, targetDirectory = pipelinePath)
 
-    pipelineResult <- list(file = xmlfile, component = resultPipeline,
-                           outputList = outputList)
-    class(pipelineResult) <- c("pipelineResult", "moduleResult")
+    pipelineResult <- list(name = name, file = xmlfile,
+                           component = pipeline,
+                           outputList = outputList,
+                           componentResultList = componentResultList)
+    class(pipelineResult) <- c("pipelineResult", "componentResult")
     pipelineResult
 }
 
@@ -216,9 +221,14 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
 #'     module(s)}
 NULL
 
-#' Export a \code{componentResult}
-#'
-#' @param targetDirectory
+#' @describeIn export Export a \code{componentResult} object
 export.componentResult <- function(x, targetDirectory = getwd()) {
-    
+    directory <- dirname(x$file)
+    oldwd <- setwd(file.path(directory, ".."))
+    on.exit(setwd(oldwd))
+    name <- getName(x$component)
+    tarfile <- file.path(targetDirectory,
+                         paste(name, "tar", "gz", sep = "."))
+    files <- list.dirs(name)
+    tar(tarfile, files = files, compression = "gzip")
 }
