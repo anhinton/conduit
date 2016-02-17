@@ -223,12 +223,27 @@ NULL
 
 #' @describeIn export Export a \code{componentResult} object
 export.componentResult <- function(x, targetDirectory = getwd()) {
+    if (!inherits(x, "componentResult"))
+        stop("componentResult object required")
+    if (!dir.exists(targetDirectory))
+        stop("targetDirectory does not exist")
+
+    ## go to parent of directory to be tarballed
     directory <- dirname(x$file)
     oldwd <- setwd(file.path(directory, ".."))
     on.exit(setwd(oldwd))
+
+    ## generate tarball filename
     name <- getName(x$component)
     tarfile <- file.path(targetDirectory,
                          paste(name, "tar", "gz", sep = "."))
+
+    ## tarball directory containing componentResult
     files <- list.dirs(name)
-    tar(tarfile, files = files, compression = "gzip")
+    sys <- tar(tarfile, files = files, compression = "gzip")
+    if (sys != 0) {
+        stop("unable to produce tarball")
+    } else {
+        tarfile
+    }
 }

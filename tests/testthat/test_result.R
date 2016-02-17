@@ -200,3 +200,30 @@ test_that("pipelineResult() returns correctly", {
             sapply(X = x, FUN = inherits, what = "output")
         })))
 })
+
+test_that("export.componentResult() returns correctly", {
+    skip_on_cran()
+    p1 <- loadPipeline("p1", system.file("extdata", "simpleGraph",
+                                         "pipeline.xml",
+                                         package = "conduit"))
+    pipelinetarg <- tempfile("exportComponentList")
+    res1 <- runPipeline(p1, targetDirectory = tempdir())
+    res2 <- res1$componentResultList[[1]]
+    targ <- tempfile("export.componentResult")
+    if (!dir.exists(targ))
+        dir.create(targ)
+
+    ## fail for invalid arguments
+    expect_error(export.componentResult(unclass(res1), targ),
+                 "componentResult object required")
+    expect_error(export.componentResult(res1, tempfile()),
+                 "targetDirectory does not exist")
+
+    ## pipelineResult
+    tar1 <- export(res1, targ)
+    expect_true(file.exists(tar1))
+
+    ## moduleResult
+    tar2 <- export(res2, targ)
+    expect_true(file.exists(tar2))
+})
