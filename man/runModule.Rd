@@ -4,14 +4,14 @@
 \alias{runModule}
 \title{Execute a \code{module}'s source(s)}
 \usage{
-runModule(module, inputObjects = NULL, targetDirectory = getwd())
+runModule(module, targetDirectory = getwd(), inputObjects = NULL)
 }
 \arguments{
 \item{module}{\code{module} object}
 
-\item{inputObjects}{Named list of input objects}
-
 \item{targetDirectory}{File path for module output}
+
+\item{inputObjects}{Named list of input objects}
 }
 \value{
 a \code{moduleResult} object containing:

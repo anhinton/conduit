@@ -223,7 +223,9 @@ runComponent <- function(component, inputList = list(),
     type <- getType(component)
     switch(
         type,
-        module = runModule(value, inputList, pipelinePath),
+        module = runModule(module = value,
+                           targetDirectory = pipelinePath,
+                           inputObjects = inputList),
         ## FIXME: running pipelines probably doesn't work
         pipeline = runPipeline(value))
 }

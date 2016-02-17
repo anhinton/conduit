@@ -805,8 +805,8 @@ buildModuleHost <- function (parsedHost) {
 #' accessible by conduit or this function will fail.
 #'
 #' @param module \code{module} object
-#' @param inputObjects Named list of input objects
 #' @param targetDirectory File path for module output
+#' @param inputObjects Named list of input objects
 #' 
 #' @seealso \code{module}, \code{moduleSource}
 #'
@@ -838,8 +838,8 @@ buildModuleHost <- function (parsedHost) {
 #'           targetDirectory = tempdir())
 #' 
 #' @export
-runModule <- function(module, inputObjects = NULL,
-                      targetDirectory = getwd()) {
+runModule <- function(module, targetDirectory = getwd(),
+                      inputObjects = NULL) {
     ## fail if not given a module
     if (class(module) != "module"){
         stop("'module' is not a 'module' object")

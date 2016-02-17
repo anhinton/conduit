@@ -50,6 +50,11 @@ The \code{pipelineResult} constructor takes a list of
 \code{componentResult} objects produced by \code{runComponent}, the
 original \code{pipeline}, and the pipeline's output location
 \code{pipelinePath}. A \code{pipelineResult} object is returned.
+
+The \code{export} function can be used to export these objects to a
+gzipped tarfile. The resulting tarfile can be read loaded into
+conduit using the \code{importModule} and \code{importPipeline}
+functions.
 }
 \section{Functions}{
 \itemize{

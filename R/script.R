@@ -153,7 +153,7 @@ prepareScriptOutput <- function(output, language) {
 #' @return List object containg scriptPath and host, with class set to
 #' module$language.
 prepareScript <- function(module, inputObjects) {
-    language <- module$language
+    language <- getLanguage(module)
     onRemoteHost <- !is.null(module$host)
     location <- attr(module, "location")
     

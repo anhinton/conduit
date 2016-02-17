@@ -201,7 +201,7 @@ test_that("pipelineResult() returns correctly", {
         })))
 })
 
-test_that("export.componentResult() returns correctly", {
+test_that("can export and import componentResult objects", {
     skip_on_cran()
     p1 <- loadPipeline("p1", system.file("extdata", "simpleGraph",
                                          "pipeline.xml",
@@ -228,21 +228,28 @@ test_that("export.componentResult() returns correctly", {
     tar2 <- export(res2, targ)
     expect_true(file.exists(tar2))
 
-    ## successfully import from tarballs
-    if (!dir.exists(impdir))
-        dir.create(impdir)
-    untar(tar1, exdir = impdir)
-    files1 <- list.files(file.path(impdir, getName(res1)), full.names = TRUE)
-    expect_null({
-        impline <- loadPipeline("impline", files1[grep("pipeline.xml$",
-                                                       files1)])
-        warnings()
-    })
-    untar(tar2, exdir = impdir)
-    files2 <- list.files(file.path(impdir, getName(res2)), full.names = TRUE)
-    expect_null({
-        impline <- loadModule("impline", files2[grep("[.]xml$",
-                                                     files2)])
-        warnings()
-    })
+    ## successfully import from pipeline tarfile
+    importDir <- tempfile("importTest")
+    if (!dir.exists(importDir))
+        dir.create(importDir)
+    import1 <- importPipeline(tar1)
+    expect_true(inherits(import1, "pipeline"))
+    expect_match(getName(import1), getName(p1))
+
+    ## set pipeline name
+    impName2 <- tempfile("rondtondly")
+    import2 <- importPipeline(tarfile = tar1, name = impName2)
+    expect_true(inherits(import2, "pipeline"))
+    expect_match(getName(import2), impName2)
+
+    ## successfully import from module tarfile
+    import3 <- importModule(tar2)
+    expect_true(inherits(import3, "module"))
+    expect_match(getName(import3), getName(res2$component))
+
+    ## set module name
+    impName4 <- tempfile("alabluxo")
+    import4 <- importModule(tarfile = tar2, name = impName4)
+    expect_true(inherits(import4, "module"))
+    expect_match(getName(import4), impName4)
 })

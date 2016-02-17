@@ -204,6 +204,11 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
 #' original \code{pipeline}, and the pipeline's output location
 #' \code{pipelinePath}. A \code{pipelineResult} object is returned.
 #'
+#' The \code{export} function can be used to export these objects to a
+#' gzipped tarfile. The resulting tarfile can be read loaded into
+#' conduit using the \code{importModule} and \code{importPipeline}
+#' functions.
+#'
 #' @param outputList list of \code{output} objects
 #' @param modulePath file path to module output
 #' @param module \code{module} object which produced \code{outputList}
@@ -222,6 +227,8 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
 NULL
 
 #' @describeIn export Export a \code{componentResult} object
+#'
+#' @export
 export.componentResult <- function(x, targetDirectory = getwd()) {
     if (!inherits(x, "componentResult"))
         stop("componentResult object required")
@@ -246,4 +253,63 @@ export.componentResult <- function(x, targetDirectory = getwd()) {
     } else {
         tarfile
     }
+}
+
+#' Import from a module archive
+#'
+#' Import a module from an exported module tarfile.
+#'
+#' This function is used to import modules from gzipped tar archives,
+#' created by the \code{export.componentFile} function. The tarfile to
+#' be imported must be called \file{MODULENAME.tar.gz}; the module to
+#' be loaded from the archive will be called
+#' \code{MODULENAME/MODULENAME.xml}. The resulting \code{module}
+#' object can be named using the \code{name} argument--it will be
+#' called MODULENAME by default.
+#'
+#' @param tarfile File path to module archive
+#' @param name Module name
+#'
+#' @return \code{module} object
+#'
+#' @seealso \code{export.componentResult}
+#'
+#' @export
+importModule <- function(tarfile, name) {
+    exportName <- gsub(".tar.gz", "", basename(tarfile))
+    if (missing(name))
+        name <- exportName
+    untar(tarfile, exdir = tempdir())
+    moduleXML <- file.path(tempdir(), exportName,
+                           paste0(exportName, ".xml"))
+    loadModule(name = name, ref = moduleXML)
+}
+
+#' Import from a pipeline archive
+#'
+#' Import a pipeline from an exported pipeline tarfile.
+#'
+#' This function is used to import pipelines from gzipped tar
+#' archives, created by the \code{export.componentFile} function. The
+#' tarfile to be imported must be called \file{PIPELINENAME.tar.gz};
+#' the PIPELINE to be loaded from the archive will be found in the
+#' file \code{PIPELINENAME/pipeline.xml}. The resulting
+#' \code{pipeline} object can be named using the \code{name}
+#' argument--it will be called PIPELINENAME by default.
+#'
+#' @param tarfile File path to pipeline archive
+#' @param name Pipeline name
+#'
+#' @return \code{pipeline} object
+#'
+#' @seealso \code{export.componentResult}
+#'
+#' @export
+importPipeline <- function(tarfile, name) {
+    exportName <- gsub(".tar.gz", "", basename(tarfile))
+    if (missing(name))
+        name <- exportName
+    untar(tarfile, exdir = tempdir())
+    pipelineXML <- file.path(tempdir(), exportName, "pipeline.xml")
+    loadPipeline(name = name, ref = pipelineXML)
 }
