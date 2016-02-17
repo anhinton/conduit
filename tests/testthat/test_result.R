@@ -222,8 +222,27 @@ test_that("export.componentResult() returns correctly", {
     ## pipelineResult
     tar1 <- export(res1, targ)
     expect_true(file.exists(tar1))
+    impdir <- tempfile("import")
 
     ## moduleResult
     tar2 <- export(res2, targ)
     expect_true(file.exists(tar2))
+
+    ## successfully import from tarballs
+    if (!dir.exists(impdir))
+        dir.create(impdir)
+    untar(tar1, exdir = impdir)
+    files1 <- list.files(file.path(impdir, getName(res1)), full.names = TRUE)
+    expect_null({
+        impline <- loadPipeline("impline", files1[grep("pipeline.xml$",
+                                                       files1)])
+        warnings()
+    })
+    untar(tar2, exdir = impdir)
+    files2 <- list.files(file.path(impdir, getName(res2)), full.names = TRUE)
+    expect_null({
+        impline <- loadModule("impline", files2[grep("[.]xml$",
+                                                     files2)])
+        warnings()
+    })
 })
