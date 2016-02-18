@@ -6,7 +6,7 @@ context("execute modules")
 skipHost <- TRUE
 
 ## skip tests which fail strangely when doing R CMD check
-skipCheck <- FALSE
+skipCheck <- TRUE
 
 targ = tempdir()
 createGraph <- loadModule(
