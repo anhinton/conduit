@@ -9,6 +9,8 @@ resultComponent(componentResult, pipelinePath)
 }
 \arguments{
 \item{componentResult}{\code{componentResult} object}
+
+\item{pipelinePath}{file path to pipeline output}
 }
 \value{
 \code{component} object

@@ -5,9 +5,6 @@ context("execute modules")
 ## requires conduit host at conduit@127.0.0.1:2222
 skipHost <- TRUE
 
-## skip tests which fail strangely when doing R CMD check
-skipCheck <- FALSE
-
 targ = tempdir()
 createGraph <- loadModule(
     "createGraph",
@@ -35,7 +32,6 @@ test_that(
         expect_match(source_script[2], "^sessionInfo[(][)]")
 
         ##
-        skip_on_cran()
         writeLines(script, file)
         file_source <- moduleSource(
             fileVessel(file))
@@ -51,7 +47,6 @@ test_that(
     {
         if (skipHost)
             skip("requires test conduit web server at http://127.0.0.1:8080/")
-        skip_on_cran()
         url_source <- moduleSource(
             urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
         class(url_source) <- class(url_source$vessel)
@@ -65,8 +60,6 @@ test_that(
 test_that(
     "R script file is created",
     {
-        skip_on_cran()
-
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         
@@ -149,7 +142,6 @@ test_that(
 test_that(
     "absolute fileVessel refs are resolved",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <-
@@ -166,7 +158,6 @@ test_that(
 test_that(
     "relative fileVessel refs are resolved",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <-
@@ -184,7 +175,6 @@ test_that(
 test_that(
     "fileVessel inputs with search paths are resolved",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <-
@@ -204,7 +194,6 @@ test_that(
 test_that(
     "internalVessel inputs are resolved",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         input <- moduleInput("fantastic",
@@ -218,7 +207,6 @@ test_that(
 test_that(
     "urlVessel inputs are resolved",
     {
-        skip_on_cran()
         moduleInput1 <- moduleInput(
             "inp1",
             urlVessel("http://cran.stat.auckland.ac.nz/"),
@@ -246,7 +234,6 @@ test_that(
 test_that(
     "executeScript.R works",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         module1 <-
@@ -262,7 +249,6 @@ test_that(
 test_that(
     "executeScript.python works",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         module2 <- module(
@@ -284,7 +270,6 @@ test_that(
 test_that(
     "executeScript.shell works",
     {
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         module3 <- module(
@@ -355,7 +340,6 @@ test_that(
 test_that(
     "resolveOutput() works on local machine",
     {
-        skip_on_cran()
         lang = "R"
         host = parseModuleHost("cronduit@not.a.real.server:11")
         outdir <- tempdir()
@@ -436,10 +420,6 @@ test_that(
 test_that(
     "runModule() succeeds for module with fileVessel input with absolute ref",
     {
-        if (skipCheck) {
-            skip(paste("2016-01-25 strange issues around R CMD check,",
-                       "system2, Rscript, and what is returned."))
-        }
         absRef <- system.file("extdata", "simpleGraph", "createGraph.xml",
                               package = "conduit")
         moduleName <- "absomod"
@@ -475,7 +455,6 @@ test_that(
 test_that(
     "runModule() works",
     {
-        skip_on_cran()
         ## run the createGraph module
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)

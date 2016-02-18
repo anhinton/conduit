@@ -1,9 +1,6 @@
 library(conduit)
 context("execute pipelines")
 
-## skip tests which fail strangely when doing R CMD check
-skipCheck <- FALSE
-
 lang = "R"
 outdir <- tempdir()
 symbol <- "x"
@@ -133,7 +130,6 @@ test_that("graphPipeline() produces appropriate object", {
 })
 
 test_that("runComponent() returns correctly", {
-    skip_on_cran()
     componentList <- getComponents(simpleGraph)
     pipelinePath <- tempfile("runComponent")
     if (!dir.exists(pipelinePath))
@@ -175,10 +171,6 @@ test_that("runPipeline() produces expected results", {
                  "no such target directory")
 
     ## correct output
-    if (skipCheck) {
-        skip(paste("2016-01-25 strange issues around R CMD check,",
-                   "system2, Rscript, and what is returned."))
-    }
     output1 <- runPipeline(simpleGraph, targetDirectory)
     expect_true(inherits(output1, "pipelineResult"))
     expect_true(file.exists(output1$file))

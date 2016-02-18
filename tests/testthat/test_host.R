@@ -27,7 +27,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         result1 <- createHostDirectory(host1)
         expect_equal(result1, 0)
         
@@ -41,7 +40,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         result1 <- fileToHost(file1, host1)
         expect_equal(result1, 0)
 
@@ -55,7 +53,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         moduleInput1 <- moduleInput("x", internalVessel("x"),
@@ -78,7 +75,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         module1 <-
@@ -97,7 +93,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         module2 <- module(
@@ -122,7 +117,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
         module3 <- module(
@@ -148,7 +142,6 @@ test_that(
     {
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         mypath <- tempfile()
         dir.create(mypath)
         oldwd <- setwd(mypath)
@@ -176,7 +169,6 @@ test_that(
 
         if (skipHost)
             skip("requires conduit host at conduit@127.0.0.1:2222")
-        skip_on_cran()
         ## run the createGraph module
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)

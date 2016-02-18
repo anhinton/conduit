@@ -156,14 +156,12 @@ mod2 <- module(name = "setY", language = "R",
                    ioFormat("R data frame"))))
 
 test_that("saveModule fails for non-existent target directory", {
-    skip_on_cran()
     expect_error(saveModule(module = mod2,
                             targetDirectory = tempfile(pattern="nope")),
                  "no such target directory")
 })
 
 test_that("saveModule produces appropriate XML file", {
-    skip_on_cran()
     targ <- tempdir()
     name <- "lazerbeast.xml"
     xmlOutput1 <- saveModule(mod2, targ)
