@@ -213,7 +213,6 @@ test_that("fetchVessel returns correctly", {
     expect_match(attr(result2, "location"), dirname(file))
 
     ## urlVessel
-    skip_on_cran()
     result3 <- fetchVessel(testURL)
     expect_true(inherits(result3, "character"))
 })
