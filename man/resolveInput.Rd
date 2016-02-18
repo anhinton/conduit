@@ -7,13 +7,13 @@
 \alias{resolveInput.url}
 \title{Resolve input object}
 \usage{
-\method{resolveInput}{internal}(moduleInput, inputObjects, host)
+\method{resolveInput}{internal}(moduleInput, inputObjects, host, location)
 
-\method{resolveInput}{file}(moduleInput, inputObjects, host)
+\method{resolveInput}{file}(moduleInput, inputObjects, host, location)
 
-\method{resolveInput}{url}(moduleInput, inputObjects, host)
+\method{resolveInput}{url}(moduleInput, inputObjects, host, location)
 
-resolveInput(moduleInput, inputObjects, host)
+resolveInput(moduleInput, inputObjects, host, location)
 }
 \arguments{
 \item{moduleInput}{\code{moduleInput} object}
@@ -21,6 +21,8 @@ resolveInput(moduleInput, inputObjects, host)
 \item{inputObjects}{resources to be supplied as inputs}
 
 \item{host}{module host}
+
+\item{location}{location of originating module file}
 }
 \value{
 TRUE if successful

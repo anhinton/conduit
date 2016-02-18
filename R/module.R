@@ -506,7 +506,7 @@ fetchFromHost <- function(file, host) {
 }
 
 #' @describeIn resolveInput Resolve internal input object
-resolveInput.internal <- function(moduleInput, inputObjects, host) {
+resolveInput.internal <- function(moduleInput, inputObjects, host, location) {
     inputObject <- getElement(inputObjects, moduleInput$name)
 
     ## copy inputObject to host
@@ -522,14 +522,13 @@ resolveInput.internal <- function(moduleInput, inputObjects, host) {
 }
 
 #' @describeIn resolveInput Resolve file input object
-resolveInput.file <- function(moduleInput, inputObjects, host) {
-    ref <- moduleInput$vessel$ref
-    path <- moduleInput$vessel$path
+resolveInput.file <- function(moduleInput, inputObjects, host, location) {
+    vessel <- getVessel(moduleInput)
+    ref <- getRef(vessel)
+    path <- vessel$path
     inputObject <- getElement(inputObjects, moduleInput$name)
-    if (!is.null(inputObject) && !is.null(path))
-        stop("file search path AND file object provided")
-    if (!is.null(path)) {
-        inputObject <- findFile(ref, path)
+    if (is.null(inputObject)) {
+        inputObject <- findFile(ref, path, location)
     } 
 
     ## copy to module directory if ref is relative
@@ -546,11 +545,11 @@ resolveInput.file <- function(moduleInput, inputObjects, host) {
         }
         return(file.exists(ref))
     }
-    return(file.exists(ref))
+   file.exists(ref)
 }
 
 #' @describeIn resolveInput Resolve URL input object
-resolveInput.url <- function(moduleInput, inputObjects, host) {
+resolveInput.url <- function(moduleInput, inputObjects, host, location) {
     name <- moduleInput$name
     url <- moduleInput$vessel$ref
     if (name %in% names(inputObjects)) {
@@ -583,10 +582,11 @@ resolveInput.url <- function(moduleInput, inputObjects, host) {
 #' @param moduleInput \code{moduleInput} object
 #' @param inputObjects resources to be supplied as inputs
 #' @param host module host
+#' @param location location of originating module file
 #'
 #' @return TRUE if successful
-resolveInput <- function(moduleInput, inputObjects, host) {
-    type <- class(moduleInput$vessel)[[1]]
+resolveInput <- function(moduleInput, inputObjects, host, location) {
+    type <- getType(getVessel(moduleInput))
     type <- switch(
         type,
         internalVessel = "internal",
@@ -605,43 +605,52 @@ resolveInput <- function(moduleInput, inputObjects, host) {
 #' This function returns a reference to the object produced by a
 #' module's output when the module is executed. The reference
 #' contained in this object is not guaranteed to exist until after
-#' module execution.
-#'
-#' 
+#' module execution. 
 #'
 #' @param moduleOutput \code{moduleOutput} object
 #' @param language module script language
 #' @param outputDirectory file location for module execution
 #'
-#' @return \code{output} object, varying according to
-#'     \code{moduleOutput}'s \code{vessel} type:
+#' @return \code{output} list object, containing:
 #'
-#' \item{fileVessel}{absolute file path to output object}
-#' \item{urlVessel}{URL to output object}
-#' \item{internalVessel}{absolute file path to serialized internal object}
+#' \item{name}{output name}
+#' \item{format}{\code{ioFormat} object}
+#' \item{vessel}{\code{vessel} object}
+#' \item{language}{module language}
+#' \item{result}{address of output object produced}
 #'
 #' @export
 output <- function(moduleOutput, language, outputDirectory) {
     if (!inherits(moduleOutput, "moduleOutput"))
         stop("moduleOutput object required")
     
+    name <- getName(moduleOutput)
+    format <- getFormat(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
-    output <-
+
+    ## calculate result
+    result <-
         switch(type,
                internalVessel =
                    paste0(vessel$symbol, internalExtension(language)),
                urlVessel=,
-               fileVessel = vessel$ref,
+               fileVessel = getRef(vessel),
                stop("vessel type not defined"))
+
+    ## ensure absolute path
     if (type == "internalVessel" || type == "fileVessel") {
-        if (!is_absolute(output)) {
-            output <- file.path(outputDirectory, output)
-        }
-        if (file.exists(output)) {
-            output <- normalizePath(output)
-        }
+        result <- 
+            if (!is_absolute(result)) {
+                file.path(outputDirectory, result)
+            } else if (file.exists(result)) {
+                normalizePath(result)
+            }
     }
+
+    ## return output object
+    output <-  list(name = name, format = format, vessel = vessel,
+                    language = language, result = result)
     class(output) <- "output"
     output
 }
@@ -650,47 +659,43 @@ output <- function(moduleOutput, language, outputDirectory) {
 #'
 #' @details Will produce an error if the object does not exist.
 #'
-#' If \code{host} is not NULL the function attempts to copy the output object
-#' across from the remote host and into the current working directory.
+#' If \code{host} is not NULL the function attempts to copy the output
+#' object across from the remote host and into the current working
+#' directory.
 #'
 #' @param moduleOutput \code{moduleOutput} object
 #' @param language module language
 #' @param host host list created by \code{parseModuleList}
 #' @param outputDirectory location of module output files
 #'
-#' @return named list containing:
-#' \itemize{
-#'   \item name: object name
-#'   \item type: object vessel type
-#'   \item object: \code{output} object
-#' }
+#' @return \code{output} object
 resolveOutput <- function (moduleOutput, language, host,
                            outputDirectory = getwd()) {
     name <- getName(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
-    object <- output(moduleOutput, language, outputDirectory)
+    output <- output(moduleOutput, language, outputDirectory)
+    result <- getResult(output)
 
     if (type == "internalVessel" || type == "fileVessel") {
         if (!is.null(host)) {
-            remote_object <- basename(object)
+            remote_object <- basename(result)
             result <- fetchFromHost(remote_object, host)
             if (result != 0) {
                 stop("Unable to fetch ", remote_object, " from host ",
                      buildModuleHost(host))
             }
         }
-        if (!file.exists(object)) {
+        if (!file.exists(result)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
     }
     if (type == "urlVessel") {
-        if (!RCurl::url.exists(object)) {
+        if (!RCurl::url.exists(result)) {
             stop(paste0("output object '", name, "' does not exist"))
         }
     }
-    object <- list(name = name, type = type, object = object)
-    return(object)
+    return(output)
 }
 
 #' Parse a module's host
@@ -785,22 +790,30 @@ buildModuleHost <- function (parsedHost) {
 #' }
 #'
 #' If the \code{module} has inputs the \code{inputObjects} list must
-#' have a named absolute file location for each input (except for
-#' inputs from \code{fileVessel}s with absolute 'ref's).
+#' have a named absolute file location for each input which is not
+#' resolveable based on only the input provided.
 #'
 #' \code{targetDirectory} must exist or the function will return an error.
 #'
-#' This function creates a directory called \sQuote{modules} in
-#' the \code{targetDirectory} if it does not already exist.
+#' This function creates a directory named for the module in the
+#' \code{targetDirectory} if it does not already exist. Outputs
+#' generated by the module source scripts are stored in this
+#' directory. A module XML file which will provide the original
+#' module's output is also created in this directory.
 #'
 #' If \code{module$host} is not NULL the remote host must exist and be
 #' accessible by conduit or this function will fail.
 #'
 #' @param module \code{module} object
-#' @param inputObjects Named list of input objects
 #' @param targetDirectory File path for module output
+#' @param inputObjects Named list of input objects
 #' 
 #' @seealso \code{module}, \code{moduleSource}
+#'
+#' @return a \code{moduleResult} object containing:
+#' \item{file}{file path to resulting module XML}
+#' \item{component}{resulting \code{module} object}
+#' \item{outputList}{list of \code{output} objects produced by module}
 #'
 #' @examples
 #'
@@ -825,8 +838,8 @@ buildModuleHost <- function (parsedHost) {
 #'           targetDirectory = tempdir())
 #' 
 #' @export
-runModule <- function(module, inputObjects = list(),
-                      targetDirectory = getwd()) {
+runModule <- function(module, targetDirectory = getwd(),
+                      inputObjects = NULL) {
     ## fail if not given a module
     if (class(module) != "module"){
         stop("'module' is not a 'module' object")
@@ -871,11 +884,10 @@ runModule <- function(module, inputObjects = list(),
                  buildModuleHost(host)))
         }
     }
-
     
     ## resolve input objects
     for (i in module$inputs) {
-        resolved <- resolveInput(i, inputObjects, host)
+        resolved <- resolveInput(i, inputObjects, host, getLocation(module))
         if (!resolved) stop(paste0("Input '", i$name, "' cannot be resolved"))
     }
 
@@ -888,8 +900,12 @@ runModule <- function(module, inputObjects = list(),
              })
     }
 
-    objects <- lapply(module$outputs, resolveOutput, module$language, host)
-    return(objects)
+    ## resolve output objects
+    outputList <- lapply(module$outputs, resolveOutput,
+                         getLanguage(module), host)
+
+    ## return moduleResult object
+    moduleResult(outputList, modulePath, module)
 }
 
 #' Create an \code{ioFormat} object.

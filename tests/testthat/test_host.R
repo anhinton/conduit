@@ -2,8 +2,8 @@ library(conduit)
 context("Check remote host functions work")
 
 ## skip tests which require a module host machine
-## requires conduit host at conduit@127.0.0.1:2222
-skip <- TRUE
+## requires conduit host at vagrant@127.0.0.1:2222
+skipHost <- TRUE
 
 file1 <- tempfile()
 system2("touch", file1)
@@ -25,7 +25,8 @@ test_module <- module(
 test_that(
     "createHostDirectory() works",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         result1 <- createHostDirectory(host1)
         expect_equal(result1, 0)
@@ -38,7 +39,8 @@ test_that(
 test_that(
     "fileToHost() works",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         result1 <- fileToHost(file1, host1)
         expect_equal(result1, 0)
@@ -51,7 +53,8 @@ test_that(
 test_that(
     "resolveInput() works for remote module hosts",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -73,7 +76,8 @@ test_that(
 test_that(
     "executeScript.R works",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -91,7 +95,8 @@ test_that(
 test_that(
     "executeScript.python works",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -115,7 +120,8 @@ test_that(
 test_that(
     "executeScript.shell works",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         oldwd <- setwd(tempdir())
         on.exit(setwd(oldwd))
@@ -140,7 +146,8 @@ test_that(
 test_that(
     "fetchFromHost() works",
     {
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         mypath <- tempfile()
         dir.create(mypath)
@@ -167,21 +174,22 @@ test_that(
         createGraph$host <- layoutGraph$host
     
 
-        if (skip) skip("requires conduit host at conduit@127.0.0.1:2222")
+        if (skipHost)
+            skip("requires conduit host at conduit@127.0.0.1:2222")
         skip_on_cran()
         ## run the createGraph module
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
-        expect_match(result1[[1]]$name, output1$name)
+        #expect_match(getName(result1$outputList[[1]]), getName(output1))
 
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
-        inputObjects <- list(result1[[1]]$object)
+        inputObjects <- list(getResult(result1$outputList[[1]]))
         names(inputObjects) <- layoutGraph$inputs[[1]]$name
         output2 <- layoutGraph$outputs[[1]]
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
-        expect_match(result2[[1]]$name, output2$name)
+        expect_match(getName(result2$outputList[[1]]), getName(output2))
     })
 

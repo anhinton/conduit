@@ -14,7 +14,7 @@ runComponent(component, inputList = list(), pipelinePath = getwd())
 \item{pipelinePath}{Pipeline output directory}
 }
 \value{
-Named list of \code{output} objects
+\code{componentResult} object
 }
 \description{
 This function executes a single pipeline component with \code{runModule} or

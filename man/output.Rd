@@ -14,12 +14,13 @@ output(moduleOutput, language, outputDirectory)
 \item{outputDirectory}{file location for module execution}
 }
 \value{
-\code{output} object, varying according to
-    \code{moduleOutput}'s \code{vessel} type:
+\code{output} list object, containing:
 
-\item{fileVessel}{absolute file path to output object}
-\item{urlVessel}{URL to output object}
-\item{internalVessel}{absolute file path to serialized internal object}
+\item{name}{output name}
+\item{format}{\code{ioFormat} object}
+\item{vessel}{\code{vessel} object}
+\item{language}{module language}
+\item{result}{address of output object produced}
 }
 \description{
 Return the object produced by a module output.
