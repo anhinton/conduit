@@ -8,9 +8,9 @@
 #'     \code{vessel} element, referencing the resource from which the
 #'     component was loaded.
 #'
+#' @param value \code{pipeline} or \code{module} object
 #' @param name Name of component
 #' @param vessel \code{fileVessel} or \code{urlVessel}
-#' @param value \code{pipeline} or \code{module} object
 #' 
 #' @return \code{component} list containing:
 #'   \item{name}{component name}
@@ -20,10 +20,10 @@
 #' @seealso \code{pipeline}, \code{module}
 #'
 #' @export
-component <- function(name,
-                      vessel = NULL,
-                      value) {
-    if (missing(name)) name <- getName(value)
+component <- function(value,
+                      name = NULL,
+                      vessel = NULL) {
+    if (is.null(name)) name <- getName(value)
     if (!is_length1_char(name)) stop("'name' is not a length 1 char value")
     if (!inherits(value, c("module", "pipeline")))
         stop("invalid 'value'")
@@ -214,7 +214,7 @@ componentPath <- function (component, pipelinePath) {
 #' @param inputList Named list of \code{input} objects
 #' @param pipelinePath Pipeline output directory
 #' 
-#' @return Named list of \code{output} objects
+#' @return \code{componentResult} object
 runComponent <- function(component, inputList = list(),
                          pipelinePath = getwd()) {
     if (!inherits(component, "component"))
@@ -223,7 +223,9 @@ runComponent <- function(component, inputList = list(),
     type <- getType(component)
     switch(
         type,
-        module = runModule(value, inputList, pipelinePath),
+        module = runModule(module = value,
+                           targetDirectory = pipelinePath,
+                           inputObjects = inputList),
         ## FIXME: running pipelines probably doesn't work
         pipeline = runPipeline(value))
 }

@@ -130,7 +130,6 @@ test_that("graphPipeline() produces appropriate object", {
 })
 
 test_that("runComponent() returns correctly", {
-    skip_on_cran()
     componentList <- getComponents(simpleGraph)
     pipelinePath <- tempfile("runComponent")
     if (!dir.exists(pipelinePath))
@@ -138,22 +137,26 @@ test_that("runComponent() returns correctly", {
     
     ## fails for invalid input
     expect_error(runComponent(unclass(componentList[[1]]),
-                              pipelinePath = pipelinePath))
+                              pipelinePath = pipelinePath),
+                 "component object required")
 
     ## component with no inputs
     result1 <- runComponent(componentList[["createGraph"]],
                             pipelinePath = pipelinePath)
-    expect_equal(length(result1), 1)
-    expect_true(inherits(result1[[1]]$object, "output"))
-    expect_true(file.exists(result1[[1]]$object))
-
+    expect_true(inherits(result1, "componentResult"))
+    expect_equal(length(result1$outputList), 1)
+    expect_true(inherits(result1$outputList[[1]], "output"))
+    expect_true(file.exists(getResult(result1$outputList[[1]])))
+                            
     ## component with inputs
-    result2 <- runComponent(componentList[["layoutGraph"]],
-                            list(myGraph = result1[[1]]$object),
-                            pipelinePath)
-    expect_equal(length(result2), 1)
-    expect_true(inherits(result2[[1]]$object, "output"))
-    expect_true(file.exists(result2[[1]]$object))
+    result2 <- runComponent(component = componentList[["layoutGraph"]],
+                            inputList = list(
+                                myGraph = getResult(result1$outputList[[1]])),
+                            pipelinePath = pipelinePath)
+    expect_true(inherits(result2, "componentResult"))
+    expect_equal(length(result2$outputList), 1)
+    expect_true(inherits(result2$outputList[[1]], "output"))
+    expect_true(file.exists(getResult(result2$outputList[[1]])))
 })
 
 test_that("runPipeline() produces expected results", {
@@ -168,12 +171,8 @@ test_that("runPipeline() produces expected results", {
                  "no such target directory")
 
     ## correct output
-    skip(paste("2016-01-25 strange issues around R CMD check, system2, ",
-               "Rscript, and what is returned."))
     output1 <- runPipeline(simpleGraph, targetDirectory)
-    expect_equal(length(output1), 3)
-    expect_true(all(sapply(output1,
-                           function(x) inherits(x[[1]]$object, "output"))))
-    expect_true(all(sapply(output1,
-                           function(x) file.exists(x[[1]]$object))))
+    expect_true(inherits(output1, "pipelineResult"))
+    expect_true(file.exists(output1$file))
 })
+

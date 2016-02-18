@@ -19,7 +19,7 @@ getName <- function(x) {
 #' @describeIn getName
 #'
 #' @export
-getName <- function(x) {
+getName.default <- function(x) {
     x$name
 }
 
@@ -50,6 +50,13 @@ getType <- function(x) {
     UseMethod("getType")
 }
 
+#' @describeIn getType
+#'
+#' @export
+getType.default <- function(x) {
+    x$type
+}
+
 #' Retrieve object vessel
 #'
 #' @param x object
@@ -64,6 +71,22 @@ getVessel <- function(x) {
 #' @export
 getVessel.default <- function(x) {
     x$vessel
+}
+
+#' Retrieve object format
+#'
+#' @param x object
+#'
+#' @export
+getFormat <- function(x) {
+    UseMethod("getFormat")
+}
+
+#' @describeIn getFormat
+#'
+#' @export
+getFormat.default <- function(x) {
+    x$format
 }
 
 #' Retrieve object value
@@ -84,6 +107,13 @@ getLanguage <- function(x) {
     UseMethod("getLanguage")
 }
 
+#' @describeIn getLanguage
+#'
+#' @export
+getLanguage.default <- function(x) {
+    x$language
+}
+
 #' Retrieve object location
 #'
 #' @param x object
@@ -91,4 +121,51 @@ getLanguage <- function(x) {
 #' @export
 getLocation <- function(x) {
     UseMethod("getLocation")
+}
+
+#' Retrieve object ref
+#'
+#' @param x object
+#'
+#' @export
+getRef <- function(x) {
+    UseMethod("getRef")
+}
+
+#' @describeIn getRef
+#'
+#' @export
+getRef.default <- function(x) {
+    x$ref
+}
+
+#' Retrieve object result
+#'
+#' @param x object
+#'
+#' @export
+getResult <- function(x) {
+    UseMethod("getResult")
+}
+
+#' @describeIn getResult
+#'
+#' @export
+getResult.default <- function(x) {
+    x$result
+}
+
+#' Export OpenAPI objects
+#'
+#' Export OpenAPI objects for sharing.
+#'
+#' This function creates tarball bundles of OpenAPI objects to be
+#' shared and loaded in other sessions.
+#'
+#' @param x object
+#' @param targetDirectory file location
+#'
+#' @export
+export <- function(x, targetDirectory = getwd()) {
+    UseMethod("export")
 }

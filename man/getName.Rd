@@ -3,19 +3,20 @@
 \name{getName.component}
 \alias{getName}
 \alias{getName.component}
+\alias{getName.default}
 \alias{getName.module}
 \alias{getName.pipeline}
 \title{Extract object name}
 \usage{
-getName.component(x)
+\method{getName}{component}(x)
 
 getName(x)
 
-getName(x)
+\method{getName}{default}(x)
 
-getName.module(x)
+\method{getName}{module}(x)
 
-getName.pipeline(x)
+\method{getName}{pipeline}(x)
 }
 \arguments{
 \item{x}{object}
@@ -23,14 +24,14 @@ getName.pipeline(x)
 \description{
 Extract object name
 }
-\section{Functions}{
+\section{Methods (by class)}{
 \itemize{
-\item \code{getName.component}: Returns component name
+\item \code{component}: Returns component name
 
-\item \code{getName}: 
+\item \code{default}: 
 
-\item \code{getName.module}: Returns module name
+\item \code{module}: Returns module name
 
-\item \code{getName.pipeline}: Returns pipeline name
+\item \code{pipeline}: Returns pipeline name
 }}
 

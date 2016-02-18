@@ -16,12 +16,7 @@ resolveOutput(moduleOutput, language, host, outputDirectory = getwd())
 \item{outputDirectory}{location of module output files}
 }
 \value{
-named list containing:
-\itemize{
-  \item name: object name
-  \item type: object vessel type
-  \item object: \code{output} object
-}
+\code{output} object
 }
 \description{
 Checks a module output object has been created.
@@ -29,7 +24,8 @@ Checks a module output object has been created.
 \details{
 Will produce an error if the object does not exist.
 
-If \code{host} is not NULL the function attempts to copy the output object
-across from the remote host and into the current working directory.
+If \code{host} is not NULL the function attempts to copy the output
+object across from the remote host and into the current working
+directory.
 }
 

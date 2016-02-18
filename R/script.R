@@ -153,7 +153,7 @@ prepareScriptOutput <- function(output, language) {
 #' @return List object containg scriptPath and host, with class set to
 #' module$language.
 prepareScript <- function(module, inputObjects) {
-    language <- module$language
+    language <- getLanguage(module)
     onRemoteHost <- !is.null(module$host)
     location <- attr(module, "location")
     
@@ -203,6 +203,9 @@ prepareScript <- function(module, inputObjects) {
         python = c("import os", "import pickle",
             inputScript, sourceScript, outputScript),
         c(inputScript, sourceScript, outputScript))
+    ## script might be empty
+    if (is.null(moduleScript))
+        moduleScript <- ""
     
     ## write script file to disk
     
