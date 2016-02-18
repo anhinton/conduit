@@ -822,7 +822,7 @@ buildModuleHost <- function (parsedHost) {
 #' 		       package = "conduit")
 #' mod1 <- loadModule("createGraph", 
 #' 		      ref = mod1xml)
-#' (outputs1 <- runModule(module = mod1, targetDirectory = tempdir()))
+#' result1 <- runModule(module = mod1, targetDirectory = tempdir())
 #' 
 #' ## run a module with inputs
 #' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
@@ -831,7 +831,7 @@ buildModuleHost <- function (parsedHost) {
 #' 
 #' ## mod2 input names
 #' names(mod2$inputs)
-#' mod2inputs <- outputs1$directedGraph$object
+#' mod2inputs <- lapply(result1$outputList, getResult)
 #' names(mod2inputs) <- names(mod2$inputs)
 #' 
 #' runModule(module = mod2, inputObjects = mod2inputs,
