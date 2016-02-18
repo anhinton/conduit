@@ -89,6 +89,7 @@ resultOutput <- function(output) {
 #' object.
 #'
 #' @param componentResult \code{componentResult} object
+#' @param pipelinePath file path to pipeline output
 #'
 #' @return \code{component} object
 resultComponent <- function(componentResult, pipelinePath) {
