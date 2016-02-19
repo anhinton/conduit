@@ -3,7 +3,11 @@
         xmlns:oa="http://www.openapi.org/2014/"
         targetNamespace="http://www.openapi.org/2014/">
 
+  <include schemaLocation="./host.xsd"/>
+
   <element name="module" type="oa:ModuleType"/>
+  <element name="host" type="oa:HostType"/>
+  <element name="moduleInput" type="oa:ModuleInputType"/>
   <element name="description" type="string"/>
   <element name="input" type="oa:IOType"/>
   <element name="output" type="oa:IOType"/>
@@ -16,15 +20,28 @@
 
   <complexType name="ModuleType">
     <sequence>
+      <element ref="oa:host" minOccurs="0"/>
       <element ref="oa:description" minOccurs="0"/>
       <element ref="oa:input" minOccurs="0" maxOccurs="unbounded"/>
       <element ref="oa:source" minOccurs="0" maxOccurs="unbounded"/>
       <element ref="oa:output" minOccurs="0" maxOccurs="unbounded"/>
     </sequence>
     <attribute name="language" type="string" use="required"/>
-    <attribute name="host" type="string"/>
   </complexType>
 
+  <complexType name="HostType">
+    <sequence>
+      <choice>
+	<element ref="oa:vagrant"/>
+	<element ref="oa:moduleInput"/>
+      </choice>
+    </sequence>
+  </complexType>
+
+  <complexType name="ModuleInputType">
+    <attribute name="name" type="string" use="required"/>
+  </complexType>
+  
   <complexType name="IOType">
     <sequence>
       <choice>
