@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <host>
+    <vagrant
+	vagrantfile="~/vagrant/vagrant-conduit/Vagrantfile"
+	location="~/vagrant/vagrant-conduit"/>
+  </host>
+  <description>Lays out a graphNEL graph using the Rgraphviz package</description>
+  <input name="myGraph">
+    <internal symbol="myGraph"/>
+    <format formatType="text">R "graphNEL" object</format>
+  </input>
+  <source>
+    <script><![CDATA[library(Rgraphviz)
+Ragraph <- agopen(myGraph, "myGraph")]]>
+    </script>
+  </source>
+  <output name="Ragraph">
+    <internal symbol="Ragraph"/>
+    <format formatType="text">R "Ragraph" object</format>
+  </output>
+</module>

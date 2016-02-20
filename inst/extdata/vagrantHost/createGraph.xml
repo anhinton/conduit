@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/" language="R">
+  <host>
+    <vagrant
+	vagrantfile="~/vagrant/vagrant-conduit/Vagrantfile"
+	location="~/vagrant/vagrant-conduit"/>
+  </host>
+  <description>Create a simple directed graphNEL graph object with four nodes and four edges</description>
+  <source>
+    <script><![CDATA[library(graph)
+nodes <- c("a", "b", "c", "d")
+edgeList <- list(a=list(edges=c("b")),
+                 b=list(edges=c("c")),
+                 c=list(edges=c("d")),
+                 d=list(edges=c("a")))
+directedGraph <- new("graphNEL", nodes=nodes, edgeL=edgeList, 
+                     edgemode="directed")]]>
+    </script>
+  </source>
+  <output name="directedGraph">
+    <internal symbol="directedGraph"/>
+    <format formatType="text">R "graphNEL" object</format>
+  </output>
+</module>

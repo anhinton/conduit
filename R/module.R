@@ -12,7 +12,8 @@
 #'
 #' @param name Name of module
 #' @param language Language name
-#' @param host Machine on which module is to be run
+#' @param host \code{moduleHost} object describing machine where
+#'     module is to be executed
 #' @param description A basic description of the module
 #' @param inputs List of \code{moduleInput} objects
 #' @param outputs List of \code{moduleOutput} objects
@@ -20,15 +21,14 @@
 #' @param location file directory where module xml and files are found
 #' 
 #' @return \code{module} list containing:
-#' \itemize{
-#'   \item{name}
-#'   \item{language}
-#'   \item{host}
-#'   \item{description}
-#'   \item{inputs}
-#'   \item{outputs}
-#'   \item{sources}
-#' }
+#'
+#' \item{name}
+#' \item{language}
+#' \item{host}
+#' \item{description}
+#' \item{inputs}
+#' \item{outputs}
+#' \item{sources}
 #' 
 #' @seealso \code{moduleInput}, \code{moduleOutput} and
 #' \code{moduleSource} for creating objects for these
@@ -81,14 +81,14 @@ module <- function(name, language, host=NULL,
     ## check 'language'
     if (!is.null(language)) {
         if (!is_length1_char(language)) {
-            stop("'host' is not a length 1 character vector")
+            stop("'language' is not a length 1 character vector")
         }
     }
     
     ## check 'host'
     if (!is.null(host)) {
-        if (!is_length1_char(host)) {
-            stop("'host' is not a length 1 character vector")
+        if (!inherits(host, "moduleHost")) {
+            stop("'host' is not moduleHost object")
         }
     }
 
@@ -627,17 +627,27 @@ readModuleSourceXML <- function (xml) {
 readModuleXML <- function (name, xml, location = getwd()) {
     attrs <- xmlAttrs(xml)
     language <- attrs[["language"]]
+    nodes <- xmlChildren(xml)
+    nodeNames <- names(nodes)
+
+    ## extract host
     host <-
-        if("host" %in% names(attrs)) {
-            attrs[["host"]]
+        if ("host" %in% nodeNames) {
+            hostNode <- nodes$host
+            moduleHostXML <- xmlChildren(hostNode)[[1]]
+            readModuleHostXML(moduleHostXML)
         } else {
             NULL
         }
-    nodes <- xmlChildren(xml)
     
     ## extract description
-    descNode <- nodes$description
-    description <- xmlValue(descNode)
+    description <-
+        if ("description" %in% nodeNames) {
+            descNode <- nodes$description
+            xmlValue(descNode)
+        } else {
+            NULL
+        }
     
     ## extract inputs
     inputNodes <- nodes[names(nodes) == "input"]
@@ -662,15 +672,14 @@ readModuleXML <- function (name, xml, location = getwd()) {
             lapply(outputNodes, readModuleIOXML)
         }
 
-    module <- module(name = name,
-                     language = language,
-                     host = host,
-                     description = description,
-                     inputs = inputs,
-                     sources = sources,
-                     outputs = outputs,
-                     location = location)
-    return(module)
+    module(name = name,
+           language = language,
+           host = host,
+           description = description,
+           inputs = inputs,
+           sources = sources,
+           outputs = outputs,
+           location = location)
 }
 
 #' Save a module to disk

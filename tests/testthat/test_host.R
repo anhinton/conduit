@@ -7,14 +7,12 @@ skipHost <- TRUE
 
 file1 <- tempfile()
 system2("touch", file1)
-host <- "conduit@127.0.0.1:2222"
-host1 <- parseModuleHost(host)
-host2 <- parseModuleHost("notreal@nosuch.server:22")
+host1 <- vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile")
 
 test_module <- module(
     name = "test_module",
     language = "R",
-    host = host,
+    host = host1,
     sources = list(
         moduleSource(
             scriptVessel("x <- 1:10"))),
