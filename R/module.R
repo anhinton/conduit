@@ -724,14 +724,60 @@ saveModule <- function(module, targetDirectory = getwd(),
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
-    moduleDoc <-
-        newXMLDoc(
-            namespaces="http://www.openapi.org/2014",
-            node=moduleToXML(
-                module,
-                namespaceDefinitions="http://www.openapi.org/2014/"))
+    namespace <- "http://www.openapi.org/2014/"
+    moduleXML <- moduleToXML(module, namespaceDefinitions = namespace)
+    moduleDoc <- newXMLDoc(
+        namespaces = namespace,
+        node = moduleXML)
     moduleFilePath <- file.path(targetDirectory, filename)
     saveXML(moduleDoc, moduleFilePath)
+}
+
+#' Convert a \code{module} object to XML
+#'
+#' @param module \code{module} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#' 
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{module} objects
+#' 
+#' @import XML
+moduleToXML <- function (module,
+                         namespaceDefinitions=NULL) {
+    if (class(module) != "module") {
+        stop("'module' is not a 'module' object")
+    }
+    moduleRoot <- newXMLNode(name = "module",
+                             attrs = c(language = module$language),
+                             namespaceDefinitions = namespaceDefinitions)
+    host <-
+        if (!is.null(module$host)) {
+            hostNode <- newXMLNode("host")
+            child <- moduleHostToXML(module$host)
+            addChildren(hostNode, kids = list(child))
+        } else {
+            NULL
+        }
+    description <-
+        if (!is.null(module$description)) {
+            newXMLNode("description", children = module$description)
+        } else {
+            NULL
+        }
+    inputs <- lapply(module$inputs, moduleIOToXML)
+    outputs <- lapply(module$outputs, moduleIOToXML)
+    sources <- lapply(module$sources, moduleSourceToXML)
+    addChildren(moduleRoot,
+                kids=list(host, description, inputs, sources,
+                          outputs))
+}
+
+#' Create XML corresponding to a \code{moduleHost} object
+moduleHostToXML <- function(moduleHost) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    UseMethod("moduleHostToXML")
 }
 
 #' Create XML corresponding to a \code{vessel} object.
@@ -846,37 +892,6 @@ moduleSourceToXML <- function (moduleSource,
     vesselXML <- vesselToXML(moduleSource$vessel)
     xmlChildren(moduleSourceXML) <- list(vesselXML)
     return(moduleSourceXML)
-}
-
-#' Convert a \code{module} object to XML
-#'
-#' @param module \code{module} object
-#' @param namespaceDefinitions XML namespaces as character vector
-#' 
-#' @return \code{XMLInternalNode} object
-#'
-#' @seealso \code{module} objects
-#' 
-#' @import XML
-moduleToXML <- function (module,
-                         namespaceDefinitions=NULL) {
-    if (class(module) != "module") {
-        stop("'module' is not a 'module' object")
-    }
-    moduleRoot <- newXMLNode(name = "module",
-                             attrs = c(language = module$language,
-                                 host = module$host),
-                             namespaceDefinitions = namespaceDefinitions)
-    host <- newXMLNode("host", children = module$host)
-    description <- newXMLNode("description", children = module$description)
-    inputs <- lapply(module$inputs, moduleIOToXML)
-    outputs <- lapply(module$outputs, moduleIOToXML)
-    sources <- lapply(module$sources, moduleSourceToXML)
-    moduleRoot <-
-        addChildren(moduleRoot,
-                    kids=list(description, inputs, sources,
-                              outputs))
-    return(moduleRoot)
 }
 
 ## RUNNING A MODULE

@@ -12,7 +12,8 @@ module(name, language, host = NULL, description = NULL, inputs = NULL,
 
 \item{language}{Language name}
 
-\item{host}{Machine on which module is to be run}
+\item{host}{\code{moduleHost} object describing machine where
+module is to be executed}
 
 \item{description}{A basic description of the module}
 
@@ -26,15 +27,14 @@ module(name, language, host = NULL, description = NULL, inputs = NULL,
 }
 \value{
 \code{module} list containing:
-\itemize{
-  \item{name}
-  \item{language}
-  \item{host}
-  \item{description}
-  \item{inputs}
-  \item{outputs}
-  \item{sources}
-}
+
+\item{name}
+\item{language}
+\item{host}
+\item{description}
+\item{inputs}
+\item{outputs}
+\item{sources}
 }
 \description{
 Creates a module object which can be executed in conduit.

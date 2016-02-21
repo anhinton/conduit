@@ -53,3 +53,10 @@ readVagrantHostXML <- function (vagrantHostXML) {
         }
     vagrantHost(vagrantfile, location)
 }
+
+#' Create XML corresponding to a \code{vagrantHost} object
+moduleHostToXML.vagrantHost <- function(vagrantHost) {
+    if (!inherits(vagrantHost, "vagrantHost"))
+        stop ("vagrantHost object required")
+    newXMLNode("vagrant", attrs = vagrantHost)
+}
