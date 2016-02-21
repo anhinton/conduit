@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<module xmlns="http://www.openapi.org/2014//" language="R">
+<module xmlns="http://www.openapi.org/2014/" language="R">
   <description>Lays out a graphNEL graph using the Rgraphviz package</description>
   <input name="myGraph">
     <internal symbol="myGraph"/>
