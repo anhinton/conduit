@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<pipeline xmlns="http://www.openapi.org/2014">
+<pipeline xmlns="http://www.openapi.org/2014/">
   <description>Create a scatter matrix from the iris data using R and python modules</description>
   <component name="iris_df" type="module">
     <file ref="iris_df.xml"/>

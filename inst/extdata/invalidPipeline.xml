@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<pipeline xmlns="http://www.openapi.org/2014">
+<pipeline xmlns="http://www.openapi.org/2014/">
   <description>This pipeline is invalid.</description>
   <description>Because it has two descriptions.</description>
   <component name="plotGraph" ref="plotGraph.xml" type="module"/>

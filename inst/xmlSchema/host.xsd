@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema"
-        xmlns:oa="http://www.openapi.org/2014"
-        targetNamespace="http://www.openapi.org/2014">
+        xmlns:oa="http://www.openapi.org/2014/"
+        targetNamespace="http://www.openapi.org/2014/">
 
   <element name="vagrant" type="oa:VagrantType"/>
 

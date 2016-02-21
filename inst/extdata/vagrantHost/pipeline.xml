@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<pipeline xmlns="http://www.openapi.org/2014">
+<pipeline xmlns="http://www.openapi.org/2014/">
   <description>This pipeline creates a directed graphNEL graph, lays it out using the Rgraphviz package, and then plots the graph as a PNG file using the gridGraphviz package</description>
   <component name="plotGraph" type="module">
     <file ref="plotGraph.xml"/>

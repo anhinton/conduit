@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<module xmlns="http://www.openapi.org/2014" language="python">
+<module xmlns="http://www.openapi.org/2014/" language="python">
   <description>create scatterplot matrix of data from a CSV file</description>
   <input name="data.csv">
     <file ref="data.csv"/>
