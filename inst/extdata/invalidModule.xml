@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<module name="myCoolModule" xmlns="http://www.openapi.org/2014/" language="R">
+<module name="myCoolModule" xmlns="http://www.openapi.org/2014" language="R">
   <description>This module is invalid as module's do not support name attributes for the &lt;module&gt; element</description>
   <source>
     <script><![CDATA[library(graph)

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<module xmlns="http://www.openapi.org/2014/" language="R">
+<module xmlns="http://www.openapi.org/2014" language="R">
   <description/>
   <source>
     <script><![CDATA[x <- rnorm(10)]]></script>

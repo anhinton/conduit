@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<module xmlns="http://www.openapi.org/2014/" language="shell">
+<module xmlns="http://www.openapi.org/2014" language="shell">
   <description/>
   <input name="dotfile">
     <file ref="dot.dot"/>
