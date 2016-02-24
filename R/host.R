@@ -1,32 +1,40 @@
-#' Constructor functions for \code{moduleHost} objects
+#' \code{moduleHost} object
 #'
-#' These functions are used to create \code{moduleHost} objects.
+#' @seealso \code{vagrantHost}, \code{module}
 #'
 #' @name moduleHost
-#'
-#' @param vagrantfile Path to vagrantfile
-#' @param location File location for running vagrant machine
-#'
-#' @return Object of class \code{moduleHost}, and one of:
-#'
-#' \item{\code{vagrantHost}}{containing \code{vagrantfile} and
-#'     \code{location}}
 NULL
 
-#' @describeIn moduleHost Create a \code{vagrantHost} object
+#' Create a \code{vagrantHost} object
+#'
+#' Create a \code{moduleHost} object of class \code{vagrantHost} to
+#' describe a vagrant machine for executing module source scripts.
+#'
+#' The default setup for vagrant synced folders is for the directory
+#' where the Vagrantfile is found to be synced to \file{/vagrant} on
+#' the vagrant guest. If the vagtant machine describes a different
+#' synced folder setup the synced folder on the host machine can be
+#' specified with \code{hostdir}, and on the vagrant guest with
+#' \code{guestdir}.
+#'
+#' @param vagrantfile Path to vagrantfile
+#' @param hostdir Host synced folder path
+#' @param guestdir Gues synced folder path
+#'
+#' @return Object of class \code{vagrantHost} and \code{moduleHost}
 #'
 #' @export
-vagrantHost <- function(vagrantfile, location = NULL) {
+vagrantHost <- function(vagrantfile, hostdir = dirname(vagrantfile),
+                        guestdir = "/vagrant") {
     if (!file.exists(vagrantfile))
         stop("vagrantfile does not exist")
-    if (is.null(location))
-        location <- dirname(vagrantfile)
-    if (!dir.exists(location))
-        stop("location does not exist")
+    if (!dir.exists(hostdir))
+        stop("hostdir does not exist")
     vagrantfile <- normalizePath(vagrantfile)
-    location <- normalizePath(location)
+    hostdir <- normalizePath(hostdir)
     vagrantHost <- list(vagrantfile = vagrantfile,
-                        location = location)
+                        synhost = hostdir,
+                        guestdir = guestdir)
     class(vagrantHost) <- c("vagrantHost", "moduleHost")
     vagrantHost
 }

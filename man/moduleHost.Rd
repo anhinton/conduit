@@ -2,27 +2,11 @@
 % Please edit documentation in R/host.R
 \name{moduleHost}
 \alias{moduleHost}
-\alias{vagrantHost}
-\title{Constructor functions for \code{moduleHost} objects}
-\usage{
-vagrantHost(vagrantfile, location = NULL)
-}
-\arguments{
-\item{vagrantfile}{Path to vagrantfile}
-
-\item{location}{File location for running vagrant machine}
-}
-\value{
-Object of class \code{moduleHost}, and one of:
-
-\item{\code{vagrantHost}}{containing \code{vagrantfile} and
-    \code{location}}
-}
+\title{\code{moduleHost} object}
 \description{
-These functions are used to create \code{moduleHost} objects.
+\code{moduleHost} object
 }
-\section{Functions}{
-\itemize{
-\item \code{vagrantHost}: Create a \code{vagrantHost} object
-}}
+\seealso{
+\code{vagrantHost}, \code{module}
+}
 
