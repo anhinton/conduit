@@ -19,7 +19,7 @@ NULL
 #'
 #' @param vagrantfile Path to vagrantfile
 #' @param hostdir Host synced folder path
-#' @param guestdir Gues synced folder path
+#' @param guestdir Guest synced folder path
 #'
 #' @return Object of class \code{vagrantHost} and \code{moduleHost}
 #'
@@ -30,10 +30,12 @@ vagrantHost <- function(vagrantfile, hostdir = dirname(vagrantfile),
         stop("vagrantfile does not exist")
     if (!dir.exists(hostdir))
         stop("hostdir does not exist")
+    if (!is_length1_char(guestdir))
+        stop("guestdir must be a length one character string")
     vagrantfile <- normalizePath(vagrantfile)
     hostdir <- normalizePath(hostdir)
     vagrantHost <- list(vagrantfile = vagrantfile,
-                        synhost = hostdir,
+                        hostdir = hostdir,
                         guestdir = guestdir)
     class(vagrantHost) <- c("vagrantHost", "moduleHost")
     vagrantHost
