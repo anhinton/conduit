@@ -206,13 +206,13 @@ test_that("fetchVessel returns correctly", {
 
     ## fileVessel
     result1 <- fetchVessel(testFile)
-    expect_true(inherits(result1, "character"))
+    expect_is(result1, "character")
     expect_match(attr(result1, "location"), dirname(file))
     result2 <- fetchVessel(testPath)
-    expect_true(inherits(result2, "character"))
+    expect_is(result2, "character")
     expect_match(attr(result2, "location"), dirname(file))
 
     ## urlVessel
     result3 <- fetchVessel(testURL)
-    expect_true(inherits(result3, "character"))
+    expect_is(result3, "character")
 })

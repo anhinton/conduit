@@ -306,7 +306,7 @@ test_that(
         internal_output <- moduleOutput(
             "internal", internalVessel(symbol), ioFormat("nonsense"))
         output1 <- output(internal_output, lang, outdir)
-        expect_true(inherits(output1, "output"))
+        expect_is(output1, "output")
         expect_match(
             getResult(output1),
             file.path(outdir, paste0(symbol, internalExtension(lang))))
@@ -316,7 +316,7 @@ test_that(
         url_output <- moduleOutput(
             "url", urlVessel(url), ioFormat("HTML file"))
         output2 <- output(url_output, lang, outdir)
-        expect_true(inherits(output2, "output"))
+        expect_is(output2, "output")
         expect_match(getResult(output2), url)
         
         ## works for fileVessel
@@ -324,7 +324,7 @@ test_that(
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
         output3 <- output(file_output, lang, outdir)
-        expect_true(inherits(output3, "output"))
+        expect_is(output3, "output")
         expect_match(getResult(output3), file.path(outdir, file))
         
         ## fails for unknown vessel type
@@ -459,7 +459,7 @@ test_that(
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1$outputList[[1]]$name, output1$name)
-        expect_true(inherits(result1, "moduleResult"))
+        expect_is(result1, "moduleResult")
         expect_true(file.exists(getResult(result1$outputList[[1]])))
         
         ## run the layoutGraph module, providing the output from
@@ -470,7 +470,7 @@ test_that(
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
-        expect_true(inherits(result2, "moduleResult"))
+        expect_is(result2, "moduleResult")
         expect_match(result2$outputList[[1]]$name, output2$name)
         expect_true(file.exists(getResult(result2$outputList[[1]])))
     })

@@ -188,7 +188,7 @@ test_that("'module' slots are correct type and length", {
     expect_equal(length(mod1$language), 1)
     expect_true(is.character(mod1$description))
     expect_true(is.null(mod2$desctription))
-    expect_true(inherits(mod1$host, "moduleHost"))
+    expect_is(mod1$host, "moduleHost")
     expect_true(is.null(mod2$host))
     expect_true(is.list(mod1$inputs))
     expect_match(class(mod1$inputs[[1]]), "^moduleInput$", all=F)

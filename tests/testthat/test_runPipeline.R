@@ -79,7 +79,7 @@ test_that("input() produces appropriate object", {
 
     ## returns correct object
     input1 <- input(pipe1, outputList)
-    expect_true(inherits(input1, "input"))
+    expect_is(input1, "input")
     expect_match(input1, getVessel(getValue(comp3)$outputs$C)$ref)
 })
 
@@ -118,7 +118,7 @@ test_that("graphPipeline() produces appropriate object", {
 
     ## expected output
     graph1 <- graphPipeline(simpleGraph)
-    expect_true(inherits(graph1, "graphNEL"))
+    expect_is(graph1, "graphNEL")
     expect_equal(graph::numNodes(graph1),
                  length(getComponents(simpleGraph)))
     expect_equal(graph::numEdges(graph1),
@@ -143,9 +143,9 @@ test_that("runComponent() returns correctly", {
     ## component with no inputs
     result1 <- runComponent(componentList[["createGraph"]],
                             pipelinePath = pipelinePath)
-    expect_true(inherits(result1, "componentResult"))
+    expect_is(result1, "componentResult")
     expect_equal(length(result1$outputList), 1)
-    expect_true(inherits(result1$outputList[[1]], "output"))
+    expect_is(result1$outputList[[1]], "output")
     expect_true(file.exists(getResult(result1$outputList[[1]])))
                             
     ## component with inputs
@@ -153,9 +153,9 @@ test_that("runComponent() returns correctly", {
                             inputList = list(
                                 myGraph = getResult(result1$outputList[[1]])),
                             pipelinePath = pipelinePath)
-    expect_true(inherits(result2, "componentResult"))
+    expect_is(result2, "componentResult")
     expect_equal(length(result2$outputList), 1)
-    expect_true(inherits(result2$outputList[[1]], "output"))
+    expect_is(result2$outputList[[1]], "output")
     expect_true(file.exists(getResult(result2$outputList[[1]])))
 })
 
@@ -172,7 +172,7 @@ test_that("runPipeline() produces expected results", {
 
     ## correct output
     output1 <- runPipeline(simpleGraph, targetDirectory)
-    expect_true(inherits(output1, "pipelineResult"))
+    expect_is(output1, "pipelineResult")
     expect_true(file.exists(output1$file))
 })
 

@@ -90,7 +90,7 @@ test_that("exportComponent() generates appropriate objects", {
 
     ## component with no vessel
     newC1 <- exportComponent(c1, targetDirectory)
-    expect_true(inherits(newC1, "component"))
+    expect_is(newC1, "component")
     expect_match(getType(c1), getType(newC1))
     expect_true(file.exists(
         file.path(targetDirectory, paste0(getName(newC1), ".xml"))))
@@ -98,7 +98,7 @@ test_that("exportComponent() generates appropriate objects", {
 
     ## component with fileVessel
     newC3 <- exportComponent(c3, targetDirectory)
-    expect_true(inherits(newC3, "component"))
+    expect_is(newC3, "component")
     expect_match(getType(c3), getType(newC3))
     expect_true(file.exists(
         file.path(targetDirectory, paste0(getName(newC3), ".xml"))))
@@ -106,7 +106,7 @@ test_that("exportComponent() generates appropriate objects", {
 
     ## component with urlVessel
     newC4 <- exportComponent(c4, targetDirectory)
-    expect_true(inherits(newC4, "component"))
+    expect_is(newC4, "component")
     expect_match(getType(c4), getType(newC4))
     expect_true(!file.exists(
         file.path(targetDirectory, paste0(getName(newC4), ".xml"))))

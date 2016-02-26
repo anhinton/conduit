@@ -51,7 +51,7 @@ pipelineXML <- xmlRoot(xmlParse(
 
 test_that("pipe nodes read correctly", {
     result <- readPipeXML(pipeXML)
-    expect_true(inherits(result, "pipe"))
+    expect_is(result, "pipe")
     expect_match(start(result)$component, startComponent)
     expect_match(start(result)$output, startOutput)
     expect_match(end(result)$component, endComponent)
@@ -61,28 +61,28 @@ test_that("pipe nodes read correctly", {
 test_that("readComponentNode() works correctly", {
     ## inline module
     result <- readComponentNode(inlineModuleXML)
-    expect_true(inherits(result, "component"))
+    expect_is(result, "component")
     expect_match(getType(result), "module")
     expect_match(getName(result), "a")
     expect_null(getVessel(result))
 
     ## file module
     result <- readComponentNode(fileModuleXML)
-    expect_true(inherits(result, "component"))
+    expect_is(result, "component")
     expect_match(getType(result), "module")
     expect_match(getName(result), "createGraph")
     expect_identical(getVessel(result), fileVessel(moduleFile))
 
     ## inline pipeline
     result <- readComponentNode(inlinePipelineXML)
-    expect_true(inherits(result, "component"))
+    expect_is(result, "component")
     expect_match(getType(result), "pipeline")
     expect_match(getName(result), "x")
     expect_null(getVessel(result))
 
     ## file pipeline
     result <- readComponentNode(filePipelineXML)
-    expect_true(inherits(result, "component"))
+    expect_is(result, "component")
     expect_match(getType(result), "pipeline")
     expect_match(getName(result), "simpleGraph")
     expect_identical(getVessel(result), fileVessel(pipelineFile))
@@ -92,7 +92,7 @@ test_that("readPipelineXML() works correctly", {
     location <- tempdir()
     result <- readPipelineXML(name = "danny", xml = pipelineXML,
                               location = location)
-    expect_true(inherits(result, "pipeline"))
+    expect_is(result, "pipeline")
     expect_match(getName(result), "danny")
     expect_match(getLocation(result), location)
     componentNames <- names(getComponents(result))
@@ -110,7 +110,7 @@ test_that("readPipelineXML() works correctly", {
 test_that("loadPipeline() works correctly", {
     ## just ref
     result <- loadPipeline("simpleGraph", ref = pipelineFile)
-    expect_true(inherits(result, "pipeline"))
+    expect_is(result, "pipeline")
     expect_match(getName(result), "simpleGraph")
     expect_match(getLocation(result),
                  dirname(pipelineFile))

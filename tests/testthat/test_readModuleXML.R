@@ -147,12 +147,21 @@ test_that(
 ## read <module> XML
 
 test_that("readModuleXML creates appropriate module object", {
-    moduleXml <-
+    ## minimal module
+    minModXML <- moduleToXML(module(
+        name = "minmod", language = "R"))
+    minMod <- readModuleXML(name = "minMod", xml = minModXML)
+    expect_is(minMod, "module")
+    
+    ## moduleXML with the works
+    module1Xml <-
         moduleToXML(
             module(
                 sources = list(moduleSource(scriptVessel("alpha"))),
                 name = "setX",
                 language = "R",
+                host = vagrantHost(
+                    vagrantfile = "~/vagrant/vagrant-conduit/Vagrantfile"),
                 description="your whole life",
                 inputs=list(
                     moduleInput("input", internalVessel("x"),
@@ -161,9 +170,9 @@ test_that("readModuleXML creates appropriate module object", {
                     moduleOutput("output", fileVessel("out.file"),
                                  ioFormat("text file")))))
 
-    module <- readModuleXML(name = "first", xml = moduleXml)
-    expect_match(class(module), "module")
-    expect_match(module$name, "first")
+    module1 <- readModuleXML(name = "first", xml = module1Xml)
+    expect_is(module1, "module")
+    expect_match(getName(module1), "first")
 })
 
 ## read <host> xml
@@ -174,7 +183,7 @@ test_that("readModuleHostXML() returns correctly", {
         name = "vagrant",
         attrs = list(vagrantfile = vagrantfile))
     vh1 <- readModuleHostXML(vhXML1)
-    expect_true(inherits(vh1, "moduleHost"))
+    expect_is(vh1, "moduleHost")
 })
 
 ## load module from XML file
