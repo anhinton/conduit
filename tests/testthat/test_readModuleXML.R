@@ -1,41 +1,25 @@
 library(conduit)
 context("read module XML")
 
-## read <format> XML
-value1 <- "R data job"
-type1 <- "text"
-format1XML <- ioFormatToXML(ioFormat(value1, type1))
-
 test_that("readIOFormatXML fails for incorrect node name", {
+    library(XML)
     notAFormat <- newXMLNode(name = "notAFormat")
     expect_error(readIOFormatXML(notAFormat),
                  "ioFormat XML is invalid")
 })
 
 test_that("readIOFormatXML creates appropriate ioFormat objects", {
+    value1 <- "R data job"
+    type1 <- "text"
+    format1XML <- ioFormatToXML(ioFormat(value1, type1))
     format1 <- readIOFormatXML(format1XML)
     expect_match(class(format1), "ioFormat")
     expect_match(format1$type, "text")
 })
 
 ## read <input> and <output> XML
-name1 <- "data"
-type1 <- "input"
-vessel1 <- internalVessel("myData")
-format1 <- ioFormat("R data")
-inputXML1 <- moduleIOToXML(moduleIO(name1, type1, vessel1, format1))
 
-name2 <- "graph"
-type2 <- "output"
-vessel2 <- fileVessel("graph.dot")
-format2 <- ioFormat("graphviz dot file")
-outputXML2 <- moduleIOToXML(moduleIO(name2, type2, vessel2, format2))
 
-name3 <- "url"
-type3 <- "input"
-vessel3 <- urlVessel("http://github.com/anhinton/conduit")
-format3 <- ioFormat("html file")
-inputXML3 <- moduleIOToXML(moduleIO(name3, type3, vessel3, format3))
 
 test_that("readModuleIOXML fails for invalid named XML", {
     notIO <- XML::newXMLNode("notInput")
@@ -44,27 +28,39 @@ test_that("readModuleIOXML fails for invalid named XML", {
 })
 
 test_that("readModuleIOXML creates appropriate inputs", {
+    ## internalVessel
+    name1 <- "data"
+    type1 <- "input"
+    vessel1 <- internalVessel("myData")
+    format1 <- ioFormat("R data")
+    inputXML1 <- moduleIOToXML(moduleIO(name1, type1, vessel1, format1))
     input1 <- readModuleIOXML(inputXML1)
     expect_match(class(input1)[2], "moduleIO")
     expect_match(input1$type, type1)
+
+    ## urlVessel
+    name3 <- "url"
+    type3 <- "input"
+    vessel3 <- urlVessel("http://github.com/anhinton/conduit")
+    format3 <- ioFormat("html file")
+    inputXML3 <- moduleIOToXML(moduleIO(name3, type3, vessel3, format3))
     input3 <- readModuleIOXML(inputXML3)
     expect_match(class(input3)[2], "moduleIO")
     expect_match(input3$type, type3)
 })
 
 test_that("readModuleIOXML creates appropriate outputs", {
+    name2 <- "graph"
+    type2 <- "output"
+    vessel2 <- fileVessel("graph.dot")
+    format2 <- ioFormat("graphviz dot file")
+    outputXML2 <- moduleIOToXML(moduleIO(name2, type2, vessel2, format2))
     output2 <- readModuleIOXML(outputXML2)
     expect_match(class(output2)[2], "moduleIO")
     expect_match(output2$type, type2)
 })
 
 ## read <source> XML
-file1 <- fileVessel("abs.csv")
-order1 <- 9
-sourceXML1 <- moduleSourceToXML(moduleSource(file1, order1))
-
-script2 <- scriptVessel(c("x", "b", "92 / 2"))
-sourceXML2 <- moduleSourceToXML(moduleSource(script2))
 
 test_that("readModuleSourceXML fails for invalid XML", {
     notSource <- XML::newXMLNode("notSource")
@@ -73,9 +69,17 @@ test_that("readModuleSourceXML fails for invalid XML", {
 })
 
 test_that("readModuleSourceXML creates appropriate objects", {
+    ## fileVessel
+    file1 <- fileVessel("abs.csv")
+    order1 <- 9
+    sourceXML1 <- moduleSourceToXML(moduleSource(file1, order1))
     fileSource <- readModuleSourceXML(sourceXML1)
     expect_match(class(fileSource), "moduleSource")
     expect_equal(fileSource$order, order1)
+
+    ## scriptVessel
+    script2 <- scriptVessel(c("x", "b", "92 / 2"))
+    sourceXML2 <- moduleSourceToXML(moduleSource(script2))
     scriptSource <- readModuleSourceXML(sourceXML2)
     expect_match(class(scriptSource), "moduleSource")
 })
@@ -141,23 +145,36 @@ test_that(
 })
 
 ## read <module> XML
-moduleXml <-
-    moduleToXML(
-        module(
-            sources = list(moduleSource(scriptVessel("alpha"))),
-            name = "setX",
-            language = "R",
-            description="your whole life",
-            inputs=list(
-                moduleInput("input", internalVessel("x"), ioFormat("names"))),
-            outputs = list(
-                moduleOutput("output", fileVessel("out.file"),
-                             ioFormat("text file")))))
 
 test_that("readModuleXML creates appropriate module object", {
+    moduleXml <-
+        moduleToXML(
+            module(
+                sources = list(moduleSource(scriptVessel("alpha"))),
+                name = "setX",
+                language = "R",
+                description="your whole life",
+                inputs=list(
+                    moduleInput("input", internalVessel("x"),
+                                ioFormat("names"))),
+                outputs = list(
+                    moduleOutput("output", fileVessel("out.file"),
+                                 ioFormat("text file")))))
+
     module <- readModuleXML(name = "first", xml = moduleXml)
     expect_match(class(module), "module")
     expect_match(module$name, "first")
+})
+
+## read <host> xml
+test_that("readModuleHostXML() returns correctly", {
+    ## <vagrant/> host XML
+    vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
+    vhXML1 <- newXMLNode(
+        name = "vagrant",
+        attrs = list(vagrantfile = vagrantfile))
+    vh1 <- readModuleHostXML(vhXML1)
+    expect_true(inherits(vh1, "moduleHost"))
 })
 
 ## load module from XML file
@@ -199,3 +216,4 @@ test_that("loadModule() handles ref and path", {
     expect_match(class(mod2), "module")
     expect_match(getLocation(mod2), dir2)
 })
+

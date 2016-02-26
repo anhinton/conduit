@@ -55,13 +55,20 @@ readVagrantHostXML <- function (vagrantHostXML) {
         stop("vagrant element required")
     attrs <- xmlAttrs(vagrantHostXML)
     vagrantfile <- attrs[["vagrantfile"]]
-    location <-
-        if ("location" %in% names(attrs)) {
-            attrs[["location"]]
+    hostdir <-
+        if ("hostdir" %in% names(attrs)) {
+            attrs[["hostdir"]]
         } else {
-            NULL
+            dirname(vagrantfile)
         }
-    vagrantHost(vagrantfile, location)
+    guestdir <-
+        if ("guestdir" %in% names(attrs)) {
+            attrs[["guestdir"]]
+        } else {
+            "/vagrant"
+        }
+    vagrantHost(vagrantfile = vagrantfile, hostdir = hostdir,
+                guestdir = guestdir)
 }
 
 #' Create XML corresponding to a \code{vagrantHost} object

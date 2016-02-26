@@ -28,21 +28,24 @@ module is to be executed}
 \value{
 \code{module} list containing:
 
-\item{name}
-\item{language}
-\item{host}
-\item{description}
-\item{inputs}
-\item{outputs}
-\item{sources}
+\item name
+\item othername
+
+\item{name}{module name}
+\item{language}{module language}
+\item{host}{\code{moduleHost} object}
+\item{description}{module description}
+\item{inputs}{list of \code{moduleInput} objects}
+\item{outputs}{list of \code{moduleOutput} objects}
+\item{sources}{list of \code{moduleSource} objects}
 }
 \description{
 Creates a module object which can be executed in conduit.
 }
 \details{
 \code{inputs}, \code{outputs}, and \code{sources} should be lists
-of objects created using \code{moduleInput}, \code{moduleOutput}, and
-\code{moduleSource} respectively.
+of objects created using \code{moduleInput}, \code{moduleOutput},
+and \code{moduleSource} respectively.
 
 Module \sQuote{location} defaults to current working
 directory. This can be set to indicate the location of the module

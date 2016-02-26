@@ -13,6 +13,11 @@ readModuleHostXML(moduleHostXML)
 \code{moduleHost} object
 }
 \description{
-Create a \code{moduleHost} object from host XML
+This function creates a \code{moduleHost} object from valid host
+elements.
+}
+\details{
+As of 2016-02-26 only \samp{<vagrant/>} elements are
+supported.
 }
 
