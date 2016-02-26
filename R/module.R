@@ -642,7 +642,11 @@ readModuleXML <- function (name, xml, location = getwd()) {
     ## extract sources
     sourceNodes <- nodes[names(nodes) == "source"]
     sources <-
-        lapply(sourceNodes, readModuleSourceXML)
+        if (!length(sourceNodes)) {
+            NULL
+        } else {
+            lapply(sourceNodes, readModuleSourceXML)
+        }
     
     ## extract outputs
     outputNodes <- nodes[names(nodes) == "output"]

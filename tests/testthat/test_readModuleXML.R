@@ -149,30 +149,43 @@ test_that(
 test_that("readModuleXML creates appropriate module object", {
     ## minimal module
     minModXML <- moduleToXML(module(
-        name = "minmod", language = "R"))
+        name = "minMod", language = "R"))
     minMod <- readModuleXML(name = "minMod", xml = minModXML)
     expect_is(minMod, "module")
+    expect_match(getName(minMod), "minMod")
+    expect_match(getLanguage(minMod), "R")
+    expect_null(minMod$host)
+    expect_null(minMod$description)
+    expect_null(minMod$inputs)
+    expect_null(minMod$outputs)
+    expect_null(minMod$sources)
     
     ## moduleXML with the works
-    module1Xml <-
-        moduleToXML(
-            module(
-                sources = list(moduleSource(scriptVessel("alpha"))),
-                name = "setX",
-                language = "R",
-                host = vagrantHost(
-                    vagrantfile = "~/vagrant/vagrant-conduit/Vagrantfile"),
-                description="your whole life",
-                inputs=list(
-                    moduleInput("input", internalVessel("x"),
-                                ioFormat("names"))),
-                outputs = list(
-                    moduleOutput("output", fileVessel("out.file"),
-                                 ioFormat("text file")))))
-
+    sources = list(moduleSource(scriptVessel("alpha")))
+    name = "setX"
+    language = "R"
+    host = vagrantHost(
+        vagrantfile = "~/vagrant/vagrant-conduit/Vagrantfile")
+    description="your whole life"
+    inputs=list(
+        moduleInput("input", internalVessel("x"),
+                    ioFormat("names")))
+    outputs = list(
+        moduleOutput("output", fileVessel("out.file"),
+                     ioFormat("text file")))
+    module1Xml <- moduleToXML(module(
+        name = name, language = language, host = host,
+        description = description, inputs = inputs, sources = sources,
+        outputs = outputs))
     module1 <- readModuleXML(name = "first", xml = module1Xml)
     expect_is(module1, "module")
     expect_match(getName(module1), "first")
+    expect_match(getLanguage(module1), "R")
+    expect_identical(module1$host, host)
+    expect_match(module1$description, description)
+    expect_true(!is.null(module1$inputs))
+    expect_true(!is.null(module1$sources))
+    expect_true(!is.null(module1$outputs))
 })
 
 ## read <host> xml
