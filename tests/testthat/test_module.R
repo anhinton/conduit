@@ -168,29 +168,27 @@ test_that("'module' fails for invalid arguments", {
                  "'inputs' is not a list object")
     expect_error(module(name = "moddy", language = "R",
                         inputs = list(character(1))),
-                 "not a 'moduleInput' object")
+                 "inputs must be moduleInput objects")
     expect_error(module(name = "moddy", language = "R",
                         outputs = character(2)),
                  "'outputs' is not a list object")
     expect_error(module(name = "moddy", language = "R",
                         outputs = list(character(1))),
-                 "not a 'moduleOutput' object")
+                 "outputs must be moduleOutput objects")
     expect_error(module(name = "moddy", language = "R",
                         sources = character(2)),
                  "'sources' is not a list object")
     expect_error(module(name = "moddy", language = "R",
                         sources = list(character(1))),
-                 "not a 'moduleSource' object")
+                 "sources must be moduleSource objects")
 })
 
 test_that("'module' slots are correct type and length", {
-    skip("2016-02-21 vagrantHost whack-a-mole")
     expect_true(is_length1_char(mod1$name))
     expect_equal(length(mod1$language), 1)
     expect_true(is.character(mod1$description))
     expect_true(is.null(mod2$desctription))
-    expect_true(is.character(mod1$host))
-    expect_equal(length(mod1$host), 1)
+    expect_true(inherits(mod1$host, "moduleHost"))
     expect_true(is.null(mod2$host))
     expect_true(is.list(mod1$inputs))
     expect_match(class(mod1$inputs[[1]]), "^moduleInput$", all=F)

@@ -28,9 +28,6 @@ module is to be executed}
 \value{
 \code{module} list containing:
 
-\item name
-\item othername
-
 \item{name}{module name}
 \item{language}{module language}
 \item{host}{\code{moduleHost} object}
@@ -47,9 +44,12 @@ Creates a module object which can be executed in conduit.
 of objects created using \code{moduleInput}, \code{moduleOutput},
 and \code{moduleSource} respectively.
 
-Module \sQuote{location} defaults to current working
+Module \code{location} defaults to current working
 directory. This can be set to indicate the location of the module
 XML file, and its supporting files.
+
+If \code{moduleHost} is not provided module will be executed on
+local machine.
 }
 \examples{
 ## create a module with one output and one source

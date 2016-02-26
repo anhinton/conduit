@@ -7,7 +7,7 @@
 readModuleHostXML(moduleHostXML)
 }
 \arguments{
-\item{moduleHostXML}{host XML}
+\item{moduleHostXML}{host XML node}
 }
 \value{
 \code{moduleHost} object

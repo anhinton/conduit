@@ -6,9 +6,12 @@
 #' of objects created using \code{moduleInput}, \code{moduleOutput},
 #' and \code{moduleSource} respectively.
 #'
-#' Module \sQuote{location} defaults to current working
+#' Module \code{location} defaults to current working
 #' directory. This can be set to indicate the location of the module
 #' XML file, and its supporting files.
+#'
+#' If \code{moduleHost} is not provided module will be executed on
+#' local machine.
 #'
 #' @param name Name of module
 #' @param language Language name
@@ -80,74 +83,46 @@ module <- function(name, language, host=NULL,
 
     ## check 'language'
     if (!is.null(language)) {
-        if (!is_length1_char(language)) {
+        if (!is_length1_char(language))
             stop("'language' is not a length 1 character vector")
-        }
     }
     
     ## check 'host'
     if (!is.null(host)) {
-        if (!inherits(host, "moduleHost")) {
+        if (!inherits(host, "moduleHost"))
             stop("'host' is not moduleHost object")
-        }
     }
 
     ## check 'description'
     if (!is.null(description)) {
-        if (!is.character(description)) {
+        if (!is.character(description))
             stop("'description' is not a character object")
-        }
     }
 
     ## check 'inputs'
     if (!is.null(inputs)) {
-        if (class(inputs) != "list") {
+        if (class(inputs) != "list")
             stop("'inputs' is not a list object")
-        }
-        inputClasses <- lapply(inputs, class)
-        for (i in seq_along(inputClasses)) {
-            if (inputClasses[[i]][1] != "moduleInput") {
-                stop(paste0("input ", i, " is not a 'moduleInput' object"))
-            }
-        }
-        ## name inputs
-        names(inputs) <-
-            sapply(inputs,
-                   function (x) {
-                       x["name"]
-                   })
+        if (!all(sapply(inputs, inherits, "moduleInput")))
+            stop("inputs must be moduleInput objects")
+        names(inputs) <- sapply(inputs, getName)
     }
 
     ## check 'outputs'
     if (!is.null(outputs)) {
-        if (class(outputs) != "list") {
+        if (class(outputs) != "list")
             stop("'outputs' is not a list object")
-        }
-        outputClasses <- lapply(outputs, class)
-        for (i in seq_along(outputClasses)) {
-            if (outputClasses[[i]][1] != "moduleOutput") {
-                stop(paste0("output ", i, " is not a 'moduleOutput' object"))
-            }
-        }        
-        ## name outputs
-        names(outputs) <-
-            sapply(outputs,
-                   function (x) {
-                       x["name"]
-                   })
+        if (!all(sapply(outputs, inherits, "moduleOutput")))
+            stop("outputs must be moduleOutput objects")
+        names(outputs) <- sapply(outputs, getName)
     }
 
     ## check 'sources'
     if (!is.null(sources)) {
-        if (class(sources) != "list") {
+        if (class(sources) != "list")
             stop("'sources' is not a list object")
-        }
-        sourceClasses <- lapply(sources, class)
-        for (i in seq_along(sourceClasses)) {
-            if (sourceClasses[[i]][1] != "moduleSource") {
-                stop(paste0("source ", i, " is not a 'moduleSource' object"))
-            }
-        }                
+        if (!all(sapply(sources, inherits, "moduleSource")))
+            stop("sources must be moduleSource objects")
     }
     
     module <- list(name = name,
