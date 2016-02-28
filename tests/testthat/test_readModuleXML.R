@@ -238,4 +238,3 @@ test_that("loadModule() handles ref and path", {
     expect_match(class(mod2), "module")
     expect_match(getLocation(mod2), dir2)
 })
-

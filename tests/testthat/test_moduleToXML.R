@@ -1,6 +1,11 @@
 library(conduit)
 context("convert modules to XML")
 
+test_that("moduleHostToXML() fails for invalid argument", {
+    expect_error(moduleHostToXML(list(a = "b", c = "d")),
+                 "moduleHost object required")
+})
+
 ## convert ioFormat objects to XML
 
 textValue <- "CSV file"

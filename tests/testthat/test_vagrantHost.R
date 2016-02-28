@@ -84,3 +84,21 @@ test_that("readVagrantHostXML() returns correctly", {
     expect_match(vh3$hostdir, normalizePath(hostdir))
     expect_match(vh3$guestdir, guestdir)
 })
+
+test_that("moduleHostToXML.vagrantHost() creates correct XML", {
+    library(XML)
+    vh1 <- vagrantHost(vagrantfile)
+    vh2 <- vagrantHost(vagrantfile, hostdir)
+    vh3 <- vagrantHost(vagrantfile, hostdir, guestdir)
+
+    ## fail for invalid argument
+    expect_error(moduleHostToXML.vagrantHost(unclass(vh1)),
+                 "vagrantHost object required")
+
+    ## just vagrantfile
+    hostNode1 <- moduleHostToXML(vh1)
+    child1 <- xmlChildren(hostNode1)[[1]]
+    expect_is(hostNode1, "XMLInternalElementNode")
+    expect_match(xmlName(hostNode1), "host")
+    expect_match(xmlName(child1), "vagrant")
+})

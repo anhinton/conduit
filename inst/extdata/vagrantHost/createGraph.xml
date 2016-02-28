@@ -3,7 +3,7 @@
   <host>
     <vagrant
 	vagrantfile="~/vagrant/vagrant-conduit/Vagrantfile"
-	location="~/vagrant/vagrant-conduit"/>
+	hostdir="~/vagrant/vagrant-conduit"/>
   </host>
   <description>Create a simple directed graphNEL graph object with four nodes and four edges</description>
   <source>

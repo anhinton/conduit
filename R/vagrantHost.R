@@ -71,9 +71,13 @@ readVagrantHostXML <- function (vagrantHostXML) {
                 guestdir = guestdir)
 }
 
-#' Create XML corresponding to a \code{vagrantHost} object
+#' @describeIn moduleHostToXML Create XML corresponding to a
+#'     \code{vagrantHost} object
+#'
+#' @import XML
 moduleHostToXML.vagrantHost <- function(vagrantHost) {
     if (!inherits(vagrantHost, "vagrantHost"))
         stop ("vagrantHost object required")
-    newXMLNode("vagrant", attrs = vagrantHost)
+    child <- newXMLNode("vagrant", attrs = vagrantHost)
+    newXMLNode(name = "host", kids = list(child))
 }

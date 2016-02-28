@@ -738,9 +738,7 @@ moduleToXML <- function (module,
                              namespaceDefinitions = namespaceDefinitions)
     host <-
         if (!is.null(module$host)) {
-            hostNode <- newXMLNode("host")
-            child <- moduleHostToXML(module$host)
-            addChildren(hostNode, kids = list(child))
+            moduleHostToXML(module$host)
         } else {
             NULL
         }
@@ -759,6 +757,10 @@ moduleToXML <- function (module,
 }
 
 #' Create XML corresponding to a \code{moduleHost} object
+#'
+#' @param moduleHost \code{moduleHost} object
+#'
+#' @return XML node representing module host
 moduleHostToXML <- function(moduleHost) {
     if (!inherits(moduleHost, "moduleHost"))
         stop("moduleHost object required")

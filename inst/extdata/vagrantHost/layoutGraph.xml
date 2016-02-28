@@ -3,7 +3,7 @@
   <host>
     <vagrant
 	vagrantfile="~/vagrant/vagrant-conduit/Vagrantfile"
-	location="~/vagrant/vagrant-conduit"/>
+	hostdir="~/vagrant/vagrant-conduit"/>
   </host>
   <description>Lays out a graphNEL graph using the Rgraphviz package</description>
   <input name="myGraph">
