@@ -98,7 +98,33 @@ test_that("moduleHostToXML.vagrantHost() creates correct XML", {
     ## just vagrantfile
     hostNode1 <- moduleHostToXML(vh1)
     child1 <- xmlChildren(hostNode1)[[1]]
+    attrs1 <- xmlAttrs(child1)
     expect_is(hostNode1, "XMLInternalElementNode")
     expect_match(xmlName(hostNode1), "host")
     expect_match(xmlName(child1), "vagrant")
+    expect_match(attrs1[["vagrantfile"]], normalizePath(vagrantfile))
+    expect_match(attrs1[["hostdir"]], dirname(vagrantfile))
+    expect_match(attrs1[["guestdir"]], "/vagrant")
+
+    ## vagrantfile and hostdir
+    hostNode2 <- moduleHostToXML(vh2)
+    child2 <- xmlChildren(hostNode2)[[1]]
+    attrs2 <- xmlAttrs(child2)
+    expect_is(hostNode2, "XMLInternalElementNode")
+    expect_match(xmlName(hostNode2), "host")
+    expect_match(xmlName(child2), "vagrant")
+    expect_match(attrs2[["vagrantfile"]], normalizePath(vagrantfile))
+    expect_match(attrs2[["hostdir"]], normalizePath(hostdir))
+    expect_match(attrs2[["guestdir"]], "/vagrant")
+
+    ## vagrantfile hostdir guestdir
+    hostNode3 <- moduleHostToXML(vh3)
+    child3 <- xmlChildren(hostNode3)[[1]]
+    attrs3 <- xmlAttrs(child3)
+    expect_is(hostNode3, "XMLInternalElementNode")
+    expect_match(xmlName(hostNode3), "host")
+    expect_match(xmlName(child3), "vagrant")
+    expect_match(attrs3[["vagrantfile"]], normalizePath(vagrantfile))
+    expect_match(attrs3[["hostdir"]], normalizePath(hostdir))
+    expect_match(attrs3[["guestdir"]], guestdir)
 })
