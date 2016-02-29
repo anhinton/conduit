@@ -141,31 +141,32 @@ test_that("moduleToXML() creates correct output", {
 })
 
 ## save module XML to file
-mod2 <- module(name = "setY", language = "R",
-               host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
-               description = "a short description",
-               inputs = list(moduleInput("in1",
-                   internalVessel("y"),
-                   ioFormat("R data frame"))),
-               sources = list(moduleSource(
-                   scriptVessel("x <- y"))),
-               outputs = list(moduleOutput("out1",
-                   internalVessel("x"),
-                   ioFormat("R data frame"))))
+test_that("saveModule() behaves correctly", {
+    mod2 <- module(name = "setY", language = "R",
+                   host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
+                   description = "a short description",
+                   inputs = list(moduleInput("in1",
+                                             internalVessel("y"),
+                                             ioFormat("R data frame"))),
+                   sources = list(moduleSource(
+                       scriptVessel("x <- y"))),
+                   outputs = list(moduleOutput("out1",
+                                               internalVessel("x"),
+                                               ioFormat("R data frame"))))
 
-test_that("saveModule fails for non-existent target directory", {
+    ## fails for non-existent target directory
     expect_error(saveModule(module = mod2,
                             targetDirectory = tempfile(pattern="nope")),
                  "no such target directory")
-})
 
-test_that("saveModule produces appropriate XML file", {
-    skip("2016-02-21 vagrantHost whack-a-mole")
+    ## produces appropriate XML file
     targ <- tempdir()
-    name <- "lazerbeast.xml"
     xmlOutput1 <- saveModule(mod2, targ)
     expect_true(file.exists(xmlOutput1))
     expect_true(isValidXML(xmlOutput1, type = "module"))
+
+    ## explicitly name file
+    name <- "lazerbeast.xml"
     xmlOutput2 <- saveModule(mod2, targ, name)
     expect_true(file.exists(xmlOutput2))
     expect_true(isValidXML(xmlOutput2, type = "module"))
