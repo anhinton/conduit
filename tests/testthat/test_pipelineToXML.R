@@ -63,11 +63,9 @@ test_that("pipelineToXML() works as expected", {
     expect_equal(length(getPipes(p1)),
                  length(getNodeSet(pipelineXML, "/pipeline/pipe")))
     expect_equal(
-        length(xmlValue(getNodeSet(pipelineXML, "/pipeline/description")[[1]])),
+        length(xmlValue(getNodeSet(pipelineXML,
+                                   "/pipeline/description")[[1]])),
         1)
-    expect_match(
-        xmlValue(getNodeSet(pipelineXML, "/pipeline/description")[[1]]),
-        getDescription(p1))
 })
 
 test_that("savePipeline() produces valid pipeline XML file", {

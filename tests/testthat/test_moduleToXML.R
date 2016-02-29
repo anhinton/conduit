@@ -100,53 +100,44 @@ test_that("moduleSourceToXML outputs correct file XML", {
 })
 
 ## convert 'module' objects to XML
-mod1 <- module(name = "setX", language = "R")
-mod1XML <- moduleToXML(mod1)
-mod2 <- module(name = "setY", language = "R",
-               host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
-               description = "a short description",
-               inputs = list(moduleInput("in1",
-                   internalVessel("y"),
-                   ioFormat("R data frame"))),
-               sources = list(moduleSource(
-                   scriptVessel("x <- y"))),
-               outputs = list(moduleOutput("out1",
-                   internalVessel("x"),
-                   ioFormat("R data frame"))))
-mod2XML <- moduleToXML(mod2)
+test_that("moduleToXML() creates correct output", {
+    mod1 <- module(name = "setX", language = "R")
+    mod2 <- module(name = "setY", language = "R",
+                   host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
+                   description = "a short description",
+                   inputs = list(moduleInput("in1",
+                                             internalVessel("y"),
+                                             ioFormat("R data frame"))),
+                   sources = list(moduleSource(
+                       scriptVessel("x <- y"))),
+                   outputs = list(moduleOutput("out1",
+                                               internalVessel("x"),
+                                               ioFormat("R data frame"))))
 
-test_that("moduleToXML fails for non-module objects", {
+    ## fails for non-module objects"
     expect_error(moduleToXML(list(name="fake", language="R")),
                  "'module' is not a 'module'")
-})
 
-test_that("moduleToXML outputs correct mod1 XML", {
-    skip("2016-02-21 vagrantHost whack-a-mole")
+    ## minimal module
+    mod1XML <- moduleToXML(mod1)
     expect_match(xmlName(mod1XML), "module")
-    attrs <- xmlAttrs(mod1XML)
-    expect_equal(length(attrs), 1)
-    expect_match(names(attrs)[1], "language")
-    expect_match(attrs[1], "R")
-    children <- xmlChildren(mod1XML)
-    expect_equal(length(children), 1)
-    expect_match(names(children), "description")
-})
+    attrs1 <- xmlAttrs(mod1XML)
+    expect_match(attrs1[["language"]], "R")
+    children1 <- xmlChildren(mod1XML)
+    expect_equal(length(children1), 0)
 
-test_that("moduleToXML outputs correct mod2 XML", {
-    skip("2016-02-21 vagrantHost whack-a-mole")
+    ## module with vagrantHost
+    mod2XML <- moduleToXML(mod2)
     expect_match(xmlName(mod2XML), "module")
-    attrs <- xmlAttrs(mod2XML)
-    expect_equal(length(attrs), 2)
-    expect_match(names(attrs)[1], "language")
-    expect_match(attrs[1], "R")
-    expect_match(names(attrs)[2], "host")
-    expect_match(attrs[2], "127.0.0.1")
-    children <- xmlChildren(mod2XML)
-    expect_equal(length(children), 4)
-    expect_match(names(children), "description", all=F)
-    expect_match(names(children), "input", all=F)
-    expect_match(names(children), "source", all=F)
-    expect_match(names(children), "output", all=F)
+    attrs2 <- xmlAttrs(mod2XML)
+    expect_match(attrs2[["language"]], "R")
+    children2 <- xmlChildren(mod2XML)
+    expect_equal(length(children2), 5)
+    expect_match(names(children2), "host", all=F)
+    expect_match(names(children2), "description", all=F)
+    expect_match(names(children2), "input", all=F)
+    expect_match(names(children2), "source", all=F)
+    expect_match(names(children2), "output", all=F)
 })
 
 ## save module XML to file
