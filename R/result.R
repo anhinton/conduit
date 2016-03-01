@@ -113,7 +113,7 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
     xmlfile <- savePipeline(resultPipeline, targetDirectory = pipelinePath)
 
     pipelineResult <- list(name = name, file = xmlfile,
-                           component = pipeline,
+                           component = resultPipeline,
                            outputList = outputList,
                            componentResultList = componentResultList)
     class(pipelineResult) <- c("pipelineResult", "componentResult")
