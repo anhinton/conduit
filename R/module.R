@@ -955,6 +955,10 @@ runModule <- function(module, targetDirectory = getwd(),
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
+
+    moduleInputList <- module$inputs
+    moduleOutputList <- module$outputs
+    language <- getLanguage(module)
     
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
@@ -967,7 +971,7 @@ runModule <- function(module, targetDirectory = getwd(),
     on.exit(setwd(oldwd))
 
     ## prepare module inputs
-    inputObjects <- lapply(X = module$inputs, FUN = prepareInput,
+    inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
                            outputDirectory = modulePath,
                            location <- getLocation(module))
@@ -1028,7 +1032,8 @@ runModule <- function(module, targetDirectory = getwd(),
 #' @param location location of originating module file
 #'
 #' @return \code{input} object
-prepareInput <- function(moduleInput, inputList, outputDirectory, location) {
+prepareInput <- function(moduleInput, inputList, outputDirectory,
+                         language, location) {
     name <- getName(moduleInput)
     vessel <- getVessel(moduleInput)
     type <- getType(vessel)
@@ -1036,7 +1041,11 @@ prepareInput <- function(moduleInput, inputList, outputDirectory, location) {
 
     input <- switch(
         type,
-        internalVessel = prepareInternalInput(input, outputDirectory),
+        internalVessel = {
+            symbol <- vessel$symbol
+            prepareInternalInput(input, symbol, language,
+                                 outputDirectory)
+        },
         fileVessel = prepareFileInput(vessel, input, outputDirectory,
                                       location),
         urlVessel = input,
@@ -1045,14 +1054,15 @@ prepareInput <- function(moduleInput, inputList, outputDirectory, location) {
     input
 }
 
-prepareInternalInput <- function(input, outputDirectory) {
-    if (!file.copy(input, outputDirectory))
+prepareInternalInput <- function(input, symbol, language, outputDirectory) {
+    internalInput <- file.path(
+        outputDirectory, paste0(symbol, internalExtension(language)))
+    if (!file.copy(input, internalInput))
         stop("unable to copy input into outputDirectory")
-    input <- file.path(outputDirectory, basename(input))
-    if (file.exists(input)) {
-        return(input)
+    if (file.exists(internalInput)) {
+        return(internalInput)
     } else {
-        stop("unable to prepare input")
+        stop("unable to prepare internalInput")
     }
 }
 
@@ -1060,27 +1070,20 @@ prepareFileInput <- function(vessel, input, outputDirectory, location) {
     ref <- getRef(vessel)
     path <- vessel$path
 
-    input <-
-        if (is.null(input)) {
-            input <- findFile(ref, path, location)
-            if (is.null(input)) {
-                stop("unable to locate input file")
-            } else {
-                input
-            }
-        } else if (is_absolute(ref)) {
-            if (findFile(ref, path, location) != input) {
-                stop("input does not match path given in fileVessel")
-            } else {
-                input
-            }
-        } else {
-            newInput <- file.path(outputDirectory, basename(input))
-            if (!file.copy(input, newInput, overwrite = TRUE))
-                stop("unable to copy input into outputDirectory")
-            newInput
-        }
-    input
+    if (is.null(input)) {
+        fileInput <- findFile(ref, path, location)
+        if (is.null(fileInput))
+            stop("unable to locate input file")
+    } else if (is_absolute(ref)) {
+        if (findFile(ref, path, location) != input)
+            stop("input does not match path given in fileVessel")
+        fileInput <- input
+    } else {
+        fileInput <- file.path(outputDirectory, ref)
+        if (!file.copy(input, fileInput, overwrite = TRUE))
+            stop("unable to copy input into outputDirectory")
+    }
+    fileInput
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
