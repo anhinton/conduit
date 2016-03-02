@@ -965,12 +965,12 @@ runModule <- function(module, targetDirectory = getwd(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
-    
-    ## resolve input objects
-    for (i in module$inputs) {
-        resolved <- resolveInput(i, inputObjects, host, getLocation(module))
-        if (!resolved) stop(paste0("Input '", i$name, "' cannot be resolved"))
-    }
+
+    ## prepare module inputs
+    inputObjects <- lapply(X = module$inputs, FUN = prepareInput,
+                           inputList = inputObjects,
+                           outputDirectory = modulePath,
+                           location <- getLocation(module))
     
     ## prepare a script file for execution
     script <- prepareScript(module, inputObjects)
@@ -1013,7 +1013,7 @@ runModule <- function(module, targetDirectory = getwd(),
     moduleResult(outputList, modulePath, module)
 }
 
-#' Resolve input object
+#' Prepare input object
 #'
 #' This function ensures a \code{module}'s \code{moduleInput}
 #' requirements will be met when executed.
@@ -1028,16 +1028,16 @@ runModule <- function(module, targetDirectory = getwd(),
 #' @param location location of originating module file
 #'
 #' @return \code{input} object
-resolveInput <- function(moduleInput, inputList, outputDirectory, location) {
+prepareInput <- function(moduleInput, inputList, outputDirectory, location) {
     name <- getName(moduleInput)
     vessel <- getVessel(moduleInput)
     type <- getType(vessel)
     input <- getElement(inputList, name)
 
-    input <- switch(
+    switch(
         type,
-        internalVessel = resolveInternalInput(input, outputDirectory),
-        fileVessel = resolveFileInput(vessel, input, outputDirectory,
+        internalVessel = prepareInternalInput(input, outputDirectory),
+        fileVessel = prepareFileInput(vessel, input, outputDirectory,
                                       location),
         urlVessel = input,
         stop("unknown vessel type"))
@@ -1045,18 +1045,18 @@ resolveInput <- function(moduleInput, inputList, outputDirectory, location) {
     input
 }
 
-resolveInternalInput <- function(input, outputDirectory) {
+prepareInternalInput <- function(input, outputDirectory) {
     if (!file.copy(input, outputDirectory))
         stop("unable to copy input into outputDirectory")
     input <- file.path(outputDirectory, basename(input))
     if (file.exists(input)) {
         return(input)
     } else {
-        stop("unable to resolve input")
+        stop("unable to prepare input")
     }
 }
 
-resolveFileInput <- function(vessel, input, outputDirectory, location) {
+prepareFileInput <- function(vessel, input, outputDirectory, location) {
     ref <- getRef(vessel)
     path <- vessel$path
 
@@ -1079,46 +1079,6 @@ resolveFileInput <- function(vessel, input, outputDirectory, location) {
                 stop("unable to copy input into outputDirectory")
             file.path(outputDirectory, basename(input))
         }
-}
-
-#' @describeIn resolveInput Resolve file input object
-resolveInput.file <- function(moduleInput, inputObjects, host, location) {
-    vessel <- getVessel(moduleInput)
-    ref <- getRef(vessel)
-    path <- vessel$path
-    inputObject <- getElement(inputObjects, moduleInput$name)
-    if (is.null(inputObject)) {
-        inputObject <- findFile(ref, path, location)
-    } 
-
-    ## copy to module directory if ref is relative
-    if (dirname(ref) == ".") {
-        ##  create a copy of resource at ref
-        file.copy(from = inputObject, to = ref, overwrite = TRUE)
-        ## copy file to host
-        if (!is.null(host)) {
-            host_result <- fileToHost(ref, host)
-            if (host_result != 0) {
-                stop("Unable to copy ", ref, " to host ",
-                     buildModuleHost(host))
-            }
-        }
-        return(file.exists(ref))
-    }
-   file.exists(ref)
-}
-
-#' @describeIn resolveInput Resolve URL input object
-resolveInput.url <- function(moduleInput, inputObjects, host, location) {
-    name <- moduleInput$name
-    url <- moduleInput$vessel$ref
-    if (name %in% names(inputObjects)) {
-        inputObject <- getElement(inputObjects, name)
-        if (url != inputObject) {
-            stop(url, " and ", inputObject, " do not match")
-        }
-    }
-    return(RCurl::url.exists(url))
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
