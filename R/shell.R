@@ -2,16 +2,19 @@
 
 #' @describeIn internalInputScript prepare internal input script for
 #' shell language
-internalInputScript.shell <- function (symbol, inputObject) {
-    script <- paste0(symbol, "=$(cat ", inputObject, ")")
-    return(script)
+internalInputScript.shellSymbol <- function (symbol) {
+    script <- paste0(symbol, "=$(cat ", symbol, internalExtension("shell"),
+                     ")")
+    class(script) <- c("shellScript", "script")
+    script
 }
 
 #' @describeIn internalOutputScript create script to create internal
 #' output for language = "shell"
-internalOutputScript.shell <- function (symbol) {
+internalOutputScript.shellSymbol <- function (symbol) {
     script <- paste0("echo ${", symbol, "} > ", symbol, ".txt")
-    return(script)
+    class(script) <- c("shellScript", "script")
+    script
 }
 
 #' @describeIn executeScript Execute a script in the "shell" language

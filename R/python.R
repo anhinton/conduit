@@ -2,19 +2,21 @@
 
 #' @describeIn internalInputScript prepare internal input script for
 #' python language
-internalInputScript.python <- function (symbol, inputObject) {
-    script <- c(paste0("with open('", inputObject,
+internalInputScript.pythonSymbol <- function (symbol) {
+    script <- c(paste0("with open('", symbol, internalExtension("python"),
                        "', 'rb') as f:"),
                 paste0("\t", symbol, " = pickle.load(f)"))
-    return(script)
+    class(script) <- c("pythonScript", "script")
+    script
 }
 
 #' @describeIn internalOutputScript create script to create internal
 #' output for language = "python"
-internalOutputScript.python <- function (symbol) {
+internalOutputScript.pythonSymbol <- function (symbol) {
     script <- c(paste0("with open('", symbol, ".pickle', 'wb') as f:"),
                 paste0("\tpickle.dump(", symbol, ", f)"))
-    return(script)
+    class(script) <- c("pythonScript", "script")
+    script
 }
 
 #' @describeIn executeScript Execute a script in the "python" language

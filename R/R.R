@@ -2,16 +2,19 @@
 
 #' @describeIn internalInputScript prepare internal input script for R
 #' language
-internalInputScript.R <- function (symbol, inputObject) {
-    script <- paste0(symbol, " <- readRDS(\"", inputObject, "\")")
-    return(script)
+internalInputScript.RSymbol <- function(symbol) {
+    script <- paste0(symbol, " <- readRDS(\"",
+                     paste0(symbol, internalExtension("R")), "\")")
+    class(script) <- c("RScript", "script")
+    script
 }
 
 #' @describeIn internalOutputScript create script to create internal
 #' output for language = "R"
-internalOutputScript.R <- function (symbol) {
+internalOutputScript.RSymbol <- function (symbol) {
     script <- paste0("saveRDS(", symbol, ", file = \"", symbol, ".rds\")")
-    return(script)
+    class(script) <- c("RScript", "script")
+    script    
 }
 
 #' @describeIn executeScript Execute a script in the "R" language

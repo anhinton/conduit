@@ -7,18 +7,14 @@
 \alias{internalInputScript.shell}
 \title{prepare script to resolve internal input}
 \usage{
-\method{internalInputScript}{R}(symbol, inputObject)
+internalInputScript.R(symbol)
 
-\method{internalInputScript}{python}(symbol, inputObject)
+internalInputScript.python(symbol)
 
-internalInputScript(symbol, inputObject)
-
-\method{internalInputScript}{shell}(symbol, inputObject)
+internalInputScript.shell(symbol)
 }
 \arguments{
 \item{symbol}{character string with class set to language of module script}
-
-\item{inputObject}{file location of serialised language object}
 }
 \value{
 character vector of script to ensure input
@@ -26,15 +22,15 @@ character vector of script to ensure input
 \description{
 prepare script to resolve internal input
 }
-\section{Methods (by class)}{
+\section{Functions}{
 \itemize{
-\item \code{R}: prepare internal input script for R
+\item \code{internalInputScript.R}: prepare internal input script for R
 language
 
-\item \code{python}: prepare internal input script for
+\item \code{internalInputScript.python}: prepare internal input script for
 python language
 
-\item \code{shell}: prepare internal input script for
+\item \code{internalInputScript.shell}: prepare internal input script for
 shell language
 }}
 
