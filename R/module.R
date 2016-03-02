@@ -975,9 +975,9 @@ runModule <- function(module, targetDirectory = getwd(),
     ## prepare a script file for execution
     script <- prepareScript(module, inputObjects)
 
-    ## determine host details
-    host <- module$host
-    host <- if (!is.null(host)) parseModuleHost(host)
+    ## ## determine host details
+    ## host <- module$host
+    ## host <- if (!is.null(host)) parseModuleHost(host)
 
     ## ## prepare remote host
     ## if (!is.null(host)) {
@@ -1013,20 +1013,72 @@ runModule <- function(module, targetDirectory = getwd(),
     moduleResult(outputList, modulePath, module)
 }
 
-#' @describeIn resolveInput Resolve internal input object
-resolveInput.internal <- function(moduleInput, inputObjects, host, location) {
-    inputObject <- getElement(inputObjects, moduleInput$name)
+#' Resolve input object
+#'
+#' This function ensures a \code{module}'s \code{moduleInput}
+#' requirements will be met when executed.
+#'
+#' For any \code{moduleInput} wrapping a \code{internalVessel} or
+#' \code{fileVessel} with a relative ref, the relevant \code{input}
+#' object is copied into the module \code{outputDirectory}.
+#' 
+#' @param moduleInput \code{moduleInput} object
+#' @param inputList list of \code{input} objects provided to module
+#' @param outputDirectory working directory for module execution
+#' @param location location of originating module file
+#'
+#' @return \code{input} object
+resolveInput <- function(moduleInput, inputList, outputDirectory, location) {
+    name <- getName(moduleInput)
+    vessel <- getVessel(moduleInput)
+    type <- getType(vessel)
+    input <- getElement(inputList, name)
 
-    ## copy inputObject to host
-    if (!is.null(host)) {
-        host_result <- fileToHost(inputObject, host)
-        if (host_result != 0) {
-            stop("Unable to copy ", inputObject, " to host ",
-                 buildModuleHost(host))
-        }
+    input <- switch(
+        type,
+        internalVessel = resolveInternalInput(input, outputDirectory),
+        fileVessel = resolveFileInput(vessel, input, outputDirectory,
+                                      location),
+        urlVessel = input,
+        stop("unknown vessel type"))
+    class(input) <- "input"
+    input
+}
+
+resolveInternalInput <- function(input, outputDirectory) {
+    if (!file.copy(input, outputDirectory))
+        stop("unable to copy input into outputDirectory")
+    input <- file.path(outputDirectory, basename(input))
+    if (file.exists(input)) {
+        return(input)
+    } else {
+        stop("unable to resolve input")
     }
-    
-    return(file.exists(inputObject))
+}
+
+resolveFileInput <- function(vessel, input, outputDirectory, location) {
+    ref <- getRef(vessel)
+    path <- vessel$path
+
+    input <-
+        if (is.null(input)) {
+            input <- findFile(ref, path, location)
+            if (is.null(input)) {
+                stop("unable to locate input file")
+            } else {
+                input
+            }
+        } else if (is_absolute(ref)) {
+            if (findFile(ref, path, location) != input) {
+                stop("input does not match path given in fileVessel")
+            } else {
+                input
+            }
+        } else {
+            if (!file.copy(input, outputDirectory))
+                stop("unable to copy input into outputDirectory")
+            file.path(outputDirectory, basename(input))
+        }
 }
 
 #' @describeIn resolveInput Resolve file input object
@@ -1067,43 +1119,6 @@ resolveInput.url <- function(moduleInput, inputObjects, host, location) {
         }
     }
     return(RCurl::url.exists(url))
-}
-
-#' Resolve input object
-#'
-#' This function ensures that an input object is where it needs to be
-#' for a module's source script to be executed. Returns TRUE if all is well.
-#'
-#' @details If the \code{moduleInput$vessel} is any of \itemize{
-#'   \item{a \code{fileVessel} containing a relative \code{ref}}
-#'   \item{an \code{internalVessel}, and \code{host} is not NULL}}
-#' the \code{inputObject} corresponding to \code{moduleInput$name} is copied
-#' to the current working directory.
-#'
-#' If \code{host} is not NULL this \code{moduleInput} is also copied
-#' to the module output directory on the remote host.
-#'
-#' If \code{moduleInput$vessel} is a \code{urlVessel} produces error if
-#' URL specified in \code{inputObjects} does not match URL in
-#' \code{moduleInput}.
-#' 
-#' @param moduleInput \code{moduleInput} object
-#' @param inputObjects resources to be supplied as inputs
-#' @param host module host
-#' @param location location of originating module file
-#'
-#' @return TRUE if successful
-resolveInput <- function(moduleInput, inputObjects, host, location) {
-    type <- getType(getVessel(moduleInput))
-    type <- switch(
-        type,
-        internalVessel = "internal",
-        fileVessel = "file",
-	urlVessel = "url",
-        stop("unknown input vessel")
-    )
-    class(moduleInput) <- type
-    UseMethod("resolveInput", object = moduleInput)
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
