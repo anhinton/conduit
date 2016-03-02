@@ -1034,7 +1034,7 @@ prepareInput <- function(moduleInput, inputList, outputDirectory, location) {
     type <- getType(vessel)
     input <- getElement(inputList, name)
 
-    switch(
+    input <- switch(
         type,
         internalVessel = prepareInternalInput(input, outputDirectory),
         fileVessel = prepareFileInput(vessel, input, outputDirectory,
@@ -1075,10 +1075,12 @@ prepareFileInput <- function(vessel, input, outputDirectory, location) {
                 input
             }
         } else {
-            if (!file.copy(input, outputDirectory))
+            newInput <- file.path(outputDirectory, basename(input))
+            if (!file.copy(input, newInput, overwrite = TRUE))
                 stop("unable to copy input into outputDirectory")
-            file.path(outputDirectory, basename(input))
+            newInput
         }
+    input
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
