@@ -1,10 +1,3 @@
-#' \code{moduleHost} object
-#'
-#' @seealso \code{vagrantHost}, \code{module}
-#'
-#' @name moduleHost
-NULL
-
 #' Create a \code{vagrantHost} object
 #'
 #' Create a \code{moduleHost} object of class \code{vagrantHost} to

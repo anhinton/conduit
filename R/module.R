@@ -137,6 +137,13 @@ module <- function(name, language, host=NULL,
     module
 }
 
+#' \code{moduleHost} object
+#'
+#' @seealso \code{vagrantHost}, \code{module}
+#'
+#' @name moduleHost
+NULL
+
 #' Create an \code{ioFormat} object.
 #'
 #' Specify the format of a \code{moduleInput} or \code{moduleOutput} object.
