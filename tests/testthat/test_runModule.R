@@ -234,6 +234,7 @@ test_that(
                     ioFormat("python list"))))
         inputObjects <- NULL
         script <- prepareScript(module2)
+        skip("2016-02-03 changing host handling")
         expect_equal(executeScript(script = script, host = NULL), 0)
     })
 
@@ -254,6 +255,7 @@ test_that(
                     internalVessel("x"),
                     ioFormat("shell environment variable"))))
         inputObjects <- NULL
+        skip("2016-02-03 changing host handling")
         script <- prepareScript(module3)
         expect_equal(executeScript(script = script, host = NULL), 0)
     })

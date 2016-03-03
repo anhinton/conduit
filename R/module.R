@@ -949,17 +949,19 @@ runModule <- function(module, targetDirectory = getwd(),
     if (class(module) != "module"){
         stop("'module' is not a 'module' object")
     }
-    
+
     ## ensure targetDirectory exists
     targetDirectory <- file.path(targetDirectory)
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
 
+    name <- getName(module)
     moduleInputList <- module$inputs
     moduleOutputList <- module$outputs
     language <- getLanguage(module)
-    
+    host <- module$host
+
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
     if (file.exists(modulePath))
@@ -969,34 +971,42 @@ runModule <- function(module, targetDirectory = getwd(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
-
+    
     ## prepare module inputs
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
-                           language = language,
                            outputDirectory = modulePath,
-                           location <- getLocation(module))
-    
-    ## prepare a script file for execution
+                           language = language,
+                           location = getLocation(module))
+
     script <- prepareScript(module)
 
-    ## do host prep here
-    host <- NULL
+## do host prep here
+host <- module$host
+hostSubdir <-
+    if (!is.null(host)) {
+        prepareModuleHost(host = host, name = name,
+                          modulePath = modulePath)
+    } else {
+        NULL
+    }
 
     ## execute script file
-    exec_result <- executeScript(script, host)
-    if (exec_result != 0) {
-        stop("Unable to execute ", script,
-             if (!is.null(host)) {
-                 paste0(" on host ", buildModuleHost(host))
-             })
+    exec_result <- executeScript(script, host, hostSubdir)
+    if (exec_result != 0)
+        stop("Unable to execute module script")
+
+    if (!is.null(host)) {
+        retrieveHost(host = host, hostSubdir = hostSubdir,
+                     modulePath = modulePath)
     }
 
     ## get things back from host here
 
     ## resolve output objects
-    outputList <- lapply(module$outputs, resolveOutput,
-                         getLanguage(module), host)
+    outputList <- lapply(X = module$outputs, FUN = resolveOutput,
+                         language = getLanguage(module),
+                         outputDirectory = modulePath)
 
     ## return moduleResult object
     moduleResult(outputList, modulePath, module)
@@ -1132,17 +1142,12 @@ output <- function(moduleOutput, language, outputDirectory) {
 #'
 #' @details Will produce an error if the object does not exist.
 #'
-#' If \code{host} is not NULL the function attempts to copy the output
-#' object across from the remote host and into the current working
-#' directory.
-#'
 #' @param moduleOutput \code{moduleOutput} object
 #' @param language module language
-#' @param host host list created by \code{parseModuleList}
 #' @param outputDirectory location of module output files
 #'
 #' @return \code{output} object
-resolveOutput <- function (moduleOutput, language, host,
+resolveOutput <- function (moduleOutput, language,
                            outputDirectory = getwd()) {
     name <- getName(moduleOutput)
     vessel <- getVessel(moduleOutput)
@@ -1151,22 +1156,16 @@ resolveOutput <- function (moduleOutput, language, host,
     result <- getResult(output)
 
     if (type == "internalVessel" || type == "fileVessel") {
-        if (!is.null(host)) {
-            remote_object <- basename(result)
-            result <- fetchFromHost(remote_object, host)
-            if (result != 0) {
-                stop("Unable to fetch ", remote_object, " from host ",
-                     buildModuleHost(host))
-            }
-        }
-        if (!file.exists(result)) {
+        if (!file.exists(result))
             stop(paste0("output object '", name, "' does not exist"))
-        }
-    }
-    if (type == "urlVessel") {
-        if (!RCurl::url.exists(result)) {
-            stop(paste0("output object '", name, "' does not exist"))
-        }
     }
     return(output)
+}
+
+prepareModuleHost <- function (host, name, modulePath) {
+    UseMethod("prepareModuleHost")
+}
+
+retrieveHost <- function(host, hostSubdir, modulePath) {
+    UseMethod("retrieveHost")
 }

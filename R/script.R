@@ -227,6 +227,20 @@ internalOutputScript <- function (symbol) {
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, host = NULL) {
-    UseMethod("executeScript")
+executeScript <- function(script, host = NULL, hostSubdir) {
+    command <- command(script)
+    executeCommand(host, hostSubdir, command)
+}
+
+command <- function(script) {
+    UseMethod("command")
+}
+
+executeCommand <- function(host, hostSubdir, command) {
+    UseMethod("executeCommand")
+}
+
+executeCommand.default <- function(host, hostSubdir, command) {
+    system2(command = command$command,
+            args = command$args)
 }

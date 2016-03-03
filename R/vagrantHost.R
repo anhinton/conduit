@@ -81,3 +81,36 @@ moduleHostToXML.vagrantHost <- function(vagrantHost) {
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
 }
+
+prepareModuleHost.vagrantHost <- function(host, name, modulePath) {
+    hostdir <- host$hostdir
+    hostSubdir <- tempfile(pattern = name,
+                        tmpdir = file.path("conduit.out"))
+    hostdir <- file.path(hostdir, hostSubdir)
+    if (dir.exists(hostdir))
+        unlink(hostdir, rescursive = TRUE)
+    dir.create(hostdir, recursive = TRUE)
+    files <- list.files(path = modulePath, full.names = TRUE)
+    for (f in files)
+        file.copy(f, hostdir, recursive = TRUE)
+    hostSubdir
+}
+
+executeCommand.vagrantHost <- function(host, hostSubdir, command) {
+    commanddir <- dirname(host$vagrantfile)
+    oldwd <- setwd(commanddir)
+    on.exit(setwd(oldwd))
+    args <- c(command$command, command$args)
+    guestdir <- file.path(host$guestdir, hostSubdir)
+    args <- paste("ssh", "-c", "'cd", guestdir, ";",
+                  paste(args, collapse = " "), "'")
+    system2(command = "vagrant",
+            args = args)
+}
+
+retrieveHost.vagrantHost <- function(host, hostSubdir, modulePath) {
+    hostdir <- file.path(host$hostdir, hostSubdir)
+    files <- list.files(path = hostdir, full.names = TRUE)
+    for (f in files)
+        file.copy(f, modulePath, recursive = TRUE)
+}
