@@ -955,6 +955,10 @@ runModule <- function(module, targetDirectory = getwd(),
     if (!file.exists(targetDirectory)) {
         stop("no such target directory")
     }
+
+    moduleInputList <- module$inputs
+    moduleOutputList <- module$outputs
+    language <- getLanguage(module)
     
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
@@ -965,36 +969,19 @@ runModule <- function(module, targetDirectory = getwd(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
+
+    ## prepare module inputs
+    inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
+                           inputList = inputObjects,
+                           language = language,
+                           outputDirectory = modulePath,
+                           location <- getLocation(module))
     
     ## prepare a script file for execution
-    script <- prepareScript(module, inputObjects)
+    script <- prepareScript(module)
 
-    ## determine host details
-    host <- module$host
-    host <- if (!is.null(host)) parseModuleHost(host)
-
-    ## prepare remote host
-    if (!is.null(host)) {
-        ## create output directory on host
-        dir_result <- createHostDirectory(host)
-        if (dir_result != 0) {
-            stop("Unable to create output directory on host ",
-                 buildModuleHost(host))
-        }
-        
-        ## copy script file to host
-        script_result <- fileToHost(script, host)
-        if (script_result != 0) {
-            stop(paste0("Unable to copy ", script, " to host ",
-                 buildModuleHost(host)))
-        }
-    }
-    
-    ## resolve input objects
-    for (i in module$inputs) {
-        resolved <- resolveInput(i, inputObjects, host, getLocation(module))
-        if (!resolved) stop(paste0("Input '", i$name, "' cannot be resolved"))
-    }
+    ## do host prep here
+    host <- NULL
 
     ## execute script file
     exec_result <- executeScript(script, host)
@@ -1005,6 +992,8 @@ runModule <- function(module, targetDirectory = getwd(),
              })
     }
 
+    ## get things back from host here
+
     ## resolve output objects
     outputList <- lapply(module$outputs, resolveOutput,
                          getLanguage(module), host)
@@ -1013,172 +1002,73 @@ runModule <- function(module, targetDirectory = getwd(),
     moduleResult(outputList, modulePath, module)
 }
 
-#' Creates module output directory on host
+#' Prepare input object
 #'
-#' @details Directory to be created is given by \code{host$directory}
+#' This function ensures a \code{module}'s \code{moduleInput}
+#' requirements will be met when executed.
 #'
-#' @param host remote host list
-#'
-#' @seealso \code{runModule}
-#'
-#' @return 0 if success
-createHostDirectory <- function(host) {
-    user <- host$user
-    address <- host$address
-    port <- host$port
-    directory <- host$directory
-    idfile <- host$idfile
-    args <- c("-i", idfile,
-              "-p", port,
-              paste0(user, "@", address),
-              paste("'mkdir -p", directory, "'"))
-    result <- system2("ssh", args)
-    return(result)
-}
-
-#' Copy a file to remote module host
-#'
-#' @details copies file at \code{file} to remote directory
-#' \code{host$directory}.
-#'
-#' @param file file to copy
-#' @param host host list
-#' @param idfile login credentials
-#'
-#' @seealso \code{runModule}
-#'
-#' @return 0 if successful
-fileToHost <- function(file, host,
-                       idfile = get("defaultIdfile", envir = .conduit.global)) {
-    user <- host$user
-    address <- host$address
-    port <- host$port
-    directory <- host$directory
-    
-    args <- c("-i", idfile,
-              "-P", port,
-              file,
-              paste0(user, "@", address, ":", directory))
-    result <- system2("scp", args)
-    return(result)
-}
-
-#' Fetch file from remote host.
-#'
-#' @details copies file at \code{file} from remote directory
-#' \code{host$directory} to the current working directory.
-#'
-#' @param file file path
-#' @param host host list
-#'
-#' @return 0 if successful
-fetchFromHost <- function(file, host) {
-    user <- host$user
-    address <- host$address
-    port <- host$port
-    directory <- host$directory
-    idfile <- host$idfile
-
-    args <- c("-i", idfile,
-              "-P", port,
-              paste0(user, "@", address, ":",
-                     file.path(directory, file, fsep = "/")),
-              ".")
-    result <- system2("scp", args)
-    return(result)
-}
-
-#' @describeIn resolveInput Resolve internal input object
-resolveInput.internal <- function(moduleInput, inputObjects, host, location) {
-    inputObject <- getElement(inputObjects, moduleInput$name)
-
-    ## copy inputObject to host
-    if (!is.null(host)) {
-        host_result <- fileToHost(inputObject, host)
-        if (host_result != 0) {
-            stop("Unable to copy ", inputObject, " to host ",
-                 buildModuleHost(host))
-        }
-    }
-    
-    return(file.exists(inputObject))
-}
-
-#' @describeIn resolveInput Resolve file input object
-resolveInput.file <- function(moduleInput, inputObjects, host, location) {
-    vessel <- getVessel(moduleInput)
-    ref <- getRef(vessel)
-    path <- vessel$path
-    inputObject <- getElement(inputObjects, moduleInput$name)
-    if (is.null(inputObject)) {
-        inputObject <- findFile(ref, path, location)
-    } 
-
-    ## copy to module directory if ref is relative
-    if (dirname(ref) == ".") {
-        ##  create a copy of resource at ref
-        file.copy(from = inputObject, to = ref, overwrite = TRUE)
-        ## copy file to host
-        if (!is.null(host)) {
-            host_result <- fileToHost(ref, host)
-            if (host_result != 0) {
-                stop("Unable to copy ", ref, " to host ",
-                     buildModuleHost(host))
-            }
-        }
-        return(file.exists(ref))
-    }
-   file.exists(ref)
-}
-
-#' @describeIn resolveInput Resolve URL input object
-resolveInput.url <- function(moduleInput, inputObjects, host, location) {
-    name <- moduleInput$name
-    url <- moduleInput$vessel$ref
-    if (name %in% names(inputObjects)) {
-        inputObject <- getElement(inputObjects, name)
-        if (url != inputObject) {
-            stop(url, " and ", inputObject, " do not match")
-        }
-    }
-    return(RCurl::url.exists(url))
-}
-
-#' Resolve input object
-#'
-#' This function ensures that an input object is where it needs to be
-#' for a module's source script to be executed. Returns TRUE if all is well.
-#'
-#' @details If the \code{moduleInput$vessel} is any of \itemize{
-#'   \item{a \code{fileVessel} containing a relative \code{ref}}
-#'   \item{an \code{internalVessel}, and \code{host} is not NULL}}
-#' the \code{inputObject} corresponding to \code{moduleInput$name} is copied
-#' to the current working directory.
-#'
-#' If \code{host} is not NULL this \code{moduleInput} is also copied
-#' to the module output directory on the remote host.
-#'
-#' If \code{moduleInput$vessel} is a \code{urlVessel} produces error if
-#' URL specified in \code{inputObjects} does not match URL in
-#' \code{moduleInput}.
+#' For any \code{moduleInput} wrapping a \code{internalVessel} or
+#' \code{fileVessel} with a relative ref, the relevant \code{input}
+#' object is copied into the module \code{outputDirectory}.
 #' 
 #' @param moduleInput \code{moduleInput} object
-#' @param inputObjects resources to be supplied as inputs
-#' @param host module host
+#' @param inputList list of \code{input} objects provided to module
+#' @param outputDirectory working directory for module execution
 #' @param location location of originating module file
 #'
-#' @return TRUE if successful
-resolveInput <- function(moduleInput, inputObjects, host, location) {
-    type <- getType(getVessel(moduleInput))
-    type <- switch(
+#' @return \code{input} object
+prepareInput <- function(moduleInput, inputList, outputDirectory,
+                         language, location) {
+    name <- getName(moduleInput)
+    vessel <- getVessel(moduleInput)
+    type <- getType(vessel)
+    input <- getElement(inputList, name)
+
+    input <- switch(
         type,
-        internalVessel = "internal",
-        fileVessel = "file",
-	urlVessel = "url",
-        stop("unknown input vessel")
-    )
-    class(moduleInput) <- type
-    UseMethod("resolveInput", object = moduleInput)
+        internalVessel = {
+            symbol <- vessel$symbol
+            prepareInternalInput(input, symbol, language,
+                                 outputDirectory)
+        },
+        fileVessel = prepareFileInput(vessel, input, outputDirectory,
+                                      location),
+        urlVessel = input,
+        stop("unknown vessel type"))
+    class(input) <- "input"
+    input
+}
+
+prepareInternalInput <- function(input, symbol, language, outputDirectory) {
+    internalInput <- file.path(
+        outputDirectory, paste0(symbol, internalExtension(language)))
+    if (!file.copy(input, internalInput))
+        stop("unable to copy input into outputDirectory")
+    if (file.exists(internalInput)) {
+        return(internalInput)
+    } else {
+        stop("unable to prepare internalInput")
+    }
+}
+
+prepareFileInput <- function(vessel, input, outputDirectory, location) {
+    ref <- getRef(vessel)
+    path <- vessel$path
+
+    if (is.null(input)) {
+        fileInput <- findFile(ref, path, location)
+        if (is.null(fileInput))
+            stop("unable to locate input file")
+    } else if (is_absolute(ref)) {
+        if (findFile(ref, path, location) != input)
+            stop("input does not match path given in fileVessel")
+        fileInput <- input
+    } else {
+        fileInput <- file.path(outputDirectory, ref)
+        if (!file.copy(input, fileInput, overwrite = TRUE))
+            stop("unable to copy input into outputDirectory")
+    }
+    fileInput
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
@@ -1279,84 +1169,4 @@ resolveOutput <- function (moduleOutput, language, host,
         }
     }
     return(output)
-}
-
-#' Parse a module's host
-#'
-#' Parse the the host attribute from a \code{module} object.
-#'
-#' @details Default user = 'conduit', default port = '22'.
-#'
-#' \code{directory} slot is filled by a random output directory to be
-#' created on the remote host at \code{/tmp/{sessionID}/}
-#'
-#' @param host module host as character string
-#' @param idfile authentication key
-#'
-#' @return list of \itemize{
-#'   \item user
-#'   \item password
-#'   \item address
-#'   \item port
-#'   \item directory
-#'   \item idfile}
-parseModuleHost <- function(host,
-                            idfile = get("defaultIdfile",
-                                         envir = .conduit.global)) {
-    scheme = "ssh"
-    if (grepl("://", host)) {
-        pieces <- strsplit(host, "://")[[1]]
-        scheme <- pieces[1]
-        if (scheme != "ssh") {
-            stop("Only SSH scheme supported for module hosts")
-        }
-        host <- pieces[2]
-    }
-    if (grepl("@", host)) {
-        pieces <- strsplit(host, "@")[[1]]
-        auth <- pieces[1]
-        address <- pieces[2]
-        if(grepl(":", auth)) {
-            pieces <- strsplit(auth, ":")[[1]]
-            user <- pieces[1]
-            password <- pieces[2]
-        } else {
-            user <- auth
-            password <- ""
-        }
-    } else {
-        user <- "conduit"
-        password <- ""
-        address <- host
-    }
-    if (grepl(":", address)) {
-        pieces <- strsplit(address, ":")[[1]]
-        address <- pieces[1]
-        port <- pieces[2]
-    } else {
-        port <- "22"
-    }
-    if (grepl("/", port)) {
-        split <- regexpr("/", port)
-        directory <- substr(port, split, nchar(port))
-        port <- substr(port, 1, split - 1)
-    } else {
-        directory <-
-            file.path("/tmp", get("sessionID", envir = .conduit.global),
-                      basename(tempfile("module")), fsep="/")
-    }
-    host <- list(user = user, password = password, address = address,
-                 port = port, directory = directory, idfile = idfile)
-    return(host)
-}
-
-#' Build a host string from a parsed host list
-#'
-#' @param parsedHost list generated by \code{parseModuleHost}
-#'
-#' @return character string describing module host
-buildModuleHost <- function (parsedHost) {
-    host <- paste0(parsedHost$user, "@", parsedHost$address, ":",
-                   parsedHost$port)
-    return(host)
 }
