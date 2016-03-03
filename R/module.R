@@ -981,27 +981,27 @@ runModule <- function(module, targetDirectory = getwd(),
 
     script <- prepareScript(module)
 
-## do host prep here
-host <- module$host
-hostSubdir <-
-    if (!is.null(host)) {
-        prepareModuleHost(host = host, name = name,
-                          modulePath = modulePath)
-    } else {
-        NULL
-    }
-
+    ## do host prep here
+    host <- module$host
+    hostSubdir <-
+        if (!is.null(host)) {
+            prepareModuleHost(host = host, name = name,
+                              modulePath = modulePath)
+        } else {
+            NULL
+        }
+    
     ## execute script file
     exec_result <- executeScript(script, host, hostSubdir)
     if (exec_result != 0)
         stop("Unable to execute module script")
 
+    ## get things back from host here
     if (!is.null(host)) {
         retrieveHost(host = host, hostSubdir = hostSubdir,
                      modulePath = modulePath)
     }
 
-    ## get things back from host here
 
     ## resolve output objects
     outputList <- lapply(X = module$outputs, FUN = resolveOutput,
