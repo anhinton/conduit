@@ -3,22 +3,18 @@
 #' @describeIn internalInputScript prepare internal input script for
 #' shell language
 internalInputScript.shellSymbol <- function (symbol) {
-    script <- paste0(symbol, "=$(cat ", symbol, internalExtension("shell"),
-                     ")")
-    class(script) <- c("shellScript", "script")
-    script
+    paste0(symbol, "=$(cat ", symbol, internalExtension("shell"),
+           ")")
 }
 
 #' @describeIn internalOutputScript create script to create internal
 #' output for language = "shell"
 internalOutputScript.shellSymbol <- function (symbol) {
-    script <- paste0("echo ${", symbol, "} > ", symbol, ".txt")
-    class(script) <- c("shellScript", "script")
-    script
+    paste0("echo ${", symbol, "} > ", symbol, ".txt")
 }
 
 #' @describeIn executeScript Execute a script in the "shell" language
-executeScript.shell <- function(script, host) {
+executeScript.shellScript <- function(script, host = NULL) {
     ## batch the script file in a shell session
     if (is.null(host)) {
         systemCall <-

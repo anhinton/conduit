@@ -1,5 +1,5 @@
 library(conduit)
-context("test module and pipeline return components")
+context("test module and pipeline result objects")
 
 modulePath <- tempfile("moduleResult")
 if (!dir.exists(modulePath))

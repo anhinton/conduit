@@ -86,19 +86,26 @@ sourceOrder <- function(sources) {
 
 #' Prepare a script for executing a module in its language.
 #'
-#' @details Resolves the module's internal inputs and creates a script
-#' file from the supplied \code{module},
+#' This function creates an executable script file from a
+#' \code{module} object.
 #'
-#' @param module \code{module} object
-#' @param inputObjects Named list of input objects
+#' The script returned will include code to load internal inputs,
+#' followed by the module source scripts in the correct order, and
+#' ending with code to produce internal outputs for consumption by
+#' other modules.
+#'
+#' The resulting script is saved to the current working directory.
 #' 
-#' @return List object containg scriptPath and host, with class set to
-#' module$language.
-prepareScript <- function(module, inputObjects) {
+#' @return Filename of script file created. Object has \code{script}
+#'     class, and of one of:
+#'
+#' \item{\code{pythonScript}}{\dQuote{python} language}
+#' \item{\code{RScript}}{\dQuote{R} language}
+#' \item{\code{shellScript}}{\dQuote{shell} language}
+prepareScript <- function(module) {
     language <- getLanguage(module)
-    onRemoteHost <- !is.null(module$host)
     location <- attr(module, "location")
-    
+
     ## sort sources into correct order
     sources <- module$sources
     sources <- lapply(sourceOrder(sources),
@@ -120,17 +127,7 @@ prepareScript <- function(module, inputObjects) {
 
     ## inputScript loads the module's designated inputs
     inputs <- module$inputs
-    inputScript <-
-        lapply(
-            inputs,
-            function (input, inputObjects, onRemoteHost, language) {
-                inputObject <- getElement(inputObjects, input$name)
-                ## if module is run on remote host, serialized internalVessel
-                ## will be placed in output directory
-                if(onRemoteHost) { inputObject <- basename(inputObject) }
-                script <- prepareScriptInput(input, inputObject, language)
-                return(script)
-            }, inputObjects, onRemoteHost, language)
+    inputScript <- lapply(inputs, prepareScriptInput, language)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
@@ -139,25 +136,26 @@ prepareScript <- function(module, inputObjects) {
         lapply(outputs, prepareScriptOutput, language)
     outputScript <- unlist(outputScript, use.names = FALSE)
 
-    ## moduleScript combines the scripts in correct order
+    moduleScript <- c(inputScript, sourceScript, outputScript)
     moduleScript <- switch(
         language,
-        python = c("import os", "import pickle",
-            inputScript, sourceScript, outputScript),
-        c(inputScript, sourceScript, outputScript))
+        python = c("#!/usr/bin/python", "import os", "import pickle",
+                   moduleScript),
+        R = c("#!/usr/bin/Rscript", moduleScript),
+        shell = c("#!/bin/sh", moduleScript))
     ## script might be empty
     if (is.null(moduleScript))
         moduleScript <- ""
-    
+
     ## write script file to disk
-    
+
     scriptPath <- paste0("script", scriptExtension(language))
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    class(scriptPath) <- module$language
-    return(scriptPath)
+    class(scriptPath) <- c(paste0(language, "Script"), "script")
+    scriptPath
 }
 
 #' Prepare script to create inputs

@@ -271,8 +271,7 @@ resultSource <- function(output, modulePath) {
         }
     input <- moduleInput(name = getName(output), vessel = getVessel(output),
                          format = getFormat(output))
-    script <- prepareScriptInput(input, inputObject = resultref,
-                                 language = getLanguage(output))
+    script <- prepareScriptInput(input, language = getLanguage(output))
     if (!is.null(script)) {
         return(moduleSource(scriptVessel(script)))
     } else {
