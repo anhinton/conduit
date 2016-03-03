@@ -84,79 +84,28 @@ sourceOrder <- function(sources) {
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
 }
 
-#' prepare script to resolve internal input
-#'
-#' @param symbol character string with class set to language of module script
-#' @param inputObject file location of serialised language object
-#'
-#' @return character vector of script to ensure input
-internalInputScript <- function(symbol, inputObject) {
-    UseMethod("internalInputScript", object = symbol)
-}
-
-#' prepare script to resolve internal output
-#'
-#' @param symbol character string with class set to language of module script
-#'
-#' @return character vector of script to ensure input
-internalOutputScript <- function (symbol) {
-    UseMethod("internalOutputScript")
-}
-
-#' Prepare script to create inputs
-#'
-#' @param input input name
-#' @param inputObject object to be supplied as input
-#' @param language module language
-#'
-#' @return Script as character vector
-prepareScriptInput <- function(input, inputObject, language) {
-    type <- class(input$vessel)[1]
-    script <- switch(
-        type,
-        internalVessel = {
-            symbol <- input$vessel$symbol
-            class(symbol) <- language
-            internalInputScript(symbol, inputObject)
-        },
-        NULL)
-    return(script)
-}
-
-#' Prepare script to create outputs
-#'
-#' @param output output name
-#' @param language module language
-#'
-#' @return Script as character vector
-prepareScriptOutput <- function(output, language) {
-    type <- class(output$vessel)[1]
-    script <- switch(
-        type,
-        internalVessel = {
-            symbol <- output$vessel$symbol
-            class(symbol) <- language
-            internalOutputScript(symbol)
-        },
-        NULL)
-    return(script)
-}
-
 #' Prepare a script for executing a module in its language.
 #'
-#' @details Resolves the module's internal inputs and creates a script
-#' file from the supplied \code{module},
+#' This function creates an executable script file from a
+#' \code{module} object.
 #'
-#' @param module \code{module} object
-#' @param inputObjects Named list of input objects
+#' The script returned will include code to load internal inputs,
+#' followed by the module source scripts in the correct order, and
+#' ending with code to produce internal outputs for consumption by
+#' other modules.
+#'
+#' The resulting script is saved to the current working directory.
 #' 
-#' @return List object containg scriptPath and host, with class set to
-#' module$language.
-prepareScript <- function(module, inputObjects) {
+#' @return Filename of script file created. Object has \code{script}
+#'     class, and of one of:
+#'
+#' \item{\code{pythonScript}}{\dQuote{python} language}
+#' \item{\code{RScript}}{\dQuote{R} language}
+#' \item{\code{shellScript}}{\dQuote{shell} language}
+prepareScript <- function(module) {
     language <- getLanguage(module)
-    onRemoteHost <- !is.null(module$host)
     location <- attr(module, "location")
-    
+
     ## sort sources into correct order
     sources <- module$sources
     sources <- lapply(sourceOrder(sources),
@@ -178,17 +127,7 @@ prepareScript <- function(module, inputObjects) {
 
     ## inputScript loads the module's designated inputs
     inputs <- module$inputs
-    inputScript <-
-        lapply(
-            inputs,
-            function (input, inputObjects, onRemoteHost, language) {
-                inputObject <- getElement(inputObjects, input$name)
-                ## if module is run on remote host, serialized internalVessel
-                ## will be placed in output directory
-                if(onRemoteHost) { inputObject <- basename(inputObject) }
-                script <- prepareScriptInput(input, inputObject, language)
-                return(script)
-            }, inputObjects, onRemoteHost, language)
+    inputScript <- lapply(inputs, prepareScriptInput, language)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
@@ -197,25 +136,84 @@ prepareScript <- function(module, inputObjects) {
         lapply(outputs, prepareScriptOutput, language)
     outputScript <- unlist(outputScript, use.names = FALSE)
 
-    ## moduleScript combines the scripts in correct order
+    moduleScript <- c(inputScript, sourceScript, outputScript)
     moduleScript <- switch(
         language,
-        python = c("import os", "import pickle",
-            inputScript, sourceScript, outputScript),
-        c(inputScript, sourceScript, outputScript))
+        python = c("#!/usr/bin/python", "import os", "import pickle",
+                   moduleScript),
+        R = c("#!/usr/bin/Rscript", moduleScript),
+        shell = c("#!/bin/sh", moduleScript))
     ## script might be empty
     if (is.null(moduleScript))
         moduleScript <- ""
-    
+
     ## write script file to disk
-    
+
     scriptPath <- paste0("script", scriptExtension(language))
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    class(scriptPath) <- module$language
-    return(scriptPath)
+    class(scriptPath) <- c(paste0(language, "Script"), "script")
+    scriptPath
+}
+
+#' Prepare script to create inputs
+#'
+#' @param input input name
+#' @param language module language
+#'
+#' @return Script as character vector
+prepareScriptInput <- function(input, language) {
+    vessel <- getVessel(input)
+    if (inherits(vessel, "internalVessel")) {
+        symbol <- vessel$symbol
+        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        internalInputScript(symbol)
+    } else {
+        NULL
+    }
+}
+
+#' Prepare script to create outputs
+#'
+#' @param output output name
+#' @param language module language
+#'
+#' @return Script as character vector
+prepareScriptOutput <- function(output, language) {
+    vessel <- getVessel(output)
+    if (inherits(vessel, "internalVessel")) {
+        symbol <- vessel$symbol
+        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        internalOutputScript(symbol)
+    } else {
+        NULL
+    }
+}
+
+#' Prepare script for internal inputs
+#'
+#' These functions prepare script in the  to resolve internal input
+#'
+#' @param symbol character string with class set to language of module script
+#'
+#' @return character vector of script to ensure input
+#'
+#' @name internalInputScript
+internalInputScript <- function(symbol) {
+    if (!inherits(symbol, "symbol"))
+        stop("symbol object required")
+    UseMethod("internalInputScript")
+}
+
+#' prepare script to resolve internal output
+#'
+#' @param symbol character string with class set to language of module script
+#'
+#' @return character vector of script to ensure input
+internalOutputScript <- function (symbol) {
+    UseMethod("internalOutputScript")
 }
 
 #' Execute a prepared module script file.
@@ -229,6 +227,20 @@ prepareScript <- function(module, inputObjects) {
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, host = NULL) {
-    UseMethod("executeScript")
+executeScript <- function(script, host = NULL, hostSubdir) {
+    command <- command(script)
+    executeCommand(host, hostSubdir, command)
+}
+
+command <- function(script) {
+    UseMethod("command")
+}
+
+executeCommand <- function(host, hostSubdir, command) {
+    UseMethod("executeCommand")
+}
+
+executeCommand.default <- function(host, hostSubdir, command) {
+    system2(command = command$command,
+            args = command$args)
 }

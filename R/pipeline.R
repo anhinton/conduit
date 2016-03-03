@@ -368,7 +368,7 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
         stop(paste0("no such target directory: '", targetDirectory, "'"))
     }
     pipelineDoc <-
-        newXMLDoc(namespaces="http://www.openapi.org/2014",
+        newXMLDoc(namespaces="http://www.openapi.org/2014/",
                   node=pipelineToXML(pipeline=pipeline,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineFilePath <-

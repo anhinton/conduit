@@ -4,12 +4,10 @@
 \alias{prepareScriptInput}
 \title{Prepare script to create inputs}
 \usage{
-prepareScriptInput(input, inputObject, language)
+prepareScriptInput(input, language)
 }
 \arguments{
 \item{input}{input name}
-
-\item{inputObject}{object to be supplied as input}
 
 \item{language}{module language}
 }

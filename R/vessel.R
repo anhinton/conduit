@@ -49,6 +49,7 @@ internalVessel <- function(symbol) {
     if (!is_length1_char(symbol)) {
         stop("'symbol' is not a length 1 character vector")
     }
+    class(symbol) <- "symbol"
     internalVessel <- list(symbol = symbol)
     class(internalVessel) <- c("internalVessel", "vessel")
     return(internalVessel)

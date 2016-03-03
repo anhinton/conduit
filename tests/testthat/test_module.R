@@ -117,25 +117,26 @@ test_that("'moduleSource' object has class \"moduleSource\"", {
 
 ## create module objects
 
-mod1 <- module(name = "createGraph",
-               language = "R",
-               host = "user@remothost:2222",
-               description = "Lays out a graphNEL graph using the Rgraphviz package",
-               inputs =
-                   list(moduleInput(
-                       name = "myGraph",
-                       vessel = internalVessel("myGraph"),
-                       format = ioFormat("R \"graphNEL\" object"))),
-               outputs =
-                   list(moduleOutput(
-                       name = "Ragraph",
-                       vessel = internalVessel("Ragraph"),
-                       format = ioFormat("R \"Ragraph\" object"))),
-               sources =
-                   list(moduleSource(
-                       scriptVessel(
-                           c("library(Rgraphviz)",
-                             "Ragraph <- agopen(myGraph, \"myGraph\")")))))
+mod1 <- module(
+    name = "createGraph",
+    language = "R",
+    host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
+    description = "Lays out a graphNEL graph using the Rgraphviz package",
+    inputs =
+        list(moduleInput(
+            name = "myGraph",
+            vessel = internalVessel("myGraph"),
+            format = ioFormat("R \"graphNEL\" object"))),
+    outputs =
+        list(moduleOutput(
+            name = "Ragraph",
+            vessel = internalVessel("Ragraph"),
+            format = ioFormat("R \"Ragraph\" object"))),
+    sources =
+        list(moduleSource(
+            scriptVessel(
+                c("library(Rgraphviz)",
+                  "Ragraph <- agopen(myGraph, \"myGraph\")")))))
 mod2 <- module(name = "blank",
                language = "shell")
                        
@@ -149,20 +150,13 @@ test_that("'module' fails for invalid arguments", {
                  "'name' is not a length 1 character vector")
     ## 'language' tests are sparse as this is properly tested in
     ## test_moduleLanguage.R
-    expect_error(module(name = "moddy", language = character(2)))
-    expect_error(module(name = "moddy", language = numeric(1)))
+    expect_error(module(name = "moddy", language = character(2)),
+                 "'language' is not a length 1 character vector")
+    expect_error(module(name = "moddy", language = numeric(1)),
+                 "'language' is not a length 1 character vector")
     expect_error(module(name = "moddy", language = "R",
                         host = character(2)),
-                 "'host' is not a length 1 character vector")
-    expect_error(module(name = "moddy", language="R",
-                        host = character(2)),
-                 "'host' is not a length 1 character vector")
-    expect_error(module(name = "moddy", language="R",
-                        host = numeric(1)),
-                 "'host' is not a length 1 character vector")
-    expect_error(module(name = "moddy", language="R",
-                        , host = 16),
-                 "'host' is not a length 1 character vector")
+                 "'host' is not moduleHost object")
     expect_error(module(name = "moddy", language = "R",
                         description = numeric(2)),
                  "'description' is not a character object")
@@ -174,19 +168,19 @@ test_that("'module' fails for invalid arguments", {
                  "'inputs' is not a list object")
     expect_error(module(name = "moddy", language = "R",
                         inputs = list(character(1))),
-                 "not a 'moduleInput' object")
+                 "inputs must be moduleInput objects")
     expect_error(module(name = "moddy", language = "R",
                         outputs = character(2)),
                  "'outputs' is not a list object")
     expect_error(module(name = "moddy", language = "R",
                         outputs = list(character(1))),
-                 "not a 'moduleOutput' object")
+                 "outputs must be moduleOutput objects")
     expect_error(module(name = "moddy", language = "R",
                         sources = character(2)),
                  "'sources' is not a list object")
     expect_error(module(name = "moddy", language = "R",
                         sources = list(character(1))),
-                 "not a 'moduleSource' object")
+                 "sources must be moduleSource objects")
 })
 
 test_that("'module' slots are correct type and length", {
@@ -194,8 +188,7 @@ test_that("'module' slots are correct type and length", {
     expect_equal(length(mod1$language), 1)
     expect_true(is.character(mod1$description))
     expect_true(is.null(mod2$desctription))
-    expect_true(is.character(mod1$host))
-    expect_equal(length(mod1$host), 1)
+    expect_is(mod1$host, "moduleHost")
     expect_true(is.null(mod2$host))
     expect_true(is.list(mod1$inputs))
     expect_match(class(mod1$inputs[[1]]), "^moduleInput$", all=F)

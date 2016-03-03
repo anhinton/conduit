@@ -1,108 +1,43 @@
-#' Return a \code{moduleInput} object for use in a
-#' \code{moduleResult} object.
+#' Create \code{componentResult} objects
 #'
-#' This function constructs an appropriate \code{moduleInput} object
-#' from the \code{output} object created when executing a module
-#' source.
+#' Constructor functions to create \code{componentResult} objects.
 #'
-#' @param output \code{output} object
+#' These functions are used to construct the objects returned by
+#'     \code{runModule} and \code{runPipeline}.
+#'
+#' The \code{moduleResult} constructor takes a list of module
+#' \code{output} objects created by \code{resolveOutput}, the original
+#' \code{module}, and the module's output location
+#' \code{modulePath}. A \code{moduleResult} object is returned.
+#'
+#' The \code{pipelineResult} constructor takes a list of
+#' \code{componentResult} objects produced by \code{runComponent}, the
+#' original \code{pipeline}, and the pipeline's output location
+#' \code{pipelinePath}. A \code{pipelineResult} object is returned.
+#'
+#' The \code{export} function can be used to export these objects to a
+#' gzipped tarfile. The resulting tarfile can be read loaded into
+#' conduit using the \code{importModule} and \code{importPipeline}
+#' functions.
+#'
+#' @name componentResult
+#' 
+#' @param outputList list of \code{output} objects
 #' @param modulePath file path to module output
-#'
-#' @return \code{moduleInput} object or NULL
-resultInput <- function(output, modulePath) {
-    if (!inherits(output, "output"))
-        stop("output object required")
-    if (!dir.exists(modulePath))
-        stop("modulePath does not exist")
-    
-    name <- getName(output)
-    vessel <- getVessel(output)
-    type <- getType(vessel)
-    format <- getFormat(output)
-    switch(type,
-           fileVessel =, internalVessel = {
-               result <- getResult(output)
-               resultref <-
-                   if (dirname(result) == modulePath) {
-                       basename(result)
-                   } else {
-                       gsub(modulePath, ".", result)
-                   }        
-               moduleInput(
-                   name = name,
-                   vessel = fileVessel(ref = resultref),
-                   format = format)
-           })
-}
-
-#' Return a \code{moduleSource} object for use in a
-#' \code{moduleResult} object.
-#'
-#' This function constructs an appropriate \code{moduleSource} object
-#' from the \code{output} object created when executing a module
-#' source.
-#'
-#' @param output \code{output} object
-#' @param modulePath file path to module output
-#'
-#' @return \code{moduleSouce} object or NULL
-resultSource <- function(output, modulePath) {
-    if (!inherits(output, "output"))
-        stop("output object required")
-    if (!dir.exists(modulePath))
-        stop("modulePath does not exist")
-    
-    result <- getResult(output)
-    resultref <-
-        if (dirname(result) == modulePath) {
-            basename(result)
-        } else {
-            gsub(modulePath, ".", result)
-        }
-    input <- moduleInput(name = getName(output), vessel = getVessel(output),
-                         format = getFormat(output))
-    script <- prepareScriptInput(input, inputObject = resultref,
-                                 language = getLanguage(output))
-    if (!is.null(script)) {
-        return(moduleSource(scriptVessel(script)))
-    } else {
-        NULL
-    }
-
-}
-
-#' Return a \code{moduleOutput} object for use in a
-#' \code{moduleResult} object.
-#'
-#' @param output \code{output} object
-#'
-#' @return \code{moduleOutput} object
-resultOutput <- function(output) {
-    if (!inherits(output, "output"))
-        stop("output object required")
-    
-    moduleOutput(name = getName(output), vessel = getVessel(output),
-                 format = getFormat(output))
-}
-
-#' Return a \code{component} object for use in a \code{pipelineResult}
-#' object.
-#'
-#' @param componentResult \code{componentResult} object
+#' @param module \code{module} object which produced \code{outputList}
+#' @param componentResultList list of \code{componentResult} objects
 #' @param pipelinePath file path to pipeline output
+#' @param pipeline \code{pipeline} object which produced
+#'     \code{componentResultList}
 #'
-#' @return \code{component} object
-resultComponent <- function(componentResult, pipelinePath) {
-    if (!inherits(componentResult, "componentResult"))
-        stop("componentResult object require")
-    if (!dir.exists(pipelinePath))
-        stop("pipelinePath does not exist")
-    
-    value <- componentResult$component
-    xmlfile <- gsub(pipelinePath, ".", componentResult$file)
-    vessel <- fileVessel(xmlfile)
-    component(value = value, vessel = vessel)
-}
+#' @return object of class \code{componentResult} and either
+#'     \code{moduleResult} or \code{componentResult} containing:
+#' 
+#' \item{file}{file path to resulting module or pipeline XML}
+#' \item{component}{resulting \code{module} or \code{pipeline} object}
+#' \item{outputList}{list of \code{output} objects produced by
+#'     module(s)}
+NULL
 
 #' @describeIn componentResult returns the result of running a
 #'     \code{module}
@@ -184,48 +119,6 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
     class(pipelineResult) <- c("pipelineResult", "componentResult")
     pipelineResult
 }
-
-#' @name componentResult
-#'
-#' @title Create \code{componentResult} objects
-#'
-#' @description Constructor functions to create \code{componentResult}
-#'     objects.
-#'
-#' @details These functions are used to construct the objects returned
-#'     by \code{runModule} and \code{runPipeline}.
-#'
-#' The \code{moduleResult} constructor takes a list of module
-#' \code{output} objects created by \code{resolveOutput}, the original
-#' \code{module}, and the module's output location
-#' \code{modulePath}. A \code{moduleResult} object is returned.
-#'
-#' The \code{pipelineResult} constructor takes a list of
-#' \code{componentResult} objects produced by \code{runComponent}, the
-#' original \code{pipeline}, and the pipeline's output location
-#' \code{pipelinePath}. A \code{pipelineResult} object is returned.
-#'
-#' The \code{export} function can be used to export these objects to a
-#' gzipped tarfile. The resulting tarfile can be read loaded into
-#' conduit using the \code{importModule} and \code{importPipeline}
-#' functions.
-#'
-#' @param outputList list of \code{output} objects
-#' @param modulePath file path to module output
-#' @param module \code{module} object which produced \code{outputList}
-#' @param componentResultList list of \code{componentResult} objects
-#' @param pipelinePath file path to pipeline output
-#' @param pipeline \code{pipeline} object which produced
-#'     \code{componentResultList}
-#'
-#' @return object of class \code{componentResult} and either
-#'     \code{moduleResult} or \code{componentResult} containing:
-#' 
-#' \item{file}{file path to resulting module or pipeline XML}
-#' \item{component}{resulting \code{module} or \code{pipeline} object}
-#' \item{outputList}{list of \code{output} objects produced by
-#'     module(s)}
-NULL
 
 #' @describeIn export Export a \code{componentResult} object
 #'
@@ -314,3 +207,110 @@ importPipeline <- function(tarfile, name) {
     pipelineXML <- file.path(tempdir(), exportName, "pipeline.xml")
     loadPipeline(name = name, ref = pipelineXML)
 }
+
+#' Return a \code{moduleInput} object for use in a
+#' \code{moduleResult} object.
+#'
+#' This function constructs an appropriate \code{moduleInput} object
+#' from the \code{output} object created when executing a module
+#' source.
+#'
+#' @param output \code{output} object
+#' @param modulePath file path to module output
+#'
+#' @return \code{moduleInput} object or NULL
+resultInput <- function(output, modulePath) {
+    if (!inherits(output, "output"))
+        stop("output object required")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    
+    name <- getName(output)
+    vessel <- getVessel(output)
+    type <- getType(vessel)
+    format <- getFormat(output)
+    switch(type,
+           fileVessel =, internalVessel = {
+               result <- getResult(output)
+               resultref <-
+                   if (dirname(result) == modulePath) {
+                       basename(result)
+                   } else {
+                       gsub(modulePath, ".", result)
+                   }        
+               moduleInput(
+                   name = name,
+                   vessel = fileVessel(ref = resultref),
+                   format = format)
+           })
+}
+
+#' Return a \code{moduleSource} object for use in a
+#' \code{moduleResult} object.
+#'
+#' This function constructs an appropriate \code{moduleSource} object
+#' from the \code{output} object created when executing a module
+#' source.
+#'
+#' @param output \code{output} object
+#' @param modulePath file path to module output
+#'
+#' @return \code{moduleSouce} object or NULL
+resultSource <- function(output, modulePath) {
+    if (!inherits(output, "output"))
+        stop("output object required")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    
+    result <- getResult(output)
+    resultref <-
+        if (dirname(result) == modulePath) {
+            basename(result)
+        } else {
+            gsub(modulePath, ".", result)
+        }
+    input <- moduleInput(name = getName(output), vessel = getVessel(output),
+                         format = getFormat(output))
+    script <- prepareScriptInput(input, language = getLanguage(output))
+    if (!is.null(script)) {
+        return(moduleSource(scriptVessel(script)))
+    } else {
+        NULL
+    }
+
+}
+
+#' Return a \code{moduleOutput} object for use in a
+#' \code{moduleResult} object.
+#'
+#' @param output \code{output} object
+#'
+#' @return \code{moduleOutput} object
+resultOutput <- function(output) {
+    if (!inherits(output, "output"))
+        stop("output object required")
+    
+    moduleOutput(name = getName(output), vessel = getVessel(output),
+                 format = getFormat(output))
+}
+
+#' Return a \code{component} object for use in a \code{pipelineResult}
+#' object.
+#'
+#' @param componentResult \code{componentResult} object
+#' @param pipelinePath file path to pipeline output
+#'
+#' @return \code{component} object
+resultComponent <- function(componentResult, pipelinePath) {
+    if (!inherits(componentResult, "componentResult"))
+        stop("componentResult object require")
+    if (!dir.exists(pipelinePath))
+        stop("pipelinePath does not exist")
+    
+    value <- componentResult$component
+    xmlfile <- gsub(pipelinePath, ".", componentResult$file)
+    vessel <- fileVessel(xmlfile)
+    component(value = value, vessel = vessel)
+}
+
+

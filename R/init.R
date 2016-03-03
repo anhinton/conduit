@@ -5,19 +5,12 @@ NULL
 NULL
 
 .onLoad <- function(libname, pkgname) {
-    initIdfile()
+    # initIdfile()
     initSession()
     initSearch()
 }
 
 .conduit.global <- new.env()
-
-initIdfile <- function () {
-    Sys.chmod(system.file("conduit.key", package = "conduit"), mode = "0400")
-    assign("defaultIdfile",
-           system.file("conduit.key", package = "conduit"),
-           .conduit.global)
-}
 
 initSession <- function () {
     assign("sessionID",
