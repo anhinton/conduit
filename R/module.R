@@ -482,7 +482,8 @@ readModuleHostXML <- function(moduleHostXML) {
     type <- xmlName(moduleHostXML)
     moduleHost <- switch(
         type,
-        vagrant = readVagrantHostXML(moduleHostXML)
+        vagrant = readVagrantHostXML(moduleHostXML),
+        docker = readDockerHostXML(moduleHostXML)
     )
     if(!inherits(moduleHost, "moduleHost"))
         class(moduleHost) <- c(class(moduleHost), "moduleHost")

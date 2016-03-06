@@ -11,4 +11,11 @@
     <attribute name="hostdir" type="string"/>
   </complexType>
   
+  <element name="docker" type="oa:DockerType"/>
+
+  <complexType name="DockerType">
+    <attribute name="image" type="string" use="required"/>
+    <attribute name="guestdir" type="string"/>
+  </complexType>
+  
 </schema>
