@@ -979,7 +979,19 @@ runModule <- function(module, targetDirectory = getwd(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
-    
+
+    ## if inputObjects is NULL, but module has inputs
+    ## (we are running a module with inputs directly) 
+    ## try to use inputs directly
+    ## (e.g., external file or URL might work)
+    if (is.null(inputObjects) && !is.null(moduleInputList)) {
+        inputObjects <-
+            lapply(moduleInputList,
+                   function(x) resolveOutput(moduleOutputFromInput(x),
+                                             language))
+        names(inputObjects) <- names(moduleInputList)
+    }
+        
     ## prepare module inputs
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
@@ -1018,6 +1030,11 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## return moduleResult object
     moduleResult(outputList, modulePath, module)
+}
+
+# Create a moduleOutput from a moduleInput
+moduleOutputFromInput <- function(input) {
+    moduleOutput(getName(input), getVessel(input), getFormat(input))
 }
 
 #' Prepare input object
