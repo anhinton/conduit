@@ -78,7 +78,7 @@ executeCommand.dockerHost <- function(host, hostSubdir, command) {
                   "-v", paste0(hostdir, ":", guestdir),
                   "-w", guestdir, 
                   host$image,
-                  "'", paste(args, collapse = " "), "'")
+                  paste(args, collapse = " "))
     system2(command = "docker",
             args = args)
 }
