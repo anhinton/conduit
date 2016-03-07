@@ -17,7 +17,7 @@
 #' @return Object of class \code{dockerHost} and \code{moduleHost}
 #'
 #' @export
-dockerHost <- function(image) {
+dockerHost <- function(image, guestdir = "/home/conduit") {
     if (!is_length1_char(image))
         stop("image must be a length one character string")
     if (!is_length1_char(guestdir))
@@ -41,6 +41,7 @@ readDockerHostXML <- function (dockerHostXML) {
     if (xmlName(dockerHostXML) != "docker")
         stop("docker element required")
     attrs <- xmlAttrs(dockerHostXML)
+    image <- attrs[["image"]]
     guestdir <-
         if ("guestdir" %in% names(attrs)) {
             attrs[["guestdir"]]
