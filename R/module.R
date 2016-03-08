@@ -980,18 +980,6 @@ runModule <- function(module, targetDirectory = getwd(),
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
 
-    ## if inputObjects is NULL, but module has inputs
-    ## (we are running a module with inputs directly) 
-    ## try to use inputs directly
-    ## (e.g., external file or URL might work)
-    if (is.null(inputObjects) && !is.null(moduleInputList)) {
-        inputObjects <-
-            lapply(moduleInputList,
-                   function(x) resolveOutput(moduleOutputFromInput(x),
-                                             language))
-        names(inputObjects) <- names(moduleInputList)
-    }
-        
     ## prepare module inputs
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
@@ -1045,6 +1033,10 @@ moduleOutputFromInput <- function(input) {
 #' For any \code{moduleInput} wrapping a \code{internalVessel} or
 #' \code{fileVessel} with a relative ref, the relevant \code{input}
 #' object is copied into the module \code{outputDirectory}.
+#'
+#' For any \code{moduleInput} that is not found in \code{inputList}
+#' (e.g., when the module is being run directly), the \code{moduleInput}
+#' itself is tried (e.g., a URL vessel should work).
 #' 
 #' @param moduleInput \code{moduleInput} object
 #' @param inputList list of \code{input} objects provided to module
@@ -1058,6 +1050,14 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
     vessel <- getVessel(moduleInput)
     type <- getType(vessel)
     input <- getElement(inputList, name)
+
+    ## If 'input' is NULL, try to use inputs directly
+    ## (e.g., external file or URL might work).
+    ## This allows module to be run directly
+    ## (e.g., if it specifies only URL as input)
+    if (is.null(input)) {
+        input <- resolveOutput(moduleOutputFromInput(moduleInput), language)
+    }        
 
     input <- switch(
         type,
