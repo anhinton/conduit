@@ -74,12 +74,12 @@ executeCommand.dockerHost <- function(host, hostSubdir, command) {
     args <- c(command$command, command$args)
     hostdir <- getwd()
     guestdir <- host$guestdir
-    args <- paste("docker", "run", 
+    args <- paste("run", 
                   "-v", paste0(hostdir, ":", guestdir),
                   "-w", guestdir, 
                   host$image,
                   paste(args, collapse = " "))
-    system2(command = "sudo",
+    system2(command = "docker",
             args = args)
 }
 
