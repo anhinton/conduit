@@ -1022,11 +1022,6 @@ runModule <- function(module, targetDirectory = getwd(),
     moduleResult(outputList, modulePath, module)
 }
 
-# Create a moduleOutput from a moduleInput
-moduleOutputFromInput <- function(input) {
-    moduleOutput(getName(input), getVessel(input), getFormat(input))
-}
-
 #' Prepare input object
 #'
 #' This function ensures a \code{module}'s \code{moduleInput}
@@ -1053,14 +1048,6 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
     type <- getType(vessel)
     input <- getElement(inputList, name)
 
-    ## If 'input' is NULL, try to use inputs directly
-    ## (e.g., external file or URL might work).
-    ## This allows module to be run directly
-    ## (e.g., if it specifies only URL as input)
-    if (is.null(input)) {
-        input <- resolveOutput(moduleOutputFromInput(moduleInput), language)
-    }        
-
     input <- switch(
         type,
         internalVessel = {
@@ -1070,7 +1057,7 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
         },
         fileVessel = prepareFileInput(vessel, input, outputDirectory,
                                       location),
-        urlVessel = input,
+        urlVessel = prepareURLInput(vessel, input),
         stop("unknown vessel type"))
     class(input) <- "input"
     input
@@ -1106,6 +1093,15 @@ prepareFileInput <- function(vessel, input, outputDirectory, location) {
             stop("unable to copy input into outputDirectory")
     }
     fileInput
+}
+
+prepareURLInput <- function(vessel, input) {
+    ref <- getRef(vessel)
+    # Allow for module being run in isolation (inputs are NULL)
+    if (is.null(input))
+        ref
+    else
+        input
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
