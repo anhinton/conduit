@@ -1080,17 +1080,26 @@ prepareFileInput <- function(vessel, input, outputDirectory, location) {
     path <- vessel$path
 
     if (is.null(input)) {
-        fileInput <- findFile(ref, path, location)
-        if (is.null(fileInput))
+        input <- findFile(ref, path, location)
+        if (is.null(input))
             stop("unable to locate input file")
-    } else if (is_absolute(ref)) {
-        if (findFile(ref, path, location) != input)
-            stop("input does not match path given in fileVessel")
-        fileInput <- input
+        if (is_absolute(ref)) {
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
     } else {
-        fileInput <- file.path(outputDirectory, ref)
-        if (!file.copy(input, fileInput, overwrite = TRUE))
-            stop("unable to copy input into outputDirectory")
+        if (is_absolute(ref)) {
+            if (findFile(ref, path, location) != input)
+                stop("input does not match path given in fileVessel")
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
     }
     fileInput
 }
