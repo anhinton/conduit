@@ -103,6 +103,25 @@ test_that(
         expect_false(grepl(dirname(inputObjects[[1]]), inputLine))
     })
 
+test_that("prepareInternalInput() returns correctly", {
+    input <- tempfile()
+    system2("touch", input)
+    symbol <- "x"
+    language = "python"
+    outputDirectory <- tempfile("prepareInternalInput")
+    if (!dir.exists(outputDirectory))
+        dir.create(outputDirectory)
+
+    ## unable to copy
+    expect_error(prepareInternalInput(input, symbol, language, tempfile()),
+                 "unable to copy input into outputDirectory")
+
+    ## success 
+    internalInput <-
+        prepareInternalInput(input, symbol, language, outputDirectory)
+    expect_true(file.exists(internalInput))
+})
+
 ## test resolveInput()
 test_that(
     "absolute fileVessel refs are resolved",

@@ -1056,10 +1056,21 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
     input
 }
 
+#' Prepare internal input object.
+#'
+#' This function makes a serialized internal module input available in
+#' a module's working directory.
+#'
+#' @param input File path to serialized object
+#' @param symbol Name of module input
+#' @param language Module language
+#' @param outputDirectory File path to module working directory
+#'
+#' @return File path to serialized internal input.
 prepareInternalInput <- function(input, symbol, language, outputDirectory) {
     internalInput <- file.path(
         outputDirectory, paste0(symbol, internalExtension(language)))
-    if (!file.copy(input, internalInput))
+    if (!suppressWarnings(file.copy(input, internalInput)))
         stop("unable to copy input into outputDirectory")
     if (file.exists(internalInput)) {
         return(internalInput)
