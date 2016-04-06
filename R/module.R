@@ -1070,7 +1070,7 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
 prepareInternalInput <- function(input, symbol, language, outputDirectory) {
     internalInput <- file.path(
         outputDirectory, paste0(symbol, internalExtension(language)))
-    if (!suppressWarnings(file.copy(input, internalInput)))
+    if (!file.copy(input, internalInput))
         stop("unable to copy input into outputDirectory")
     if (file.exists(internalInput)) {
         return(internalInput)
@@ -1079,10 +1079,29 @@ prepareInternalInput <- function(input, symbol, language, outputDirectory) {
     }
 }
 
+#' Prepare file input object
+#'
+#' This function makes sure a module's file input is available to the
+#' module.
+#'
+#' If \code{input} is NULL the module is assumed to be
+#' \dQuote{starting} from a file, and the file referenced in
+#' \code{vessel} is returned.
+#'
+#' Where \code{input} is not null, and \code{vessel} describes an
+#' absolute path to a file this path is returned. If \code{vessel}
+#' describes a relative path to a file, this file is copied into the
+#' module's outputDirectory, and the resulting file is returned.
+#'
+#' @param vessel Module input vessel object
+#' @param input File path to input
+#' @param outputDirectory File path to module working directory
+#' @param location File path to originating module XML file
+#'
+#' @return File path to input file
 prepareFileInput <- function(vessel, input, outputDirectory, location) {
     ref <- getRef(vessel)
     path <- vessel$path
-
     if (is.null(input)) {
         fileInput <- findFile(ref, path, location)
         if (is.null(fileInput))

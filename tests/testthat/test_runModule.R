@@ -103,7 +103,7 @@ test_that(
         expect_false(grepl(dirname(inputObjects[[1]]), inputLine))
     })
 
-test_that("prepareInternalInput() returns correctly", {
+test_that("prepareInternalInput() returns correct file path", {
     input <- tempfile()
     system2("touch", input)
     symbol <- "x"
@@ -113,13 +113,69 @@ test_that("prepareInternalInput() returns correctly", {
         dir.create(outputDirectory)
 
     ## unable to copy
-    expect_error(prepareInternalInput(input, symbol, language, tempfile()),
-                 "unable to copy input into outputDirectory")
+    expect_error(
+        suppressWarnings(prepareInternalInput(input, symbol, language,
+                                              tempfile())),
+        "unable to copy input into outputDirectory")
 
     ## success 
     internalInput <-
         prepareInternalInput(input, symbol, language, outputDirectory)
     expect_true(file.exists(internalInput))
+})
+
+test_that("prepareFileInput() returns correct file path", {
+    outputDirectory <- tempfile("prepareFileInput")
+    if (!dir.exists(outputDirectory))
+        dir.create(outputDirectory)
+    location <- tempdir()
+    input <- tempfile("input")
+    ref <- tempfile("ref")
+    system2("touch", args = c(input, ref))
+    vessel <- fileVessel(ref = basename(ref), path = dirname(ref))
+    
+    ## no input given
+    ## fails if referenced file not found
+    expect_error(prepareFileInput(input = NULL,
+                                  vessel = fileVessel(ref = tempfile()),
+                                  outputDirectory = outputDirectory,
+                                  location = location),
+                 "unable to locate input file")
+    ## success
+    fileInput1 <- prepareFileInput(input = NULL,
+                                   vessel = vessel,
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput1))
+    
+    ## absolute ref in vessel
+    ## fails if path from resolved vessel does not match input
+    expect_error(prepareFileInput(input = input,
+                                  vessel = fileVessel(ref = ref),
+                                  outputDirectory = outputDirectory,
+                                  location = location),
+                 "input does not match path given in fileVessel")
+    ## success
+    fileInput2 <- prepareFileInput(input = ref,
+                                   vessel = fileVessel(ref = ref),
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    file.exists(fileInput2)
+    
+    ## relative ref in vessel
+    ## fails if unable to copy file
+    expect_error(
+        suppressWarnings(prepareFileInput(input = input,
+                                          vessel = vessel,
+                                          outputDirectory = tempfile(),
+                                          location = location)),
+        "unable to copy input into outputDirectory")
+    ## success
+    fileInput3 <- prepareFileInput(input = input,
+                                   vessel = vessel,
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput3))
 })
 
 ## test resolveInput()
