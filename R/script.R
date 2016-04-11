@@ -160,17 +160,19 @@ prepareScript <- function(module) {
 
 #' Prepare script to create inputs
 #'
-#' @details if a module input is referenced by an internalVessel the
-#'     module source scripts will require the symbol to be loaded
+#' @details if a module input is to be fulfilled via an internalVessel
+#'     the module source scripts will require the symbol to be loaded
 #'     prior to execution. other vessel types do not need to be loaded
 #'     in script.
 #' 
-#' @param input input name
+#' @param moduleInput module input object
 #' @param language module language
 #'
 #' @return Script as character vector
-prepareScriptInput <- function(input, language) {
-    vessel <- getVessel(input)
+prepareScriptInput <- function(moduleInput, language) {
+    if (!inherits(moduleInput, "moduleInput"))
+        stop("moduleInput oject required")
+    vessel <- getVessel(moduleInput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
         class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
