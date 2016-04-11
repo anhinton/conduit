@@ -251,7 +251,7 @@ test_that("prepareInput() returns resolved input objects", {
                            outputDirectory = outputDirectory,
                            language = language,
                            location = location)
-    expect_match(input3, urlInput)    
+    expect_match(input3, urlInput)
 })
 
 ## test executeScript
