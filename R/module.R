@@ -1031,9 +1031,11 @@ runModule <- function(module, targetDirectory = getwd(),
 #' @param moduleInput \code{moduleInput} object
 #' @param inputList list of \code{input} objects provided to module
 #' @param outputDirectory working directory for module execution
+#' @param language Module language
 #' @param location location of originating module file
 #'
-#' @return \code{input} object
+#' @return \code{input} object. Generally a character string
+#'     referencing a file location or URL
 prepareInput <- function(moduleInput, inputList, outputDirectory,
                          language, location) {
     name <- getName(moduleInput)
@@ -1050,7 +1052,7 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
         },
         fileVessel = prepareFileInput(vessel, input, outputDirectory,
                                       location),
-        urlVessel = input,
+        urlVessel = prepareURLInput(vessel, input),
         stop("unknown vessel type"))
     class(input) <- "input"
     input
@@ -1116,6 +1118,31 @@ prepareFileInput <- function(vessel, input, outputDirectory, location) {
             stop("unable to copy input into outputDirectory")
     }
     fileInput
+}
+
+#' Prepare URL input object
+#'
+#' This function ensure's a module's URL input is available to the
+#' module.
+#'
+#' If \code{input} is NULL the module is assumed to be
+#' \dQuote{starting} from a URL, and the URL referenced in
+#' \code{vessel} is returned.
+#'
+#' @param vessel Module input vessel object
+#' @param input URL string
+#'
+#' @return URL to input resource
+prepareURLInput <- function(vessel, input) {
+    ref <- getRef(vessel)
+    ## Allow for module being run in isolation (inputs are NULL)
+    if (is.null(input)) {
+        ref
+    } else {
+        if (ref != input)
+            stop("input does not match URL given in urlVessel")
+        input
+    }
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
