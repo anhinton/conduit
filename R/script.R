@@ -171,7 +171,7 @@ prepareScript <- function(module) {
 #' @return Script as character vector
 prepareScriptInput <- function(moduleInput, language) {
     if (!inherits(moduleInput, "moduleInput"))
-        stop("moduleInput oject required")
+        stop("moduleInput object required")
     vessel <- getVessel(moduleInput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
@@ -184,12 +184,19 @@ prepareScriptInput <- function(moduleInput, language) {
 
 #' Prepare script to create outputs
 #'
-#' @param output output name
+#' @details if a module output is passed to conduit via an
+#'     internalVessel the module source scripts must serialize the
+#'     object after execution. other vessel types do not need this to
+#'     be done by the glue system.
+#'
+#' @param moduleOutput \code{moduleOutput} object
 #' @param language module language
 #'
 #' @return Script as character vector
-prepareScriptOutput <- function(output, language) {
-    vessel <- getVessel(output)
+prepareScriptOutput <- function(moduleOutput, language) {
+    if (!inherits(moduleOutput, "moduleOutput"))
+        stop("moduleOutput object required")
+    vessel <- getVessel(moduleOutput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
         class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
