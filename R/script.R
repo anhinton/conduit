@@ -160,6 +160,11 @@ prepareScript <- function(module) {
 
 #' Prepare script to create inputs
 #'
+#' @details if a module input is referenced by an internalVessel the
+#'     module source scripts will require the symbol to be loaded
+#'     prior to execution. other vessel types do not need to be loaded
+#'     in script.
+#' 
 #' @param input input name
 #' @param language module language
 #'
@@ -194,9 +199,10 @@ prepareScriptOutput <- function(output, language) {
 
 #' Prepare script for internal inputs
 #'
-#' These functions prepare script in the  to resolve internal input
+#' These functions prepare a module script snippet to resolve an
+#' internal input
 #'
-#' @param symbol character string with class set to language of module script
+#' @param symbol \code{symbol} object
 #'
 #' @return character vector of script to ensure input
 #'
