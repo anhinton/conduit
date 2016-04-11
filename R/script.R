@@ -206,7 +206,7 @@ prepareScriptOutput <- function(output, language) {
 #'
 #' @param symbol \code{symbol} object
 #'
-#' @return character vector of script to ensure input
+#' @return script as character vector
 #'
 #' @name internalInputScript
 internalInputScript <- function(symbol) {
@@ -217,10 +217,15 @@ internalInputScript <- function(symbol) {
 
 #' prepare script to resolve internal output
 #'
-#' @param symbol character string with class set to language of module script
+#' These functions prepare a module script snippet to produce an
+#' internal output
 #'
-#' @return character vector of script to ensure input
+#' @param symbol \code{symbol} object
+#'
+#' @return script as character vector
 internalOutputScript <- function (symbol) {
+    if (!inherits(symbol, "symbol"))
+        stop("symbol object required")
     UseMethod("internalOutputScript")
 }
 

@@ -19,7 +19,7 @@ internalInputScript(symbol)
 \item{symbol}{\code{symbol} object}
 }
 \value{
-character vector of script to ensure input
+script as character vector
 }
 \description{
 These functions prepare a module script snippet to resolve an

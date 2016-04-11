@@ -33,3 +33,11 @@ test_that("prepareScriptInput() returns script fragment", {
                                        language = "R")
     expect_null(scriptInput2)
 })
+
+test_that("internalOutputScript() returns sensible script fragment", {
+    ## fails for invalid arguments
+    expect_error(internalOutputScript(as.character("cookies")),
+                 "symbol object required")
+
+    ## language-specific testing found in test_LANGUAGE.R files
+})
