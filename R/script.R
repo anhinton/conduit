@@ -95,14 +95,13 @@ sourceOrder <- function(sources) {
 #' other modules.
 #'
 #' The resulting script is saved to the current working directory.
-#' 
-#' @return Filename of script file created. Object has \code{script}
-#'     class, and of one of:
 #'
-#' \item{\code{pythonScript}}{\dQuote{python} language}
-#' \item{\code{RScript}}{\dQuote{R} language}
-#' \item{\code{shellScript}}{\dQuote{shell} language}
+#' @param module \code{module} object
+#' 
+#' @return \code{script} object naming script file
 prepareScript <- function(module) {
+    if (!inherits(module, "module"))
+        stop("module object required")
     language <- getLanguage(module)
     location <- attr(module, "location")
 

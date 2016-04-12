@@ -68,3 +68,36 @@ test_that("prepareScriptOutput() returns script fragment", {
                                          language = "R")
     expect_null(scriptOutput2)
 })
+
+## test prepareScript
+test_that("prepareScript() returns script file", {
+    testDir <- tempfile("prepareScript")
+    if (!dir.exists(testDir))
+        dir.create(testDir)
+    oldwd <- setwd(testDir)
+    on.exit(setwd(oldwd))
+    module1 <- module(
+        name = "mod1",
+        language = "R",
+        inputs = list(
+            moduleInput(name = "X",
+                        vessel = internalVessel("X"),
+                        format = ioFormat("language object"))),
+        sources = list(
+            moduleSource(
+                scriptVessel("Y <- X * 2"))),
+        outputs = list(
+            moduleOutput(name = "Y",
+                         vessel = internalVessel("Y"),
+                         format = ioFormat("language object"))))
+
+    ## fail for invalid input
+    expect_error(prepareScript(module = unclass(module1)),
+                 "module object required")
+
+    ## creates script file    
+    script1 <- prepareScript(module = module1)
+    expect_true(file.exists(script1))
+    expect_is(script1, "script")
+    expect_is(script1, c(paste0(getLanguage(module1), "Script")))
+})

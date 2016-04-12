@@ -56,53 +56,6 @@ test_that(
         expect_match(source_script[1], "^library[(]R2HTML[)]")
     })
 
-## test prepareScript
-test_that(
-    "R script file is created",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        
-        ## create RDS file for input
-        input_object <- 1:10
-        filename <- tempfile()
-        saveRDS(input_object, filename)
-        inputObjects <- list(a = filename)
-
-        ## create module
-        module <-
-            module(
-                "testy",
-                "R",
-                inputs =
-                    list(moduleInput(
-                        "a",
-                        internalVessel("onetoten"),
-                        ioFormat("R numeric vector"))),
-                sources =
-                    list(moduleSource(
-                        scriptVessel(
-                            "top <- head(onetoten)"))),
-                outputs =
-                    list(moduleOutput(
-                        "b",
-                        internalVessel("top"),
-                        ioFormat("R character vector"))))
-
-        ## test script creation
-        expect_match(prepareScript(module),
-                     "script.R")
-
-        skip("2016-02-03 changing host handling")
-        ## module with remote host uses relative refs for serialized
-        ## internalVessel input files
-        module$host <- "conduit@127.0.0.1:2222"
-        script <- prepareScript(module)
-        inputLine <- readLines(script)[1]
-        expect_true(grepl(basename(inputObjects[[1]]), inputLine))
-        expect_false(grepl(dirname(inputObjects[[1]]), inputLine))
-    })
-
 test_that("prepareInternalInput() returns correct file path", {
     input <- tempfile()
     system2("touch", input)
