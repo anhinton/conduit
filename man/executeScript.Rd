@@ -4,12 +4,14 @@
 \alias{executeScript}
 \title{Execute a prepared module script file.}
 \usage{
-executeScript(script, host = NULL, hostSubdir)
+executeScript(script, moduleHost = NULL, hostSubdir)
 }
 \arguments{
-\item{script}{script file to be executed}
+\item{script}{\code{script} object to be executed}
 
-\item{host}{list of host details}
+\item{moduleHost}{\code{moduleHost} object}
+
+\item{hostSubdir}{output directory on \code{moduleHost}}
 }
 \value{
 0 if successful
@@ -18,10 +20,15 @@ executeScript(script, host = NULL, hostSubdir)
 Execute a prepared module script file.
 }
 \details{
-If \code{host} is provided script will be executed on
-remote host in \code{host$directory}.
+If \code{moduleHost} is provided script will be executed on
+remote host in \code{hostSubdir} on that machine.
+
+\code{hostSubdir} should be the result of running
+\code{prepareModuleHost}
 }
 \seealso{
+\code{moduleHost}, \code{prepareModuleHost}
+
 \code{runModule}
 }
 

@@ -91,12 +91,12 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
     hostSubdir
 }
 
-executeCommand.vagrantHost <- function(host, hostSubdir, command) {
-    commanddir <- dirname(host$vagrantfile)
+executeCommand.vagrantHost <- function(moduleHost, hostSubdir, command) {
+    commanddir <- dirname(moduleHost$vagrantfile)
     oldwd <- setwd(commanddir)
     on.exit(setwd(oldwd))
     args <- c(command$command, command$args)
-    guestdir <- file.path(host$guestdir, hostSubdir)
+    guestdir <- file.path(moduleHost$guestdir, moduleHostSubdir)
     args <- paste("ssh", "-c", "'cd", guestdir, ";",
                   paste(args, collapse = " "), "'")
     system2(command = "vagrant",

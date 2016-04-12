@@ -237,29 +237,45 @@ internalOutputScript <- function (symbol) {
 
 #' Execute a prepared module script file.
 #'
-#' @details If \code{host} is provided script will be executed on
-#' remote host in \code{host$directory}.
+#' @details If \code{moduleHost} is provided script will be executed on
+#' remote host in \code{hostSubdir} on that machine.
 #'
-#' @param script script file to be executed
-#' @param host list of host details
+#' \code{hostSubdir} should be the result of running
+#' \code{prepareModuleHost}
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost}
+#'
+#' @param script \code{script} object to be executed
+#' @param moduleHost \code{moduleHost} object
+#' @param hostSubdir output directory on \code{moduleHost}
 #'
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, host = NULL, hostSubdir) {
+executeScript <- function(script, moduleHost = NULL, hostSubdir) {
     command <- command(script)
-    executeCommand(host, hostSubdir, command)
+    executeCommand(moduleHost, hostSubdir, command)
 }
 
+#' Generate a system command to run a module's source scripts
+#'
+#' @details \code{script} should be the result of \code{prepareScript}
+#'
+#' @param \code{script} object
+#'
+#' @return list containing system \code{command} and character vector
+#'     of \code{args}
 command <- function(script) {
+    if (!inherits(script, "script"))
+        stop("script object required")
     UseMethod("command")
 }
 
-executeCommand <- function(host, hostSubdir, command) {
+executeCommand <- function(moduleHost, hostSubdir, command) {
     UseMethod("executeCommand")
 }
 
-executeCommand.default <- function(host, hostSubdir, command) {
+executeCommand.default <- function(moduleHost, hostSubdir, command) {
     system2(command = command$command,
             args = command$args)
 }

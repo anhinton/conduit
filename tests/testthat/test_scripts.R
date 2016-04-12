@@ -101,3 +101,11 @@ test_that("prepareScript() returns script file", {
     expect_is(script1, "script")
     expect_is(script1, c(paste0(getLanguage(module1), "Script")))
 })
+
+test_that("command() returns appropriately", {
+    ## fail for invalid arguments
+    expect_error(command(tempfile()),
+                 "script object require")
+
+    ## see test_LANGUAGE.R for language-specific test
+})

@@ -13,6 +13,8 @@ internalOutputScript.RSymbol <- function (symbol) {
     paste0("saveRDS(", symbol, ", file = \"", symbol, ".rds\")")
 }
 
+#' @describeIn command generate a command to execute an R language
+#'     script
 command.RScript <- function(script) {
     list(command = "Rscript",
          args = script)
