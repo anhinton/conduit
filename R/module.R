@@ -992,7 +992,7 @@ runModule <- function(module, targetDirectory = getwd(),
     host <- module$host
     hostSubdir <-
         if (!is.null(host)) {
-            prepareModuleHost(host = host, name = name,
+            prepareModuleHost(host = host, moduleName = name,
                               modulePath = modulePath)
         } else {
             NULL
@@ -1226,7 +1226,26 @@ resolveOutput <- function (moduleOutput, language,
     return(output)
 }
 
-prepareModuleHost <- function (host, name, modulePath) {
+#' Prepare a module host for execution.
+#'
+#' These methods ensure that a \code{moduleHost} will have all
+#' resources required to execute a \code{module}'s source scripts.
+#'
+#' These methods return the path to the module output directory
+#' as a path on the host machine.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param moduleName module name
+#' @param modulePath module output directory
+#'
+#' @return path to module output directory on host machine
+prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!is_length1_char(moduleName))
+        stop("moduleName is not length 1 character")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
     UseMethod("prepareModuleHost")
 }
 

@@ -207,6 +207,30 @@ test_that("prepareInput() returns resolved input objects", {
     expect_match(input3, urlInput)
 })
 
+test_that("prepareModuleHost() behaves correctly", {
+    vagrantfile <- tempfile()
+    system2("touch", vagrantfile)        
+    vagrantHost <- vagrantHost(vagrantfile = vagrantfile)
+    name = "mod1"
+    modulePath <- tempdir()
+
+    ## fail for invalid arguments
+    expect_error(prepareModuleHost(moduleHost = unclass(vagrantHost),
+                                   moduleName = name,
+                                   modulePath = modulePath),
+                 "moduleHost object required")
+    expect_error(prepareModuleHost(moduleHost = vagrantHost,
+                                   moduleName = c("two", "names"),
+                                   modulePath = modulePath),
+                 "moduleName is not length 1 character")
+    expect_error(prepareModuleHost(moduleHost = vagrantHost,
+                                   moduleName = name,
+                                   modulePath = tempfile()),
+                 "modulePath does not exist")
+
+    ## see test_HOST_TYPE.R for host specific tests
+})
+
 ## test executeScript
 test_that(
     "executeScript.R works",

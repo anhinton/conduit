@@ -75,10 +75,12 @@ moduleHostToXML.vagrantHost <- function(vagrantHost) {
     newXMLNode(name = "host", kids = list(child))
 }
 
-prepareModuleHost.vagrantHost <- function(host, name, modulePath) {
+#' @describeIn prepareModuleHost prepare \code{vagrantHost}
+prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
+                                          modulePath) {
     hostdir <- host$hostdir
-    hostSubdir <- tempfile(pattern = name,
-                        tmpdir = file.path("conduit.out"))
+    hostSubdir <- tempfile(pattern = moduleName,
+                           tmpdir = file.path("conduit.out"))
     hostdir <- file.path(hostdir, hostSubdir)
     if (dir.exists(hostdir))
         unlink(hostdir, rescursive = TRUE)
