@@ -63,27 +63,27 @@ moduleHostToXML.dockerHost <- function(dockerHost) {
     newXMLNode(name = "host", kids = list(child))
 }
 
-prepareModuleHost.dockerHost <- function(host, name, modulePath) {
+prepareModuleHost.dockerHost <- function(moduleHost, moduleName, modulePath) {
     # module execution directory is shared with guest container
     # SO nothing to do
     # EXCEPT return an empty string as 'hostSubdir' to satisfy
     # the 'conduit' template for these generics
 }
 
-executeCommand.dockerHost <- function(host, hostSubdir, command) {
+executeCommand.dockerHost <- function(moduleHost, hostSubdir, command) {
     args <- c(command$command, command$args)
     hostdir <- getwd()
-    guestdir <- host$guestdir
+    guestdir <- moduleHost$guestdir
     args <- paste("run", 
                   "-v", paste0(hostdir, ":", guestdir),
                   "-w", guestdir, 
-                  host$image,
+                  moduleHost$image,
                   paste(args, collapse = " "))
     system2(command = "docker",
             args = args)
 }
 
-retrieveHost.dockerHost <- function(host, hostSubdir, modulePath) {
+retrieveModuleHost.dockerHost <- function(moduleHost, hostSubdir, modulePath) {
     # module execution directory is shared with guest container
     # SO nothing to do
 }
