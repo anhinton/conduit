@@ -4,10 +4,10 @@
 \alias{prepareScriptOutput}
 \title{Prepare script to create outputs}
 \usage{
-prepareScriptOutput(output, language)
+prepareScriptOutput(moduleOutput, language)
 }
 \arguments{
-\item{output}{output name}
+\item{moduleOutput}{\code{moduleOutput} object}
 
 \item{language}{module language}
 }
@@ -16,5 +16,11 @@ Script as character vector
 }
 \description{
 Prepare script to create outputs
+}
+\details{
+if a module output is passed to conduit via an
+    internalVessel the module source scripts must serialize the
+    object after execution. other vessel types do not need this to
+    be done by the glue system.
 }
 

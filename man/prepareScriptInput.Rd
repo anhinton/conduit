@@ -4,10 +4,10 @@
 \alias{prepareScriptInput}
 \title{Prepare script to create inputs}
 \usage{
-prepareScriptInput(input, language)
+prepareScriptInput(moduleInput, language)
 }
 \arguments{
-\item{input}{input name}
+\item{moduleInput}{module input object}
 
 \item{language}{module language}
 }
@@ -16,5 +16,11 @@ Script as character vector
 }
 \description{
 Prepare script to create inputs
+}
+\details{
+if a module input is to be fulfilled via an internalVessel
+    the module source scripts will require the symbol to be loaded
+    prior to execution. other vessel types do not need to be loaded
+    in script.
 }
 
