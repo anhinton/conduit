@@ -988,7 +988,7 @@ runModule <- function(module, targetDirectory = getwd(),
 
     script <- prepareScript(module)
 
-    ## do host prep here
+    ## prepare moduleHost
     moduleHost <- module$host
     hostSubdir <-
         if (!is.null(moduleHost)) {
@@ -1003,12 +1003,11 @@ runModule <- function(module, targetDirectory = getwd(),
     if (exec_result != 0)
         stop("Unable to execute module script")
 
-    ## get things back from host here
+    ## retrieve outputs from moduleHost
     if (!is.null(moduleHost)) {
         retrieveModuleHost(moduleHost = moduleHost, hostSubdir = hostSubdir,
                            modulePath = modulePath)
     }
-
 
     ## resolve output objects
     outputList <- lapply(X = module$outputs, FUN = resolveOutput,
@@ -1219,6 +1218,7 @@ resolveOutput <- function (moduleOutput, language,
     output <- output(moduleOutput, language, outputDirectory)
     result <- getResult(output)
 
+    ## TODO(anhinton): write check for URL outputs
     if (type == "internalVessel" || type == "fileVessel") {
         if (!file.exists(result))
             stop(paste0("output object '", name, "' does not exist"))

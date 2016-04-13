@@ -15,7 +15,12 @@ internalOutputScript.pythonSymbol <- function (symbol) {
       paste0("\tpickle.dump(", symbol, ", f)"))
 }
 
+
+#' @describeIn command generate a command to execute a python language
+#'     script
 command.pythonScript <- function(script) {
-    list(command = "python",
-         args = script)
+    command <- list(command = "python",
+                    args = script)
+    class(command) <- "command"
+    command
 }

@@ -18,6 +18,6 @@ internalOutputScript.RSymbol <- function (symbol) {
 command.RScript <- function(script) {
     command <- list(command = "Rscript",
                     args = script)
-    class(command) <- c("command")
+    class(command) <- "command"
     command
 }

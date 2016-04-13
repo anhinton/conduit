@@ -42,19 +42,17 @@ test_that(
         expect_match(source_script[3], "^getwd[(][)]")        
     })
 
-test_that(
-    "extractModuleSource() works for <url> sources",
-    {
-        if (skipHost)
-            skip("requires test conduit web server at http://127.0.0.1:8080/")
-        url_source <- moduleSource(
-            urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
-        class(url_source) <- class(url_source$vessel)
-        source_script <- extractModuleSource(url_source)
-        expect_equal(length(source_script), 10)
-        expect_match(class(source_script), "character")
-        expect_match(source_script[1], "^library[(]R2HTML[)]")
-    })
+test_that("extractModuleSource() works for <url> sources", {
+    if (skipHost)
+        skip("requires test conduit web server at http://127.0.0.1:8080/")
+    url_source <- moduleSource(
+        urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
+    class(url_source) <- class(url_source$vessel)
+    source_script <- extractModuleSource(url_source)
+    expect_equal(length(source_script), 10)
+    expect_match(class(source_script), "character")
+    expect_match(source_script[1], "^library[(]R2HTML[)]")
+})
 
 test_that("prepareInternalInput() returns correct file path", {
     input <- tempfile()
@@ -256,65 +254,61 @@ test_that("retrieveModuleHost() behaves correctly", {
 })
 
 ## test executeScript
-test_that(
-    "executeScript.R works",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        module1 <-
-            loadModule("module1",
-                       system.file("extdata", "test_pipeline",
-                                   "module1.xml",
-                                   package = "conduit"))
-        inputObjects <- NULL
-        script <- prepareScript(module1)
-        expect_equal(executeScript(script = script, moduleHost = NULL,
-                                   host = NULL), 0)
-    })
+test_that("can execute R scripts", {
+    oldwd <- setwd(tempdir())
+    on.exit(setwd(oldwd))
+    module1 <-
+        loadModule("module1",
+                   system.file("extdata", "test_pipeline",
+                               "module1.xml",
+                               package = "conduit"))
+    inputObjects <- NULL
+    script <- prepareScript(module1)
+    expect_equal(executeScript(script = script, moduleHost = NULL,
+                               host = NULL), 0)
+})
 
-test_that(
-    "executeScript.python works",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        module2 <- module(
-            "module2",
-            "python",
-            sources = list(
-                moduleSource(
-                    scriptVessel("x = [1, 2, 3, 5, 10]"))),
-            outputs = list(
-                moduleOutput(
-                    "x",
-                    internalVessel("x"),
-                    ioFormat("python list"))))
-        inputObjects <- NULL
-        script <- prepareScript(module2)
-        skip("2016-02-03 changing host handling")
-        expect_equal(executeScript(script = script, host = NULL), 0)
-    })
+test_that("can execute python scripts", {
+    oldwd <- setwd(tempdir())
+    on.exit(setwd(oldwd))
+    module2 <- module(
+        "module2",
+        "python",
+        sources = list(
+            moduleSource(
+                scriptVessel("x = [1, 2, 3, 5, 10]"))),
+        outputs = list(
+            moduleOutput(
+                "x",
+                internalVessel("x"),
+                ioFormat("python list"))))
+    inputObjects <- NULL
+    script <- prepareScript(module2)
+    expect_equal(executeScript(script = script, moduleHost = NULL,
+                               hostSubdir = NULL),
+                 0)
+})
 
-test_that(
-    "executeScript.shell works",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        module3 <- module(
-            "module3",
-            "shell",
-            sources = list(
-                moduleSource(
-                    scriptVessel("x=\"lemon duds\"]"))),
-            outputs = list(
-                moduleOutput(
-                    "x",
-                    internalVessel("x"),
-                    ioFormat("shell environment variable"))))
-        inputObjects <- NULL
-        skip("2016-02-03 changing host handling")
-        script <- prepareScript(module3)
-        expect_equal(executeScript(script = script, host = NULL), 0)
-    })
+test_that("can execute shell scripts", {
+    oldwd <- setwd(tempdir())
+    on.exit(setwd(oldwd))
+    module3 <- module(
+        "module3",
+        "shell",
+        sources = list(
+            moduleSource(
+                scriptVessel("x=\"lemon duds\"]"))),
+        outputs = list(
+            moduleOutput(
+                "x",
+                internalVessel("x"),
+                ioFormat("shell environment variable"))))
+    inputObjects <- NULL
+    script <- prepareScript(module3)
+    expect_equal(executeScript(script = script, moduleHost = NULL,
+                               hostSubdir = NULL),
+                 0)
+})
 
 test_that(
     "output() behaves",
@@ -369,8 +363,6 @@ test_that(
     "resolveOutput() works on local machine",
     {
         lang = "R"
-        skip("2016-02-03 changing host handling")
-        host = parseModuleHost("cronduit@not.a.real.server:11")
         outdir <- tempdir()
         symbol <- basename(tempfile())
         internal_output <- moduleOutput(
@@ -378,28 +370,18 @@ test_that(
         file <- basename(tempfile())
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
-        url <- "http://not.a.real.server/at/all"
-        url_output <- moduleOutput(
-            "url", urlVessel(url), ioFormat("html file"))
 
-        ## throws error when object does not exist
-        ## urlVessel
-        expect_error(resolveOutput(url_output, lang, NULL, outdir),
-                     "output object '")
+        ## TODO(anhinton): write check for URL outputs
         ## internalVessel
-        expect_error(resolveOutput(internal_output, lang, NULL, outdir),
+        expect_error(resolveOutput(moduleOutput = internal_output,
+                                   language = lang,
+                                   outputDirectory = outdir),
                      "output object '")
         ## fileVessel
-        expect_error(resolveOutput(file_output, lang, NULL, outdir),
-                     "output object '")        
-        
-        ## throws error when unable to fetch from host
-        ## internalVessel
-        expect_error(resolveOutput(internal_output, lang, host, outdir),
-                     "Unable to fetch ")
-        ## fileVessel
-        expect_error(resolveOutput(file_output, lang, host, outdir),
-                     "Unable to fetch ")
+        expect_error(resolveOutput(moduleOutput = file_output,
+                                   language = lang,
+                                   outputDirectory = outdir),
+                     "output object '") 
     })
 
 ## test runModule()
@@ -420,31 +402,6 @@ test_that(
         badTarget <- paste0(tempfile(), tempfile())
         expect_error(runModule(createGraph, targetDirectory = badTarget),
                      "no such target")
-    })
-
-test_that(
-    "runModule() fails when input cannot be resolved",
-    {
-        skip("2016-02-03 changing host handling")
-        badInput <- paste0(tempfile(), tempfile())
-        module <- module(
-            name = "fails",
-            language = "R",
-            inputs = list(
-                moduleInput(
-                    name = "nope",
-                    vessel = fileVessel(badInput),
-                    format = ioFormat("file"))),
-            sources = list(
-                moduleSource(vessel = scriptVessel(
-                    paste0("exists <- file.exists(\"", badInput, "\")")))),
-            outputs = list(
-                moduleOutput(
-                    name = "truth",
-                    vessel = internalVessel("exists"),
-                    format = ioFormat("R logical"))))
-        expect_error(runModule(module, targetDirectory = targ),
-                     "Input ")
     })
 
 test_that(
@@ -504,3 +461,5 @@ test_that(
         expect_match(result2$outputList[[1]]$name, output2$name)
         expect_true(file.exists(getResult(result2$outputList[[1]])))
     })
+
+## TODO(anhinton): runModule() works for a module with a moduleHost
