@@ -444,6 +444,9 @@ getLocation.module <- function(x) {
 #' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## TODO(anhinton): change how modules are loaded to include
+    ## loading from URLs, files etc. The following code uses vessel
+    ## objects to provide a temporary solution
     if (!inherits(ref, "vessel"))
         ref <- fileVessel(ref, path)
     ## fetch module XML from disk
