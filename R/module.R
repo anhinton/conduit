@@ -420,7 +420,7 @@ getLocation.module <- function(x) {
 #' the default search paths are used.
 #' 
 #' @param name Name of module
-#' @param ref Module location or filename
+#' @param ref Module location or filename or a \code{vessel} object
 #' @param path (Optional) Search path if \code{ref} is a filename
 #' @param namespaces Namespaces used in XML document
 #' @return \code{module} list
@@ -444,9 +444,11 @@ getLocation.module <- function(x) {
 #' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
+    if (!inherits(ref, "vessel"))
+        ref <- fileVessel(ref, path)
     ## fetch module XML from disk
     rawXML <- tryCatch(
-        fetchVessel(fileVessel(ref, path)),
+        fetchVessel(ref),
         error = function(err) {
             problem <- c(paste0("Unable to load module '", name, "'\n"),
                          err)
