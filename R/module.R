@@ -420,7 +420,7 @@ getLocation.module <- function(x) {
 #' the default search paths are used.
 #' 
 #' @param name Name of module
-#' @param ref Module location or filename
+#' @param ref Module location or filename or a \code{vessel} object
 #' @param path (Optional) Search path if \code{ref} is a filename
 #' @param namespaces Namespaces used in XML document
 #' @return \code{module} list
@@ -444,9 +444,14 @@ getLocation.module <- function(x) {
 #' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## TODO(anhinton): change how modules are loaded to include
+    ## loading from URLs, files etc. The following code uses vessel
+    ## objects to provide a temporary solution
+    if (!inherits(ref, "vessel"))
+        ref <- fileVessel(ref, path)
     ## fetch module XML from disk
     rawXML <- tryCatch(
-        fetchVessel(fileVessel(ref, path)),
+        fetchVessel(ref),
         error = function(err) {
             problem <- c(paste0("Unable to load module '", name, "'\n"),
                          err)
@@ -1103,18 +1108,28 @@ prepareInternalInput <- function(input, symbol, language, outputDirectory) {
 prepareFileInput <- function(vessel, input, outputDirectory, location) {
     ref <- getRef(vessel)
     path <- vessel$path
+    
     if (is.null(input)) {
-        fileInput <- findFile(ref, path, location)
-        if (is.null(fileInput))
+        input <- findFile(ref, path, location)
+        if (is.null(input))
             stop("unable to locate input file")
-    } else if (is_absolute(ref)) {
-        if (findFile(ref, path, location) != input)
-            stop("input does not match path given in fileVessel")
-        fileInput <- input
+        if (is_absolute(ref)) {
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
     } else {
-        fileInput <- file.path(outputDirectory, ref)
-        if (!file.copy(input, fileInput, overwrite = TRUE))
-            stop("unable to copy input into outputDirectory")
+        if (is_absolute(ref)) {
+            if (findFile(ref, path, location) != input)
+                stop("input does not match path given in fileVessel")
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
     }
     fileInput
 }
