@@ -155,7 +155,7 @@ getLocation.pipeline <- function(x) {
 #' default search paths are used.
 #' 
 #' @param name Name of pipeline
-#' @param ref Path to XML file
+#' @param ref Path to XML file or a \code{vessel} object
 #' @param path Search path (optional)
 #' @param namespaces Namespaces used in XML document
 #' 
