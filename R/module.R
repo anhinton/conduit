@@ -1108,26 +1108,24 @@ prepareInternalInput <- function(input, symbol, language, outputDirectory) {
 prepareFileInput <- function(vessel, input, outputDirectory, location) {
     ref <- getRef(vessel)
     path <- vessel$path
-
+    
     if (is.null(input)) {
-        ## When 'starting' from a file we will have no
-        ## 'input'. Regardless of whether the file reference is
-        ## absolute or non-absolute this findFile() should be
-        ## sufficient to locate the file
         input <- findFile(ref, path, location)
         if (is.null(input))
             stop("unable to locate input file")
-        fileInput <- input
+        if (is_absolute(ref)) {
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
     } else {
         if (is_absolute(ref)) {
-            ## if the file reference is absolute then it should exactly
-            ## match 'input'
             if (findFile(ref, path, location) != input)
                 stop("input does not match path given in fileVessel")
             fileInput <- input
         } else {
-            ## if not absolute we need to copy the file so as to be
-            ## relative to the module output directory
             fileInput <- file.path(outputDirectory, ref)
             if (!file.copy(input, fileInput, overwrite = TRUE))
                 stop("unable to copy input into outputDirectory")
