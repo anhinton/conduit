@@ -121,12 +121,23 @@ test_that("prepareFileInput() returns correct file path", {
                                           outputDirectory = tempfile(),
                                           location = location)),
         "unable to copy input into outputDirectory")
-    ## success
+    ## success where input provided
     fileInput3 <- prepareFileInput(input = input,
                                    vessel = vessel,
                                    outputDirectory = outputDirectory,
                                    location = location)
     expect_true(file.exists(fileInput3))
+    ## success where input = NULL
+    oldwd <- setwd(outputDirectory)
+    on.exit(setwd(oldwd))
+    ref2 <- basename(tempfile("relative"))
+    system2("touch", ref2)
+    vessel2 <- fileVessel(ref = ref2)
+    fileInput4 <- prepareFileInput(input = NULL,
+                                   vessel = vessel2,
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput4))
 })
 
 test_that("prepareURLInput() returns correct URL",
