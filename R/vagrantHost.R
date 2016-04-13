@@ -75,10 +75,12 @@ moduleHostToXML.vagrantHost <- function(vagrantHost) {
     newXMLNode(name = "host", kids = list(child))
 }
 
-prepareModuleHost.vagrantHost <- function(host, name, modulePath) {
+#' @describeIn prepareModuleHost prepare \code{vagrantHost}
+prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
+                                          modulePath) {
     hostdir <- host$hostdir
-    hostSubdir <- tempfile(pattern = name,
-                        tmpdir = file.path("conduit.out"))
+    hostSubdir <- tempfile(pattern = moduleName,
+                           tmpdir = file.path("conduit.out"))
     hostdir <- file.path(hostdir, hostSubdir)
     if (dir.exists(hostdir))
         unlink(hostdir, rescursive = TRUE)
@@ -89,20 +91,23 @@ prepareModuleHost.vagrantHost <- function(host, name, modulePath) {
     hostSubdir
 }
 
-executeCommand.vagrantHost <- function(host, hostSubdir, command) {
-    commanddir <- dirname(host$vagrantfile)
+#' @describeIn executeCommand execute command on a \code{vagrantHost}
+executeCommand.vagrantHost <- function(moduleHost, hostSubdir, command) {
+    commanddir <- dirname(moduleHost$vagrantfile)
     oldwd <- setwd(commanddir)
     on.exit(setwd(oldwd))
     args <- c(command$command, command$args)
-    guestdir <- file.path(host$guestdir, hostSubdir)
+    guestdir <- file.path(moduleHost$guestdir, moduleHostSubdir)
     args <- paste("ssh", "-c", "'cd", guestdir, ";",
                   paste(args, collapse = " "), "'")
     system2(command = "vagrant",
             args = args)
 }
 
-retrieveHost.vagrantHost <- function(host, hostSubdir, modulePath) {
-    hostdir <- file.path(host$hostdir, hostSubdir)
+#' @describeIn retrieveModuleHost retrieve module output from
+#'     \code{vagrantHost}
+retrieveModuleHost.vagrantHost <- function(moduleHost, hostSubdir, modulePath) {
+    hostdir <- file.path(moduleHost$hostdir, hostSubdir)
     files <- list.files(path = hostdir, full.names = TRUE)
     for (f in files)
         file.copy(f, modulePath, recursive = TRUE)

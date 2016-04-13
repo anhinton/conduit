@@ -444,6 +444,9 @@ getLocation.module <- function(x) {
 #' @export
 loadModule <- function(name, ref, path = NULL,
                        namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## TODO(anhinton): change how modules are loaded to include
+    ## loading from URLs, files etc. The following code uses vessel
+    ## objects to provide a temporary solution
     if (!inherits(ref, "vessel"))
         ref <- fileVessel(ref, path)
     ## fetch module XML from disk
@@ -991,27 +994,26 @@ runModule <- function(module, targetDirectory = getwd(),
 
     script <- prepareScript(module)
 
-    ## do host prep here
-    host <- module$host
+    ## prepare moduleHost
+    moduleHost <- module$host
     hostSubdir <-
-        if (!is.null(host)) {
-            prepareModuleHost(host = host, name = name,
+        if (!is.null(moduleHost)) {
+            prepareModuleHost(moduleHost = moduleHost, moduleName = name,
                               modulePath = modulePath)
         } else {
             NULL
         }
     
     ## execute script file
-    exec_result <- executeScript(script, host, hostSubdir)
+    exec_result <- executeScript(script, moduleHost, hostSubdir)
     if (exec_result != 0)
         stop("Unable to execute module script")
 
-    ## get things back from host here
-    if (!is.null(host)) {
-        retrieveHost(host = host, hostSubdir = hostSubdir,
-                     modulePath = modulePath)
+    ## retrieve outputs from moduleHost
+    if (!is.null(moduleHost)) {
+        retrieveModuleHost(moduleHost = moduleHost, hostSubdir = hostSubdir,
+                           modulePath = modulePath)
     }
-
 
     ## resolve output objects
     outputList <- lapply(X = module$outputs, FUN = resolveOutput,
@@ -1038,9 +1040,11 @@ runModule <- function(module, targetDirectory = getwd(),
 #' @param moduleInput \code{moduleInput} object
 #' @param inputList list of \code{input} objects provided to module
 #' @param outputDirectory working directory for module execution
+#' @param language Module language
 #' @param location location of originating module file
 #'
-#' @return \code{input} object
+#' @return \code{input} object. Generally a character string
+#'     referencing a file location or URL
 prepareInput <- function(moduleInput, inputList, outputDirectory,
                          language, location) {
     name <- getName(moduleInput)
@@ -1063,6 +1067,17 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
     input
 }
 
+#' Prepare internal input object.
+#'
+#' This function makes a serialized internal module input available in
+#' a module's working directory.
+#'
+#' @param input File path to serialized object
+#' @param symbol Name of module input
+#' @param language Module language
+#' @param outputDirectory File path to module working directory
+#'
+#' @return File path to serialized internal input.
 prepareInternalInput <- function(input, symbol, language, outputDirectory) {
     internalInput <- file.path(
         outputDirectory, paste0(symbol, internalExtension(language)))
@@ -1075,27 +1090,49 @@ prepareInternalInput <- function(input, symbol, language, outputDirectory) {
     }
 }
 
+#' Prepare file input object
+#'
+#' This function makes sure a module's file input is available to the
+#' module.
+#'
+#' If \code{input} is NULL the module is assumed to be
+#' \dQuote{starting} from a file, and the file referenced in
+#' \code{vessel} is returned.
+#'
+#' Where \code{input} is not null, and \code{vessel} describes an
+#' absolute path to a file this path is returned. If \code{vessel}
+#' describes a relative path to a file, this file is copied into the
+#' module's outputDirectory, and the resulting file is returned.
+#'
+#' @param vessel Module input vessel object
+#' @param input File path to input
+#' @param outputDirectory File path to module working directory
+#' @param location File path to originating module XML file
+#'
+#' @return File path to input file
 prepareFileInput <- function(vessel, input, outputDirectory, location) {
     ref <- getRef(vessel)
     path <- vessel$path
 
     if (is.null(input)) {
+        ## When 'starting' from a file we will have no
+        ## 'input'. Regardless of whether the file reference is
+        ## absolute or non-absolute this findFile() should be
+        ## sufficient to locate the file
         input <- findFile(ref, path, location)
         if (is.null(input))
             stop("unable to locate input file")
-        if (is_absolute(ref)) {
-            fileInput <- input
-        } else {
-            fileInput <- file.path(outputDirectory, ref)
-            if (!file.copy(input, fileInput, overwrite = TRUE))
-                stop("unable to copy input into outputDirectory")
-        }
+        fileInput <- input
     } else {
         if (is_absolute(ref)) {
+            ## if the file reference is absolute then it should exactly
+            ## match 'input'
             if (findFile(ref, path, location) != input)
                 stop("input does not match path given in fileVessel")
             fileInput <- input
         } else {
+            ## if not absolute we need to copy the file so as to be
+            ## relative to the module output directory
             fileInput <- file.path(outputDirectory, ref)
             if (!file.copy(input, fileInput, overwrite = TRUE))
                 stop("unable to copy input into outputDirectory")
@@ -1104,13 +1141,29 @@ prepareFileInput <- function(vessel, input, outputDirectory, location) {
     fileInput
 }
 
+#' Prepare URL input object
+#'
+#' This function ensure's a module's URL input is available to the
+#' module.
+#'
+#' If \code{input} is NULL the module is assumed to be
+#' \dQuote{starting} from a URL, and the URL referenced in
+#' \code{vessel} is returned.
+#'
+#' @param vessel Module input vessel object
+#' @param input URL string
+#'
+#' @return URL to input resource
 prepareURLInput <- function(vessel, input) {
     ref <- getRef(vessel)
-    # Allow for module being run in isolation (inputs are NULL)
-    if (is.null(input))
+    ## Allow for module being run in isolation (inputs are NULL)
+    if (is.null(input)) {
         ref
-    else
+    } else {
+        if (ref != input)
+            stop("input does not match URL given in urlVessel")
         input
+    }
 }
 
 #' return \code{output} produced by a \code{moduleOutput}
@@ -1187,6 +1240,7 @@ resolveOutput <- function (moduleOutput, language,
     output <- output(moduleOutput, language, outputDirectory)
     result <- getResult(output)
 
+    ## TODO(anhinton): write check for URL outputs
     if (type == "internalVessel" || type == "fileVessel") {
         if (!file.exists(result))
             stop(paste0("output object '", name, "' does not exist"))
@@ -1194,10 +1248,40 @@ resolveOutput <- function (moduleOutput, language,
     return(output)
 }
 
-prepareModuleHost <- function (host, name, modulePath) {
+#' Prepare a module host for execution.
+#'
+#' These methods ensure that a \code{moduleHost} will have all
+#' resources required to execute a \code{module}'s source scripts.
+#'
+#' These methods return the path to the module output directory
+#' as a path on the host machine.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param moduleName module name
+#' @param modulePath module output directory
+#'
+#' @return path to module output directory on host machine
+prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!is_length1_char(moduleName))
+        stop("moduleName is not length 1 character")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
     UseMethod("prepareModuleHost")
 }
 
-retrieveHost <- function(host, hostSubdir, modulePath) {
-    UseMethod("retrieveHost")
+#' Retrieve results of running a module on a remote host
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param hostSubdir output directory on host machine
+#' @param modulePath output directory on local machine
+retrieveModuleHost <- function(moduleHost, hostSubdir, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!is_length1_char(hostSubdir))
+        stop("hostSubdir is not length 1 character")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    UseMethod("retrieveModuleHost")
 }

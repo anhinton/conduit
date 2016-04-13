@@ -172,6 +172,9 @@ getLocation.pipeline <- function(x) {
 #' pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
 loadPipeline <- function(name, ref, path = NULL,
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## TODO(anhinton): change how modules are loaded to include
+    ## loading from URLs, files etc. The following code uses vessel
+    ## objects to provide a temporary solution
     if (!inherits(ref, "vessel"))
         ref <- fileVessel(ref, path)
     ## fetch pipeline XML from disk

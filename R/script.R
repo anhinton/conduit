@@ -95,14 +95,13 @@ sourceOrder <- function(sources) {
 #' other modules.
 #'
 #' The resulting script is saved to the current working directory.
-#' 
-#' @return Filename of script file created. Object has \code{script}
-#'     class, and of one of:
 #'
-#' \item{\code{pythonScript}}{\dQuote{python} language}
-#' \item{\code{RScript}}{\dQuote{R} language}
-#' \item{\code{shellScript}}{\dQuote{shell} language}
+#' @param module \code{module} object
+#' 
+#' @return \code{script} object naming script file
 prepareScript <- function(module) {
+    if (!inherits(module, "module"))
+        stop("module object required")
     language <- getLanguage(module)
     location <- attr(module, "location")
 
@@ -160,12 +159,19 @@ prepareScript <- function(module) {
 
 #' Prepare script to create inputs
 #'
-#' @param input input name
+#' @details if a module input is to be fulfilled via an internalVessel
+#'     the module source scripts will require the symbol to be loaded
+#'     prior to execution. other vessel types do not need to be loaded
+#'     in script.
+#' 
+#' @param moduleInput module input object
 #' @param language module language
 #'
 #' @return Script as character vector
-prepareScriptInput <- function(input, language) {
-    vessel <- getVessel(input)
+prepareScriptInput <- function(moduleInput, language) {
+    if (!inherits(moduleInput, "moduleInput"))
+        stop("moduleInput object required")
+    vessel <- getVessel(moduleInput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
         class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
@@ -177,12 +183,19 @@ prepareScriptInput <- function(input, language) {
 
 #' Prepare script to create outputs
 #'
-#' @param output output name
+#' @details if a module output is passed to conduit via an
+#'     internalVessel the module source scripts must serialize the
+#'     object after execution. other vessel types do not need this to
+#'     be done by the glue system.
+#'
+#' @param moduleOutput \code{moduleOutput} object
 #' @param language module language
 #'
 #' @return Script as character vector
-prepareScriptOutput <- function(output, language) {
-    vessel <- getVessel(output)
+prepareScriptOutput <- function(moduleOutput, language) {
+    if (!inherits(moduleOutput, "moduleOutput"))
+        stop("moduleOutput object required")
+    vessel <- getVessel(moduleOutput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
         class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
@@ -194,11 +207,12 @@ prepareScriptOutput <- function(output, language) {
 
 #' Prepare script for internal inputs
 #'
-#' These functions prepare script in the  to resolve internal input
+#' These functions prepare a module script snippet to resolve an
+#' internal input
 #'
-#' @param symbol character string with class set to language of module script
+#' @param symbol \code{symbol} object
 #'
-#' @return character vector of script to ensure input
+#' @return script as character vector
 #'
 #' @name internalInputScript
 internalInputScript <- function(symbol) {
@@ -209,38 +223,89 @@ internalInputScript <- function(symbol) {
 
 #' prepare script to resolve internal output
 #'
-#' @param symbol character string with class set to language of module script
+#' These functions prepare a module script snippet to produce an
+#' internal output
 #'
-#' @return character vector of script to ensure input
+#' @param symbol \code{symbol} object
+#'
+#' @return script as character vector
 internalOutputScript <- function (symbol) {
+    if (!inherits(symbol, "symbol"))
+        stop("symbol object required")
     UseMethod("internalOutputScript")
 }
 
 #' Execute a prepared module script file.
 #'
-#' @details If \code{host} is provided script will be executed on
-#' remote host in \code{host$directory}.
+#' @details If \code{moduleHost} is provided script will be executed on
+#' remote host in \code{hostSubdir} on that machine.
 #'
-#' @param script script file to be executed
-#' @param host list of host details
+#' \code{hostSubdir} should be the result of running
+#' \code{prepareModuleHost}
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost}
+#'
+#' @param script \code{script} object to be executed
+#' @param moduleHost \code{moduleHost} object
+#' @param hostSubdir output directory on \code{moduleHost}
 #'
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, host = NULL, hostSubdir) {
+executeScript <- function(script, moduleHost, hostSubdir) {
+    if (!inherits(script, "script"))
+        stop("script object required")
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
+        stop("hostSubdir is not length 1 char")
     command <- command(script)
-    executeCommand(host, hostSubdir, command)
+    executeCommand(moduleHost, hostSubdir, command)
 }
 
+#' Generate a system command to run a module's source scripts
+#'
+#' @details \code{script} should be the result of \code{prepareScript}
+#'
+#' @param \code{script} object
+#'
+#' @return \code{command} list containing \code{command} and
+#'     \code{args} character vectors
 command <- function(script) {
+    if (!inherits(script, "script"))
+        stop("script object required")
     UseMethod("command")
 }
 
-executeCommand <- function(host, hostSubdir, command) {
+#' Execute a \code{command} list object
+#'
+#' These methods execute a command list prepared by the \code{command}
+#' function.
+#'
+#' If a \code{moduleHost} is provided the command is executed in the
+#' \code{hostSubdir} on the host machine.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param hostSubdir module output directory on host machine
+#' @param command \code{command} object
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost} for hostSubdir
+#'     creation, \code{command}
+#'
+#' @return 0 if successful
+executeCommand <- function(moduleHost, hostSubdir, command) {
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
+        stop("hostSubdir is not length 1 char")
+    if (!inherits(command, "command"))
+        stop("command object required")
     UseMethod("executeCommand")
 }
 
-executeCommand.default <- function(host, hostSubdir, command) {
+#' @describeIn executeCommand execute a command with no
+#'     \code{moduleHost}
+executeCommand.default <- function(moduleHost, hostSubdir, command) {
     system2(command = command$command,
             args = command$args)
 }

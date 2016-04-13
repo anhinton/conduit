@@ -6,13 +6,11 @@
 \usage{
 prepareScript(module)
 }
+\arguments{
+\item{module}{\code{module} object}
+}
 \value{
-Filename of script file created. Object has \code{script}
-    class, and of one of:
-
-\item{\code{pythonScript}}{\dQuote{python} language}
-\item{\code{RScript}}{\dQuote{R} language}
-\item{\code{shellScript}}{\dQuote{shell} language}
+\code{script} object naming script file
 }
 \description{
 This function creates an executable script file from a
