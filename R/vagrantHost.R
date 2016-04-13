@@ -104,8 +104,10 @@ executeCommand.vagrantHost <- function(moduleHost, hostSubdir, command) {
             args = args)
 }
 
-retrieveHost.vagrantHost <- function(host, hostSubdir, modulePath) {
-    hostdir <- file.path(host$hostdir, hostSubdir)
+#' @describeIn retrieveModuleHost retrieve module output from
+#'     \code{vagrantHost}
+retrieveModuleHost.vagrantHost <- function(moduleHost, hostSubdir, modulePath) {
+    hostdir <- file.path(moduleHost$hostdir, hostSubdir)
     files <- list.files(path = hostdir, full.names = TRUE)
     for (f in files)
         file.copy(f, modulePath, recursive = TRUE)

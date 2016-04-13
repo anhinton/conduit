@@ -989,24 +989,24 @@ runModule <- function(module, targetDirectory = getwd(),
     script <- prepareScript(module)
 
     ## do host prep here
-    host <- module$host
+    moduleHost <- module$host
     hostSubdir <-
-        if (!is.null(host)) {
-            prepareModuleHost(host = host, moduleName = name,
+        if (!is.null(moduleHost)) {
+            prepareModuleHost(moduleHost = moduleHost, moduleName = name,
                               modulePath = modulePath)
         } else {
             NULL
         }
     
     ## execute script file
-    exec_result <- executeScript(script, host, hostSubdir)
+    exec_result <- executeScript(script, moduleHost, hostSubdir)
     if (exec_result != 0)
         stop("Unable to execute module script")
 
     ## get things back from host here
-    if (!is.null(host)) {
-        retrieveHost(host = host, hostSubdir = hostSubdir,
-                     modulePath = modulePath)
+    if (!is.null(moduleHost)) {
+        retrieveModuleHost(moduleHost = moduleHost, hostSubdir = hostSubdir,
+                           modulePath = modulePath)
     }
 
 
@@ -1249,6 +1249,17 @@ prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
     UseMethod("prepareModuleHost")
 }
 
-retrieveHost <- function(host, hostSubdir, modulePath) {
-    UseMethod("retrieveHost")
+#' Retrieve results of running a module on a remote host
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param hostSubdir output directory on host machine
+#' @param modulePath output directory on local machine
+retrieveModuleHost <- function(moduleHost, hostSubdir, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!is_length1_char(hostSubdir))
+        stop("hostSubdir is not length 1 character")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    UseMethod("retrieveModuleHost")
 }

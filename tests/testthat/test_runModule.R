@@ -231,6 +231,30 @@ test_that("prepareModuleHost() behaves correctly", {
     ## see test_HOST_TYPE.R for host specific tests
 })
 
+test_that("retrieveModuleHost() behaves correctly", {
+    vagrantfile <- tempfile()
+    system2("touch", vagrantfile)        
+    vagrantHost <- vagrantHost(vagrantfile = vagrantfile)
+    hostSubdir1 = tempdir()
+    modulePath <- tempdir()
+    
+    ## fail for invalid arguments
+    expect_error(retrieveModuleHost(moduleHost = unclass(vagrantHost),
+                                    hostSubdir = hostSubdir1,
+                                    modulePath = modulePath),
+                 "moduleHost object required")
+    expect_error(retrieveModuleHost(moduleHost = vagrantHost,
+                                    hostSubdir = c("/home", "/tmp"),
+                                    modulePath = modulePath),
+                 "hostSubdir is not length 1 character")
+    expect_error(retrieveModuleHost(moduleHost = vagrantHost,
+                                    hostSubdir = hostSubdir1,
+                                    modulePath = tempfile()),
+                 "modulePath does not exist")
+
+    ## see test_HOSTTYPE.R for host specific tests
+})
+
 ## test executeScript
 test_that(
     "executeScript.R works",
