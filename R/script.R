@@ -263,18 +263,42 @@ executeScript <- function(script, moduleHost = NULL, hostSubdir) {
 #'
 #' @param \code{script} object
 #'
-#' @return list containing system \code{command} and character vector
-#'     of \code{args}
+#' @return \code{command} list containing \code{command} and
+#'     \code{args} character vectors
 command <- function(script) {
     if (!inherits(script, "script"))
         stop("script object required")
     UseMethod("command")
 }
 
+#' Execute a \code{command} list object
+#'
+#' These methods execute a command list prepared by the \code{command}
+#' function.
+#'
+#' If a \code{moduleHost} is provided the command is executed in the
+#' \code{hostSubdir} on the host machine.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param hostSubdir module output directory on host machine
+#' @param command \code{command} object
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost} for hostSubdir
+#'     creation, \code{command}
+#'
+#' @return 0 if successful
 executeCommand <- function(moduleHost, hostSubdir, command) {
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
+        stop("hostSubdir is not length 1 char")
+    if (!inherits(command, "command"))
+        stop("command object required")
     UseMethod("executeCommand")
 }
 
+#' @describeIn executeCommand execute a command with no
+#'     \code{moduleHost}
 executeCommand.default <- function(moduleHost, hostSubdir, command) {
     system2(command = command$command,
             args = command$args)

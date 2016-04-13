@@ -13,8 +13,8 @@ command(script)
 \item{\code{script}}{object}
 }
 \value{
-list containing system \code{command} and character vector
-    of \code{args}
+\code{command} list containing \code{command} and
+    \code{args} character vectors
 }
 \description{
 Generate a system command to run a module's source scripts

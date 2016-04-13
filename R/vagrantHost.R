@@ -91,6 +91,7 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
     hostSubdir
 }
 
+#' @describeIn executeCommand execute command on a \code{vagrantHost}
 executeCommand.vagrantHost <- function(moduleHost, hostSubdir, command) {
     commanddir <- dirname(moduleHost$vagrantfile)
     oldwd <- setwd(commanddir)

@@ -16,6 +16,8 @@ internalOutputScript.RSymbol <- function (symbol) {
 #' @describeIn command generate a command to execute an R language
 #'     script
 command.RScript <- function(script) {
-    list(command = "Rscript",
-         args = script)
+    command <- list(command = "Rscript",
+                    args = script)
+    class(command) <- c("command")
+    command
 }

@@ -105,7 +105,35 @@ test_that("prepareScript() returns script file", {
 test_that("command() returns appropriately", {
     ## fail for invalid arguments
     expect_error(command(tempfile()),
-                 "script object require")
+                 "script object required")
 
     ## see test_LANGUAGE.R for language-specific test
+})
+
+test_that("executeCommand() returns appropriately", {
+    vagrantfile <- tempfile("vagrantfile")
+    system2("touch", vagrantfile)
+    moduleHost1 <- vagrantHost(vagrantfile = vagrantfile)
+    hostSubdir1 <- tempdir()
+    command1 <- list(command = "echo", args = "$PWD")
+    class(command1) <- "command"
+
+    ## fail for invalid arguments
+    expect_error(executeCommand(moduleHost = unclass(moduleHost1),
+                                hostSubdir = hostSubdir1,
+                                command = command1),
+                 "moduleHost object required")
+    expect_error(executeCommand(moduleHost = moduleHost1,
+                                hostSubdir = c("/home", "/tmp"),
+                                command = command1),
+                 "hostSubdir is not length 1 char")
+    expect_error(executeCommand(moduleHost = moduleHost1,
+                                hostSubdir = hostSubdir1,
+                                command = unclass(command1)),
+                 "command object required")
+
+    ## returns cleanly for default
+    expect_equal(executeCommand(moduleHost = NULL, hostSubdir = NULL,
+                                command = command1),
+                 0)
 })
