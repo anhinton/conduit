@@ -4,7 +4,7 @@
 \alias{executeScript}
 \title{Execute a prepared module script file.}
 \usage{
-executeScript(script, moduleHost = NULL, hostSubdir)
+executeScript(script, moduleHost, hostSubdir)
 }
 \arguments{
 \item{script}{\code{script} object to be executed}

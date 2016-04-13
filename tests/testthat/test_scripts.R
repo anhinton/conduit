@@ -137,3 +137,37 @@ test_that("executeCommand() returns appropriately", {
                                 command = command1),
                  0)
 })
+
+test_that("executeScript() returns correctly", {
+    outDir <- tempfile("executeScript")
+    if (!dir.exists(outDir))
+        dir.create(outDir)
+    oldwd <- setwd(outDir)
+    on.exit(setwd(oldwd))
+    mod1 <- loadModule(
+        name = "mod1",
+        ref = system.file("extdata", "test_pipeline", "module1.xml",
+                          package = "conduit"))
+    script1 <- prepareScript(mod1)
+    vagrantfile1 <- tempfile("vagrantfile")
+    system2("touch", vagrantfile1)
+    moduleHost1 <- vagrantHost(vagrantfile = vagrantfile1)
+
+    ## fail for invalid arguments
+    expect_error(executeScript(script = unclass(script1),
+                               moduleHost = NULL, hostSubdir = NULL),
+                 "script object required")
+    expect_error(executeScript(script = script1,
+                               moduleHost = unclass(moduleHost1),
+                               hostSubdir = NULL),
+                 "moduleHost object required")
+    expect_error(executeScript(script = script1,
+                               moduleHost = moduleHost1,
+                               hostSubdir = c("/home", "/tmp")),
+                 "hostSubdir is not length 1 char")
+    
+    ## valid return for no moduleHost
+    expect_equal(
+        executeScript(script = script1, moduleHost = NULL, hostSubdir = NULL),
+        0)
+})

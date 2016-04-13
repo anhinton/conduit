@@ -252,7 +252,13 @@ internalOutputScript <- function (symbol) {
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, moduleHost = NULL, hostSubdir) {
+executeScript <- function(script, moduleHost, hostSubdir) {
+    if (!inherits(script, "script"))
+        stop("script object required")
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
+        stop("hostSubdir is not length 1 char")
     command <- command(script)
     executeCommand(moduleHost, hostSubdir, command)
 }

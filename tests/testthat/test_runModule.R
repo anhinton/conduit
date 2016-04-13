@@ -244,7 +244,8 @@ test_that(
                                    package = "conduit"))
         inputObjects <- NULL
         script <- prepareScript(module1)
-        expect_equal(executeScript(script = script, host = NULL), 0)
+        expect_equal(executeScript(script = script, moduleHost = NULL,
+                                   host = NULL), 0)
     })
 
 test_that(

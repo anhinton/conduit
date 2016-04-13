@@ -6,7 +6,7 @@
 \alias{executeCommand.vagrantHost}
 \title{Execute a \code{command} list object}
 \usage{
-executeCommand(moduleHost, hostSubdir = "", command)
+executeCommand(moduleHost, hostSubdir, command)
 
 \method{executeCommand}{default}(moduleHost, hostSubdir, command)
 
