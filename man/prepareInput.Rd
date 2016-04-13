@@ -13,10 +13,13 @@ prepareInput(moduleInput, inputList, outputDirectory, language, location)
 
 \item{outputDirectory}{working directory for module execution}
 
+\item{language}{Module language}
+
 \item{location}{location of originating module file}
 }
 \value{
-\code{input} object
+\code{input} object. Generally a character string
+    referencing a file location or URL
 }
 \description{
 This function ensures a \code{module}'s \code{moduleInput}

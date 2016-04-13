@@ -10,7 +10,7 @@ loadModule(name, ref, path = NULL, namespaces = c(oa =
 \arguments{
 \item{name}{Name of module}
 
-\item{ref}{Module location or filename}
+\item{ref}{Module location or filename or a \code{vessel} object}
 
 \item{path}{(Optional) Search path if \code{ref} is a filename}
 

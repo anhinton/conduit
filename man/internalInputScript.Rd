@@ -16,13 +16,14 @@ internalInputScript(symbol)
 \method{internalInputScript}{shellSymbol}(symbol)
 }
 \arguments{
-\item{symbol}{character string with class set to language of module script}
+\item{symbol}{\code{symbol} object}
 }
 \value{
-character vector of script to ensure input
+script as character vector
 }
 \description{
-These functions prepare script in the  to resolve internal input
+These functions prepare a module script snippet to resolve an
+internal input
 }
 \section{Methods (by class)}{
 \itemize{
