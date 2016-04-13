@@ -68,6 +68,7 @@ prepareModuleHost.dockerHost <- function(moduleHost, moduleName, modulePath) {
     # SO nothing to do
     # EXCEPT return an empty string as 'hostSubdir' to satisfy
     # the 'conduit' template for these generics
+    ""
 }
 
 executeCommand.dockerHost <- function(moduleHost, hostSubdir, command) {
