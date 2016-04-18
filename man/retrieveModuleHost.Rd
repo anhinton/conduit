@@ -3,7 +3,8 @@
 \name{retrieveModuleHost}
 \alias{retrieveModuleHost}
 \alias{retrieveModuleHost.vagrantHost}
-\title{Retrieve results of running a module on a remote host}
+\title{Retrieve results of running a module's source scripts on a
+\code{moduleHost}}
 \usage{
 retrieveModuleHost(moduleHost, outputLocation, modulePath)
 
@@ -17,11 +18,20 @@ retrieveModuleHost(moduleHost, outputLocation, modulePath)
 \item{modulePath}{output directory on local machine}
 }
 \description{
-Retrieve results of running a module on a remote host
+This functions retrieves the results of executing a module's source
+scripts on a \code{moduleHost} using \code{executeScript}.
+}
+\details{
+\code{outputLocation} should be the result of
+\code{prepareModuleHost} on the same \code{moduleHost}.
 }
 \section{Methods (by class)}{
 \itemize{
 \item \code{vagrantHost}: retrieve module output from
 \code{vagrantHost}
 }}
+\seealso{
+\code{moduleHost}, \code{prepareModuleHost},
+    \code{executeScript}
+}
 

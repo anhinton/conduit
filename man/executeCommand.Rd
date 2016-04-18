@@ -29,6 +29,8 @@ function.
 \details{
 If a \code{moduleHost} is provided the command is executed in the
 \code{outputLocation} on the host machine.
+
+This function is usually called by \code{executeScript}.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -38,7 +40,9 @@ If a \code{moduleHost} is provided the command is executed in the
 \item \code{vagrantHost}: execute command on a \code{vagrantHost}
 }}
 \seealso{
-\code{moduleHost}, \code{prepareModuleHost} for
-    \code{outputLocation} creation, \code{command}
+This function called by
+    \code{executeScript}. \code{moduleHost},
+    \code{prepareModuleHost} for \code{outputLocation} creation,
+    \code{command}.
 }
 

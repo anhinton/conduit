@@ -285,12 +285,16 @@ command <- function(script) {
 #' If a \code{moduleHost} is provided the command is executed in the
 #' \code{outputLocation} on the host machine.
 #'
+#' This function is usually called by \code{executeScript}.
+#'
 #' @param moduleHost \code{moduleHost} object
 #' @param outputLocation \code{outputLocation} object
 #' @param command \code{command} object
 #'
-#' @seealso \code{moduleHost}, \code{prepareModuleHost} for
-#'     \code{outputLocation} creation, \code{command}
+#' @seealso This function called by
+#'     \code{executeScript}. \code{moduleHost},
+#'     \code{prepareModuleHost} for \code{outputLocation} creation,
+#'     \code{command}.
 #'
 #' @return 0 if successful
 executeCommand <- function(moduleHost, outputLocation, command) {

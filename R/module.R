@@ -1264,11 +1264,21 @@ prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
     UseMethod("prepareModuleHost")
 }
 
-#' Retrieve results of running a module on a remote host
+#' Retrieve results of running a module's source scripts on a
+#' \code{moduleHost}
+#'
+#' This functions retrieves the results of executing a module's source
+#' scripts on a \code{moduleHost} using \code{executeScript}.
+#'
+#' \code{outputLocation} should be the result of
+#' \code{prepareModuleHost} on the same \code{moduleHost}.
 #'
 #' @param moduleHost \code{moduleHost} object
 #' @param outputLocation \code{outputLocation} object
 #' @param modulePath output directory on local machine
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost},
+#'     \code{executeScript}
 retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
     if (!inherits(moduleHost, "moduleHost"))
         stop("moduleHost object required")
