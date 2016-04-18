@@ -2,7 +2,7 @@ library(conduit)
 context("Check vagrantHost functions work")
 
 ## skip tests which require a vagrantHost be available with
-## Vagrantfilr at ~/vagrant/vagrant-conduit/Vagrantfile
+## Vagrantfile at ~/vagrant/vagrant-conduit/Vagrantfile
 skipHost <- FALSE
 
 vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
@@ -126,6 +126,11 @@ test_that("moduleHostToXML.vagrantHost() creates correct XML", {
 })
 
 test_that("prepareModuleHost.vagrantHost() returns correctly", {
+    if (skipHost) {
+        skip(paste("tests requires a vagrantHost running at",
+                   "~/vagrant/vagrant-conduit/Vagrantfile"))
+    }
+    
     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
     moduleName1 <- "mod1"
     modulePath1 <- tempfile("modulePath")
@@ -133,8 +138,6 @@ test_that("prepareModuleHost.vagrantHost() returns correctly", {
         dir.create(modulePath1)
     inputs1 <- sapply(1:3, function(x) tempfile(tmpdir = modulePath1))
     system2("touch", args = inputs1)
-
-    ## success
     outputLocation1 <-
         prepareModuleHost(moduleHost = vagrantHost1,
                           moduleName = moduleName1,
@@ -148,3 +151,34 @@ test_that("prepareModuleHost.vagrantHost() returns correctly", {
                expect_match(list.files(realLocation1), x, all = FALSE)
            })
 })
+
+test_that("executeCommand.vagrantHost() returns correctly", {
+    if (skipHost) {
+        skip(paste("tests requires a vagrantHost running at",
+                   "~/vagrant/vagrant-conduit/Vagrantfile"))
+    }
+
+    vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
+    mod1 <- module(name = "mod1",
+                   language = "R",
+                   host = vagrantHost1,
+                   sources = list(moduleSource(scriptVessel("x <- 1:10"))),
+                   outputs = list(moduleOutput(
+                       name = "x",
+                       vessel = internalVessel("x"),
+                       format = ioFormat("R numeric vector"))))
+    modulePath1 <- tempfile("modulePath")
+    if (!dir.exists(modulePath1))
+        dir.create(modulePath1)
+    oldwd <- setwd(modulePath1)
+    on.exit(setwd(modulePath1))
+    command1 <- command(prepareScript(mod1))
+    outputLocation1 <- prepareModuleHost(moduleHost = vagrantHost1,
+                                        moduleName = getName(mod1),
+                                        modulePath = modulePath1)
+    exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
+                                              outputLocation = outputLocation1,
+                                              command = command1)
+    expect_equal(exec_result, 0)
+})
+

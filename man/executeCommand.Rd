@@ -28,7 +28,7 @@ function.
 }
 \details{
 If a \code{moduleHost} is provided the command is executed in the
-\code{hostSubdir} on the host machine.
+\code{outputLocation} on the host machine.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -38,7 +38,7 @@ If a \code{moduleHost} is provided the command is executed in the
 \item \code{vagrantHost}: execute command on a \code{vagrantHost}
 }}
 \seealso{
-\code{moduleHost}, \code{prepareModuleHost} for hostSubdir
-    creation, \code{command}
+\code{moduleHost}, \code{prepareModuleHost} for
+    \code{outputLocation} creation, \code{command}
 }
 

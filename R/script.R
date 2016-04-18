@@ -283,14 +283,14 @@ command <- function(script) {
 #' function.
 #'
 #' If a \code{moduleHost} is provided the command is executed in the
-#' \code{hostSubdir} on the host machine.
+#' \code{outputLocation} on the host machine.
 #'
 #' @param moduleHost \code{moduleHost} object
 #' @param outputLocation \code{outputLocation} object
 #' @param command \code{command} object
 #'
-#' @seealso \code{moduleHost}, \code{prepareModuleHost} for hostSubdir
-#'     creation, \code{command}
+#' @seealso \code{moduleHost}, \code{prepareModuleHost} for
+#'     \code{outputLocation} creation, \code{command}
 #'
 #' @return 0 if successful
 executeCommand <- function(moduleHost, outputLocation, command) {
