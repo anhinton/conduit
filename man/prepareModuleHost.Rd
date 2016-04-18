@@ -17,15 +17,15 @@ prepareModuleHost(moduleHost, moduleName, modulePath)
 \item{modulePath}{module output directory}
 }
 \value{
-\code{outputDir} object
+\code{outputLocation} object
 }
 \description{
 These methods ensure that a \code{moduleHost} will have all
 resources required to execute a \code{module}'s source scripts.
 }
 \details{
-These methods return the path to the module output directory
-as a path on the host machine.
+These methods return the path to the module output directory as an
+\code{outputLocation} object.
 }
 \section{Methods (by class)}{
 \itemize{
