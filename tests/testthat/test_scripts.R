@@ -110,6 +110,36 @@ test_that("command() returns appropriately", {
     ## see test_LANGUAGE.R for language-specific test
 })
 
+test_that("executeCommand() returns appropriately", {
+    vagrantfile <- tempfile("vagrantfile")
+    system2("touch", vagrantfile)
+    moduleHost1 <- vagrantHost(vagrantfile = vagrantfile)
+    outputLocation1 <- tempdir()
+    class(outputLocation1) <- c("vagrantHostOutputLocation",
+                                "outputLocation")
+    command1 <- list(command = "echo", args = "$PWD")
+    class(command1) <- "command"
+
+    ## fail for invalid arguments
+    expect_error(executeCommand(moduleHost = unclass(moduleHost1),
+                                outputLocation = outputLocation1,
+                                command = command1),
+                 "moduleHost object required")
+    expect_error(executeCommand(moduleHost = moduleHost1,
+                                outputLocation = unclass(outputLocation1),
+                                command = command1),
+                 "outputLocation object required")
+    expect_error(executeCommand(moduleHost = moduleHost1,
+                                outputLocation = outputLocation1,
+                                command = unclass(command1)),
+                 "command object required")
+
+    ## returns cleanly for default
+    expect_equal(executeCommand(moduleHost = NULL, outputLocation = NULL,
+                                command = command1),
+                 0)
+})
+
 test_that("executeScript() returns correctly", {
     outDir <- tempfile("executeScript")
     if (!dir.exists(outDir))
@@ -143,4 +173,62 @@ test_that("executeScript() returns correctly", {
         executeScript(script = script1, moduleHost = NULL,
                       outputLocation = NULL),
         0)
+})
+
+## test executeScript.LANGUAGE
+## TODO(anhinton): move these test to test_LANGUAGE.R
+test_that("can execute R scripts", {
+    oldwd <- setwd(tempdir())
+    on.exit(setwd(oldwd))
+    module1 <-
+        loadModule("module1",
+                   system.file("extdata", "test_pipeline",
+                               "module1.xml",
+                               package = "conduit"))
+    inputObjects <- NULL
+    script <- prepareScript(module1)
+    expect_equal(executeScript(script = script, moduleHost = NULL,
+                               outputLocation = NULL), 0)
+})
+
+test_that("can execute python scripts", {
+    oldwd <- setwd(tempdir())
+    on.exit(setwd(oldwd))
+    module2 <- module(
+        "module2",
+        "python",
+        sources = list(
+            moduleSource(
+                scriptVessel("x = [1, 2, 3, 5, 10]"))),
+        outputs = list(
+            moduleOutput(
+                "x",
+                internalVessel("x"),
+                ioFormat("python list"))))
+    inputObjects <- NULL
+    script <- prepareScript(module2)
+    expect_equal(executeScript(script = script, moduleHost = NULL,
+                               outputLocation = NULL),
+                 0)
+})
+
+test_that("can execute shell scripts", {
+    oldwd <- setwd(tempdir())
+    on.exit(setwd(oldwd))
+    module3 <- module(
+        "module3",
+        "shell",
+        sources = list(
+            moduleSource(
+                scriptVessel("x=\"lemon duds\"]"))),
+        outputs = list(
+            moduleOutput(
+                "x",
+                internalVessel("x"),
+                ioFormat("shell environment variable"))))
+    inputObjects <- NULL
+    script <- prepareScript(module3)
+    expect_equal(executeScript(script = script, moduleHost = NULL,
+                               outputLocation = NULL),
+                 0)
 })

@@ -276,3 +276,36 @@ command <- function(script) {
         stop("script object required")
     UseMethod("command")
 }
+
+#' Execute a \code{command} list object
+#'
+#' These methods execute a command list prepared by the \code{command}
+#' function.
+#'
+#' If a \code{moduleHost} is provided the command is executed in the
+#' \code{hostSubdir} on the host machine.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param outputLocation \code{outputLocation} object
+#' @param command \code{command} object
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost} for hostSubdir
+#'     creation, \code{command}
+#'
+#' @return 0 if successful
+executeCommand <- function(moduleHost, outputLocation, command) {
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
+    if (!inherits(command, "command"))
+        stop("command object required")
+    UseMethod("executeCommand")
+}
+
+#' @describeIn executeCommand execute a command with no
+#'     \code{moduleHost}
+executeCommand.default <- function(moduleHost, outputLocation, command) {
+    system2(command = command$command,
+            args = command$args)
+}
