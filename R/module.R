@@ -1246,14 +1246,14 @@ resolveOutput <- function (moduleOutput, language,
 #' These methods ensure that a \code{moduleHost} will have all
 #' resources required to execute a \code{module}'s source scripts.
 #'
-#' These methods return the path to the module output directory
-#' as a path on the host machine.
+#' These methods return the path to the module output directory as an
+#' \code{outputLocation} object.
 #'
 #' @param moduleHost \code{moduleHost} object
 #' @param moduleName module name
 #' @param modulePath module output directory
 #'
-#' @return path to module output directory on host machine
+#' @return \code{outputLocation} object
 prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
     if (!inherits(moduleHost, "moduleHost"))
         stop("moduleHost object required")

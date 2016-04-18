@@ -75,20 +75,37 @@ moduleHostToXML.vagrantHost <- function(vagrantHost) {
     newXMLNode(name = "host", kids = list(child))
 }
 
-#' @describeIn prepareModuleHost prepare \code{vagrantHost}
+#' @describeIn prepareModuleHost prepare \code{vagrantHost}; returns
+#' path to unique module output directory relative to hostdir/guestdir
 prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                           modulePath) {
-    hostdir <- host$hostdir
-    hostSubdir <- tempfile(pattern = moduleName,
-                           tmpdir = file.path("conduit.out"))
-    hostdir <- file.path(hostdir, hostSubdir)
+    if (!inherits(moduleHost, "vagrantHost"))
+        stop("vagrantHost object required")
+    if (!is_length1_char(moduleName))
+        stop("moduleName is not length 1 character")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+
+    vagrantHost <- moduleHost
+
+    ## create unique module output directory--'outputLocation'--in
+    ## 'hostdir' on local machine
+    hostdir <- vagrantHost$hostdir
+    outputLocation <- tempfile(pattern = moduleName,
+                               tmpdir = file.path("conduit.out"))
+    hostdir <- file.path(hostdir, outputLocation)
     if (dir.exists(hostdir))
         unlink(hostdir, rescursive = TRUE)
     dir.create(hostdir, recursive = TRUE)
+    
+    ## make contents of modulePath available to vagrantHost
     files <- list.files(path = modulePath, full.names = TRUE)
     for (f in files)
         file.copy(f, hostdir, recursive = TRUE)
-    hostSubdir
+
+    ## return outputLocation object
+    class(outputLocation) <- c("vagrantHostOutputLocation", "outputLocation")
+    outputLocation
 }
 
 #' @describeIn executeCommand execute command on a \code{vagrantHost}

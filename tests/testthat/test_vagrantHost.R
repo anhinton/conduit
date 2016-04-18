@@ -1,8 +1,8 @@
 library(conduit)
 context("Check vagrantHost functions work")
 
-## skip tests which require a module host machine
-## requires conduit host at vagrant@127.0.0.1:2222
+## skip tests which require a vagrantHost be available with
+## Vagrantfilr at ~/vagrant/vagrant-conduit/Vagrantfile
 skipHost <- FALSE
 
 vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
@@ -127,4 +127,48 @@ test_that("moduleHostToXML.vagrantHost() creates correct XML", {
     expect_match(attrs3[["vagrantfile"]], normalizePath(vagrantfile))
     expect_match(attrs3[["hostdir"]], normalizePath(hostdir))
     expect_match(attrs3[["guestdir"]], guestdir)
+})
+
+test_that("prepareModuleHost.vagrantHost() returns correctly", {
+    vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
+    moduleName1 <- "mod1"
+    modulePath1 <- tempfile("modulePath")
+    if (!dir.exists(modulePath1))
+        dir.create(modulePath1)
+    inputs1 <- sapply(1:3, function(x) tempfile(tmpdir = modulePath1))
+    system2("touch", args = inputs1)
+
+    ## fail for invalid arguments
+    expect_error(
+        prepareModuleHost.vagrantHost(
+            moduleHost = unclass(vagrantHost1),
+            moduleName = moduleName1,
+            modulePath = modulePath1),
+        "vagrantHost object required")
+    expect_error(
+        prepareModuleHost.vagrantHost(
+            moduleHost = vagrantHost1,
+            moduleName = c("two", "names"),
+            modulePath = modulePath1),
+        "moduleName is not length 1 character")
+    expect_error(
+        prepareModuleHost.vagrantHost(
+            moduleHost = vagrantHost1,
+            moduleName = moduleName1,
+            modulePath = tempfile()),
+        "modulePath does not exist")
+
+    ## success
+    outputLocation1 <-
+        prepareModuleHost(moduleHost = vagrantHost1,
+                          moduleName = moduleName1,
+                          modulePath = modulePath1)
+    realLocation1 <- file.path(vagrantHost1$hostdir, outputLocation1)
+    expect_true(dir.exists(realLocation1))
+    expect_is(outputLocation1, "vagrantHostOutputLocation")
+    expect_is(outputLocation1, "outputLocation")
+    lapply(list.files(modulePath1),
+           function (x) {
+               expect_match(list.files(realLocation1), x, all = FALSE)
+           })
 })

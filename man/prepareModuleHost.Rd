@@ -17,7 +17,7 @@ prepareModuleHost(moduleHost, moduleName, modulePath)
 \item{modulePath}{module output directory}
 }
 \value{
-path to module output directory on host machine
+\code{outputDir} object
 }
 \description{
 These methods ensure that a \code{moduleHost} will have all
@@ -29,6 +29,7 @@ as a path on the host machine.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{vagrantHost}: prepare \code{vagrantHost}
+\item \code{vagrantHost}: prepare \code{vagrantHost}; returns
+path to unique module output directory relative to hostdir/guestdir
 }}
 
