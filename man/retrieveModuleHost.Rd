@@ -5,14 +5,14 @@
 \alias{retrieveModuleHost.vagrantHost}
 \title{Retrieve results of running a module on a remote host}
 \usage{
-retrieveModuleHost(moduleHost, hostSubdir, modulePath)
+retrieveModuleHost(moduleHost, outputLocation, modulePath)
 
-\method{retrieveModuleHost}{vagrantHost}(moduleHost, hostSubdir, modulePath)
+\method{retrieveModuleHost}{vagrantHost}(moduleHost, outputLocation, modulePath)
 }
 \arguments{
 \item{moduleHost}{\code{moduleHost} object}
 
-\item{hostSubdir}{output directory on host machine}
+\item{outputLocation}{\code{outputLocation} object}
 
 \item{modulePath}{output directory on local machine}
 }

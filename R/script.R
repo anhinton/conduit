@@ -238,29 +238,29 @@ internalOutputScript <- function (symbol) {
 #' Execute a prepared module script file.
 #'
 #' @details If \code{moduleHost} is provided script will be executed on
-#' remote host in \code{hostSubdir} on that machine.
+#' remote host in \code{outputLocation} on that machine.
 #'
-#' \code{hostSubdir} should be the result of running
+#' \code{outputLocation} should be the result of running
 #' \code{prepareModuleHost}
 #'
 #' @seealso \code{moduleHost}, \code{prepareModuleHost}
 #'
 #' @param script \code{script} object to be executed
 #' @param moduleHost \code{moduleHost} object
-#' @param hostSubdir output directory on \code{moduleHost}
+#' @param outputLocation \code{outputLocation} object
 #'
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, moduleHost, hostSubdir) {
+executeScript <- function(script, moduleHost, outputLocation) {
     if (!inherits(script, "script"))
         stop("script object required")
     if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
         stop("moduleHost object required")
-    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
-        stop("hostSubdir is not length 1 char")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
     command <- command(script)
-    executeCommand(moduleHost, hostSubdir, command)
+    executeCommand(moduleHost, outputLocation, command)
 }
 
 #' Generate a system command to run a module's source scripts

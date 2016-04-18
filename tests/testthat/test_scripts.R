@@ -127,19 +127,20 @@ test_that("executeScript() returns correctly", {
 
     ## fail for invalid arguments
     expect_error(executeScript(script = unclass(script1),
-                               moduleHost = NULL, hostSubdir = NULL),
+                               moduleHost = NULL, outputLocation = NULL),
                  "script object required")
     expect_error(executeScript(script = script1,
                                moduleHost = unclass(moduleHost1),
-                               hostSubdir = NULL),
+                               outputLocation = NULL),
                  "moduleHost object required")
     expect_error(executeScript(script = script1,
                                moduleHost = moduleHost1,
-                               hostSubdir = c("/home", "/tmp")),
-                 "hostSubdir is not length 1 char")
+                               outputLocation = c("/home", "/tmp")),
+                 "outputLocation object required")
     
     ## valid return for no moduleHost
     expect_equal(
-        executeScript(script = script1, moduleHost = NULL, hostSubdir = NULL),
+        executeScript(script = script1, moduleHost = NULL,
+                      outputLocation = NULL),
         0)
 })

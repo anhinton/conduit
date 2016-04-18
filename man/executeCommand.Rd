@@ -6,16 +6,16 @@
 \alias{executeCommand.vagrantHost}
 \title{Execute a \code{command} list object}
 \usage{
-executeCommand(moduleHost, hostSubdir, command)
+executeCommand(moduleHost, outputLocation, command)
 
-\method{executeCommand}{default}(moduleHost, hostSubdir, command)
+\method{executeCommand}{default}(moduleHost, outputLocation, command)
 
 \method{executeCommand}{vagrantHost}(moduleHost, outputLocation, command)
 }
 \arguments{
 \item{moduleHost}{\code{moduleHost} object}
 
-\item{hostSubdir}{module output directory on host machine}
+\item{outputLocation}{\code{outputLocation} object}
 
 \item{command}{\code{command} object}
 }

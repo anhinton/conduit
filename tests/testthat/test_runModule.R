@@ -259,26 +259,28 @@ test_that("executeCommand() returns appropriately", {
     vagrantfile <- tempfile("vagrantfile")
     system2("touch", vagrantfile)
     moduleHost1 <- vagrantHost(vagrantfile = vagrantfile)
-    hostSubdir1 <- tempdir()
+    outputLocation1 <- tempdir()
+    class(outputLocation1) <- c("vagrantHostOutputLocation",
+                                "outputLocation")
     command1 <- list(command = "echo", args = "$PWD")
     class(command1) <- "command"
 
     ## fail for invalid arguments
     expect_error(executeCommand(moduleHost = unclass(moduleHost1),
-                                hostSubdir = hostSubdir1,
+                                outputLocation = outputLocation1,
                                 command = command1),
                  "moduleHost object required")
     expect_error(executeCommand(moduleHost = moduleHost1,
-                                hostSubdir = c("/home", "/tmp"),
+                                outputLocation = unclass(outputLocation1),
                                 command = command1),
-                 "hostSubdir is not length 1 char")
+                 "outputLocation object required")
     expect_error(executeCommand(moduleHost = moduleHost1,
-                                hostSubdir = hostSubdir1,
+                                outputLocation = outputLocation1,
                                 command = unclass(command1)),
                  "command object required")
 
     ## returns cleanly for default
-    expect_equal(executeCommand(moduleHost = NULL, hostSubdir = NULL,
+    expect_equal(executeCommand(moduleHost = NULL, outputLocation = NULL,
                                 command = command1),
                  0)
 })
@@ -287,20 +289,22 @@ test_that("retrieveModuleHost() behaves correctly", {
     vagrantfile <- tempfile()
     system2("touch", vagrantfile)        
     vagrantHost <- vagrantHost(vagrantfile = vagrantfile)
-    hostSubdir1 = tempdir()
+    outputLocation1 = tempdir()
+    class(outputLocation1) <- c("vagrantHostOutputLocation",
+                                "outputLocation")
     modulePath <- tempdir()
     
     ## fail for invalid arguments
     expect_error(retrieveModuleHost(moduleHost = unclass(vagrantHost),
-                                    hostSubdir = hostSubdir1,
+                                    outputLocation = outputLocation1,
                                     modulePath = modulePath),
                  "moduleHost object required")
     expect_error(retrieveModuleHost(moduleHost = vagrantHost,
-                                    hostSubdir = c("/home", "/tmp"),
+                                    outputLocation = unclass(outputLocation1),
                                     modulePath = modulePath),
-                 "hostSubdir is not length 1 character")
+                 "outputLocation object required")
     expect_error(retrieveModuleHost(moduleHost = vagrantHost,
-                                    hostSubdir = hostSubdir1,
+                                    outputLocation = outputLocation1,
                                     modulePath = tempfile()),
                  "modulePath does not exist")
 
@@ -319,7 +323,7 @@ test_that("can execute R scripts", {
     inputObjects <- NULL
     script <- prepareScript(module1)
     expect_equal(executeScript(script = script, moduleHost = NULL,
-                               host = NULL), 0)
+                               outputLocation = NULL), 0)
 })
 
 test_that("can execute python scripts", {
@@ -339,7 +343,7 @@ test_that("can execute python scripts", {
     inputObjects <- NULL
     script <- prepareScript(module2)
     expect_equal(executeScript(script = script, moduleHost = NULL,
-                               hostSubdir = NULL),
+                               outputLocation = NULL),
                  0)
 })
 
@@ -360,7 +364,7 @@ test_that("can execute shell scripts", {
     inputObjects <- NULL
     script <- prepareScript(module3)
     expect_equal(executeScript(script = script, moduleHost = NULL,
-                               hostSubdir = NULL),
+                               outputLocation = NULL),
                  0)
 })
 

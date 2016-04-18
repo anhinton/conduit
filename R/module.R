@@ -995,7 +995,7 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## prepare moduleHost
     moduleHost <- module$host
-    hostSubdir <-
+    outputLocation <-
         if (!is.null(moduleHost)) {
             prepareModuleHost(moduleHost = moduleHost, moduleName = name,
                               modulePath = modulePath)
@@ -1004,7 +1004,7 @@ runModule <- function(module, targetDirectory = getwd(),
         }
     
     ## execute script file
-    exec_result <- executeScript(script, moduleHost, hostSubdir)
+    exec_result <- executeScript(script, moduleHost, outputLocation)
     if (exec_result != 0)
         stop("Unable to execute module script")
 
@@ -1264,21 +1264,6 @@ prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
     UseMethod("prepareModuleHost")
 }
 
-#' Retrieve results of running a module on a remote host
-#'
-#' @param moduleHost \code{moduleHost} object
-#' @param hostSubdir output directory on host machine
-#' @param modulePath output directory on local machine
-retrieveModuleHost <- function(moduleHost, hostSubdir, modulePath) {
-    if (!inherits(moduleHost, "moduleHost"))
-        stop("moduleHost object required")
-    if (!is_length1_char(hostSubdir))
-        stop("hostSubdir is not length 1 character")
-    if (!dir.exists(modulePath))
-        stop("modulePath does not exist")
-    UseMethod("retrieveModuleHost")
-}
-
 #' Execute a \code{command} list object
 #'
 #' These methods execute a command list prepared by the \code{command}
@@ -1288,18 +1273,18 @@ retrieveModuleHost <- function(moduleHost, hostSubdir, modulePath) {
 #' \code{hostSubdir} on the host machine.
 #'
 #' @param moduleHost \code{moduleHost} object
-#' @param hostSubdir module output directory on host machine
+#' @param outputLocation \code{outputLocation} object
 #' @param command \code{command} object
 #'
 #' @seealso \code{moduleHost}, \code{prepareModuleHost} for hostSubdir
 #'     creation, \code{command}
 #'
 #' @return 0 if successful
-executeCommand <- function(moduleHost, hostSubdir, command) {
+executeCommand <- function(moduleHost, outputLocation, command) {
     if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
         stop("moduleHost object required")
-    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
-        stop("hostSubdir is not length 1 char")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
     if (!inherits(command, "command"))
         stop("command object required")
     UseMethod("executeCommand")
@@ -1307,7 +1292,22 @@ executeCommand <- function(moduleHost, hostSubdir, command) {
 
 #' @describeIn executeCommand execute a command with no
 #'     \code{moduleHost}
-executeCommand.default <- function(moduleHost, hostSubdir, command) {
+executeCommand.default <- function(moduleHost, outputLocation, command) {
     system2(command = command$command,
             args = command$args)
+}
+
+#' Retrieve results of running a module on a remote host
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param outputLocation \code{outputLocation} object
+#' @param modulePath output directory on local machine
+retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    UseMethod("retrieveModuleHost")
 }
