@@ -91,10 +91,6 @@ test_that("moduleHostToXML.vagrantHost() creates correct XML", {
     vh2 <- vagrantHost(vagrantfile, hostdir)
     vh3 <- vagrantHost(vagrantfile, hostdir, guestdir)
 
-    ## fail for invalid argument
-    expect_error(moduleHostToXML.vagrantHost(unclass(vh1)),
-                 "vagrantHost object required")
-
     ## just vagrantfile
     hostNode1 <- moduleHostToXML(vh1)
     child1 <- xmlChildren(hostNode1)[[1]]
@@ -137,26 +133,6 @@ test_that("prepareModuleHost.vagrantHost() returns correctly", {
         dir.create(modulePath1)
     inputs1 <- sapply(1:3, function(x) tempfile(tmpdir = modulePath1))
     system2("touch", args = inputs1)
-
-    ## fail for invalid arguments
-    expect_error(
-        prepareModuleHost.vagrantHost(
-            moduleHost = unclass(vagrantHost1),
-            moduleName = moduleName1,
-            modulePath = modulePath1),
-        "vagrantHost object required")
-    expect_error(
-        prepareModuleHost.vagrantHost(
-            moduleHost = vagrantHost1,
-            moduleName = c("two", "names"),
-            modulePath = modulePath1),
-        "moduleName is not length 1 character")
-    expect_error(
-        prepareModuleHost.vagrantHost(
-            moduleHost = vagrantHost1,
-            moduleName = moduleName1,
-            modulePath = tempfile()),
-        "modulePath does not exist")
 
     ## success
     outputLocation1 <-

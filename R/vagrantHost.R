@@ -69,8 +69,6 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'
 #' @import XML
 moduleHostToXML.vagrantHost <- function(vagrantHost) {
-    if (!inherits(vagrantHost, "vagrantHost"))
-        stop ("vagrantHost object required")
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
 }
@@ -79,13 +77,6 @@ moduleHostToXML.vagrantHost <- function(vagrantHost) {
 #' path to unique module output directory relative to hostdir/guestdir
 prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                           modulePath) {
-    if (!inherits(moduleHost, "vagrantHost"))
-        stop("vagrantHost object required")
-    if (!is_length1_char(moduleName))
-        stop("moduleName is not length 1 character")
-    if (!dir.exists(modulePath))
-        stop("modulePath does not exist")
-
     vagrantHost <- moduleHost
 
     ## create unique module output directory--'outputLocation'--in

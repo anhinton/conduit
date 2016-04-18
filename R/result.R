@@ -124,8 +124,6 @@ pipelineResult <- function(componentResultList, pipelinePath, pipeline) {
 #'
 #' @export
 export.componentResult <- function(x, targetDirectory = getwd()) {
-    if (!inherits(x, "componentResult"))
-        stop("componentResult object required")
     if (!dir.exists(targetDirectory))
         stop("targetDirectory does not exist")
 
