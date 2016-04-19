@@ -9,7 +9,7 @@ vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
 hostdir <- tempdir()
 guestdir <- "/data/conduit"
 
-test_that("vagrantHost() consructor works right", {
+test_that("vagrantHost() constructor works right", {
     ## fail for invalid arguments
     expect_error(vagrantHost(tempfile()),
                  "vagrantfile does not exist")
