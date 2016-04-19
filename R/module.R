@@ -487,7 +487,8 @@ readModuleHostXML <- function(moduleHostXML) {
     type <- xmlName(moduleHostXML)
     moduleHost <- switch(
         type,
-        vagrant = readVagrantHostXML(moduleHostXML)
+        vagrant = readVagrantHostXML(moduleHostXML),
+        docker = readDockerHostXML(moduleHostXML)
     )
     if(!inherits(moduleHost, "moduleHost"))
         class(moduleHost) <- c(class(moduleHost), "moduleHost")
@@ -983,7 +984,7 @@ runModule <- function(module, targetDirectory = getwd(),
     ## enter output directory
     oldwd <- setwd(modulePath)
     on.exit(setwd(oldwd))
-    
+
     ## prepare module inputs
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
@@ -1031,6 +1032,10 @@ runModule <- function(module, targetDirectory = getwd(),
 #' For any \code{moduleInput} wrapping a \code{internalVessel} or
 #' \code{fileVessel} with a relative ref, the relevant \code{input}
 #' object is copied into the module \code{outputDirectory}.
+#'
+#' For any \code{moduleInput} that is not found in \code{inputList}
+#' (e.g., when the module is being run directly), the \code{moduleInput}
+#' itself is tried (e.g., a URL vessel should work).
 #' 
 #' @param moduleInput \code{moduleInput} object
 #' @param inputList list of \code{input} objects provided to module
@@ -1276,6 +1281,8 @@ prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
 #' @param moduleHost \code{moduleHost} object
 #' @param outputLocation \code{outputLocation} object
 #' @param modulePath output directory on local machine
+#'
+#' @return NULL if successful
 #'
 #' @seealso \code{moduleHost}, \code{prepareModuleHost},
 #'     \code{executeScript}

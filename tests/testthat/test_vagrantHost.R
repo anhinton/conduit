@@ -1,5 +1,5 @@
 library(conduit)
-context("Check vagrantHost functions work")
+context("create and use vagrantHost objects")
 
 ## skip tests which require a vagrantHost be available with
 ## Vagrantfile at ~/vagrant/vagrant-conduit/Vagrantfile
@@ -9,7 +9,7 @@ vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
 hostdir <- tempdir()
 guestdir <- "/data/conduit"
 
-test_that("vagrantHost() consructor works right", {
+test_that("vagrantHost() constructor works right", {
     ## fail for invalid arguments
     expect_error(vagrantHost(tempfile()),
                  "vagrantfile does not exist")
@@ -72,7 +72,7 @@ test_that("readVagrantHostXML() returns correctly", {
 
     ## vagrantfile and hostdir
     vh2 <- readVagrantHostXML(vhXML2)
-    expect_is(vh1, "vagrantHost")
+    expect_is(vh2, "vagrantHost")
     expect_match(vh2$vagrantfile, normalizePath(vagrantfile))
     expect_match(vh2$hostdir, normalizePath(hostdir))
     expect_match(vh2$guestdir, "/vagrant")
@@ -194,8 +194,8 @@ test_that("retrieveModuleHost.vagrantHost() returns correctly", {
     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
     mod1 <- loadModule(name = "mod1",
                        ref = system.file(
-                           "extdata", "simpleGraph",
-                           "createGraph.xml",
+                           "extdata", "test_pipeline",
+                           "module1.xml",
                            package = "conduit"))
     mod1$host <- vagrantHost1
     modulePath1 <- tempfile("modulePath")
@@ -211,9 +211,10 @@ test_that("retrieveModuleHost.vagrantHost() returns correctly", {
     exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
                                               outputLocation = outputLocation1,
                                               command = command1)
-    retrieveModuleHost.vagrantHost(moduleHost = vagrantHost1,
-                                   outputLocation = outputLocation1,
-                                   modulePath = modulePath1)
+    x <- retrieveModuleHost.vagrantHost(moduleHost = vagrantHost1,
+                                        outputLocation = outputLocation1,
+                                        modulePath = modulePath1)
+    expect_null(x)
     ## correct defined as contents of modulePath1 and realLocation
     ## being the same, assuming they were not before execution
     lapply(list.files(realLocation1),

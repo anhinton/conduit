@@ -29,5 +29,9 @@ requirements will be met when executed.
 For any \code{moduleInput} wrapping a \code{internalVessel} or
 \code{fileVessel} with a relative ref, the relevant \code{input}
 object is copied into the module \code{outputDirectory}.
+
+For any \code{moduleInput} that is not found in \code{inputList}
+(e.g., when the module is being run directly), the \code{moduleInput}
+itself is tried (e.g., a URL vessel should work).
 }
 

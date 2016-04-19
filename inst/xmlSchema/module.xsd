@@ -33,6 +33,7 @@
     <sequence>
       <choice>
 	<element ref="oa:vagrant"/>
+	<element ref="oa:docker"/>
 	<element ref="oa:moduleInput"/>
       </choice>
     </sequence>
