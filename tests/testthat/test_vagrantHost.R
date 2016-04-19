@@ -72,7 +72,7 @@ test_that("readVagrantHostXML() returns correctly", {
 
     ## vagrantfile and hostdir
     vh2 <- readVagrantHostXML(vhXML2)
-    expect_is(vh1, "vagrantHost")
+    expect_is(vh2, "vagrantHost")
     expect_match(vh2$vagrantfile, normalizePath(vagrantfile))
     expect_match(vh2$hostdir, normalizePath(hostdir))
     expect_match(vh2$guestdir, "/vagrant")
