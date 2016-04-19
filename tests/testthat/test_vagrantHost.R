@@ -211,9 +211,10 @@ test_that("retrieveModuleHost.vagrantHost() returns correctly", {
     exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
                                               outputLocation = outputLocation1,
                                               command = command1)
-    retrieveModuleHost.vagrantHost(moduleHost = vagrantHost1,
-                                   outputLocation = outputLocation1,
-                                   modulePath = modulePath1)
+    x <- retrieveModuleHost.vagrantHost(moduleHost = vagrantHost1,
+                                        outputLocation = outputLocation1,
+                                        modulePath = modulePath1)
+    expect_null(x)
     ## correct defined as contents of modulePath1 and realLocation
     ## being the same, assuming they were not before execution
     lapply(list.files(realLocation1),
