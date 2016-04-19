@@ -1282,6 +1282,8 @@ prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
 #' @param outputLocation \code{outputLocation} object
 #' @param modulePath output directory on local machine
 #'
+#' @return NULL if successful
+#'
 #' @seealso \code{moduleHost}, \code{prepareModuleHost},
 #'     \code{executeScript}
 retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
