@@ -146,6 +146,8 @@ test_that("prepareModuleHost.vagrantHost() returns correctly", {
     expect_true(dir.exists(realLocation1))
     expect_is(outputLocation1, "vagrantHostOutputLocation")
     expect_is(outputLocation1, "outputLocation")
+    ## correct defined as contents of realLocation1 now same as
+    ## modulePath1
     lapply(list.files(modulePath1),
            function (x) {
                expect_match(list.files(realLocation1), x, all = FALSE)
@@ -179,6 +181,43 @@ test_that("executeCommand.vagrantHost() returns correctly", {
     exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
                                               outputLocation = outputLocation1,
                                               command = command1)
+    ## correct defined as not getting error message from wrapped
+    ## system2 call
     expect_equal(exec_result, 0)
 })
 
+test_that("retrieveModuleHost.vagrantHost() returns correctly", {
+    if (skipHost) {
+        skip(paste("tests requires a vagrantHost running at",
+                   "~/vagrant/vagrant-conduit/Vagrantfile"))
+    }
+    vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
+    mod1 <- loadModule(name = "mod1",
+                       ref = system.file(
+                           "extdata", "simpleGraph",
+                           "createGraph.xml",
+                           package = "conduit"))
+    mod1$host <- vagrantHost1
+    modulePath1 <- tempfile("modulePath")
+    if (!dir.exists(modulePath1))
+        dir.create(modulePath1)
+    oldwd <- setwd(modulePath1)
+    on.exit(setwd(modulePath1))
+    command1 <- command(prepareScript(mod1))
+    outputLocation1 <- prepareModuleHost(moduleHost = vagrantHost1,
+                                        moduleName = getName(mod1),
+                                        modulePath = modulePath1)
+    realLocation1 <- file.path(vagrantHost1$hostdir, outputLocation1)
+    exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
+                                              outputLocation = outputLocation1,
+                                              command = command1)
+    retrieveModuleHost.vagrantHost(moduleHost = vagrantHost1,
+                                   outputLocation = outputLocation1,
+                                   modulePath = modulePath1)
+    ## correct defined as contents of modulePath1 and realLocation
+    ## being the same, assuming they were not before execution
+    lapply(list.files(realLocation1),
+           function (x) {
+               expect_match(list.files(modulePath1), x, all = FALSE)
+           })
+})
