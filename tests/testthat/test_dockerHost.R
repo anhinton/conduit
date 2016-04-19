@@ -33,48 +33,33 @@ test_that("dockerHost() constructor works right", {
     expect_match(dh2$guestdir, guestdir)
 })
 
-## test_that("readVagrantHostXML() returns correctly", {
-##     library(XML)
-##     vhXML1 <- newXMLNode(
-##         name = "vagrant",
-##         attrs = list(vagrantfile = vagrantfile))
-##     vhXML2 <- newXMLNode(
-##         name = "vagrant",
-##         attrs = list(
-##             vagrantfile = vagrantfile,
-##             hostdir = hostdir))
-##     vhXML3 <- newXMLNode(
-##         name = "vagrant",
-##         attrs = list(
-##             vagrantfile = vagrantfile,
-##             hostdir = hostdir,
-##             guestdir = guestdir))
+test_that("readDockerHostXML() returns correctly", {
+    library(XML)
+    dhXML1 <- newXMLNode(
+        name = "docker",
+        attrs = list(image = dockerImage))
+    dhXML2 <- newXMLNode(
+        name = "docker",
+        attrs = list(
+            image = dockerImage,
+            guestdir = guestdir))
 
-##     ## fail for invalid argument
-##     expect_error(readVagrantHostXML(newXMLNode("voogrant")),
-##                  "vagrant element required")
+    ## fail for invalid argument
+    expect_error(readDockerHostXML(newXMLNode("doocker")),
+                 "docker element required")
 
-##     ## vagrantfile only
-##     vh1 <- readVagrantHostXML(vhXML1)
-##     expect_is(vh1, "vagrantHost")
-##     expect_match(vh1$vagrantfile, normalizePath(vagrantfile))
-##     expect_match(vh1$hostdir, dirname(vagrantfile))
-##     expect_match(vh1$guestdir, "/vagrant")
+    ## image only
+    dh1 <- readDockerHostXML(dhXML1)
+    expect_is(dh1, "dockerHost")
+    expect_match(dh1$image, dockerImage)
+    expect_match(dh1$guestdir, "/home/conduit")
 
-##     ## vagrantfile and hostdir
-##     vh2 <- readVagrantHostXML(vhXML2)
-##     expect_is(vh1, "vagrantHost")
-##     expect_match(vh2$vagrantfile, normalizePath(vagrantfile))
-##     expect_match(vh2$hostdir, normalizePath(hostdir))
-##     expect_match(vh2$guestdir, "/vagrant")
-
-##     ## vagrantfile, hostdir, guestdir
-##     vh3 <- readVagrantHostXML(vhXML3)
-##     expect_is(vh3, "vagrantHost")
-##     expect_match(vh3$vagrantfile, normalizePath(vagrantfile))
-##     expect_match(vh3$hostdir, normalizePath(hostdir))
-##     expect_match(vh3$guestdir, guestdir)
-## })
+    ## image and guestdir
+    dh2 <- readDockerHostXML(dhXML2)
+    expect_is(dh2, "dockerHost")
+    expect_match(dh2$image, dockerImage)
+    expect_match(dh2$guestdir, guestdir)
+})
 
 ## test_that("moduleHostToXML.vagrantHost() creates correct XML", {
 ##     library(XML)
