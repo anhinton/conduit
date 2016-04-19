@@ -1,5 +1,5 @@
 library(conduit)
-context("Check vagrantHost functions work")
+context("create and use vagrantHost objects")
 
 ## skip tests which require a vagrantHost be available with
 ## Vagrantfile at ~/vagrant/vagrant-conduit/Vagrantfile
