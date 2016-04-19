@@ -77,7 +77,8 @@ prepareModuleHost.dockerHost <- function(moduleHost, moduleName, modulePath) {
     outputLocation
 }
 
-executeCommand.dockerHost <- function(moduleHost, hostSubdir, command) {
+#' @describeIn executeCommand execute command on a \code{dockerHost}
+executeCommand.dockerHost <- function(moduleHost, outputLocation, command) {
     args <- c(command$command, command$args)
     hostdir <- getwd()
     guestdir <- moduleHost$guestdir

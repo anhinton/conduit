@@ -103,48 +103,48 @@ test_that("prepareModuleHost.dockerHost() returns correctly", {
     expect_match("", outputLocation1)
 })
 
-## test_that("executeCommand.dockerHost() returns correctly", {
-##     if (skipHost) {
-##         skip(paste("tests requires a dockerHost running at",
-##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
-##     }
+test_that("executeCommand.dockerHost() returns correctly", {
+    if (skipHost) {
+        skip(paste("test requires the R user be in the docker group,",
+                   "with dockerHost image \"rocker/r-base\""))
+    }
 
-##     dockerHost1 <- dockerHost(vagrantfile = vagrantfile)
-##     mod1 <- module(name = "mod1",
-##                    language = "R",
-##                    host = dockerHost1,
-##                    sources = list(moduleSource(scriptVessel("x <- 1:10"))),
-##                    outputs = list(moduleOutput(
-##                        name = "x",
-##                        vessel = internalVessel("x"),
-##                        format = ioFormat("R numeric vector"))))
-##     modulePath1 <- tempfile("modulePath")
-##     if (!dir.exists(modulePath1))
-##         dir.create(modulePath1)
-##     oldwd <- setwd(modulePath1)
-##     on.exit(setwd(modulePath1))
-##     command1 <- command(prepareScript(mod1))
-##     outputLocation1 <- prepareModuleHost(moduleHost = dockerHost1,
-##                                         moduleName = getName(mod1),
-##                                         modulePath = modulePath1)
-##     exec_result <- executeCommand.dockerHost(moduleHost = dockerHost1,
-##                                               outputLocation = outputLocation1,
-##                                               command = command1)
-##     ## correct defined as not getting error message from wrapped
-##     ## system2 call
-##     expect_equal(exec_result, 0)
-## })
+    dockerHost1 <- dockerHost(image = dockerImage)
+    mod1 <- module(name = "mod1",
+                   language = "R",
+                   host = dockerHost1,
+                   sources = list(moduleSource(scriptVessel("x <- 1:10"))),
+                   outputs = list(moduleOutput(
+                       name = "x",
+                       vessel = internalVessel("x"),
+                       format = ioFormat("R numeric vector"))))
+    modulePath1 <- tempfile("modulePath")
+    if (!dir.exists(modulePath1))
+        dir.create(modulePath1)
+    oldwd <- setwd(modulePath1)
+    on.exit(setwd(modulePath1))
+    command1 <- command(prepareScript(mod1))
+    outputLocation1 <- prepareModuleHost(moduleHost = dockerHost1,
+                                         moduleName = getName(mod1),
+                                         modulePath = modulePath1)
+    exec_result <- executeCommand.dockerHost(moduleHost = dockerHost1,
+                                             outputLocation = outputLocation1,
+                                             command = command1)
+    ## correct defined as not getting error message from wrapped
+    ## system2 call
+    expect_equal(exec_result, 0)
+})
 
 ## test_that("retrieveModuleHost.dockerHost() returns correctly", {
 ##     if (skipHost) {
 ##         skip(paste("tests requires a dockerHost running at",
 ##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
 ##     }
-##     dockerHost1 <- dockerHost(vagrantfile = vagrantfile)
+##     dockerHost1 <- dockerHost(image = dockerImage)
 ##     mod1 <- loadModule(name = "mod1",
 ##                        ref = system.file(
-##                            "extdata", "simpleGraph",
-##                            "createGraph.xml",
+                           ## "extdata", "test-pipeline",
+                           ## "module1.xml",
 ##                            package = "conduit"))
 ##     mod1$host <- dockerHost1
 ##     modulePath1 <- tempfile("modulePath")
