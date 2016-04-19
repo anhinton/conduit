@@ -99,6 +99,8 @@ sourceOrder <- function(sources) {
 #' @param module \code{module} object
 #' 
 #' @return \code{script} object naming script file
+#'
+#' @seealso Called by \code{runModule}. \code{module}
 prepareScript <- function(module) {
     if (!inherits(module, "module"))
         stop("module object required")
@@ -267,10 +269,14 @@ executeScript <- function(script, moduleHost, outputLocation) {
 #'
 #' @details \code{script} should be the result of \code{prepareScript}
 #'
+#' This function is usually called by \code{executeScript}.
+#'
 #' @param \code{script} object
 #'
 #' @return \code{command} list containing \code{command} and
 #'     \code{args} character vectors
+#'
+#' @seealso \code{prepareScript}, \code{executeScript}
 command <- function(script) {
     if (!inherits(script, "script"))
         stop("script object required")
