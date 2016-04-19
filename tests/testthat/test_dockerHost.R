@@ -1,5 +1,5 @@
 library(conduit)
-context("Check dockerHost functions work")
+context("create and use dockerHost objects")
 
 ## skip tests which require a dockerHost image rocker/r-base
 skipHost <- FALSE
@@ -87,34 +87,21 @@ test_that("moduleHostToXML.dockerHost() creates correct XML", {
     expect_match(attrs2[["guestdir"]], guestdir)
 })
 
-## test_that("prepareModuleHost.dockerHost() returns correctly", {
-##     if (skipHost) {
-##         skip(paste("tests requires a dockerHost running at",
-##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
-##     }
-    
-##     dockerHost1 <- dockerHost(vagrantfile = vagrantfile)
-##     moduleName1 <- "mod1"
-##     modulePath1 <- tempfile("modulePath")
-##     if (!dir.exists(modulePath1))
-##         dir.create(modulePath1)
-##     inputs1 <- sapply(1:3, function(x) tempfile(tmpdir = modulePath1))
-##     system2("touch", args = inputs1)
-##     outputLocation1 <-
-##         prepareModuleHost(moduleHost = dockerHost1,
-##                           moduleName = moduleName1,
-##                           modulePath = modulePath1)
-##     realLocation1 <- file.path(dockerHost1$hostdir, outputLocation1)
-##     expect_true(dir.exists(realLocation1))
-##     expect_is(outputLocation1, "dockerHostOutputLocation")
-##     expect_is(outputLocation1, "outputLocation")
-##     ## correct defined as contents of realLocation1 now same as
-##     ## modulePath1
-##     lapply(list.files(modulePath1),
-##            function (x) {
-##                expect_match(list.files(realLocation1), x, all = FALSE)
-##            })
-## })
+test_that("prepareModuleHost.dockerHost() returns correctly", {
+    dockerHost1 <- dockerHost(image = dockerImage)
+    moduleName1 <- "mod1"
+    modulePath1 <- tempfile("modulePath")
+    if (!dir.exists(modulePath1))
+        dir.create(modulePath1)
+    outputLocation1 <-
+        prepareModuleHost(moduleHost = dockerHost1,
+                          moduleName = moduleName1,
+                          modulePath = modulePath1)
+    expect_is(outputLocation1, "dockerHostOutputLocation")
+    expect_is(outputLocation1, "outputLocation")
+    ## correct defined as an empty string
+    expect_match("", outputLocation1)
+})
 
 ## test_that("executeCommand.dockerHost() returns correctly", {
 ##     if (skipHost) {
