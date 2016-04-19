@@ -1,10 +1,6 @@
 library(conduit)
 context("execute modules")
 
-## skip tests which require a module host machine
-## requires conduit host at conduit@127.0.0.1:2222
-skipHost <- TRUE
-
 targ = tempdir()
 createGraph <- loadModule(
     "createGraph",
@@ -43,15 +39,14 @@ test_that(
     })
 
 test_that("extractModuleSource() works for <url> sources", {
-    if (skipHost)
-        skip("requires test conduit web server at http://127.0.0.1:8080/")
+    skip("requires active internet connection")
     url_source <- moduleSource(
-        urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
+        urlVessel("https://raw.githubusercontent.com/anhinton/conduit/master/README.md"))
+    localReadme <- readLines(system.file("README.md", package = "conduit"))
     class(url_source) <- class(url_source$vessel)
     source_script <- extractModuleSource(url_source)
-    expect_equal(length(source_script), 10)
     expect_match(class(source_script), "character")
-    expect_match(source_script[1], "^library[(]R2HTML[)]")
+    expect_match(source_script[1], localReadme[1])
 })
 
 test_that("prepareInternalInput() returns correct file path", {

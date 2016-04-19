@@ -3,7 +3,7 @@ context("Check vagrantHost functions work")
 
 ## skip tests which require a vagrantHost be available with
 ## Vagrantfile at ~/vagrant/vagrant-conduit/Vagrantfile
-skipHost <- FALSE
+skipHost <- TRUE
 
 vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
 hostdir <- tempdir()
