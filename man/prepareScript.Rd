@@ -24,4 +24,7 @@ other modules.
 
 The resulting script is saved to the current working directory.
 }
+\seealso{
+Called by \code{runModule}. \code{module}
+}
 

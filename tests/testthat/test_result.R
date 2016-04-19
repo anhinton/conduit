@@ -213,9 +213,7 @@ test_that("can export and import componentResult objects", {
         dir.create(targ)
 
     ## fail for invalid arguments
-    expect_error(export.componentResult(unclass(res1), targ),
-                 "componentResult object required")
-    expect_error(export.componentResult(res1, tempfile()),
+    expect_error(export(res1, tempfile()),
                  "targetDirectory does not exist")
 
     ## pipelineResult

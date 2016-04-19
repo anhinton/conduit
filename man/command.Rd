@@ -27,6 +27,8 @@ Generate a system command to run a module's source scripts
 }
 \details{
 \code{script} should be the result of \code{prepareScript}
+
+This function is usually called by \code{executeScript}.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -39,4 +41,7 @@ script
 \item \code{shellScript}: generate a command to execute a shell language
 script
 }}
+\seealso{
+\code{prepareScript}, \code{executeScript}
+}
 
