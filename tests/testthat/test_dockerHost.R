@@ -61,53 +61,39 @@ test_that("readDockerHostXML() returns correctly", {
     expect_match(dh2$guestdir, guestdir)
 })
 
-## test_that("moduleHostToXML.vagrantHost() creates correct XML", {
-##     library(XML)
-##     vh1 <- vagrantHost(vagrantfile)
-##     vh2 <- vagrantHost(vagrantfile, hostdir)
-##     vh3 <- vagrantHost(vagrantfile, hostdir, guestdir)
+test_that("moduleHostToXML.dockerHost() creates correct XML", {
+    library(XML)
+    dh1 <- dockerHost(image = dockerImage)
+    dh2 <- dockerHost(image = dockerImage, guestdir = guestdir)
 
-##     ## just vagrantfile
-##     hostNode1 <- moduleHostToXML(vh1)
-##     child1 <- xmlChildren(hostNode1)[[1]]
-##     attrs1 <- xmlAttrs(child1)
-##     expect_is(hostNode1, "XMLInternalElementNode")
-##     expect_match(xmlName(hostNode1), "host")
-##     expect_match(xmlName(child1), "vagrant")
-##     expect_match(attrs1[["vagrantfile"]], normalizePath(vagrantfile))
-##     expect_match(attrs1[["hostdir"]], dirname(vagrantfile))
-##     expect_match(attrs1[["guestdir"]], "/vagrant")
+    ## just image
+    hostNode1 <- moduleHostToXML(dh1)
+    child1 <- xmlChildren(hostNode1)[[1]]
+    attrs1 <- xmlAttrs(child1)
+    expect_is(hostNode1, "XMLInternalElementNode")
+    expect_match(xmlName(hostNode1), "host")
+    expect_match(xmlName(child1), "docker")
+    expect_match(attrs1[["image"]], dockerImage)
+    expect_match(attrs1[["guestdir"]], "/home/conduit")
 
-##     ## vagrantfile and hostdir
-##     hostNode2 <- moduleHostToXML(vh2)
-##     child2 <- xmlChildren(hostNode2)[[1]]
-##     attrs2 <- xmlAttrs(child2)
-##     expect_is(hostNode2, "XMLInternalElementNode")
-##     expect_match(xmlName(hostNode2), "host")
-##     expect_match(xmlName(child2), "vagrant")
-##     expect_match(attrs2[["vagrantfile"]], normalizePath(vagrantfile))
-##     expect_match(attrs2[["hostdir"]], normalizePath(hostdir))
-##     expect_match(attrs2[["guestdir"]], "/vagrant")
+    ## image and guestdir
+    hostNode2 <- moduleHostToXML(dh2)
+    child2 <- xmlChildren(hostNode2)[[1]]
+    attrs2 <- xmlAttrs(child2)
+    expect_is(hostNode2, "XMLInternalElementNode")
+    expect_match(xmlName(hostNode2), "host")
+    expect_match(xmlName(child2), "docker")
+    expect_match(attrs2[["image"]], dockerImage)
+    expect_match(attrs2[["guestdir"]], guestdir)
+})
 
-##     ## vagrantfile hostdir guestdir
-##     hostNode3 <- moduleHostToXML(vh3)
-##     child3 <- xmlChildren(hostNode3)[[1]]
-##     attrs3 <- xmlAttrs(child3)
-##     expect_is(hostNode3, "XMLInternalElementNode")
-##     expect_match(xmlName(hostNode3), "host")
-##     expect_match(xmlName(child3), "vagrant")
-##     expect_match(attrs3[["vagrantfile"]], normalizePath(vagrantfile))
-##     expect_match(attrs3[["hostdir"]], normalizePath(hostdir))
-##     expect_match(attrs3[["guestdir"]], guestdir)
-## })
-
-## test_that("prepareModuleHost.vagrantHost() returns correctly", {
+## test_that("prepareModuleHost.dockerHost() returns correctly", {
 ##     if (skipHost) {
-##         skip(paste("tests requires a vagrantHost running at",
+##         skip(paste("tests requires a dockerHost running at",
 ##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
 ##     }
     
-##     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
+##     dockerHost1 <- dockerHost(vagrantfile = vagrantfile)
 ##     moduleName1 <- "mod1"
 ##     modulePath1 <- tempfile("modulePath")
 ##     if (!dir.exists(modulePath1))
@@ -115,12 +101,12 @@ test_that("readDockerHostXML() returns correctly", {
 ##     inputs1 <- sapply(1:3, function(x) tempfile(tmpdir = modulePath1))
 ##     system2("touch", args = inputs1)
 ##     outputLocation1 <-
-##         prepareModuleHost(moduleHost = vagrantHost1,
+##         prepareModuleHost(moduleHost = dockerHost1,
 ##                           moduleName = moduleName1,
 ##                           modulePath = modulePath1)
-##     realLocation1 <- file.path(vagrantHost1$hostdir, outputLocation1)
+##     realLocation1 <- file.path(dockerHost1$hostdir, outputLocation1)
 ##     expect_true(dir.exists(realLocation1))
-##     expect_is(outputLocation1, "vagrantHostOutputLocation")
+##     expect_is(outputLocation1, "dockerHostOutputLocation")
 ##     expect_is(outputLocation1, "outputLocation")
 ##     ## correct defined as contents of realLocation1 now same as
 ##     ## modulePath1
@@ -130,16 +116,16 @@ test_that("readDockerHostXML() returns correctly", {
 ##            })
 ## })
 
-## test_that("executeCommand.vagrantHost() returns correctly", {
+## test_that("executeCommand.dockerHost() returns correctly", {
 ##     if (skipHost) {
-##         skip(paste("tests requires a vagrantHost running at",
+##         skip(paste("tests requires a dockerHost running at",
 ##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
 ##     }
 
-##     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
+##     dockerHost1 <- dockerHost(vagrantfile = vagrantfile)
 ##     mod1 <- module(name = "mod1",
 ##                    language = "R",
-##                    host = vagrantHost1,
+##                    host = dockerHost1,
 ##                    sources = list(moduleSource(scriptVessel("x <- 1:10"))),
 ##                    outputs = list(moduleOutput(
 ##                        name = "x",
@@ -151,10 +137,10 @@ test_that("readDockerHostXML() returns correctly", {
 ##     oldwd <- setwd(modulePath1)
 ##     on.exit(setwd(modulePath1))
 ##     command1 <- command(prepareScript(mod1))
-##     outputLocation1 <- prepareModuleHost(moduleHost = vagrantHost1,
+##     outputLocation1 <- prepareModuleHost(moduleHost = dockerHost1,
 ##                                         moduleName = getName(mod1),
 ##                                         modulePath = modulePath1)
-##     exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
+##     exec_result <- executeCommand.dockerHost(moduleHost = dockerHost1,
 ##                                               outputLocation = outputLocation1,
 ##                                               command = command1)
 ##     ## correct defined as not getting error message from wrapped
@@ -162,32 +148,32 @@ test_that("readDockerHostXML() returns correctly", {
 ##     expect_equal(exec_result, 0)
 ## })
 
-## test_that("retrieveModuleHost.vagrantHost() returns correctly", {
+## test_that("retrieveModuleHost.dockerHost() returns correctly", {
 ##     if (skipHost) {
-##         skip(paste("tests requires a vagrantHost running at",
+##         skip(paste("tests requires a dockerHost running at",
 ##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
 ##     }
-##     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
+##     dockerHost1 <- dockerHost(vagrantfile = vagrantfile)
 ##     mod1 <- loadModule(name = "mod1",
 ##                        ref = system.file(
 ##                            "extdata", "simpleGraph",
 ##                            "createGraph.xml",
 ##                            package = "conduit"))
-##     mod1$host <- vagrantHost1
+##     mod1$host <- dockerHost1
 ##     modulePath1 <- tempfile("modulePath")
 ##     if (!dir.exists(modulePath1))
 ##         dir.create(modulePath1)
 ##     oldwd <- setwd(modulePath1)
 ##     on.exit(setwd(modulePath1))
 ##     command1 <- command(prepareScript(mod1))
-##     outputLocation1 <- prepareModuleHost(moduleHost = vagrantHost1,
+##     outputLocation1 <- prepareModuleHost(moduleHost = dockerHost1,
 ##                                         moduleName = getName(mod1),
 ##                                         modulePath = modulePath1)
-##     realLocation1 <- file.path(vagrantHost1$hostdir, outputLocation1)
-##     exec_result <- executeCommand.vagrantHost(moduleHost = vagrantHost1,
+##     realLocation1 <- file.path(dockerHost1$hostdir, outputLocation1)
+##     exec_result <- executeCommand.dockerHost(moduleHost = dockerHost1,
 ##                                               outputLocation = outputLocation1,
 ##                                               command = command1)
-##     retrieveModuleHost.vagrantHost(moduleHost = vagrantHost1,
+##     retrieveModuleHost.dockerHost(moduleHost = dockerHost1,
 ##                                    outputLocation = outputLocation1,
 ##                                    modulePath = modulePath1)
 ##     ## correct defined as contents of modulePath1 and realLocation
