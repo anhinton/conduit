@@ -135,38 +135,31 @@ test_that("executeCommand.dockerHost() returns correctly", {
     expect_equal(exec_result, 0)
 })
 
-## test_that("retrieveModuleHost.dockerHost() returns correctly", {
-##     if (skipHost) {
-##         skip(paste("tests requires a dockerHost running at",
-##                    "~/vagrant/vagrant-conduit/Vagrantfile"))
-##     }
-##     dockerHost1 <- dockerHost(image = dockerImage)
-##     mod1 <- loadModule(name = "mod1",
-##                        ref = system.file(
-                           ## "extdata", "test-pipeline",
-                           ## "module1.xml",
-##                            package = "conduit"))
-##     mod1$host <- dockerHost1
-##     modulePath1 <- tempfile("modulePath")
-##     if (!dir.exists(modulePath1))
-##         dir.create(modulePath1)
-##     oldwd <- setwd(modulePath1)
-##     on.exit(setwd(modulePath1))
-##     command1 <- command(prepareScript(mod1))
-##     outputLocation1 <- prepareModuleHost(moduleHost = dockerHost1,
-##                                         moduleName = getName(mod1),
-##                                         modulePath = modulePath1)
-##     realLocation1 <- file.path(dockerHost1$hostdir, outputLocation1)
-##     exec_result <- executeCommand.dockerHost(moduleHost = dockerHost1,
-##                                               outputLocation = outputLocation1,
-##                                               command = command1)
-##     retrieveModuleHost.dockerHost(moduleHost = dockerHost1,
-##                                    outputLocation = outputLocation1,
-##                                    modulePath = modulePath1)
-##     ## correct defined as contents of modulePath1 and realLocation
-##     ## being the same, assuming they were not before execution
-##     lapply(list.files(realLocation1),
-##            function (x) {
-##                expect_match(list.files(modulePath1), x, all = FALSE)
-##            })
-## })
+test_that("retrieveModuleHost.dockerHost() returns correctly", {
+    dockerHost1 <- dockerHost(image = dockerImage)
+    mod1 <- loadModule(name = "mod1",
+                       ref = system.file(
+                           "extdata", "test_pipeline",
+                           "module1.xml",
+                           package = "conduit"))
+    mod1$host <- dockerHost1
+    modulePath1 <- tempfile("modulePath")
+    if (!dir.exists(modulePath1))
+        dir.create(modulePath1)
+    oldwd <- setwd(modulePath1)
+    on.exit(setwd(modulePath1))
+    command1 <- command(prepareScript(mod1))
+    outputLocation1 <- prepareModuleHost(moduleHost = dockerHost1,
+                                         moduleName = getName(mod1),
+                                         modulePath = modulePath1)
+    realLocation1 <- file.path(dockerHost1$hostdir, outputLocation1)
+    exec_result <- executeCommand.dockerHost(moduleHost = dockerHost1,
+                                             outputLocation = outputLocation1,
+                                             command = command1)
+    x <- retrieveModuleHost.dockerHost(moduleHost = dockerHost1,
+                                  outputLocation = outputLocation1,
+                                  modulePath = modulePath1)
+    ## correct defined as returning NULL as this function actually
+    ## does nothing
+    expect_null(x)
+})

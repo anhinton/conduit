@@ -91,7 +91,9 @@ executeCommand.dockerHost <- function(moduleHost, outputLocation, command) {
             args = args)
 }
 
-retrieveModuleHost.dockerHost <- function(moduleHost, hostSubdir, modulePath) {
+#' @describeIn retrieveModuleHost does nothing
+retrieveModuleHost.dockerHost <- function(moduleHost, outputLocation,
+                                          modulePath) {
     # module execution directory is shared with guest container
     # SO nothing to do
 }
