@@ -99,6 +99,8 @@ sourceOrder <- function(sources) {
 #' @param module \code{module} object
 #' 
 #' @return \code{script} object naming script file
+#'
+#' @seealso Called by \code{runModule}. \code{module}
 prepareScript <- function(module) {
     if (!inherits(module, "module"))
         stop("module object required")
@@ -238,39 +240,43 @@ internalOutputScript <- function (symbol) {
 #' Execute a prepared module script file.
 #'
 #' @details If \code{moduleHost} is provided script will be executed on
-#' remote host in \code{hostSubdir} on that machine.
+#' remote host in \code{outputLocation} on that machine.
 #'
-#' \code{hostSubdir} should be the result of running
+#' \code{outputLocation} should be the result of running
 #' \code{prepareModuleHost}
 #'
 #' @seealso \code{moduleHost}, \code{prepareModuleHost}
 #'
 #' @param script \code{script} object to be executed
 #' @param moduleHost \code{moduleHost} object
-#' @param hostSubdir output directory on \code{moduleHost}
+#' @param outputLocation \code{outputLocation} object
 #'
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, moduleHost, hostSubdir) {
+executeScript <- function(script, moduleHost, outputLocation) {
     if (!inherits(script, "script"))
         stop("script object required")
     if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
         stop("moduleHost object required")
-    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
-        stop("hostSubdir is not length 1 char")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
     command <- command(script)
-    executeCommand(moduleHost, hostSubdir, command)
+    executeCommand(moduleHost, outputLocation, command)
 }
 
 #' Generate a system command to run a module's source scripts
 #'
 #' @details \code{script} should be the result of \code{prepareScript}
 #'
+#' This function is usually called by \code{executeScript}.
+#'
 #' @param \code{script} object
 #'
 #' @return \code{command} list containing \code{command} and
 #'     \code{args} character vectors
+#'
+#' @seealso \code{prepareScript}, \code{executeScript}
 command <- function(script) {
     if (!inherits(script, "script"))
         stop("script object required")
@@ -283,21 +289,25 @@ command <- function(script) {
 #' function.
 #'
 #' If a \code{moduleHost} is provided the command is executed in the
-#' \code{hostSubdir} on the host machine.
+#' \code{outputLocation} on the host machine.
+#'
+#' This function is usually called by \code{executeScript}.
 #'
 #' @param moduleHost \code{moduleHost} object
-#' @param hostSubdir module output directory on host machine
+#' @param outputLocation \code{outputLocation} object
 #' @param command \code{command} object
 #'
-#' @seealso \code{moduleHost}, \code{prepareModuleHost} for hostSubdir
-#'     creation, \code{command}
+#' @seealso This function called by
+#'     \code{executeScript}. \code{moduleHost},
+#'     \code{prepareModuleHost} for \code{outputLocation} creation,
+#'     \code{command}.
 #'
 #' @return 0 if successful
-executeCommand <- function(moduleHost, hostSubdir, command) {
+executeCommand <- function(moduleHost, outputLocation, command) {
     if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
         stop("moduleHost object required")
-    if (!is_length1_char(hostSubdir) && !is.null(hostSubdir))
-        stop("hostSubdir is not length 1 char")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
     if (!inherits(command, "command"))
         stop("command object required")
     UseMethod("executeCommand")
@@ -305,7 +315,7 @@ executeCommand <- function(moduleHost, hostSubdir, command) {
 
 #' @describeIn executeCommand execute a command with no
 #'     \code{moduleHost}
-executeCommand.default <- function(moduleHost, hostSubdir, command) {
+executeCommand.default <- function(moduleHost, outputLocation, command) {
     system2(command = command$command,
             args = command$args)
 }

@@ -6,16 +6,16 @@
 \alias{executeCommand.vagrantHost}
 \title{Execute a \code{command} list object}
 \usage{
-executeCommand(moduleHost, hostSubdir, command)
+executeCommand(moduleHost, outputLocation, command)
 
-\method{executeCommand}{default}(moduleHost, hostSubdir, command)
+\method{executeCommand}{default}(moduleHost, outputLocation, command)
 
-\method{executeCommand}{vagrantHost}(moduleHost, hostSubdir, command)
+\method{executeCommand}{vagrantHost}(moduleHost, outputLocation, command)
 }
 \arguments{
 \item{moduleHost}{\code{moduleHost} object}
 
-\item{hostSubdir}{module output directory on host machine}
+\item{outputLocation}{\code{outputLocation} object}
 
 \item{command}{\code{command} object}
 }
@@ -28,7 +28,9 @@ function.
 }
 \details{
 If a \code{moduleHost} is provided the command is executed in the
-\code{hostSubdir} on the host machine.
+\code{outputLocation} on the host machine.
+
+This function is usually called by \code{executeScript}.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -38,7 +40,9 @@ If a \code{moduleHost} is provided the command is executed in the
 \item \code{vagrantHost}: execute command on a \code{vagrantHost}
 }}
 \seealso{
-\code{moduleHost}, \code{prepareModuleHost} for hostSubdir
-    creation, \code{command}
+This function called by
+    \code{executeScript}. \code{moduleHost},
+    \code{prepareModuleHost} for \code{outputLocation} creation,
+    \code{command}.
 }
 

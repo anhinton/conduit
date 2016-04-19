@@ -208,6 +208,7 @@ test_that("fetchVessel returns correctly", {
     expect_match(attr(result2, "location"), dirname(file))
 
     ## urlVessel
+    skip("requires active internet connection")
     result3 <- fetchVessel(testURL)
     expect_is(result3, "character")
 })

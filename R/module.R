@@ -995,7 +995,7 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## prepare moduleHost
     moduleHost <- module$host
-    hostSubdir <-
+    outputLocation <-
         if (!is.null(moduleHost)) {
             prepareModuleHost(moduleHost = moduleHost, moduleName = name,
                               modulePath = modulePath)
@@ -1004,7 +1004,7 @@ runModule <- function(module, targetDirectory = getwd(),
         }
     
     ## execute script file
-    exec_result <- executeScript(script, moduleHost, hostSubdir)
+    exec_result <- executeScript(script, moduleHost, outputLocation)
     if (exec_result != 0)
         stop("Unable to execute module script")
 
@@ -1246,14 +1246,14 @@ resolveOutput <- function (moduleOutput, language,
 #' These methods ensure that a \code{moduleHost} will have all
 #' resources required to execute a \code{module}'s source scripts.
 #'
-#' These methods return the path to the module output directory
-#' as a path on the host machine.
+#' These methods return the path to the module output directory as an
+#' \code{outputLocation} object.
 #'
 #' @param moduleHost \code{moduleHost} object
 #' @param moduleName module name
 #' @param modulePath module output directory
 #'
-#' @return path to module output directory on host machine
+#' @return \code{outputLocation} object
 prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
     if (!inherits(moduleHost, "moduleHost"))
         stop("moduleHost object required")
@@ -1264,16 +1264,26 @@ prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
     UseMethod("prepareModuleHost")
 }
 
-#' Retrieve results of running a module on a remote host
+#' Retrieve results of running a module's source scripts on a
+#' \code{moduleHost}
+#'
+#' This functions retrieves the results of executing a module's source
+#' scripts on a \code{moduleHost} using \code{executeScript}.
+#'
+#' \code{outputLocation} should be the result of
+#' \code{prepareModuleHost} on the same \code{moduleHost}.
 #'
 #' @param moduleHost \code{moduleHost} object
-#' @param hostSubdir output directory on host machine
+#' @param outputLocation \code{outputLocation} object
 #' @param modulePath output directory on local machine
-retrieveModuleHost <- function(moduleHost, hostSubdir, modulePath) {
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost},
+#'     \code{executeScript}
+retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
     if (!inherits(moduleHost, "moduleHost"))
         stop("moduleHost object required")
-    if (!is_length1_char(hostSubdir))
-        stop("hostSubdir is not length 1 character")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
     if (!dir.exists(modulePath))
         stop("modulePath does not exist")
     UseMethod("retrieveModuleHost")

@@ -17,18 +17,19 @@ prepareModuleHost(moduleHost, moduleName, modulePath)
 \item{modulePath}{module output directory}
 }
 \value{
-path to module output directory on host machine
+\code{outputLocation} object
 }
 \description{
 These methods ensure that a \code{moduleHost} will have all
 resources required to execute a \code{module}'s source scripts.
 }
 \details{
-These methods return the path to the module output directory
-as a path on the host machine.
+These methods return the path to the module output directory as an
+\code{outputLocation} object.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{vagrantHost}: prepare \code{vagrantHost}
+\item \code{vagrantHost}: prepare \code{vagrantHost}; returns
+path to unique module output directory relative to hostdir/guestdir
 }}
 

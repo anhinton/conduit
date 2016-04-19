@@ -1,10 +1,6 @@
 library(conduit)
 context("execute modules")
 
-## skip tests which require a module host machine
-## requires conduit host at conduit@127.0.0.1:2222
-skipHost <- TRUE
-
 targ = tempdir()
 createGraph <- loadModule(
     "createGraph",
@@ -43,15 +39,14 @@ test_that(
     })
 
 test_that("extractModuleSource() works for <url> sources", {
-    if (skipHost)
-        skip("requires test conduit web server at http://127.0.0.1:8080/")
+    skip("requires active internet connection")
     url_source <- moduleSource(
-        urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
+        urlVessel("https://raw.githubusercontent.com/anhinton/conduit/master/README.md"))
+    localReadme <- readLines(system.file("README.md", package = "conduit"))
     class(url_source) <- class(url_source$vessel)
     source_script <- extractModuleSource(url_source)
-    expect_equal(length(source_script), 10)
     expect_match(class(source_script), "character")
-    expect_match(source_script[1], "^library[(]R2HTML[)]")
+    expect_match(source_script[1], localReadme[1])
 })
 
 test_that("prepareInternalInput() returns correct file path", {
@@ -259,81 +254,26 @@ test_that("retrieveModuleHost() behaves correctly", {
     vagrantfile <- tempfile()
     system2("touch", vagrantfile)        
     vagrantHost <- vagrantHost(vagrantfile = vagrantfile)
-    hostSubdir1 = tempdir()
+    outputLocation1 = tempdir()
+    class(outputLocation1) <- c("vagrantHostOutputLocation",
+                                "outputLocation")
     modulePath <- tempdir()
     
     ## fail for invalid arguments
     expect_error(retrieveModuleHost(moduleHost = unclass(vagrantHost),
-                                    hostSubdir = hostSubdir1,
+                                    outputLocation = outputLocation1,
                                     modulePath = modulePath),
                  "moduleHost object required")
     expect_error(retrieveModuleHost(moduleHost = vagrantHost,
-                                    hostSubdir = c("/home", "/tmp"),
+                                    outputLocation = unclass(outputLocation1),
                                     modulePath = modulePath),
-                 "hostSubdir is not length 1 character")
+                 "outputLocation object required")
     expect_error(retrieveModuleHost(moduleHost = vagrantHost,
-                                    hostSubdir = hostSubdir1,
+                                    outputLocation = outputLocation1,
                                     modulePath = tempfile()),
                  "modulePath does not exist")
 
     ## see test_HOSTTYPE.R for host specific tests
-})
-
-## test executeScript
-test_that("can execute R scripts", {
-    oldwd <- setwd(tempdir())
-    on.exit(setwd(oldwd))
-    module1 <-
-        loadModule("module1",
-                   system.file("extdata", "test_pipeline",
-                               "module1.xml",
-                               package = "conduit"))
-    inputObjects <- NULL
-    script <- prepareScript(module1)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               host = NULL), 0)
-})
-
-test_that("can execute python scripts", {
-    oldwd <- setwd(tempdir())
-    on.exit(setwd(oldwd))
-    module2 <- module(
-        "module2",
-        "python",
-        sources = list(
-            moduleSource(
-                scriptVessel("x = [1, 2, 3, 5, 10]"))),
-        outputs = list(
-            moduleOutput(
-                "x",
-                internalVessel("x"),
-                ioFormat("python list"))))
-    inputObjects <- NULL
-    script <- prepareScript(module2)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               hostSubdir = NULL),
-                 0)
-})
-
-test_that("can execute shell scripts", {
-    oldwd <- setwd(tempdir())
-    on.exit(setwd(oldwd))
-    module3 <- module(
-        "module3",
-        "shell",
-        sources = list(
-            moduleSource(
-                scriptVessel("x=\"lemon duds\"]"))),
-        outputs = list(
-            moduleOutput(
-                "x",
-                internalVessel("x"),
-                ioFormat("shell environment variable"))))
-    inputObjects <- NULL
-    script <- prepareScript(module3)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               hostSubdir = NULL),
-                 0)
 })
 
 test_that(

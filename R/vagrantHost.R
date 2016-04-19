@@ -69,35 +69,44 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'
 #' @import XML
 moduleHostToXML.vagrantHost <- function(vagrantHost) {
-    if (!inherits(vagrantHost, "vagrantHost"))
-        stop ("vagrantHost object required")
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
 }
 
-#' @describeIn prepareModuleHost prepare \code{vagrantHost}
+#' @describeIn prepareModuleHost prepare \code{vagrantHost}; returns
+#' path to unique module output directory relative to hostdir/guestdir
 prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                           modulePath) {
-    hostdir <- host$hostdir
-    hostSubdir <- tempfile(pattern = moduleName,
-                           tmpdir = file.path("conduit.out"))
-    hostdir <- file.path(hostdir, hostSubdir)
+    vagrantHost <- moduleHost
+
+    ## create unique module output directory--'outputLocation'--in
+    ## 'hostdir' on local machine
+    hostdir <- vagrantHost$hostdir
+    outputLocation <- tempfile(pattern = moduleName,
+                               tmpdir = file.path("conduit.out"))
+    hostdir <- file.path(hostdir, outputLocation)
     if (dir.exists(hostdir))
         unlink(hostdir, rescursive = TRUE)
     dir.create(hostdir, recursive = TRUE)
+    
+    ## make contents of modulePath available to vagrantHost
     files <- list.files(path = modulePath, full.names = TRUE)
     for (f in files)
         file.copy(f, hostdir, recursive = TRUE)
-    hostSubdir
+
+    ## return outputLocation object
+    class(outputLocation) <- c("vagrantHostOutputLocation", "outputLocation")
+    outputLocation
 }
 
 #' @describeIn executeCommand execute command on a \code{vagrantHost}
-executeCommand.vagrantHost <- function(moduleHost, hostSubdir, command) {
+executeCommand.vagrantHost <- function(moduleHost, outputLocation,
+                                       command) {
     commanddir <- dirname(moduleHost$vagrantfile)
     oldwd <- setwd(commanddir)
     on.exit(setwd(oldwd))
     args <- c(command$command, command$args)
-    guestdir <- file.path(moduleHost$guestdir, moduleHostSubdir)
+    guestdir <- file.path(moduleHost$guestdir, outputLocation)
     args <- paste("ssh", "-c", "'cd", guestdir, ";",
                   paste(args, collapse = " "), "'")
     system2(command = "vagrant",
@@ -106,8 +115,9 @@ executeCommand.vagrantHost <- function(moduleHost, hostSubdir, command) {
 
 #' @describeIn retrieveModuleHost retrieve module output from
 #'     \code{vagrantHost}
-retrieveModuleHost.vagrantHost <- function(moduleHost, hostSubdir, modulePath) {
-    hostdir <- file.path(moduleHost$hostdir, hostSubdir)
+retrieveModuleHost.vagrantHost <- function(moduleHost, outputLocation,
+                                           modulePath) {
+    hostdir <- file.path(moduleHost$hostdir, outputLocation)
     files <- list.files(path = hostdir, full.names = TRUE)
     for (f in files)
         file.copy(f, modulePath, recursive = TRUE)
