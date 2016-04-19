@@ -194,7 +194,7 @@ test_that("retrieveModuleHost.vagrantHost() returns correctly", {
     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
     mod1 <- loadModule(name = "mod1",
                        ref = system.file(
-                           "extdata", "test-pipeline",
+                           "extdata", "test_pipeline",
                            "module1.xml",
                            package = "conduit"))
     mod1$host <- vagrantHost1
