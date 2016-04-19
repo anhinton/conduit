@@ -2,7 +2,7 @@ library(conduit)
 context("create and use dockerHost objects")
 
 ## skip tests which require a dockerHost image rocker/r-base
-skipHost <- FALSE
+skipHost <- TRUE
 
 dockerImage <- "rocker/r-base"
 guestdir <- "/data/dir"
@@ -136,6 +136,11 @@ test_that("executeCommand.dockerHost() returns correctly", {
 })
 
 test_that("retrieveModuleHost.dockerHost() returns correctly", {
+    if (skipHost) {
+        skip(paste("test requires the R user be in the docker group,",
+                   "with dockerHost image \"rocker/r-base\""))
+    }
+    
     dockerHost1 <- dockerHost(image = dockerImage)
     mod1 <- loadModule(name = "mod1",
                        ref = system.file(
