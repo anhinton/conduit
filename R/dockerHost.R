@@ -63,12 +63,18 @@ moduleHostToXML.dockerHost <- function(dockerHost) {
     newXMLNode(name = "host", kids = list(child))
 }
 
+#' @describeIn prepareModuleHost prepare \code{dockerHost}. Returns
+#'     empty string.
 prepareModuleHost.dockerHost <- function(moduleHost, moduleName, modulePath) {
-    # module execution directory is shared with guest container
-    # SO nothing to do
-    # EXCEPT return an empty string as 'hostSubdir' to satisfy
-    # the 'conduit' template for these generics
-    ""
+    ## module execution directory is shared with guest container
+    ## SO nothing to do
+    ## EXCEPT return an empty string as 'hostSubdir' to satisfy
+    ## the 'conduit' template for these generics
+    outputLocation <- ""
+
+    ## return outputLocation object
+    class(outputLocation) <- c("dockerHostOutputLocation", "outputLocation")
+    outputLocation
 }
 
 executeCommand.dockerHost <- function(moduleHost, hostSubdir, command) {
