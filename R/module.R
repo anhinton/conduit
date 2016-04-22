@@ -1011,7 +1011,8 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## retrieve outputs from moduleHost
     if (!is.null(moduleHost)) {
-        retrieveModuleHost(moduleHost = moduleHost, hostSubdir = hostSubdir,
+        retrieveModuleHost(moduleHost = moduleHost,
+                           outputLocation = outputLocation,
                            modulePath = modulePath)
     }
 
