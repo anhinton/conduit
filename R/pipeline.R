@@ -155,7 +155,7 @@ getLocation.pipeline <- function(x) {
 #' default search paths are used.
 #' 
 #' @param name Name of pipeline
-#' @param ref Path to XML file
+#' @param ref Path to XML file or a \code{vessel} object
 #' @param path Search path (optional)
 #' @param namespaces Namespaces used in XML document
 #' 
@@ -172,9 +172,14 @@ getLocation.pipeline <- function(x) {
 #' pln1 <- loadPipeline(name = "simpleGraph", ref = pln1xml)
 loadPipeline <- function(name, ref, path = NULL,
                          namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## TODO(anhinton): change how modules are loaded to include
+    ## loading from URLs, files etc. The following code uses vessel
+    ## objects to provide a temporary solution
+    if (!inherits(ref, "vessel"))
+        ref <- fileVessel(ref, path)
     ## fetch pipeline XML from disk
     rawXML <- tryCatch(
-        fetchVessel(fileVessel(ref, path)),
+        fetchVessel(ref),
         error = function(err) {
             problem <- c(paste0("Unable to load pipeline '", name, "'\n"),
                          err)
@@ -368,7 +373,7 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
         stop(paste0("no such target directory: '", targetDirectory, "'"))
     }
     pipelineDoc <-
-        newXMLDoc(namespaces="http://www.openapi.org/2014",
+        newXMLDoc(namespaces="http://www.openapi.org/2014/",
                   node=pipelineToXML(pipeline=pipeline,
                       namespaceDefinitions="http://www.openapi.org/2014/"))
     pipelineFilePath <-

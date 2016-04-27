@@ -49,6 +49,7 @@ internalVessel <- function(symbol) {
     if (!is_length1_char(symbol)) {
         stop("'symbol' is not a length 1 character vector")
     }
+    class(symbol) <- "symbol"
     internalVessel <- list(symbol = symbol)
     class(internalVessel) <- c("internalVessel", "vessel")
     return(internalVessel)
@@ -130,7 +131,9 @@ fetchVessel.fileVessel <- function(vessel, location = getwd()) {
 fetchVessel.urlVessel <- function(vessel, location = getwd()) {
     con <- textConnection(RCurl::getURL(vessel$ref))
     on.exit(close(con))
-    readLines(con)
+    content <- readLines(con)
+    attr(content, "location") <- location
+    content
 }
 
 #' @describeIn getType

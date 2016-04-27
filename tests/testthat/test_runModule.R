@@ -1,10 +1,6 @@
 library(conduit)
 context("execute modules")
 
-## skip tests which require a module host machine
-## requires conduit host at conduit@127.0.0.1:2222
-skipHost <- TRUE
-
 targ = tempdir()
 createGraph <- loadModule(
     "createGraph",
@@ -42,251 +38,243 @@ test_that(
         expect_match(source_script[3], "^getwd[(][)]")        
     })
 
-test_that(
-    "extractModuleSource() works for <url> sources",
-    {
-        if (skipHost)
-            skip("requires test conduit web server at http://127.0.0.1:8080/")
-        url_source <- moduleSource(
-            urlVessel("http://127.0.0.1:8080/urlTesting/season1_html.R"))
-        class(url_source) <- class(url_source$vessel)
-        source_script <- extractModuleSource(url_source)
-        expect_equal(length(source_script), 10)
-        expect_match(class(source_script), "character")
-        expect_match(source_script[1], "^library[(]R2HTML[)]")
-    })
+test_that("extractModuleSource() works for <url> sources", {
+    skip("requires active internet connection")
+    url_source <- moduleSource(
+        urlVessel("https://raw.githubusercontent.com/anhinton/conduit/master/README.md"))
+    localReadme <- readLines(system.file("README.md", package = "conduit"))
+    class(url_source) <- class(url_source$vessel)
+    source_script <- extractModuleSource(url_source)
+    expect_match(class(source_script), "character")
+    expect_match(source_script[1], localReadme[1])
+})
 
-## test prepareScript
-test_that(
-    "R script file is created",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        
-        ## create RDS file for input
-        input_object <- 1:10
-        filename <- tempfile()
-        saveRDS(input_object, filename)
-        inputObjects <- list(a = filename)
+test_that("prepareInternalInput() returns correct file path", {
+    input <- tempfile()
+    system2("touch", input)
+    symbol <- "x"
+    language = "python"
+    outputDirectory <- tempfile("prepareInternalInput")
+    if (!dir.exists(outputDirectory))
+        dir.create(outputDirectory)
 
-        ## create module
-        module <-
-            module(
-                "testy",
-                "R",
-                inputs =
-                    list(moduleInput(
-                        "a",
-                        internalVessel("onetoten"),
-                        ioFormat("R numeric vector"))),
-                sources =
-                    list(moduleSource(
-                        scriptVessel(
-                            "top <- head(onetoten)"))),
-                outputs =
-                    list(moduleOutput(
-                        "b",
-                        internalVessel("top"),
-                        ioFormat("R character vector"))))
+    ## unable to copy
+    expect_error(
+        suppressWarnings(prepareInternalInput(input, symbol, language,
+                                              tempfile())),
+        "unable to copy input into outputDirectory")
 
-        ## test script creation
-        expect_match(prepareScript(module, inputObjects),
-                     "script.R")
+    ## success 
+    internalInput <-
+        prepareInternalInput(input, symbol, language, outputDirectory)
+    expect_true(file.exists(internalInput))
+})
 
-        ## module with remote host uses relative refs for serialized
-        ## internalVessel input files
-        module$host <- "conduit@127.0.0.1:2222"
-        script <- prepareScript(module, inputObjects)
-        inputLine <- readLines(script)[1]
-        expect_true(grepl(basename(inputObjects[[1]]), inputLine))
-        expect_false(grepl(dirname(inputObjects[[1]]), inputLine))
-    })
+test_that("prepareFileInput() works with input = NULL", {
+    outputDirectory <- tempfile("prepareFileInput")
+    if (!dir.exists(outputDirectory))
+        dir.create(outputDirectory)
+    location <- tempdir()
+    ref1 <- tempfile("ref1")
+    ref2 <- file.path(location, "relativeToModule.file")
+    system2("touch", args = c(ref1, ref2))
+    vessel1 <- fileVessel(ref = basename(ref1))
+    vessel2 <- fileVessel(ref = basename(ref2))
+    
+    ## fails if referenced file not found
+    expect_error(prepareFileInput(input = NULL,
+                                  vessel = fileVessel(ref = tempfile()),
+                                  outputDirectory = outputDirectory,
+                                  location = location),
+                 "unable to locate input file")
+    ## fails if unable to copy file
+    expect_error(
+        suppressWarnings(
+            prepareFileInput(input = NULL,
+                             vessel = vessel1,
+                             outputDirectory = tempfile(),
+                             location = location)),
+        "unable to copy input into outputDirectory")
 
-## test parseModuleHost
-test_that(
-    "parseModuleHost() works",
-    {
-        host <- "conduit@server:666"
-        parsedHost <- parseModuleHost(host)
-        expect_match(names(parsedHost), "user", all=F)
-        expect_match(names(parsedHost), "password", all=F)
-        expect_match(names(parsedHost), "address", all=F)
-        expect_match(names(parsedHost), "port", all=F)
-        expect_match(names(parsedHost), "directory", all=F)
-        expect_match(names(parsedHost), "idfile", all=F)
-        expect_match(parsedHost$user, "conduit")
-        expect_match(parsedHost$password, "")
-        expect_match(parsedHost$address, "server")
-        expect_match(parsedHost$port, "666")
-        expect_match(parsedHost$directory,
-                     paste0("^/tmp/", get("sessionID",
-                                          envir = .conduit.global)))
-        expect_match(parsedHost$idfile,
-                     get("defaultIdfile", envir = .conduit.global))
+    ## success for absolute file ref
+    fileInput1 <- prepareFileInput(input = NULL,
+                                   vessel = fileVessel(ref = ref1),
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput1))
+                                   
+    ##success for relative file ref
+    fileInput2 <- prepareFileInput(input = NULL,
+                                   vessel = vessel2,
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput2))
+})
 
-        ## no username or host given
-        host <- "6.6.6.6"
-        parsedHost <- parseModuleHost(host)
-        expect_match(parsedHost$user, "conduit")
-        expect_match(parsedHost$address, "6.6.6.6")
-        expect_match(parsedHost$port, "22")
+test_that("prepareFileInput() succeeds given input" , {
+    outputDirectory <- tempfile("prepareFileInput")
+    if (!dir.exists(outputDirectory))
+        dir.create(outputDirectory)
+    location <- tempdir()
+    input <- tempfile("input")
+    ref1 <- tempfile("ref")
+    system2("touch", args = c(input, ref1))
+    vessel1 <- fileVessel(ref = basename(ref1))
 
-        ## unsupported scheme given
-        host <- "ftp://1.2.3.4"
-        expect_error(parseModuleHost(host),
-                     "Only SSH scheme")
-    })
-          
+    ## fails if path from resolved vessel does not match input
+    expect_error(prepareFileInput(input = input,
+                                  vessel = fileVessel(ref = ref1),
+                                  outputDirectory = outputDirectory,
+                                  location = location),
+                 "input does not match path given in fileVessel")
+    ## fails if unable to copy file
+    expect_error(
+        suppressWarnings(prepareFileInput(input = input,
+                                          vessel = vessel1,
+                                          outputDirectory = tempfile(),
+                                          location = location)),
+        "unable to copy input into outputDirectory")
 
-## test resolveInput()
-test_that(
-    "absolute fileVessel refs are resolved",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        input <-
-            moduleInput(
-                "great",
-                fileVessel(
-                    system.file("extdata", "simpleGraph", "createGraph.xml",
-                                package = "conduit")),
-                ioFormat("text file"))
-        inputObjects <- NULL
-        expect_true(resolveInput(input, inputObjects))
-    })
+    ## succeeds for absolute file ref
+    fileInput1 <- prepareFileInput(input = ref1,
+                                   vessel = fileVessel(ref = ref1),
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput1))
 
-test_that(
-    "relative fileVessel refs are resolved",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        input <-
-            moduleInput(
-                "good",
-                fileVessel("test2"),               
-                ioFormat("text file"))
-        inputObjects <-
-            list(good = system.file(
-                     "extdata", "simpleGraph", "createGraph.xml",
-                     package = "conduit"))
-        expect_true(resolveInput(input, inputObjects, host = NULL))
-    })
+    ## succeeds for relative file ref
+    fileInput2 <- prepareFileInput(input = input,
+                                   vessel = vessel1,
+                                   outputDirectory = outputDirectory,
+                                   location = location)
+    expect_true(file.exists(fileInput2))
+})
 
-test_that(
-    "fileVessel inputs with search paths are resolved",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        input <-
-            moduleInput("okay",
-                        fileVessel(ref = "layoutGraph.xml",
-                                   path = system.file("extdata", "simpleGraph",
-                                                      package = "conduit")),
-                        ioFormat("text file"))
-        inputObjects <-
-            list(okay = system.file(
-                     "extdata", "simpleGraph", "createGraph.xml",
-                     package = "conduit"))
-        expect_true(resolveInput(input, list(), host = NULL,
-                                 location = getwd()))
-    })
+test_that("prepareURLInput() returns correct URL",
+{
+    ## fails for mismatched URLs
+    expect_error(
+        prepareURLInput(vessel = urlVessel("http://cran.stat.auckland.ac.nz"),
+                        input = "https://github.com/anhinton/conduit"),
+        "input does not match URL given in urlVessel")
+    
+    ## start from URL
+    vessel1 <- urlVessel("http://cran.stat.auckland.ac.nz")
+    urlInput1 <- prepareURLInput(vessel = vessel1, input = NULL)
+    expect_match(getRef(vessel1), urlInput1)
 
-test_that(
-    "internalVessel inputs are resolved",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        input <- moduleInput("fantastic",
-                             internalVessel("y"),
-                             ioFormat("R numeric vector"))
-        filename <- tempfile("testRDS", fileext=".rds")
-        saveRDS(1:10, filename)
-        inputObjects <- list(fantastic = filename)
-        expect_true(resolveInput(input, inputObjects, host = NULL))
-    })
-test_that(
-    "urlVessel inputs are resolved",
-    {
-        moduleInput1 <- moduleInput(
-            "inp1",
-            urlVessel("http://cran.stat.auckland.ac.nz/"),
-            ioFormat("HTML file"))
-        inputObjects1 <- list()
-        expect_true(resolveInput(moduleInput1, inputObjects1, host = NULL))
+    ## match the input
+    urlInput2 <- prepareURLInput(vessel = vessel1, input = getRef(vessel1))
+    expect_match(getRef(vessel1), urlInput2)
+})
 
-        moduleInput2 <- moduleInput(
-            "inp1",
-            urlVessel("NOT.A.REAL.URL"),
-            ioFormat("HTML file"))
-        expect_false(resolveInput(moduleInput2, inputObjects1, host = NULL))
-        
-        moduleInput3 <- moduleInput(
-            "inp1",
-            urlVessel("http://cran.stat.auckland.ac.nz/"),
-            ioFormat("HTML file"))
-        inputObjects3 <-
-            list(inp1 = "http://cran.stat.auckland.ac.nz/SUBFOLDER")
-        expect_error(resolveInput(moduleInput3, inputObjects3, host = NULL),
-                     "url")
-     })
+test_that("prepareInput() returns resolved input objects", {
+    fileInput <- tempfile("fileInput")
+    internalInput <- tempfile("internalInput")
+    system2("touch", args = c(fileInput, internalInput))
+    outputDirectory <- tempfile("prepareInput")
+    if (!dir.exists(outputDirectory))
+        dir.create(outputDirectory)
+    language = "R"
+    location <- tempdir()
+    urlInput <- "https://cran.stat.auckland.ac.nz/"
+    inputList <- list(file = fileInput, internal = internalInput,
+                      url = urlInput)
 
-## test executeScript
-test_that(
-    "executeScript.R works",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        module1 <-
-            loadModule("module1",
-                       system.file("extdata", "test_pipeline",
-                                   "module1.xml",
-                                   package = "conduit"))
-        inputObjects <- NULL
-        script <- prepareScript(module1, inputObjects)
-        expect_equal(executeScript(script = script, host = NULL), 0)
-    })
+    ## fails for unknown vessel type
+    fakeVessel <- "nope"
+    class(fakeVessel) <- c("fakeVessel", "vessel")
+    moduleInputBad <- moduleInput(name = "input1",
+                               vessel = fakeVessel,
+                               format = ioFormat("XML file"))
+    expect_error(
+        prepareInput(moduleInput = moduleInputBad, inputList, outputDirectory,
+                     language, location),
+        "unknown vessel type")
 
-test_that(
-    "executeScript.python works",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        module2 <- module(
-            "module2",
-            "python",
-            sources = list(
-                moduleSource(
-                    scriptVessel("x = [1, 2, 3, 5, 10]"))),
-            outputs = list(
-                moduleOutput(
-                    "x",
-                    internalVessel("x"),
-                    ioFormat("python list"))))
-        inputObjects <- NULL
-        script <- prepareScript(module2, inputObjects)
-        expect_equal(executeScript(script = script, host = NULL), 0)
-    })
+    ## internal input
+    moduleInput1 <- moduleInput(name = "internal",
+                                vessel = internalVessel("obj"),
+                                format = ioFormat("language object"))
+    input1 <- prepareInput(moduleInput = moduleInput1,
+                           inputList = inputList,
+                           outputDirectory = outputDirectory,
+                           language = language,
+                           location = location)
+    expect_true(file.exists(input1))
 
-test_that(
-    "executeScript.shell works",
-    {
-        oldwd <- setwd(tempdir())
-        on.exit(setwd(oldwd))
-        module3 <- module(
-            "module3",
-            "shell",
-            sources = list(
-                moduleSource(
-                    scriptVessel("x=\"lemon duds\"]"))),
-            outputs = list(
-                moduleOutput(
-                    "x",
-                    internalVessel("x"),
-                    ioFormat("shell environment variable"))))
-        inputObjects <- NULL
-        script <- prepareScript(module3, inputObjects)
-        expect_equal(executeScript(script = script, host = NULL), 0)
-    })
+    ## file input
+    moduleInput2 <- moduleInput(name = "file",
+                                vessel = fileVessel("file.fle"),
+                                ioFormat("fle file"))
+    input2 <- prepareInput(moduleInput = moduleInput2,
+                           inputList = inputList,
+                           outputDirectory = outputDirectory,
+                           language = language,
+                           location = location)
+    expect_true(file.exists(input2))
+
+    ## url input
+    moduleInput3 <- moduleInput(name = "url",
+                                vessel = urlVessel(urlInput),
+                                ioFormat("HTML"))
+    input3 <- prepareInput(moduleInput = moduleInput3,
+                           inputList = inputList,
+                           outputDirectory = outputDirectory,
+                           language = language,
+                           location = location)
+    expect_match(input3, urlInput)
+})
+
+test_that("prepareModuleHost() behaves correctly", {
+    vagrantfile <- tempfile()
+    system2("touch", vagrantfile)        
+    vagrantHost <- vagrantHost(vagrantfile = vagrantfile)
+    name = "mod1"
+    modulePath <- tempdir()
+
+    ## fail for invalid arguments
+    expect_error(prepareModuleHost(moduleHost = unclass(vagrantHost),
+                                   moduleName = name,
+                                   modulePath = modulePath),
+                 "moduleHost object required")
+    expect_error(prepareModuleHost(moduleHost = vagrantHost,
+                                   moduleName = c("two", "names"),
+                                   modulePath = modulePath),
+                 "moduleName is not length 1 character")
+    expect_error(prepareModuleHost(moduleHost = vagrantHost,
+                                   moduleName = name,
+                                   modulePath = tempfile()),
+                 "modulePath does not exist")
+
+    ## see test_HOST_TYPE.R for host specific tests
+})
+
+test_that("retrieveModuleHost() behaves correctly", {
+    vagrantfile <- tempfile()
+    system2("touch", vagrantfile)        
+    vagrantHost <- vagrantHost(vagrantfile = vagrantfile)
+    outputLocation1 = tempdir()
+    class(outputLocation1) <- c("vagrantHostOutputLocation",
+                                "outputLocation")
+    modulePath <- tempdir()
+    
+    ## fail for invalid arguments
+    expect_error(retrieveModuleHost(moduleHost = unclass(vagrantHost),
+                                    outputLocation = outputLocation1,
+                                    modulePath = modulePath),
+                 "moduleHost object required")
+    expect_error(retrieveModuleHost(moduleHost = vagrantHost,
+                                    outputLocation = unclass(outputLocation1),
+                                    modulePath = modulePath),
+                 "outputLocation object required")
+    expect_error(retrieveModuleHost(moduleHost = vagrantHost,
+                                    outputLocation = outputLocation1,
+                                    modulePath = tempfile()),
+                 "modulePath does not exist")
+
+    ## see test_HOSTTYPE.R for host specific tests
+})
 
 test_that(
     "output() behaves",
@@ -306,7 +294,7 @@ test_that(
         internal_output <- moduleOutput(
             "internal", internalVessel(symbol), ioFormat("nonsense"))
         output1 <- output(internal_output, lang, outdir)
-        expect_true(inherits(output1, "output"))
+        expect_is(output1, "output")
         expect_match(
             getResult(output1),
             file.path(outdir, paste0(symbol, internalExtension(lang))))
@@ -316,7 +304,7 @@ test_that(
         url_output <- moduleOutput(
             "url", urlVessel(url), ioFormat("HTML file"))
         output2 <- output(url_output, lang, outdir)
-        expect_true(inherits(output2, "output"))
+        expect_is(output2, "output")
         expect_match(getResult(output2), url)
         
         ## works for fileVessel
@@ -324,7 +312,7 @@ test_that(
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
         output3 <- output(file_output, lang, outdir)
-        expect_true(inherits(output3, "output"))
+        expect_is(output3, "output")
         expect_match(getResult(output3), file.path(outdir, file))
         
         ## fails for unknown vessel type
@@ -341,7 +329,6 @@ test_that(
     "resolveOutput() works on local machine",
     {
         lang = "R"
-        host = parseModuleHost("cronduit@not.a.real.server:11")
         outdir <- tempdir()
         symbol <- basename(tempfile())
         internal_output <- moduleOutput(
@@ -349,28 +336,18 @@ test_that(
         file <- basename(tempfile())
         file_output <- moduleOutput(
             "file", fileVessel(file), ioFormat("CSV file"))
-        url <- "http://not.a.real.server/at/all"
-        url_output <- moduleOutput(
-            "url", urlVessel(url), ioFormat("html file"))
 
-        ## throws error when object does not exist
-        ## urlVessel
-        expect_error(resolveOutput(url_output, lang, NULL, outdir),
-                     "output object '")
+        ## TODO(anhinton): write check for URL outputs
         ## internalVessel
-        expect_error(resolveOutput(internal_output, lang, NULL, outdir),
+        expect_error(resolveOutput(moduleOutput = internal_output,
+                                   language = lang,
+                                   outputDirectory = outdir),
                      "output object '")
         ## fileVessel
-        expect_error(resolveOutput(file_output, lang, NULL, outdir),
-                     "output object '")        
-        
-        ## throws error when unable to fetch from host
-        ## internalVessel
-        expect_error(resolveOutput(internal_output, lang, host, outdir),
-                     "Unable to fetch ")
-        ## fileVessel
-        expect_error(resolveOutput(file_output, lang, host, outdir),
-                     "Unable to fetch ")
+        expect_error(resolveOutput(moduleOutput = file_output,
+                                   language = lang,
+                                   outputDirectory = outdir),
+                     "output object '") 
     })
 
 ## test runModule()
@@ -391,30 +368,6 @@ test_that(
         badTarget <- paste0(tempfile(), tempfile())
         expect_error(runModule(createGraph, targetDirectory = badTarget),
                      "no such target")
-    })
-
-test_that(
-    "runModule() fails when input cannot be resolved",
-    {
-        badInput <- paste0(tempfile(), tempfile())
-        module <- module(
-            name = "fails",
-            language = "R",
-            inputs = list(
-                moduleInput(
-                    name = "nope",
-                    vessel = fileVessel(badInput),
-                    format = ioFormat("file"))),
-            sources = list(
-                moduleSource(vessel = scriptVessel(
-                    paste0("exists <- file.exists(\"", badInput, "\")")))),
-            outputs = list(
-                moduleOutput(
-                    name = "truth",
-                    vessel = internalVessel("exists"),
-                    format = ioFormat("R logical"))))
-        expect_error(runModule(module, targetDirectory = targ),
-                     "Input ")
     })
 
 test_that(
@@ -459,7 +412,7 @@ test_that(
         output1 <- createGraph$outputs[[1]]
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1$outputList[[1]]$name, output1$name)
-        expect_true(inherits(result1, "moduleResult"))
+        expect_is(result1, "moduleResult")
         expect_true(file.exists(getResult(result1$outputList[[1]])))
         
         ## run the layoutGraph module, providing the output from
@@ -470,7 +423,9 @@ test_that(
         result2 <- runModule(layoutGraph,
                              inputObjects = inputObjects,
                              targetDirectory = targ)
-        expect_true(inherits(result2, "moduleResult"))
+        expect_is(result2, "moduleResult")
         expect_match(result2$outputList[[1]]$name, output2$name)
         expect_true(file.exists(getResult(result2$outputList[[1]])))
     })
+
+## TODO(anhinton): runModule() works for a module with a moduleHost

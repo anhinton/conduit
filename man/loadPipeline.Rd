@@ -10,7 +10,7 @@ loadPipeline(name, ref, path = NULL, namespaces = c(oa =
 \arguments{
 \item{name}{Name of pipeline}
 
-\item{ref}{Path to XML file}
+\item{ref}{Path to XML file or a \code{vessel} object}
 
 \item{path}{Search path (optional)}
 

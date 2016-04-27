@@ -1,7 +1,6 @@
 library(conduit)
 context("create vessel objects")
 
-testInternal <- internalVessel("important_data")
 file <- system.file("extdata", "simpleGraph", "createGraph.xml",
                     package = "conduit")
 
@@ -18,32 +17,28 @@ text_format <- ioFormat(value="R data frame", type="text")
 
 ## internalVessel creation
 
-test_that("internalVessel stops when 'symbol' is not length 1 char", {
+test_that("'internalVessel' objects correctly created", {
+    testInternal <- internalVessel(symbol = "important_data")
+
+    ## fail for invalid arguments
     expect_error(internalVessel(character(2)),
                  "'symbol' is not a length 1 character vector")
     expect_error(internalVessel(numeric(1)),
                  "'symbol' is not a length 1 character vector")
-})
 
-test_that("'internalVessel' slots are right type and length", {
-    expect_true(is_length1_char(testInternal$symbol))
-})
-
-test_that("'internalVessel' objects contain appropriate slots", {
+    ## correctly constructed
     expect_match(names(testInternal), "^symbol$", all=F)
-})
-
-test_that(paste0("'internalVessel' object has class",
-                 "c(\"internalVessel\", \"vessel\")"), {
-    expect_match(class(testInternal)[1], "^internalVessel$")
-    expect_match(class(testInternal)[2], "^vessel$")
+    expect_is(testInternal$symbol, "symbol")
+    expect_true(is_length1_char(testInternal$symbol))
+    expect_is(testInternal, "internalVessel")
+    expect_is(testInternal, "vessel")
 })
 
 ## fileVessel creation
 test_that("fileVessel stops for invalid arguments", {
     expect_error(fileVessel(c("ref1", "ref1")),
                  "'ref' is not a length 1 character vector")
-    expect_error(fileVessel(666),
+    expect_error(fileVessel(664),
                  "'ref' is not a length 1 character vector")
     expect_error(fileVessel(ref = "ref", path = c("ref1", "ref1")),
                  "'path' is not a length 1 character vector")
@@ -206,13 +201,14 @@ test_that("fetchVessel returns correctly", {
 
     ## fileVessel
     result1 <- fetchVessel(testFile)
-    expect_true(inherits(result1, "character"))
+    expect_is(result1, "character")
     expect_match(attr(result1, "location"), dirname(file))
     result2 <- fetchVessel(testPath)
-    expect_true(inherits(result2, "character"))
+    expect_is(result2, "character")
     expect_match(attr(result2, "location"), dirname(file))
 
     ## urlVessel
+    skip("requires active internet connection")
     result3 <- fetchVessel(testURL)
-    expect_true(inherits(result3, "character"))
+    expect_is(result3, "character")
 })

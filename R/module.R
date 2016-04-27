@@ -1,912 +1,148 @@
-### Functions for loading, saving, running, creating modules
-
-#' Create a \code{vessel} object from vessel XML
+#' Create a \code{module} object
 #'
-#' @param xml vessel XML
+#' Creates a module object which can be executed in conduit.
 #'
-#' @return \code{vessel} object
+#' \code{inputs}, \code{outputs}, and \code{sources} should be lists
+#' of objects created using \code{moduleInput}, \code{moduleOutput},
+#' and \code{moduleSource} respectively.
 #'
-#' @import XML
-readVesselXML <- function (xml) {
-    type <- xmlName(xml)
-    content <-
-        switch(type,
-               script = xmlValue(xml),
-               internal = xmlAttrs(xml),
-               file = xmlAttrs(xml),
-               url = xmlAttrs(xml),
-               stop("'vessel' xml unknown type"))    
-    vessel <-
-        switch(type,
-               file = {
-                   ref = content[["ref"]]
-                   path = if ("path" %in% names(content)) {
-                       content[["path"]]
-                   } else {
-                       NULL
-                   }
-                   fileVessel(ref = ref, path = path)
-               },
-               internal = internalVessel(
-                   symbol = content[["symbol"]]),
-               url = urlVessel(
-                   ref = content[["ref"]]),
-               script = scriptVessel(readLines(textConnection(content))))
-    return(vessel)
-}
-
-#' Create a \code{ioFormat} object from format XML
+#' Module \code{location} defaults to current working
+#' directory. This can be set to indicate the location of the module
+#' XML file, and its supporting files.
 #'
-#' @param xml format XML
+#' If \code{moduleHost} is not provided module will be executed on
+#' local machine.
 #'
-#' @return \code{ioFormat} object
-#'
-#' @import XML
-readIOFormatXML <- function (xml) {
-    if (xmlName(xml) != "format") {
-        stop("ioFormat XML is invalid")
-    }   
-    value <- xmlValue(xml)
-    attrs <- xmlAttrs(xml)
-    ioFormat <-
-        if (is.null(attrs)) {
-            ioFormat(value = value)
-        } else {
-            ioFormat(value = value, type = attrs[["formatType"]])
-        }
-    return(ioFormat)
-}
-
-#' Create a \code{moduleIO} object from input/output XML
-#'
-#' @param xml input/output XML
-#'
-#' @return \code{moduleIO} object
-#'
-#' @import XML
-readModuleIOXML <- function (xml) {
-    type <- xmlName(xml)
-    if (type != "input" && type != "output") {
-        stop("moduleIO XML is invalid")
-    }
-    name <- xmlAttrs(xml)[["name"]]
-    children <- xmlChildren(xml)
-
-    ## create ioFormat object
-    formatChild <- children$format
-    ioFormat <- readIOFormatXML(formatChild)
-
-    ## create vessel object:
-    ## determine which child has an appropriate vessel name
-    vesselChild <-
-        which(names(children) %in% c("internal", "file", "url"))
-    vessel <- readVesselXML(children[[vesselChild]])
-
-    ## create moduleIO object
-    moduleIO <- moduleIO(name = name, type = type, vessel = vessel,
-                         format = ioFormat)
-    return(moduleIO)
-}
-
-#' create a \code{moduleSource} object from module source XML
-#'
-#' @param xml module source XML
-#'
-#' @return \code{moduleSource} object
-#'
-#' @import XML
-readModuleSourceXML <- function (xml) {
-    if (xmlName(xml) != "source") {
-        stop("moduleSource XML is invalid")
-    }
-
-    ## extract vessel object.
-    child <- xmlChildren(xml)[[1]] # there should be only one child
-    vessel <- readVesselXML(child)
-
-    attrs <- xmlAttrs(xml)
-    moduleSource <-
-        if (is.null(attrs)) {
-            moduleSource(vessel = vessel)
-        } else {
-            moduleSource(vessel = vessel, order = as.numeric(attrs[["order"]]))
-        }
-    return(moduleSource)
-}
-
-#' Parse module XML and return a \code{module} object
-#'
-#' @param name module name
-#' @param xml module \code{XMLNode}
-#' @param location file directory of invoking pipeline/module xml (optional)
-#' 
-#' @return \code{module} object
-#' 
-#' @import XML
-readModuleXML <- function (name, xml, location = getwd()) {
-    attrs <- xmlAttrs(xml)
-    language <- attrs[["language"]]
-    host <-
-        if("host" %in% names(attrs)) {
-            attrs[["host"]]
-        } else {
-            NULL
-        }
-    nodes <- xmlChildren(xml)
-    
-    ## extract description
-    descNode <- nodes$description
-    description <- xmlValue(descNode)
-    
-    ## extract inputs
-    inputNodes <- nodes[names(nodes) == "input"]
-    inputs <-
-        if (length(inputNodes) == 0) {
-            NULL
-        } else {
-            lapply(inputNodes, readModuleIOXML)
-        }
-    
-    ## extract sources
-    sourceNodes <- nodes[names(nodes) == "source"]
-    sources <-
-        lapply(sourceNodes, readModuleSourceXML)
-    
-    ## extract outputs
-    outputNodes <- nodes[names(nodes) == "output"]
-    outputs <-
-        if (length(outputNodes) == 0) {
-            NULL
-        } else {
-            lapply(outputNodes, readModuleIOXML)
-        }
-
-    module <- module(name = name,
-                     language = language,
-                     host = host,
-                     description = description,
-                     inputs = inputs,
-                     sources = sources,
-                     outputs = outputs,
-                     location = location)
-    return(module)
-}
-
-#' Load a module from an XML file
-#'
-#' Reads an XML file given by \code{ref} and \code{path} and interprets to
-#' produce a \code{module}.
-#'
-#' If the module XML file is not valid OpenAPI module XML this
-#' function will return an error.
-#'
-#' If \code{path} is not set and conduit needs to search for the file
-#' the default search paths are used.
-#' 
 #' @param name Name of module
-#' @param ref Module location or filename
-#' @param path (Optional) Search path if \code{ref} is a filename
-#' @param namespaces Namespaces used in XML document
-#' @return \code{module} list
-#' @seealso \code{module}
+#' @param language Language name
+#' @param host \code{moduleHost} object describing machine where
+#'     module is to be executed
+#' @param description A basic description of the module
+#' @param inputs List of \code{moduleInput} objects
+#' @param outputs List of \code{moduleOutput} objects
+#' @param sources List of \code{moduleSource} objects
+#' @param location file directory where module xml and files are found
 #' 
-#' @import XML
+#' @return \code{module} list containing:
 #'
-#' @examples
-#'
-#' ## load a module from XML given by absolute of relative file path
-#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
-#'                        package = "conduit")
-#' mod1 <- loadModule(name = "createGraph", ref = mod1xml)
-#'
-#' ## load a module by searching for 'ref'
-#' srch1 <- system.file("extdata", package = "conduit")
-#' srch1
-#'
-#' mod2 <- loadModule(name = "layoutGraph", ref = "layoutGraph.xml",
-#'                    path = srch1)
-#' @export
-loadModule <- function(name, ref, path = NULL,
-                       namespaces=c(oa="http://www.openapi.org/2014/")) {
-    ## fetch module XML from disk
-    rawXML <- tryCatch(
-        fetchVessel(fileVessel(ref, path)),
-        error = function(err) {
-            problem <- c(paste0("Unable to load module '", name, "'\n"),
-                         err)
-            stop(problem)
-        })
-    if (!isValidXML(rawXML, "module"))
-        stop(paste0("'", ref, "': module XML is invalid"))
-    xml <- xmlRoot(xmlParse(rawXML))
-
-    ## create module object
-    module <- readModuleXML(name, xml)
-
-    ## store location of originating module file
-    attr(module, "location") <- attr(rawXML, "location")
-    
-    return(module)
-}
-
-## functions for saving a module object to an XML file
-
-#' Create XML corresponding to a \code{vessel} object.
-#'
-#' @param vessel \code{vessel} object
-#' @param namespaceDefinitions XML namespaces as character vector
-#'
-#' @return \code{XMLInternalNode} object
-#'
-#' @seealso \code{vessel} objects
-#' 
-#' @import XML
-vesselToXML <- function (vessel,
-                         namespaceDefinitions=NULL) {
-    if (!("vessel" %in% class(vessel))) {
-        stop("'vessel' is not a 'vessel' object")
-    }
-    
-    ## determine vessel type from known list
-    type <- switch(
-        class(vessel)[1],
-        fileVessel = "file",
-        internalVessel = "internal",
-        urlVessel = "url",
-        scriptVessel = "script",
-        stop("'vessel' is of unknown type")) # if vessel type not recognised
-
-    ## create vessel XML object
-    vesselXML <- newXMLNode(name = type,
-                            namespaceDefinitions=namespaceDefinitions)
-
-    ## assign value/attributes
-    if (type == "script") {
-        xmlChildren(vesselXML) <- newXMLCDataNode(vessel$value)
-    } else {
-        attributes <- unlist(vessel)
-        xmlAttrs(vesselXML) <- attributes
-    }
-    
-    return(vesselXML)
-}
-    
-#' Create XML corresponding to an \code{ioFormat} object
-#'
-#' @param ioFormat \code{ioFormat} object
-#' @param namespaceDefinitions XML namespaces as character vector
-#'
-#' @return \code{XMLInternalNode} object
-#'
-#' @seealso \code{ioFormat} objects
-#'
-#' @import XML
-ioFormatToXML <- function (ioFormat,
-                           namespaceDefinitions=NULL) {
-    if (class(ioFormat) != "ioFormat") {
-        stop("'ioFormat' is not an 'ioFormat' object")
-    }
-    ioFormatXML <- newXMLNode("format",
-                              namespaceDefinitions=namespaceDefinitions)
-    xmlAttrs(ioFormatXML) <- c("formatType" = ioFormat$type)
-    xmlChildren(ioFormatXML) <- newXMLTextNode(ioFormat$value)
-    return(ioFormatXML)
-}
-
-#' Create XML corresponding to \code{moduleIO} object
-#'
-#' @param moduleIO \code{moduleIO} object
-#' @param namespaceDefinitions XML namespaces as character vector
-#'
-#' @return \code{XMLInternalNode} object
-#'
-#' @seealso \code{moduleIO} objects
-#'
-#' @import XML
-moduleIOToXML <- function (moduleIO,
-                           namespaceDefinitions = NULL) {
-    if (!("moduleIO" %in% class(moduleIO))) {
-        stop("'moduleIO' is not a 'moduleIO' object")
-    }
-    moduleIOXML <- newXMLNode(name = moduleIO$type,
-                              attrs = c(name = moduleIO$name),
-                              namespaceDefinitions = namespaceDefinitions)
-    vesselXML <- vesselToXML(moduleIO$vessel, 
-                             namespaceDefinitions = namespaceDefinitions)
-    ioFormatXML <- ioFormatToXML(moduleIO$format,
-                                 namespaceDefinitions = namespaceDefinitions)
-    xmlChildren(moduleIOXML) <- list(vesselXML,
-                                     ioFormatXML)
-    return(moduleIOXML)
-}
-
-#' Create XML corresponding to \code{moduleSource} object
-#'
-#' @param moduleSource \code{moduleSource} object
-#' @param namespaceDefinitions XML namespaces as character vector
-#'
-#' @return \code{XMLInternalNode} object
-#'
-#' @seealso \code{moduleSource} objects
-#'
-#' @import XML
-moduleSourceToXML <- function (moduleSource,
-                               namespaceDefinitions = NULL) {
-    if (class(moduleSource) != "moduleSource") {
-        stop("'moduleSource' is not a 'moduleSource' object")
-    }
-    moduleSourceXML <- newXMLNode(name = "source",
-                                  namespaceDefinitions = namespaceDefinitions)
-    if (!is.null(moduleSource$order)) {
-        xmlAttrs(moduleSourceXML) <- c("order" = moduleSource$order)
-    }
-    vesselXML <- vesselToXML(moduleSource$vessel)
-    xmlChildren(moduleSourceXML) <- list(vesselXML)
-    return(moduleSourceXML)
-}
-
-#' Convert a \code{module} object to XML
-#'
-#' @param module \code{module} object
-#' @param namespaceDefinitions XML namespaces as character vector
-#' 
-#' @return \code{XMLInternalNode} object
-#'
-#' @seealso \code{module} objects
-#' 
-#' @import XML
-moduleToXML <- function (module,
-                         namespaceDefinitions=NULL) {
-    if (class(module) != "module") {
-        stop("'module' is not a 'module' object")
-    }
-    moduleRoot <- newXMLNode(name = "module",
-                             attrs = c(language = module$language,
-                                 host = module$host),
-                             namespaceDefinitions = namespaceDefinitions)
-    host <- newXMLNode("host", children = module$host)
-    description <- newXMLNode("description", children = module$description)
-    inputs <- lapply(module$inputs, moduleIOToXML)
-    outputs <- lapply(module$outputs, moduleIOToXML)
-    sources <- lapply(module$sources, moduleSourceToXML)
-    moduleRoot <-
-        addChildren(moduleRoot,
-                    kids=list(description, inputs, sources,
-                              outputs))
-    return(moduleRoot)
-}
-
-#' Save a module to disk
-#' 
-#' Save a \code{module} to an XML file on disk. File is saved to the directory
-#' named in \code{targetDirectory}.
-#' 
-#' @details The resulting XML file will be called \file{\code{module$name}.xml}
-#' unless another \code{filename} is specified.
-#' 
-#' \code{targetDirectory} must exist, or function exits with error. If no
-#' \code{targetDirectory} file is saved to current working directory.
-#' 
-#' @param module \code{module} object
-#' @param targetDirectory destination directory
-#' @param filename Filename for resulting XML file
-#' @return resulting file location
-#' @import XML
-#' @export
-#' 
-#' @examples
-#' 
-#' targ1 <- tempdir() 
-#' 
-#' ## use a module's name for filename
-#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
-#' 		           package = "conduit")
-#' mod1 <- loadModule("createGraph", 
-#' 		       ref = mod1xml)
-#' saveModule(module = mod1, targetDirectory = targ1)
-#' 
-#' ## specify a filename for the module XML
-#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
-#' 		           package = "conduit")
-#' mod2 <- loadModule("layoutGraph",
-#' 		       ref = mod2xml)
-#' saveModule(module = mod2, targetDirectory = targ1,
-#' 	       filename = "myNewModule.xml")
-saveModule <- function(module, targetDirectory = getwd(),
-                       filename = paste0(module$name, ".xml")) {
-    targetDirectory <- file.path(targetDirectory)
-    if (!file.exists(targetDirectory)) {
-        stop("no such target directory")
-    }
-    moduleDoc <-
-        newXMLDoc(
-            namespaces="http://www.openapi.org/2014",
-            node=moduleToXML(
-                module,
-                namespaceDefinitions="http://www.openapi.org/2014/"))
-    moduleFilePath <- file.path(targetDirectory, filename)
-    saveXML(moduleDoc, moduleFilePath)
-}
-
-## RUNNING A MODULE
-
-#' Creates module output directory on host
-#'
-#' @details Directory to be created is given by \code{host$directory}
-#'
-#' @param host remote host list
-#'
-#' @seealso \code{runModule}
-#'
-#' @return 0 if success
-createHostDirectory <- function(host) {
-    user <- host$user
-    address <- host$address
-    port <- host$port
-    directory <- host$directory
-    idfile <- host$idfile
-    args <- c("-i", idfile,
-              "-p", port,
-              paste0(user, "@", address),
-              paste("'mkdir -p", directory, "'"))
-    result <- system2("ssh", args)
-    return(result)
-}
-
-#' Copy a file to remote module host
-#'
-#' @details copies file at \code{file} to remote directory
-#' \code{host$directory}.
-#'
-#' @param file file to copy
-#' @param host host list
-#' @param idfile login credentials
-#'
-#' @seealso \code{runModule}
-#'
-#' @return 0 if successful
-fileToHost <- function(file, host,
-                       idfile = get("defaultIdfile", envir = .conduit.global)) {
-    user <- host$user
-    address <- host$address
-    port <- host$port
-    directory <- host$directory
-    
-    args <- c("-i", idfile,
-              "-P", port,
-              file,
-              paste0(user, "@", address, ":", directory))
-    result <- system2("scp", args)
-    return(result)
-}
-
-#' Fetch file from remote host.
-#'
-#' @details copies file at \code{file} from remote directory
-#' \code{host$directory} to the current working directory.
-#'
-#' @param file file path
-#' @param host host list
-#'
-#' @return 0 if successful
-fetchFromHost <- function(file, host) {
-    user <- host$user
-    address <- host$address
-    port <- host$port
-    directory <- host$directory
-    idfile <- host$idfile
-
-    args <- c("-i", idfile,
-              "-P", port,
-              paste0(user, "@", address, ":",
-                     file.path(directory, file, fsep = "/")),
-              ".")
-    result <- system2("scp", args)
-    return(result)
-}
-
-#' @describeIn resolveInput Resolve internal input object
-resolveInput.internal <- function(moduleInput, inputObjects, host, location) {
-    inputObject <- getElement(inputObjects, moduleInput$name)
-
-    ## copy inputObject to host
-    if (!is.null(host)) {
-        host_result <- fileToHost(inputObject, host)
-        if (host_result != 0) {
-            stop("Unable to copy ", inputObject, " to host ",
-                 buildModuleHost(host))
-        }
-    }
-    
-    return(file.exists(inputObject))
-}
-
-#' @describeIn resolveInput Resolve file input object
-resolveInput.file <- function(moduleInput, inputObjects, host, location) {
-    vessel <- getVessel(moduleInput)
-    ref <- getRef(vessel)
-    path <- vessel$path
-    inputObject <- getElement(inputObjects, moduleInput$name)
-    if (is.null(inputObject)) {
-        inputObject <- findFile(ref, path, location)
-    } 
-
-    ## copy to module directory if ref is relative
-    if (dirname(ref) == ".") {
-        ##  create a copy of resource at ref
-        file.copy(from = inputObject, to = ref, overwrite = TRUE)
-        ## copy file to host
-        if (!is.null(host)) {
-            host_result <- fileToHost(ref, host)
-            if (host_result != 0) {
-                stop("Unable to copy ", ref, " to host ",
-                     buildModuleHost(host))
-            }
-        }
-        return(file.exists(ref))
-    }
-   file.exists(ref)
-}
-
-#' @describeIn resolveInput Resolve URL input object
-resolveInput.url <- function(moduleInput, inputObjects, host, location) {
-    name <- moduleInput$name
-    url <- moduleInput$vessel$ref
-    if (name %in% names(inputObjects)) {
-        inputObject <- getElement(inputObjects, name)
-        if (url != inputObject) {
-            stop(url, " and ", inputObject, " do not match")
-        }
-    }
-    return(RCurl::url.exists(url))
-}
-
-#' Resolve input object
-#'
-#' This function ensures that an input object is where it needs to be
-#' for a module's source script to be executed. Returns TRUE if all is well.
-#'
-#' @details If the \code{moduleInput$vessel} is any of \itemize{
-#'   \item{a \code{fileVessel} containing a relative \code{ref}}
-#'   \item{an \code{internalVessel}, and \code{host} is not NULL}}
-#' the \code{inputObject} corresponding to \code{moduleInput$name} is copied
-#' to the current working directory.
-#'
-#' If \code{host} is not NULL this \code{moduleInput} is also copied
-#' to the module output directory on the remote host.
-#'
-#' If \code{moduleInput$vessel} is a \code{urlVessel} produces error if
-#' URL specified in \code{inputObjects} does not match URL in
-#' \code{moduleInput}.
-#' 
-#' @param moduleInput \code{moduleInput} object
-#' @param inputObjects resources to be supplied as inputs
-#' @param host module host
-#' @param location location of originating module file
-#'
-#' @return TRUE if successful
-resolveInput <- function(moduleInput, inputObjects, host, location) {
-    type <- getType(getVessel(moduleInput))
-    type <- switch(
-        type,
-        internalVessel = "internal",
-        fileVessel = "file",
-	urlVessel = "url",
-        stop("unknown input vessel")
-    )
-    class(moduleInput) <- type
-    UseMethod("resolveInput", object = moduleInput)
-}
-
-#' return \code{output} produced by a \code{moduleOutput}
-#'
-#' Return the object produced by a module output.
-#'
-#' This function returns a reference to the object produced by a
-#' module's output when the module is executed. The reference
-#' contained in this object is not guaranteed to exist until after
-#' module execution. 
-#'
-#' @param moduleOutput \code{moduleOutput} object
-#' @param language module script language
-#' @param outputDirectory file location for module execution
-#'
-#' @return \code{output} list object, containing:
-#'
-#' \item{name}{output name}
-#' \item{format}{\code{ioFormat} object}
-#' \item{vessel}{\code{vessel} object}
+#' \item{name}{module name}
 #' \item{language}{module language}
-#' \item{result}{address of output object produced}
-#'
-#' @export
-output <- function(moduleOutput, language, outputDirectory) {
-    if (!inherits(moduleOutput, "moduleOutput"))
-        stop("moduleOutput object required")
-    
-    name <- getName(moduleOutput)
-    format <- getFormat(moduleOutput)
-    vessel <- getVessel(moduleOutput)
-    type <- getType(vessel)
-
-    ## calculate result
-    result <-
-        switch(type,
-               internalVessel =
-                   paste0(vessel$symbol, internalExtension(language)),
-               urlVessel=,
-               fileVessel = getRef(vessel),
-               stop("vessel type not defined"))
-
-    ## ensure absolute path
-    if (type == "internalVessel" || type == "fileVessel") {
-        result <- 
-            if (!is_absolute(result)) {
-                file.path(outputDirectory, result)
-            } else if (file.exists(result)) {
-                normalizePath(result)
-            }
-    }
-
-    ## return output object
-    output <-  list(name = name, format = format, vessel = vessel,
-                    language = language, result = result)
-    class(output) <- "output"
-    output
-}
-
-#' Checks a module output object has been created.
-#'
-#' @details Will produce an error if the object does not exist.
-#'
-#' If \code{host} is not NULL the function attempts to copy the output
-#' object across from the remote host and into the current working
-#' directory.
-#'
-#' @param moduleOutput \code{moduleOutput} object
-#' @param language module language
-#' @param host host list created by \code{parseModuleList}
-#' @param outputDirectory location of module output files
-#'
-#' @return \code{output} object
-resolveOutput <- function (moduleOutput, language, host,
-                           outputDirectory = getwd()) {
-    name <- getName(moduleOutput)
-    vessel <- getVessel(moduleOutput)
-    type <- getType(vessel)
-    output <- output(moduleOutput, language, outputDirectory)
-    result <- getResult(output)
-
-    if (type == "internalVessel" || type == "fileVessel") {
-        if (!is.null(host)) {
-            remote_object <- basename(result)
-            result <- fetchFromHost(remote_object, host)
-            if (result != 0) {
-                stop("Unable to fetch ", remote_object, " from host ",
-                     buildModuleHost(host))
-            }
-        }
-        if (!file.exists(result)) {
-            stop(paste0("output object '", name, "' does not exist"))
-        }
-    }
-    if (type == "urlVessel") {
-        if (!RCurl::url.exists(result)) {
-            stop(paste0("output object '", name, "' does not exist"))
-        }
-    }
-    return(output)
-}
-
-#' Parse a module's host
-#'
-#' Parse the the host attribute from a \code{module} object.
-#'
-#' @details Default user = 'conduit', default port = '22'.
-#'
-#' \code{directory} slot is filled by a random output directory to be
-#' created on the remote host at \code{/tmp/{sessionID}/}
-#'
-#' @param host module host as character string
-#' @param idfile authentication key
-#'
-#' @return list of \itemize{
-#'   \item user
-#'   \item password
-#'   \item address
-#'   \item port
-#'   \item directory
-#'   \item idfile}
-parseModuleHost <- function(host,
-                            idfile = get("defaultIdfile",
-                                         envir = .conduit.global)) {
-    scheme = "ssh"
-    if (grepl("://", host)) {
-        pieces <- strsplit(host, "://")[[1]]
-        scheme <- pieces[1]
-        if (scheme != "ssh") {
-            stop("Only SSH scheme supported for module hosts")
-        }
-        host <- pieces[2]
-    }
-    if (grepl("@", host)) {
-        pieces <- strsplit(host, "@")[[1]]
-        auth <- pieces[1]
-        address <- pieces[2]
-        if(grepl(":", auth)) {
-            pieces <- strsplit(auth, ":")[[1]]
-            user <- pieces[1]
-            password <- pieces[2]
-        } else {
-            user <- auth
-            password <- ""
-        }
-    } else {
-        user <- "conduit"
-        password <- ""
-        address <- host
-    }
-    if (grepl(":", address)) {
-        pieces <- strsplit(address, ":")[[1]]
-        address <- pieces[1]
-        port <- pieces[2]
-    } else {
-        port <- "22"
-    }
-    if (grepl("/", port)) {
-        split <- regexpr("/", port)
-        directory <- substr(port, split, nchar(port))
-        port <- substr(port, 1, split - 1)
-    } else {
-        directory <-
-            file.path("/tmp", get("sessionID", envir = .conduit.global),
-                      basename(tempfile("module")), fsep="/")
-    }
-    host <- list(user = user, password = password, address = address,
-                 port = port, directory = directory, idfile = idfile)
-    return(host)
-}
-
-#' Build a host string from a parsed host list
-#'
-#' @param parsedHost list generated by \code{parseModuleHost}
-#'
-#' @return character string describing module host
-buildModuleHost <- function (parsedHost) {
-    host <- paste0(parsedHost$user, "@", parsedHost$address, ":",
-                   parsedHost$port)
-    return(host)
-}
-
-#' Execute a \code{module}'s source(s)
-#'
-#' Execute the scripts contained in or referenced by a \code{module}'s sources.
-#'
-#' @details This function:
-#' \itemize{
-#'   \item creates a directory for the \code{module}'s outputs
-#'   \item determines which language the module script requires
-#'   \item executes the \code{module}'s source(s) using this language
-#' }
-#'
-#' If the \code{module} has inputs the \code{inputObjects} list must
-#' have a named absolute file location for each input which is not
-#' resolveable based on only the input provided.
-#'
-#' \code{targetDirectory} must exist or the function will return an error.
-#'
-#' This function creates a directory named for the module in the
-#' \code{targetDirectory} if it does not already exist. Outputs
-#' generated by the module source scripts are stored in this
-#' directory. A module XML file which will provide the original
-#' module's output is also created in this directory.
-#'
-#' If \code{module$host} is not NULL the remote host must exist and be
-#' accessible by conduit or this function will fail.
-#'
-#' @param module \code{module} object
-#' @param targetDirectory File path for module output
-#' @param inputObjects Named list of input objects
+#' \item{host}{\code{moduleHost} object}
+#' \item{description}{module description}
+#' \item{inputs}{list of \code{moduleInput} objects}
+#' \item{outputs}{list of \code{moduleOutput} objects}
+#' \item{sources}{list of \code{moduleSource} objects}
 #' 
-#' @seealso \code{module}, \code{moduleSource}
-#'
-#' @return a \code{moduleResult} object containing:
-#' \item{file}{file path to resulting module XML}
-#' \item{component}{resulting \code{module} object}
-#' \item{outputList}{list of \code{output} objects produced by module}
-#'
+#' @seealso \code{moduleInput}, \code{moduleOutput} and
+#' \code{moduleSource} for creating objects for these
+#' lists. \code{loadModule} for reading a module from an XML
+#' file. \code{saveModule} for saving a module as an XML
+#' file. \code{runModule} for executing a module's source scripts.
+#' 
 #' @examples
-#'
-#' ## run a module with no inputs
-#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
-#' 		       package = "conduit")
-#' mod1 <- loadModule("createGraph", 
-#' 		      ref = mod1xml)
-#' result1 <- runModule(module = mod1, targetDirectory = tempdir())
+#' ## create a module with one output and one source
+#' src1 <- moduleSource(vessel = scriptVessel(value = "x <- \"set\""))
+#' outp1 <- moduleOutput(
+#'              name = "x",
+#'              internalVessel(symbol = "x"),
+#'              format = ioFormat("R character string"))
+#' mod1 <- module(name = "setX", language = "R",
+#'                description = "sets the value of x",
+#'                outputs = list(outp1),
+#'                sources = list(src1))
 #' 
-#' ## run a module with inputs
-#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
-#' 		          package = "conduit")
-#' mod2 <- loadModule("layoutGraph", ref = mod2xml)
-#' 
-#' ## mod2 input names
-#' names(mod2$inputs)
-#' mod2inputs <- lapply(result1$outputList, getResult)
-#' names(mod2inputs) <- names(mod2$inputs)
-#' 
-#' runModule(module = mod2, inputObjects = mod2inputs,
-#'           targetDirectory = tempdir())
+#' ## create a module with one input and one source
+#' mod2 <-
+#'     module(
+#'         "showY",
+#'         language = "R",
+#'         host = "localhost",
+#'         description = "displays the value of Y",
+#'         inputs =
+#'             list(
+#'                 moduleInput(
+#'                     name = "y",
+#'                     vessel = internalVessel(symbol = "y"),
+#'                     format = ioFormat("R character string"))),
+#'         sources =
+#'             list(
+#'                 moduleSource(
+#'                 scriptVessel(value = "print(y)"))))
 #' 
 #' @export
-runModule <- function(module, targetDirectory = getwd(),
-                      inputObjects = NULL) {
-    ## fail if not given a module
-    if (class(module) != "module"){
-        stop("'module' is not a 'module' object")
+module <- function(name, language, host=NULL,
+                   description=NULL,
+                   inputs=NULL, outputs=NULL, sources=NULL,
+                   location = getwd()) {
+    ## check arguments for errors
+
+    ## check 'name'
+    if (!is_length1_char(name)) {
+        stop("'name' is not a length 1 character vector")
+    }
+
+    ## check 'language'
+    if (!is.null(language)) {
+        if (!is_length1_char(language))
+            stop("'language' is not a length 1 character vector")
     }
     
-    ## ensure targetDirectory exists
-    targetDirectory <- file.path(targetDirectory)
-    if (!file.exists(targetDirectory)) {
-        stop("no such target directory")
-    }
-    
-    ## create a directory for this module's output
-    modulePath <- file.path(targetDirectory, getName(module))
-    if (file.exists(modulePath))
-        unlink(modulePath, recursive=TRUE)
-    dir.create(modulePath, recursive=TRUE)
-
-    ## enter output directory
-    oldwd <- setwd(modulePath)
-    on.exit(setwd(oldwd))
-    
-    ## prepare a script file for execution
-    script <- prepareScript(module, inputObjects)
-
-    ## determine host details
-    host <- module$host
-    host <- if (!is.null(host)) parseModuleHost(host)
-
-    ## prepare remote host
+    ## check 'host'
     if (!is.null(host)) {
-        ## create output directory on host
-        dir_result <- createHostDirectory(host)
-        if (dir_result != 0) {
-            stop("Unable to create output directory on host ",
-                 buildModuleHost(host))
-        }
-        
-        ## copy script file to host
-        script_result <- fileToHost(script, host)
-        if (script_result != 0) {
-            stop(paste0("Unable to copy ", script, " to host ",
-                 buildModuleHost(host)))
-        }
+        if (!inherits(host, "moduleHost"))
+            stop("'host' is not moduleHost object")
+    }
+
+    ## check 'description'
+    if (!is.null(description)) {
+        if (!is.character(description))
+            stop("'description' is not a character object")
+    }
+
+    ## check 'inputs'
+    if (!is.null(inputs)) {
+        if (class(inputs) != "list")
+            stop("'inputs' is not a list object")
+        if (!all(sapply(inputs, inherits, "moduleInput")))
+            stop("inputs must be moduleInput objects")
+        names(inputs) <- sapply(inputs, getName)
+    }
+
+    ## check 'outputs'
+    if (!is.null(outputs)) {
+        if (class(outputs) != "list")
+            stop("'outputs' is not a list object")
+        if (!all(sapply(outputs, inherits, "moduleOutput")))
+            stop("outputs must be moduleOutput objects")
+        names(outputs) <- sapply(outputs, getName)
+    }
+
+    ## check 'sources'
+    if (!is.null(sources)) {
+        if (class(sources) != "list")
+            stop("'sources' is not a list object")
+        if (!all(sapply(sources, inherits, "moduleSource")))
+            stop("sources must be moduleSource objects")
     }
     
-    ## resolve input objects
-    for (i in module$inputs) {
-        resolved <- resolveInput(i, inputObjects, host, getLocation(module))
-        if (!resolved) stop(paste0("Input '", i$name, "' cannot be resolved"))
-    }
-
-    ## execute script file
-    exec_result <- executeScript(script, host)
-    if (exec_result != 0) {
-        stop("Unable to execute ", script,
-             if (!is.null(host)) {
-                 paste0(" on host ", buildModuleHost(host))
-             })
-    }
-
-    ## resolve output objects
-    outputList <- lapply(module$outputs, resolveOutput,
-                         getLanguage(module), host)
-
-    ## return moduleResult object
-    moduleResult(outputList, modulePath, module)
+    module <- list(name = name,
+                   language = language,
+                   host = host,
+                   description = description,
+                   inputs = inputs,
+                   outputs = outputs,
+                   sources = sources)
+    class(module) <- "module"
+    attr(module, "location") <- location
+    module
 }
+
+#' \code{moduleHost} object
+#'
+#' @seealso \code{vagrantHost}, \code{module}
+#'
+#' @name moduleHost
+NULL
 
 #' Create an \code{ioFormat} object.
 #'
@@ -1136,170 +372,6 @@ moduleSource <- function(vessel, order = NULL) {
     src
 }
 
-#' Create a \code{module} object
-#'
-#' Creates a module object which can be executed in conduit.
-#'
-#' @details \code{inputs}, \code{outputs}, and \code{sources} should be lists
-#' of objects created using \code{moduleInput}, \code{moduleOutput}, and
-#' \code{moduleSource} respectively.
-#'
-#' Module \sQuote{location} defaults to current working
-#' directory. This can be set to indicate the location of the module
-#' XML file, and its supporting files.
-#'
-#' @param name Name of module
-#' @param language Language name
-#' @param host Machine on which module is to be run
-#' @param description A basic description of the module
-#' @param inputs List of \code{moduleInput} objects
-#' @param outputs List of \code{moduleOutput} objects
-#' @param sources List of \code{moduleSource} objects
-#' @param location file directory where module xml and files are found
-#' 
-#' @return \code{module} list containing:
-#' \itemize{
-#'   \item{name}
-#'   \item{language}
-#'   \item{host}
-#'   \item{description}
-#'   \item{inputs}
-#'   \item{outputs}
-#'   \item{sources}
-#' }
-#' 
-#' @seealso \code{moduleInput}, \code{moduleOutput} and
-#' \code{moduleSource} for creating objects for these
-#' lists. \code{loadModule} for reading a module from an XML
-#' file. \code{saveModule} for saving a module as an XML
-#' file. \code{runModule} for executing a module's source scripts.
-#' 
-#' @examples
-#' ## create a module with one output and one source
-#' src1 <- moduleSource(vessel = scriptVessel(value = "x <- \"set\""))
-#' outp1 <- moduleOutput(
-#'              name = "x",
-#'              internalVessel(symbol = "x"),
-#'              format = ioFormat("R character string"))
-#' mod1 <- module(name = "setX", language = "R",
-#'                description = "sets the value of x",
-#'                outputs = list(outp1),
-#'                sources = list(src1))
-#' 
-#' ## create a module with one input and one source
-#' mod2 <-
-#'     module(
-#'         "showY",
-#'         language = "R",
-#'         host = "localhost",
-#'         description = "displays the value of Y",
-#'         inputs =
-#'             list(
-#'                 moduleInput(
-#'                     name = "y",
-#'                     vessel = internalVessel(symbol = "y"),
-#'                     format = ioFormat("R character string"))),
-#'         sources =
-#'             list(
-#'                 moduleSource(
-#'                 scriptVessel(value = "print(y)"))))
-#' 
-#' @export
-module <- function(name, language, host=NULL,
-                   description=NULL,
-                   inputs=NULL, outputs=NULL, sources=NULL,
-                   location = getwd()) {
-    ## check arguments for errors
-
-    ## check 'name'
-    if (!is_length1_char(name)) {
-        stop("'name' is not a length 1 character vector")
-    }
-
-    ## check 'language'
-    if (!is.null(language)) {
-        if (!is_length1_char(language)) {
-            stop("'host' is not a length 1 character vector")
-        }
-    }
-    
-    ## check 'host'
-    if (!is.null(host)) {
-        if (!is_length1_char(host)) {
-            stop("'host' is not a length 1 character vector")
-        }
-    }
-
-    ## check 'description'
-    if (!is.null(description)) {
-        if (!is.character(description)) {
-            stop("'description' is not a character object")
-        }
-    }
-
-    ## check 'inputs'
-    if (!is.null(inputs)) {
-        if (class(inputs) != "list") {
-            stop("'inputs' is not a list object")
-        }
-        inputClasses <- lapply(inputs, class)
-        for (i in seq_along(inputClasses)) {
-            if (inputClasses[[i]][1] != "moduleInput") {
-                stop(paste0("input ", i, " is not a 'moduleInput' object"))
-            }
-        }
-        ## name inputs
-        names(inputs) <-
-            sapply(inputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-
-    ## check 'outputs'
-    if (!is.null(outputs)) {
-        if (class(outputs) != "list") {
-            stop("'outputs' is not a list object")
-        }
-        outputClasses <- lapply(outputs, class)
-        for (i in seq_along(outputClasses)) {
-            if (outputClasses[[i]][1] != "moduleOutput") {
-                stop(paste0("output ", i, " is not a 'moduleOutput' object"))
-            }
-        }        
-        ## name outputs
-        names(outputs) <-
-            sapply(outputs,
-                   function (x) {
-                       x["name"]
-                   })
-    }
-
-    ## check 'sources'
-    if (!is.null(sources)) {
-        if (class(sources) != "list") {
-            stop("'sources' is not a list object")
-        }
-        sourceClasses <- lapply(sources, class)
-        for (i in seq_along(sourceClasses)) {
-            if (sourceClasses[[i]][1] != "moduleSource") {
-                stop(paste0("source ", i, " is not a 'moduleSource' object"))
-            }
-        }                
-    }
-    
-    module <- list(name = name,
-                   language = language,
-                   host = host,
-                   description = description,
-                   inputs = inputs,
-                   outputs = outputs,
-                   sources = sources)
-    class(module) <- "module"
-    attr(module, "location") <- location
-    module
-}
-
 #' @describeIn getName
 #'
 #' Returns module name
@@ -1334,4 +406,893 @@ getLanguage.module <- function(x) {
 #' @export
 getLocation.module <- function(x) {
     attr(x, "location")
+}
+
+#' Load a module from an XML file
+#'
+#' Reads an XML file given by \code{ref} and \code{path} and interprets to
+#' produce a \code{module}.
+#'
+#' If the module XML file is not valid OpenAPI module XML this
+#' function will return an error.
+#'
+#' If \code{path} is not set and conduit needs to search for the file
+#' the default search paths are used.
+#' 
+#' @param name Name of module
+#' @param ref Module location or filename or a \code{vessel} object
+#' @param path (Optional) Search path if \code{ref} is a filename
+#' @param namespaces Namespaces used in XML document
+#' @return \code{module} list
+#' @seealso \code{module}
+#' 
+#' @import XML
+#'
+#' @examples
+#'
+#' ## load a module from XML given by absolute of relative file path
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml",
+#'                        package = "conduit")
+#' mod1 <- loadModule(name = "createGraph", ref = mod1xml)
+#'
+#' ## load a module by searching for 'ref'
+#' srch1 <- system.file("extdata", package = "conduit")
+#' srch1
+#'
+#' mod2 <- loadModule(name = "layoutGraph", ref = "layoutGraph.xml",
+#'                    path = srch1)
+#' @export
+loadModule <- function(name, ref, path = NULL,
+                       namespaces=c(oa="http://www.openapi.org/2014/")) {
+    ## TODO(anhinton): change how modules are loaded to include
+    ## loading from URLs, files etc. The following code uses vessel
+    ## objects to provide a temporary solution
+    if (!inherits(ref, "vessel"))
+        ref <- fileVessel(ref, path)
+    ## fetch module XML from disk
+    rawXML <- tryCatch(
+        fetchVessel(ref),
+        error = function(err) {
+            problem <- c(paste0("Unable to load module '", name, "'\n"),
+                         err)
+            stop(problem)
+        })
+    if (!isValidXML(rawXML, "module"))
+        stop(paste0("'", ref, "': module XML is invalid"))
+    xml <- xmlRoot(xmlParse(rawXML))
+
+    ## create module object
+    module <- readModuleXML(name, xml)
+
+    ## store location of originating module file
+    attr(module, "location") <- attr(rawXML, "location")
+    
+    return(module)
+}
+
+#' Create a \code{moduleHost} object from host XML
+#'
+#' This function creates a \code{moduleHost} object from valid host
+#' elements.
+#'
+#' As of 2016-02-26 only \samp{<vagrant/>} elements are
+#' supported.
+#'
+#' @param moduleHostXML host XML node
+#'
+#' @return \code{moduleHost} object
+#'
+#' @import XML
+readModuleHostXML <- function(moduleHostXML) {
+    type <- xmlName(moduleHostXML)
+    moduleHost <- switch(
+        type,
+        vagrant = readVagrantHostXML(moduleHostXML),
+        docker = readDockerHostXML(moduleHostXML)
+    )
+    if(!inherits(moduleHost, "moduleHost"))
+        class(moduleHost) <- c(class(moduleHost), "moduleHost")
+    moduleHost
+}
+
+#' Create a \code{vessel} object from vessel XML
+#'
+#' @param xml vessel XML
+#'
+#' @return \code{vessel} object
+#'
+#' @import XML
+readVesselXML <- function (xml) {
+    type <- xmlName(xml)
+    content <-
+        switch(type,
+               script = xmlValue(xml),
+               internal = xmlAttrs(xml),
+               file = xmlAttrs(xml),
+               url = xmlAttrs(xml),
+               stop("'vessel' xml unknown type"))    
+    vessel <-
+        switch(type,
+               file = {
+                   ref = content[["ref"]]
+                   path = if ("path" %in% names(content)) {
+                       content[["path"]]
+                   } else {
+                       NULL
+                   }
+                   fileVessel(ref = ref, path = path)
+               },
+               internal = internalVessel(
+                   symbol = content[["symbol"]]),
+               url = urlVessel(
+                   ref = content[["ref"]]),
+               script = scriptVessel(readLines(textConnection(content))))
+    return(vessel)
+}
+
+#' Create a \code{ioFormat} object from format XML
+#'
+#' @param xml format XML
+#'
+#' @return \code{ioFormat} object
+#'
+#' @import XML
+readIOFormatXML <- function (xml) {
+    if (xmlName(xml) != "format") {
+        stop("ioFormat XML is invalid")
+    }   
+    value <- xmlValue(xml)
+    attrs <- xmlAttrs(xml)
+    ioFormat <-
+        if (is.null(attrs)) {
+            ioFormat(value = value)
+        } else {
+            ioFormat(value = value, type = attrs[["formatType"]])
+        }
+    return(ioFormat)
+}
+
+#' Create a \code{moduleIO} object from input/output XML
+#'
+#' @param xml input/output XML
+#'
+#' @return \code{moduleIO} object
+#'
+#' @import XML
+readModuleIOXML <- function (xml) {
+    type <- xmlName(xml)
+    if (type != "input" && type != "output") {
+        stop("moduleIO XML is invalid")
+    }
+    name <- xmlAttrs(xml)[["name"]]
+    children <- xmlChildren(xml)
+
+    ## create ioFormat object
+    formatChild <- children$format
+    ioFormat <- readIOFormatXML(formatChild)
+
+    ## create vessel object:
+    ## determine which child has an appropriate vessel name
+    vesselChild <-
+        which(names(children) %in% c("internal", "file", "url"))
+    vessel <- readVesselXML(children[[vesselChild]])
+
+    ## create moduleIO object
+    moduleIO <- moduleIO(name = name, type = type, vessel = vessel,
+                         format = ioFormat)
+    return(moduleIO)
+}
+
+#' create a \code{moduleSource} object from module source XML
+#'
+#' @param xml module source XML
+#'
+#' @return \code{moduleSource} object
+#'
+#' @import XML
+readModuleSourceXML <- function (xml) {
+    if (xmlName(xml) != "source") {
+        stop("moduleSource XML is invalid")
+    }
+
+    ## extract vessel object.
+    child <- xmlChildren(xml)[[1]] # there should be only one child
+    vessel <- readVesselXML(child)
+
+    attrs <- xmlAttrs(xml)
+    moduleSource <-
+        if (is.null(attrs)) {
+            moduleSource(vessel = vessel)
+        } else {
+            moduleSource(vessel = vessel, order = as.numeric(attrs[["order"]]))
+        }
+    return(moduleSource)
+}
+
+#' Parse module XML and return a \code{module} object
+#'
+#' @param name module name
+#' @param xml module \code{XMLNode}
+#' @param location file directory of invoking pipeline/module xml (optional)
+#' 
+#' @return \code{module} object
+#' 
+#' @import XML
+readModuleXML <- function (name, xml, location = getwd()) {
+    attrs <- xmlAttrs(xml)
+    language <- attrs[["language"]]
+    nodes <- xmlChildren(xml)
+    nodeNames <- names(nodes)
+
+    ## extract host
+    host <-
+        if ("host" %in% nodeNames) {
+            hostNode <- nodes$host
+            moduleHostXML <- xmlChildren(hostNode)[[1]]
+            readModuleHostXML(moduleHostXML)
+        } else {
+            NULL
+        }
+    
+    ## extract description
+    description <-
+        if ("description" %in% nodeNames) {
+            descNode <- nodes$description
+            xmlValue(descNode)
+        } else {
+            NULL
+        }
+    
+    ## extract inputs
+    inputNodes <- nodes[names(nodes) == "input"]
+    inputs <-
+        if (length(inputNodes) == 0) {
+            NULL
+        } else {
+            lapply(inputNodes, readModuleIOXML)
+        }
+    
+    ## extract sources
+    sourceNodes <- nodes[names(nodes) == "source"]
+    sources <-
+        if (!length(sourceNodes)) {
+            NULL
+        } else {
+            lapply(sourceNodes, readModuleSourceXML)
+        }
+    
+    ## extract outputs
+    outputNodes <- nodes[names(nodes) == "output"]
+    outputs <-
+        if (length(outputNodes) == 0) {
+            NULL
+        } else {
+            lapply(outputNodes, readModuleIOXML)
+        }
+
+    module(name = name,
+           language = language,
+           host = host,
+           description = description,
+           inputs = inputs,
+           sources = sources,
+           outputs = outputs,
+           location = location)
+}
+
+#' Save a module to disk
+#' 
+#' Save a \code{module} to an XML file on disk. File is saved to the directory
+#' named in \code{targetDirectory}.
+#' 
+#' @details The resulting XML file will be called \file{\code{module$name}.xml}
+#' unless another \code{filename} is specified.
+#' 
+#' \code{targetDirectory} must exist, or function exits with error. If no
+#' \code{targetDirectory} file is saved to current working directory.
+#' 
+#' @param module \code{module} object
+#' @param targetDirectory destination directory
+#' @param filename Filename for resulting XML file
+#' @return resulting file location
+#' @import XML
+#' @export
+#' 
+#' @examples
+#' 
+#' targ1 <- tempdir() 
+#' 
+#' ## use a module's name for filename
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
+#' 		           package = "conduit")
+#' mod1 <- loadModule("createGraph", 
+#' 		       ref = mod1xml)
+#' saveModule(module = mod1, targetDirectory = targ1)
+#' 
+#' ## specify a filename for the module XML
+#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+#' 		           package = "conduit")
+#' mod2 <- loadModule("layoutGraph",
+#' 		       ref = mod2xml)
+#' saveModule(module = mod2, targetDirectory = targ1,
+#' 	       filename = "myNewModule.xml")
+saveModule <- function(module, targetDirectory = getwd(),
+                       filename = paste0(module$name, ".xml")) {
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
+    namespace <- "http://www.openapi.org/2014/"
+    moduleXML <- moduleToXML(module, namespaceDefinitions = namespace)
+    moduleDoc <- newXMLDoc(
+        namespaces = namespace,
+        node = moduleXML)
+    moduleFilePath <- file.path(targetDirectory, filename)
+    saveXML(moduleDoc, moduleFilePath)
+}
+
+#' Convert a \code{module} object to XML
+#'
+#' @param module \code{module} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#' 
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{module} objects
+#' 
+#' @import XML
+moduleToXML <- function (module,
+                         namespaceDefinitions=NULL) {
+    if (class(module) != "module") {
+        stop("'module' is not a 'module' object")
+    }
+    moduleRoot <- newXMLNode(name = "module",
+                             attrs = c(language = module$language),
+                             namespaceDefinitions = namespaceDefinitions)
+    host <-
+        if (!is.null(module$host)) {
+            moduleHostToXML(module$host)
+        } else {
+            NULL
+        }
+    description <-
+        if (!is.null(module$description)) {
+            newXMLNode("description", children = module$description)
+        } else {
+            NULL
+        }
+    inputs <- lapply(module$inputs, moduleIOToXML)
+    outputs <- lapply(module$outputs, moduleIOToXML)
+    sources <- lapply(module$sources, moduleSourceToXML)
+    addChildren(moduleRoot,
+                kids=list(host, description, inputs, sources,
+                          outputs))
+}
+
+#' Create XML corresponding to a \code{moduleHost} object
+#'
+#' @param moduleHost \code{moduleHost} object
+#'
+#' @return XML node representing module host
+moduleHostToXML <- function(moduleHost) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    UseMethod("moduleHostToXML")
+}
+
+#' Create XML corresponding to a \code{vessel} object.
+#'
+#' @param vessel \code{vessel} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{vessel} objects
+#' 
+#' @import XML
+vesselToXML <- function (vessel,
+                         namespaceDefinitions=NULL) {
+    if (!("vessel" %in% class(vessel))) {
+        stop("'vessel' is not a 'vessel' object")
+    }
+    
+    ## determine vessel type from known list
+    type <- switch(
+        class(vessel)[1],
+        fileVessel = "file",
+        internalVessel = "internal",
+        urlVessel = "url",
+        scriptVessel = "script",
+        stop("'vessel' is of unknown type")) # if vessel type not recognised
+
+    ## create vessel XML object
+    vesselXML <- newXMLNode(name = type,
+                            namespaceDefinitions=namespaceDefinitions)
+
+    ## assign value/attributes
+    if (type == "script") {
+        xmlChildren(vesselXML) <- newXMLCDataNode(vessel$value)
+    } else {
+        attributes <- unlist(vessel)
+        xmlAttrs(vesselXML) <- attributes
+    }
+    
+    return(vesselXML)
+}
+    
+#' Create XML corresponding to an \code{ioFormat} object
+#'
+#' @param ioFormat \code{ioFormat} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{ioFormat} objects
+#'
+#' @import XML
+ioFormatToXML <- function (ioFormat,
+                           namespaceDefinitions=NULL) {
+    if (class(ioFormat) != "ioFormat") {
+        stop("'ioFormat' is not an 'ioFormat' object")
+    }
+    ioFormatXML <- newXMLNode("format",
+                              namespaceDefinitions=namespaceDefinitions)
+    xmlAttrs(ioFormatXML) <- c("formatType" = ioFormat$type)
+    xmlChildren(ioFormatXML) <- newXMLTextNode(ioFormat$value)
+    return(ioFormatXML)
+}
+
+#' Create XML corresponding to \code{moduleIO} object
+#'
+#' @param moduleIO \code{moduleIO} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{moduleIO} objects
+#'
+#' @import XML
+moduleIOToXML <- function (moduleIO,
+                           namespaceDefinitions = NULL) {
+    if (!("moduleIO" %in% class(moduleIO))) {
+        stop("'moduleIO' is not a 'moduleIO' object")
+    }
+    moduleIOXML <- newXMLNode(name = moduleIO$type,
+                              attrs = c(name = moduleIO$name),
+                              namespaceDefinitions = namespaceDefinitions)
+    vesselXML <- vesselToXML(moduleIO$vessel, 
+                             namespaceDefinitions = namespaceDefinitions)
+    ioFormatXML <- ioFormatToXML(moduleIO$format,
+                                 namespaceDefinitions = namespaceDefinitions)
+    xmlChildren(moduleIOXML) <- list(vesselXML,
+                                     ioFormatXML)
+    return(moduleIOXML)
+}
+
+#' Create XML corresponding to \code{moduleSource} object
+#'
+#' @param moduleSource \code{moduleSource} object
+#' @param namespaceDefinitions XML namespaces as character vector
+#'
+#' @return \code{XMLInternalNode} object
+#'
+#' @seealso \code{moduleSource} objects
+#'
+#' @import XML
+moduleSourceToXML <- function (moduleSource,
+                               namespaceDefinitions = NULL) {
+    if (class(moduleSource) != "moduleSource") {
+        stop("'moduleSource' is not a 'moduleSource' object")
+    }
+    moduleSourceXML <- newXMLNode(name = "source",
+                                  namespaceDefinitions = namespaceDefinitions)
+    if (!is.null(moduleSource$order)) {
+        xmlAttrs(moduleSourceXML) <- c("order" = moduleSource$order)
+    }
+    vesselXML <- vesselToXML(moduleSource$vessel)
+    xmlChildren(moduleSourceXML) <- list(vesselXML)
+    return(moduleSourceXML)
+}
+
+## RUNNING A MODULE
+
+#' Execute a \code{module}'s source(s)
+#'
+#' Execute the scripts contained in or referenced by a \code{module}'s sources.
+#'
+#' @details This function:
+#' \itemize{
+#'   \item creates a directory for the \code{module}'s outputs
+#'   \item determines which language the module script requires
+#'   \item executes the \code{module}'s source(s) using this language
+#' }
+#'
+#' If the \code{module} has inputs the \code{inputObjects} list must
+#' have a named absolute file location for each input which is not
+#' resolveable based on only the input provided.
+#'
+#' \code{targetDirectory} must exist or the function will return an error.
+#'
+#' This function creates a directory named for the module in the
+#' \code{targetDirectory} if it does not already exist. Outputs
+#' generated by the module source scripts are stored in this
+#' directory. A module XML file which will provide the original
+#' module's output is also created in this directory.
+#'
+#' If \code{module$host} is not NULL the remote host must exist and be
+#' accessible by conduit or this function will fail.
+#'
+#' @param module \code{module} object
+#' @param targetDirectory File path for module output
+#' @param inputObjects Named list of input objects
+#' 
+#' @seealso \code{module}, \code{moduleSource}
+#'
+#' @return a \code{moduleResult} object containing:
+#' \item{file}{file path to resulting module XML}
+#' \item{component}{resulting \code{module} object}
+#' \item{outputList}{list of \code{output} objects produced by module}
+#'
+#' @examples
+#'
+#' ## run a module with no inputs
+#' mod1xml <- system.file("extdata", "simpleGraph", "createGraph.xml", 
+#' 		       package = "conduit")
+#' mod1 <- loadModule("createGraph", 
+#' 		      ref = mod1xml)
+#' result1 <- runModule(module = mod1, targetDirectory = tempdir())
+#' 
+#' ## run a module with inputs
+#' mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
+#' 		          package = "conduit")
+#' mod2 <- loadModule("layoutGraph", ref = mod2xml)
+#' 
+#' ## mod2 input names
+#' names(mod2$inputs)
+#' mod2inputs <- lapply(result1$outputList, getResult)
+#' names(mod2inputs) <- names(mod2$inputs)
+#' 
+#' runModule(module = mod2, inputObjects = mod2inputs,
+#'           targetDirectory = tempdir())
+#' 
+#' @export
+runModule <- function(module, targetDirectory = getwd(),
+                      inputObjects = NULL) {
+    ## fail if not given a module
+    if (class(module) != "module"){
+        stop("'module' is not a 'module' object")
+    }
+
+    ## ensure targetDirectory exists
+    targetDirectory <- file.path(targetDirectory)
+    if (!file.exists(targetDirectory)) {
+        stop("no such target directory")
+    }
+
+    name <- getName(module)
+    moduleInputList <- module$inputs
+    moduleOutputList <- module$outputs
+    language <- getLanguage(module)
+    host <- module$host
+
+    ## create a directory for this module's output
+    modulePath <- file.path(targetDirectory, getName(module))
+    if (file.exists(modulePath))
+        unlink(modulePath, recursive=TRUE)
+    dir.create(modulePath, recursive=TRUE)
+
+    ## enter output directory
+    oldwd <- setwd(modulePath)
+    on.exit(setwd(oldwd))
+
+    ## prepare module inputs
+    inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
+                           inputList = inputObjects,
+                           outputDirectory = modulePath,
+                           language = language,
+                           location = getLocation(module))
+
+    script <- prepareScript(module)
+
+    ## prepare moduleHost
+    moduleHost <- module$host
+    outputLocation <-
+        if (!is.null(moduleHost)) {
+            prepareModuleHost(moduleHost = moduleHost, moduleName = name,
+                              modulePath = modulePath)
+        } else {
+            NULL
+        }
+    
+    ## execute script file
+    exec_result <- executeScript(script, moduleHost, outputLocation)
+    if (exec_result != 0)
+        stop("Unable to execute module script")
+
+    ## retrieve outputs from moduleHost
+    if (!is.null(moduleHost)) {
+        retrieveModuleHost(moduleHost = moduleHost,
+                           outputLocation = outputLocation,
+                           modulePath = modulePath)
+    }
+
+    ## resolve output objects
+    outputList <- lapply(X = module$outputs, FUN = resolveOutput,
+                         language = getLanguage(module),
+                         outputDirectory = modulePath)
+
+    ## return moduleResult object
+    moduleResult(outputList, modulePath, module)
+}
+
+#' Prepare input object
+#'
+#' This function ensures a \code{module}'s \code{moduleInput}
+#' requirements will be met when executed.
+#'
+#' For any \code{moduleInput} wrapping a \code{internalVessel} or
+#' \code{fileVessel} with a relative ref, the relevant \code{input}
+#' object is copied into the module \code{outputDirectory}.
+#'
+#' For any \code{moduleInput} that is not found in \code{inputList}
+#' (e.g., when the module is being run directly), the \code{moduleInput}
+#' itself is tried (e.g., a URL vessel should work).
+#' 
+#' @param moduleInput \code{moduleInput} object
+#' @param inputList list of \code{input} objects provided to module
+#' @param outputDirectory working directory for module execution
+#' @param language Module language
+#' @param location location of originating module file
+#'
+#' @return \code{input} object. Generally a character string
+#'     referencing a file location or URL
+prepareInput <- function(moduleInput, inputList, outputDirectory,
+                         language, location) {
+    name <- getName(moduleInput)
+    vessel <- getVessel(moduleInput)
+    type <- getType(vessel)
+    input <- getElement(inputList, name)
+
+    input <- switch(
+        type,
+        internalVessel = {
+            symbol <- vessel$symbol
+            prepareInternalInput(input, symbol, language,
+                                 outputDirectory)
+        },
+        fileVessel = prepareFileInput(vessel, input, outputDirectory,
+                                      location),
+        urlVessel = prepareURLInput(vessel, input),
+        stop("unknown vessel type"))
+    class(input) <- "input"
+    input
+}
+
+#' Prepare internal input object.
+#'
+#' This function makes a serialized internal module input available in
+#' a module's working directory.
+#'
+#' @param input File path to serialized object
+#' @param symbol Name of module input
+#' @param language Module language
+#' @param outputDirectory File path to module working directory
+#'
+#' @return File path to serialized internal input.
+prepareInternalInput <- function(input, symbol, language, outputDirectory) {
+    internalInput <- file.path(
+        outputDirectory, paste0(symbol, internalExtension(language)))
+    if (!file.copy(input, internalInput))
+        stop("unable to copy input into outputDirectory")
+    if (file.exists(internalInput)) {
+        return(internalInput)
+    } else {
+        stop("unable to prepare internalInput")
+    }
+}
+
+#' Prepare file input object
+#'
+#' This function makes sure a module's file input is available to the
+#' module.
+#'
+#' If \code{input} is NULL the module is assumed to be
+#' \dQuote{starting} from a file, and the file referenced in
+#' \code{vessel} is returned.
+#'
+#' Where \code{input} is not null, and \code{vessel} describes an
+#' absolute path to a file this path is returned. If \code{vessel}
+#' describes a relative path to a file, this file is copied into the
+#' module's outputDirectory, and the resulting file is returned.
+#'
+#' @param vessel Module input vessel object
+#' @param input File path to input
+#' @param outputDirectory File path to module working directory
+#' @param location File path to originating module XML file
+#'
+#' @return File path to input file
+prepareFileInput <- function(vessel, input, outputDirectory, location) {
+    ref <- getRef(vessel)
+    path <- vessel$path
+    
+    if (is.null(input)) {
+        input <- findFile(ref, path, location)
+        if (is.null(input))
+            stop("unable to locate input file")
+        if (is_absolute(ref)) {
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
+    } else {
+        if (is_absolute(ref)) {
+            if (findFile(ref, path, location) != input)
+                stop("input does not match path given in fileVessel")
+            fileInput <- input
+        } else {
+            fileInput <- file.path(outputDirectory, ref)
+            if (!file.copy(input, fileInput, overwrite = TRUE))
+                stop("unable to copy input into outputDirectory")
+        }
+    }
+    fileInput
+}
+
+#' Prepare URL input object
+#'
+#' This function ensure's a module's URL input is available to the
+#' module.
+#'
+#' If \code{input} is NULL the module is assumed to be
+#' \dQuote{starting} from a URL, and the URL referenced in
+#' \code{vessel} is returned.
+#'
+#' @param vessel Module input vessel object
+#' @param input URL string
+#'
+#' @return URL to input resource
+prepareURLInput <- function(vessel, input) {
+    ref <- getRef(vessel)
+    ## Allow for module being run in isolation (inputs are NULL)
+    if (is.null(input)) {
+        ref
+    } else {
+        if (ref != input)
+            stop("input does not match URL given in urlVessel")
+        input
+    }
+}
+
+#' return \code{output} produced by a \code{moduleOutput}
+#'
+#' Return the object produced by a module output.
+#'
+#' This function returns a reference to the object produced by a
+#' module's output when the module is executed. The reference
+#' contained in this object is not guaranteed to exist until after
+#' module execution. 
+#'
+#' @param moduleOutput \code{moduleOutput} object
+#' @param language module script language
+#' @param outputDirectory file location for module execution
+#'
+#' @return \code{output} list object, containing:
+#'
+#' \item{name}{output name}
+#' \item{format}{\code{ioFormat} object}
+#' \item{vessel}{\code{vessel} object}
+#' \item{language}{module language}
+#' \item{result}{address of output object produced}
+#'
+#' @export
+output <- function(moduleOutput, language, outputDirectory) {
+    if (!inherits(moduleOutput, "moduleOutput"))
+        stop("moduleOutput object required")
+    
+    name <- getName(moduleOutput)
+    format <- getFormat(moduleOutput)
+    vessel <- getVessel(moduleOutput)
+    type <- getType(vessel)
+
+    ## calculate result
+    result <-
+        switch(type,
+               internalVessel =
+                   paste0(vessel$symbol, internalExtension(language)),
+               urlVessel=,
+               fileVessel = getRef(vessel),
+               stop("vessel type not defined"))
+
+    ## ensure absolute path
+    if (type == "internalVessel" || type == "fileVessel") {
+        result <- 
+            if (!is_absolute(result)) {
+                file.path(outputDirectory, result)
+            } else if (file.exists(result)) {
+                normalizePath(result)
+            }
+    }
+
+    ## return output object
+    output <-  list(name = name, format = format, vessel = vessel,
+                    language = language, result = result)
+    class(output) <- "output"
+    output
+}
+
+#' Checks a module output object has been created.
+#'
+#' @details Will produce an error if the object does not exist.
+#'
+#' @param moduleOutput \code{moduleOutput} object
+#' @param language module language
+#' @param outputDirectory location of module output files
+#'
+#' @return \code{output} object
+resolveOutput <- function (moduleOutput, language,
+                           outputDirectory = getwd()) {
+    name <- getName(moduleOutput)
+    vessel <- getVessel(moduleOutput)
+    type <- getType(vessel)
+    output <- output(moduleOutput, language, outputDirectory)
+    result <- getResult(output)
+
+    ## TODO(anhinton): write check for URL outputs
+    if (type == "internalVessel" || type == "fileVessel") {
+        if (!file.exists(result))
+            stop(paste0("output object '", name, "' does not exist"))
+    }
+    return(output)
+}
+
+#' Prepare a module host for execution.
+#'
+#' These methods ensure that a \code{moduleHost} will have all
+#' resources required to execute a \code{module}'s source scripts.
+#'
+#' These methods return the path to the module output directory as an
+#' \code{outputLocation} object.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param moduleName module name
+#' @param modulePath module output directory
+#'
+#' @return \code{outputLocation} object
+prepareModuleHost <- function (moduleHost, moduleName, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!is_length1_char(moduleName))
+        stop("moduleName is not length 1 character")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    UseMethod("prepareModuleHost")
+}
+
+#' Retrieve results of running a module's source scripts on a
+#' \code{moduleHost}
+#'
+#' This functions retrieves the results of executing a module's source
+#' scripts on a \code{moduleHost} using \code{executeScript}.
+#'
+#' \code{outputLocation} should be the result of
+#' \code{prepareModuleHost} on the same \code{moduleHost}.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param outputLocation \code{outputLocation} object
+#' @param modulePath output directory on local machine
+#'
+#' @return NULL if successful
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost},
+#'     \code{executeScript}
+retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
+    if (!inherits(moduleHost, "moduleHost"))
+        stop("moduleHost object required")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
+    UseMethod("retrieveModuleHost")
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:oa="http://www.openapi.org/2014/"
+        targetNamespace="http://www.openapi.org/2014/">
+
+  <element name="vagrant" type="oa:VagrantType"/>
+
+  <complexType name="VagrantType">
+    <attribute name="vagrantfile" type="string" use="required"/>
+    <attribute name="guestdir" type="string"/>
+    <attribute name="hostdir" type="string"/>
+  </complexType>
+  
+  <element name="docker" type="oa:DockerType"/>
+
+  <complexType name="DockerType">
+    <attribute name="image" type="string" use="required"/>
+    <attribute name="guestdir" type="string"/>
+  </complexType>
+  
+</schema>

@@ -48,7 +48,7 @@ test_that("pipeline creation fails in expected ways", {
 
 test_that("pipeline object is correctly formed", {
     ## class
-    expect_true(inherits(pline1, "pipeline"))
+    expect_is(pline1, "pipeline")
 
     ## element names
     elementNames <- names(pline1)
@@ -58,10 +58,10 @@ test_that("pipeline object is correctly formed", {
     expect_match(elementNames, "^pipes$", all = FALSE)
 
     ## element classes
-    expect_true(inherits(getName(pline1), "character"))
-    expect_true(inherits(getComponents(pline1), "list"))
-    expect_true(inherits(getDescription(pline1), "character"))
-    expect_true(inherits(getPipes(pline1), "list"))
+    expect_is(getName(pline1), "character")
+    expect_is(getComponents(pline1), "list")
+    expect_is(getDescription(pline1), "character")
+    expect_is(getPipes(pline1), "list")
 
     ## element values
     expect_identical(getName(pline1), plineName)
@@ -89,7 +89,7 @@ test_that("pipe creation fails in expected ways", {
 
 test_that("pipe object is correctly formed", {
     ## class
-    expect_true(inherits(pipe1, "pipe"))
+    expect_is(pipe1, "pipe")
 
     ## element names
     elementNames <- names(pipe1)
@@ -97,8 +97,8 @@ test_that("pipe object is correctly formed", {
     expect_match(elementNames, "^end$", all = FALSE)
 
     ## element classes
-    expect_true(inherits(start(pipe1), "list"))
-    expect_true(inherits(end(pipe1), "list"))
+    expect_is(start(pipe1), "list")
+    expect_is(end(pipe1), "list")
 
     ## element values
     expect_equal(length(end(pipe1)), 2)
@@ -127,7 +127,7 @@ test_that("component creation fails in expected ways", {
 
 test_that("component object is correctly formed", {
     ## class
-    expect_true(inherits(comp1, "component"))
+    expect_is(comp1, "component")
 
     ## element names
     elementNames <- names(comp1)

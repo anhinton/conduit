@@ -12,7 +12,8 @@ module(name, language, host = NULL, description = NULL, inputs = NULL,
 
 \item{language}{Language name}
 
-\item{host}{Machine on which module is to be run}
+\item{host}{\code{moduleHost} object describing machine where
+module is to be executed}
 
 \item{description}{A basic description of the module}
 
@@ -26,27 +27,29 @@ module(name, language, host = NULL, description = NULL, inputs = NULL,
 }
 \value{
 \code{module} list containing:
-\itemize{
-  \item{name}
-  \item{language}
-  \item{host}
-  \item{description}
-  \item{inputs}
-  \item{outputs}
-  \item{sources}
-}
+
+\item{name}{module name}
+\item{language}{module language}
+\item{host}{\code{moduleHost} object}
+\item{description}{module description}
+\item{inputs}{list of \code{moduleInput} objects}
+\item{outputs}{list of \code{moduleOutput} objects}
+\item{sources}{list of \code{moduleSource} objects}
 }
 \description{
 Creates a module object which can be executed in conduit.
 }
 \details{
 \code{inputs}, \code{outputs}, and \code{sources} should be lists
-of objects created using \code{moduleInput}, \code{moduleOutput}, and
-\code{moduleSource} respectively.
+of objects created using \code{moduleInput}, \code{moduleOutput},
+and \code{moduleSource} respectively.
 
-Module \sQuote{location} defaults to current working
+Module \code{location} defaults to current working
 directory. This can be set to indicate the location of the module
 XML file, and its supporting files.
+
+If \code{moduleHost} is not provided module will be executed on
+local machine.
 }
 \examples{
 ## create a module with one output and one source

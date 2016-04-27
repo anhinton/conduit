@@ -84,79 +84,29 @@ sourceOrder <- function(sources) {
     c(zeroLessOrdered, unorderedOrdered, posOrdered)
 }
 
-#' prepare script to resolve internal input
-#'
-#' @param symbol character string with class set to language of module script
-#' @param inputObject file location of serialised language object
-#'
-#' @return character vector of script to ensure input
-internalInputScript <- function(symbol, inputObject) {
-    UseMethod("internalInputScript", object = symbol)
-}
-
-#' prepare script to resolve internal output
-#'
-#' @param symbol character string with class set to language of module script
-#'
-#' @return character vector of script to ensure input
-internalOutputScript <- function (symbol) {
-    UseMethod("internalOutputScript")
-}
-
-#' Prepare script to create inputs
-#'
-#' @param input input name
-#' @param inputObject object to be supplied as input
-#' @param language module language
-#'
-#' @return Script as character vector
-prepareScriptInput <- function(input, inputObject, language) {
-    type <- class(input$vessel)[1]
-    script <- switch(
-        type,
-        internalVessel = {
-            symbol <- input$vessel$symbol
-            class(symbol) <- language
-            internalInputScript(symbol, inputObject)
-        },
-        NULL)
-    return(script)
-}
-
-#' Prepare script to create outputs
-#'
-#' @param output output name
-#' @param language module language
-#'
-#' @return Script as character vector
-prepareScriptOutput <- function(output, language) {
-    type <- class(output$vessel)[1]
-    script <- switch(
-        type,
-        internalVessel = {
-            symbol <- output$vessel$symbol
-            class(symbol) <- language
-            internalOutputScript(symbol)
-        },
-        NULL)
-    return(script)
-}
-
 #' Prepare a script for executing a module in its language.
 #'
-#' @details Resolves the module's internal inputs and creates a script
-#' file from the supplied \code{module},
+#' This function creates an executable script file from a
+#' \code{module} object.
+#'
+#' The script returned will include code to load internal inputs,
+#' followed by the module source scripts in the correct order, and
+#' ending with code to produce internal outputs for consumption by
+#' other modules.
+#'
+#' The resulting script is saved to the current working directory.
 #'
 #' @param module \code{module} object
-#' @param inputObjects Named list of input objects
 #' 
-#' @return List object containg scriptPath and host, with class set to
-#' module$language.
-prepareScript <- function(module, inputObjects) {
+#' @return \code{script} object naming script file
+#'
+#' @seealso Called by \code{runModule}. \code{module}
+prepareScript <- function(module) {
+    if (!inherits(module, "module"))
+        stop("module object required")
     language <- getLanguage(module)
-    onRemoteHost <- !is.null(module$host)
     location <- attr(module, "location")
-    
+
     ## sort sources into correct order
     sources <- module$sources
     sources <- lapply(sourceOrder(sources),
@@ -178,17 +128,7 @@ prepareScript <- function(module, inputObjects) {
 
     ## inputScript loads the module's designated inputs
     inputs <- module$inputs
-    inputScript <-
-        lapply(
-            inputs,
-            function (input, inputObjects, onRemoteHost, language) {
-                inputObject <- getElement(inputObjects, input$name)
-                ## if module is run on remote host, serialized internalVessel
-                ## will be placed in output directory
-                if(onRemoteHost) { inputObject <- basename(inputObject) }
-                script <- prepareScriptInput(input, inputObject, language)
-                return(script)
-            }, inputObjects, onRemoteHost, language)
+    inputScript <- lapply(inputs, prepareScriptInput, language)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
@@ -197,38 +137,185 @@ prepareScript <- function(module, inputObjects) {
         lapply(outputs, prepareScriptOutput, language)
     outputScript <- unlist(outputScript, use.names = FALSE)
 
-    ## moduleScript combines the scripts in correct order
+    moduleScript <- c(inputScript, sourceScript, outputScript)
     moduleScript <- switch(
         language,
-        python = c("import os", "import pickle",
-            inputScript, sourceScript, outputScript),
-        c(inputScript, sourceScript, outputScript))
+        python = c("#!/usr/bin/python", "import os", "import pickle",
+                   moduleScript),
+        R = c("#!/usr/bin/Rscript", moduleScript),
+        shell = c("#!/bin/sh", moduleScript))
     ## script might be empty
     if (is.null(moduleScript))
         moduleScript <- ""
-    
+
     ## write script file to disk
-    
+
     scriptPath <- paste0("script", scriptExtension(language))
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    class(scriptPath) <- module$language
-    return(scriptPath)
+    class(scriptPath) <- c(paste0(language, "Script"), "script")
+    scriptPath
+}
+
+#' Prepare script to create inputs
+#'
+#' @details if a module input is to be fulfilled via an internalVessel
+#'     the module source scripts will require the symbol to be loaded
+#'     prior to execution. other vessel types do not need to be loaded
+#'     in script.
+#' 
+#' @param moduleInput module input object
+#' @param language module language
+#'
+#' @return Script as character vector
+prepareScriptInput <- function(moduleInput, language) {
+    if (!inherits(moduleInput, "moduleInput"))
+        stop("moduleInput object required")
+    vessel <- getVessel(moduleInput)
+    if (inherits(vessel, "internalVessel")) {
+        symbol <- vessel$symbol
+        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        internalInputScript(symbol)
+    } else {
+        NULL
+    }
+}
+
+#' Prepare script to create outputs
+#'
+#' @details if a module output is passed to conduit via an
+#'     internalVessel the module source scripts must serialize the
+#'     object after execution. other vessel types do not need this to
+#'     be done by the glue system.
+#'
+#' @param moduleOutput \code{moduleOutput} object
+#' @param language module language
+#'
+#' @return Script as character vector
+prepareScriptOutput <- function(moduleOutput, language) {
+    if (!inherits(moduleOutput, "moduleOutput"))
+        stop("moduleOutput object required")
+    vessel <- getVessel(moduleOutput)
+    if (inherits(vessel, "internalVessel")) {
+        symbol <- vessel$symbol
+        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        internalOutputScript(symbol)
+    } else {
+        NULL
+    }
+}
+
+#' Prepare script for internal inputs
+#'
+#' These functions prepare a module script snippet to resolve an
+#' internal input
+#'
+#' @param symbol \code{symbol} object
+#'
+#' @return script as character vector
+#'
+#' @name internalInputScript
+internalInputScript <- function(symbol) {
+    if (!inherits(symbol, "symbol"))
+        stop("symbol object required")
+    UseMethod("internalInputScript")
+}
+
+#' prepare script to resolve internal output
+#'
+#' These functions prepare a module script snippet to produce an
+#' internal output
+#'
+#' @param symbol \code{symbol} object
+#'
+#' @return script as character vector
+internalOutputScript <- function (symbol) {
+    if (!inherits(symbol, "symbol"))
+        stop("symbol object required")
+    UseMethod("internalOutputScript")
 }
 
 #' Execute a prepared module script file.
 #'
-#' @details If \code{host} is provided script will be executed on
-#' remote host in \code{host$directory}.
+#' @details If \code{moduleHost} is provided script will be executed on
+#' remote host in \code{outputLocation} on that machine.
 #'
-#' @param script script file to be executed
-#' @param host list of host details
+#' \code{outputLocation} should be the result of running
+#' \code{prepareModuleHost}
+#'
+#' @seealso \code{moduleHost}, \code{prepareModuleHost}
+#'
+#' @param script \code{script} object to be executed
+#' @param moduleHost \code{moduleHost} object
+#' @param outputLocation \code{outputLocation} object
 #'
 #' @seealso \code{runModule}
 #' 
 #' @return 0 if successful
-executeScript <- function(script, host = NULL) {
-    UseMethod("executeScript")
+executeScript <- function(script, moduleHost, outputLocation) {
+    if (!inherits(script, "script"))
+        stop("script object required")
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
+    command <- command(script)
+    executeCommand(moduleHost, outputLocation, command)
+}
+
+#' Generate a system command to run a module's source scripts
+#'
+#' @details \code{script} should be the result of \code{prepareScript}
+#'
+#' This function is usually called by \code{executeScript}.
+#'
+#' @param \code{script} object
+#'
+#' @return \code{command} list containing \code{command} and
+#'     \code{args} character vectors
+#'
+#' @seealso \code{prepareScript}, \code{executeScript}
+command <- function(script) {
+    if (!inherits(script, "script"))
+        stop("script object required")
+    UseMethod("command")
+}
+
+#' Execute a \code{command} list object
+#'
+#' These methods execute a command list prepared by the \code{command}
+#' function.
+#'
+#' If a \code{moduleHost} is provided the command is executed in the
+#' \code{outputLocation} on the host machine.
+#'
+#' This function is usually called by \code{executeScript}.
+#'
+#' @param moduleHost \code{moduleHost} object
+#' @param outputLocation \code{outputLocation} object
+#' @param command \code{command} object
+#'
+#' @seealso This function called by
+#'     \code{executeScript}. \code{moduleHost},
+#'     \code{prepareModuleHost} for \code{outputLocation} creation,
+#'     \code{command}.
+#'
+#' @return 0 if successful
+executeCommand <- function(moduleHost, outputLocation, command) {
+    if (!inherits(moduleHost, "moduleHost") && !is.null(moduleHost))
+        stop("moduleHost object required")
+    if (!inherits(outputLocation, "outputLocation") && !is.null(outputLocation))
+        stop("outputLocation object required")
+    if (!inherits(command, "command"))
+        stop("command object required")
+    UseMethod("executeCommand")
+}
+
+#' @describeIn executeCommand execute a command with no
+#'     \code{moduleHost}
+executeCommand.default <- function(moduleHost, outputLocation, command) {
+    system2(command = command$command,
+            args = command$args)
 }

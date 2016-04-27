@@ -4,22 +4,27 @@
 \alias{prepareScript}
 \title{Prepare a script for executing a module in its language.}
 \usage{
-prepareScript(module, inputObjects)
+prepareScript(module)
 }
 \arguments{
 \item{module}{\code{module} object}
-
-\item{inputObjects}{Named list of input objects}
 }
 \value{
-List object containg scriptPath and host, with class set to
-module$language.
+\code{script} object naming script file
 }
 \description{
-Prepare a script for executing a module in its language.
+This function creates an executable script file from a
+\code{module} object.
 }
 \details{
-Resolves the module's internal inputs and creates a script
-file from the supplied \code{module},
+The script returned will include code to load internal inputs,
+followed by the module source scripts in the correct order, and
+ending with code to produce internal outputs for consumption by
+other modules.
+
+The resulting script is saved to the current working directory.
+}
+\seealso{
+Called by \code{runModule}. \code{module}
 }
 

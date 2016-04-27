@@ -1,5 +1,5 @@
 library(conduit)
-context("test module and pipeline return components")
+context("test module and pipeline result objects")
 
 modulePath <- tempfile("moduleResult")
 if (!dir.exists(modulePath))
@@ -35,7 +35,7 @@ test_that("resultInput() returns correctly", {
 
     ## returns correctly for file output
     res1 <- resultInput(fileoutput, modulePath)
-    expect_true(inherits(res1, "moduleInput"))
+    expect_is(res1, "moduleInput")
     expect_match(getVessel(res1)$ref, getVessel(fileoutput)$ref)
 
     ## returns correctly for url output
@@ -44,7 +44,7 @@ test_that("resultInput() returns correctly", {
 
     ## returns correctly for internal output
     res3 <- resultInput(internaloutput, modulePath)
-    expect_true(inherits(res3, "moduleInput"))
+    expect_is(res3, "moduleInput")
     expect_match(getType(getVessel(res3)), "fileVessel")
     expect_match(getVessel(res3)$ref,
                  paste0(getVessel(internaloutput)$ref,
@@ -68,7 +68,7 @@ test_that("resultSource() returns correctly", {
 
     ## returns correctly for internal output
     res3 <- resultSource(internaloutput, modulePath)
-    expect_true(inherits(res3, "moduleSource"))
+    expect_is(res3, "moduleSource")
 })
 
 test_that("resultOutput() returns correctly", {
@@ -78,19 +78,19 @@ test_that("resultOutput() returns correctly", {
 
     ## returns correctly for file output
     res1 <- resultOutput(fileoutput)
-    expect_true(inherits(res1, "moduleOutput"))
+    expect_is(res1, "moduleOutput")
     expect_match(getType(getVessel(res1)),
                  getType(getVessel(fileoutput)))
 
     ## returns correctly for url output
     res2 <- resultOutput(urloutput)
-    expect_true(inherits(res2, "moduleOutput"))
+    expect_is(res2, "moduleOutput")
     expect_match(getType(getVessel(res2)),
                  getType(getVessel(urloutput)))
 
     ## returns correctly for internal output
     res3 <- resultOutput(internaloutput)
-    expect_true(inherits(res3, "moduleOutput"))
+    expect_is(res3, "moduleOutput")
     expect_match(getType(getVessel(res3)),
                  getType(getVessel(internaloutput)))
 })
@@ -116,8 +116,8 @@ test_that("moduleResult() returns correctly", {
 
     ## correct output
     res1 <- moduleResult(objects, modulePath, module)
-    expect_true(inherits(res1, "moduleResult"))
-    expect_true(inherits(res1, "componentResult"))
+    expect_is(res1, "moduleResult")
+    expect_is(res1, "componentResult")
 
     ## name
     expect_match(names(res1), "name", all = FALSE)
@@ -129,7 +129,7 @@ test_that("moduleResult() returns correctly", {
 
     ## module object
     expect_match(names(res1), "component", all = FALSE)
-    expect_true(inherits(res1$component, "module"))
+    expect_is(res1$component, "module")
 
     ## output objects
     expect_match(names(res1), "outputList", all = FALSE)
@@ -143,7 +143,7 @@ test_that("resultComponent() returns correctly", {
 
     ## module component
     comp1 <- resultComponent(compRes1, pipelinePath)
-    expect_true(inherits(comp1, "component"))
+    expect_is(comp1, "component")
 })
 
 test_that("pipelineResult() returns correctly", {
@@ -171,8 +171,8 @@ test_that("pipelineResult() returns correctly", {
     ## correct output
     res1 <- pipelineResult(componentResultList, pipelinePath,
                            pipeline)
-    expect_true(inherits(res1, "pipelineResult"))
-    expect_true(inherits(res1, "componentResult"))
+    expect_is(res1, "pipelineResult")
+    expect_is(res1, "componentResult")
 
     ## name
     expect_match(names(res1), "name", all = FALSE)
@@ -184,7 +184,7 @@ test_that("pipelineResult() returns correctly", {
 
     ## component
     expect_match(names(res1), "component", all = FALSE)
-    expect_true(inherits(res1$component, "pipeline"))
+    expect_is(res1$component, "pipeline")
 
     ## componentResultList
     expect_match(names(res1), "componentResultList", all = FALSE)
@@ -213,9 +213,7 @@ test_that("can export and import componentResult objects", {
         dir.create(targ)
 
     ## fail for invalid arguments
-    expect_error(export.componentResult(unclass(res1), targ),
-                 "componentResult object required")
-    expect_error(export.componentResult(res1, tempfile()),
+    expect_error(export(res1, tempfile()),
                  "targetDirectory does not exist")
 
     ## pipelineResult
@@ -232,23 +230,23 @@ test_that("can export and import componentResult objects", {
     if (!dir.exists(importDir))
         dir.create(importDir)
     import1 <- importPipeline(tar1)
-    expect_true(inherits(import1, "pipeline"))
+    expect_is(import1, "pipeline")
     expect_match(getName(import1), getName(p1))
 
     ## set pipeline name
     impName2 <- tempfile("rondtondly")
     import2 <- importPipeline(tarfile = tar1, name = impName2)
-    expect_true(inherits(import2, "pipeline"))
+    expect_is(import2, "pipeline")
     expect_match(getName(import2), impName2)
 
     ## successfully import from module tarfile
     import3 <- importModule(tar2)
-    expect_true(inherits(import3, "module"))
+    expect_is(import3, "module")
     expect_match(getName(import3), getName(res2$component))
 
     ## set module name
     impName4 <- tempfile("alabluxo")
     import4 <- importModule(tarfile = tar2, name = impName4)
-    expect_true(inherits(import4, "module"))
+    expect_is(import4, "module")
     expect_match(getName(import4), impName4)
 })
