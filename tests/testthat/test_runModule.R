@@ -296,7 +296,7 @@ test_that(
         output1 <- output(internal_output, lang, outdir)
         expect_is(output1, "output")
         expect_match(
-            getResult(output1),
+            getRef(output1),
             file.path(outdir, paste0(symbol, internalExtension(lang))))
 
         ## works for urlVessel
@@ -305,7 +305,7 @@ test_that(
             "url", urlVessel(url), ioFormat("HTML file"))
         output2 <- output(url_output, lang, outdir)
         expect_is(output2, "output")
-        expect_match(getResult(output2), url)
+        expect_match(getRef(output2), url)
         
         ## works for fileVessel
         file <- "output.csv"
@@ -313,7 +313,7 @@ test_that(
             "file", fileVessel(file), ioFormat("CSV file"))
         output3 <- output(file_output, lang, outdir)
         expect_is(output3, "output")
-        expect_match(getResult(output3), file.path(outdir, file))
+        expect_match(getRef(output3), file.path(outdir, file))
         
         ## fails for unknown vessel type
         not_a_real_output <- internal_output
@@ -413,11 +413,11 @@ test_that(
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1$outputList[[1]]$name, output1$name)
         expect_is(result1, "moduleResult")
-        expect_true(file.exists(getResult(result1$outputList[[1]])))
+        expect_true(file.exists(getRef(result1$outputList[[1]])))
         
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
-        inputObjects <- list(getResult(result1$outputList[[1]]))
+        inputObjects <- list(getRef(result1$outputList[[1]]))
         names(inputObjects) <- layoutGraph$inputs[[1]]$name
         output2 <- layoutGraph$outputs[[1]]
         result2 <- runModule(layoutGraph,
@@ -425,7 +425,7 @@ test_that(
                              targetDirectory = targ)
         expect_is(result2, "moduleResult")
         expect_match(result2$outputList[[1]]$name, output2$name)
-        expect_true(file.exists(getResult(result2$outputList[[1]])))
+        expect_true(file.exists(getRef(result2$outputList[[1]])))
     })
 
 ## TODO(anhinton): runModule() works for a module with a moduleHost

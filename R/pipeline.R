@@ -488,7 +488,7 @@ input <- function (pipe, outputList) {
     startOutput <- start(pipe)$output
     componentOutputs <- outputList[[startComponent]]
     if (is.null(componentOutputs)) stop("start component does not exist")
-    input <- getResult(componentOutputs[[startOutput]])
+    input <- getRef(componentOutputs[[startOutput]])
     if (is.null(input)) stop("start output does not exist")
     class(input) <- "input"
     input
