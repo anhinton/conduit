@@ -139,22 +139,6 @@ getRef.default <- function(x) {
     x$ref
 }
 
-#' Retrieve object result
-#'
-#' @param x object
-#'
-#' @export
-getResult <- function(x) {
-    UseMethod("getResult")
-}
-
-#' @describeIn getResult
-#'
-#' @export
-getResult.default <- function(x) {
-    x$result
-}
-
 #' Export OpenAPI objects
 #'
 #' Export OpenAPI objects for sharing.

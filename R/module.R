@@ -1184,7 +1184,7 @@ prepareURLInput <- function(vessel, input) {
 #' \item{format}{\code{ioFormat} object}
 #' \item{vessel}{\code{vessel} object}
 #' \item{language}{module language}
-#' \item{result}{address of output object produced}
+#' \item{ref}{address of output object produced}
 #'
 #' @export
 output <- function(moduleOutput, language, outputDirectory) {
@@ -1196,8 +1196,8 @@ output <- function(moduleOutput, language, outputDirectory) {
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
 
-    ## calculate result
-    result <-
+    ## calculate ref
+    ref <-
         switch(type,
                internalVessel =
                    paste0(vessel$symbol, internalExtension(language)),
@@ -1207,17 +1207,17 @@ output <- function(moduleOutput, language, outputDirectory) {
 
     ## ensure absolute path
     if (type == "internalVessel" || type == "fileVessel") {
-        result <- 
-            if (!is_absolute(result)) {
-                file.path(outputDirectory, result)
-            } else if (file.exists(result)) {
-                normalizePath(result)
+        ref <- 
+            if (!is_absolute(ref)) {
+                file.path(outputDirectory, ref)
+            } else if (file.exists(ref)) {
+                normalizePath(ref)
             }
     }
 
     ## return output object
     output <-  list(name = name, format = format, vessel = vessel,
-                    language = language, result = result)
+                    language = language, ref = ref)
     class(output) <- "output"
     output
 }
@@ -1237,11 +1237,11 @@ resolveOutput <- function (moduleOutput, language,
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
     output <- output(moduleOutput, language, outputDirectory)
-    result <- getResult(output)
+    ref <- getRef(output)
 
     ## TODO(anhinton): write check for URL outputs
     if (type == "internalVessel" || type == "fileVessel") {
-        if (!file.exists(result))
+        if (!file.exists(ref))
             stop(paste0("output object '", name, "' does not exist"))
     }
     return(output)

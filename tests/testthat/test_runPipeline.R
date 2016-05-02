@@ -146,17 +146,17 @@ test_that("runComponent() returns correctly", {
     expect_is(result1, "componentResult")
     expect_equal(length(result1$outputList), 1)
     expect_is(result1$outputList[[1]], "output")
-    expect_true(file.exists(getResult(result1$outputList[[1]])))
+    expect_true(file.exists(getRef(result1$outputList[[1]])))
                             
     ## component with inputs
     result2 <- runComponent(component = componentList[["layoutGraph"]],
                             inputList = list(
-                                myGraph = getResult(result1$outputList[[1]])),
+                                myGraph = getRef(result1$outputList[[1]])),
                             pipelinePath = pipelinePath)
     expect_is(result2, "componentResult")
     expect_equal(length(result2$outputList), 1)
     expect_is(result2$outputList[[1]], "output")
-    expect_true(file.exists(getResult(result2$outputList[[1]])))
+    expect_true(file.exists(getRef(result2$outputList[[1]])))
 })
 
 test_that("runPipeline() produces expected results", {

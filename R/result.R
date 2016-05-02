@@ -229,16 +229,16 @@ resultInput <- function(output, modulePath) {
     format <- getFormat(output)
     switch(type,
            fileVessel =, internalVessel = {
-               result <- getResult(output)
-               resultref <-
-                   if (dirname(result) == modulePath) {
-                       basename(result)
+               ref <- getRef(output)
+               ref <-
+                   if (dirname(ref) == modulePath) {
+                       basename(ref)
                    } else {
-                       gsub(modulePath, ".", result)
+                       gsub(modulePath, ".", ref)
                    }        
                moduleInput(
                    name = name,
-                   vessel = fileVessel(ref = resultref),
+                   vessel = fileVessel(ref = ref),
                    format = format)
            })
 }
@@ -260,12 +260,12 @@ resultSource <- function(output, modulePath) {
     if (!dir.exists(modulePath))
         stop("modulePath does not exist")
     
-    result <- getResult(output)
-    resultref <-
-        if (dirname(result) == modulePath) {
-            basename(result)
+    ref <- getRef(output)
+    ref <-
+        if (dirname(ref) == modulePath) {
+            basename(ref)
         } else {
-            gsub(modulePath, ".", result)
+            gsub(modulePath, ".", ref)
         }
     input <- moduleInput(name = getName(output), vessel = getVessel(output),
                          format = getFormat(output))

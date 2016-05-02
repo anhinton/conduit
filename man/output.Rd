@@ -20,7 +20,7 @@ output(moduleOutput, language, outputDirectory)
 \item{format}{\code{ioFormat} object}
 \item{vessel}{\code{vessel} object}
 \item{language}{module language}
-\item{result}{address of output object produced}
+\item{ref}{address of output object produced}
 }
 \description{
 Return the object produced by a module output.
