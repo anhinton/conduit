@@ -541,21 +541,15 @@ calculateInputs <- function(pipeList, componentList, pipelinePath) {
     inputList
 }
 
-#' Create a \code{graphNEL} node-and-edge graph of a pipeline
+#' Get pipes as list of edges
 #'
-#' \code{graphPipeline} produces a directed graph of the given
-#' \code{pipeline} with components as nodes and pipes as directed edges.
-#'
-#' The edges in the resulting graph object are a dumb representation
-#' of the pipes in a pipeline, i.e. they do not retain output and
-#' input information. They merely serve to provide on object for a
-#' topological sort for the purposes of determining the execution
-#' order of a pipeline's components.
+#' For each vertex (component) get a vector of vertices to which there
+#' is an edge (pipe).
 #'
 #' @param pipeline A \code{pipeline} list object
 #'
-#' @return A \pkg{graph} \code{graphNEL} object
-graphPipeline <- function(pipeline) {
+#' @return named list of character vectors for each component
+pipesAsEdges <- function(pipeline) {
     if (!inherits(pipeline, "pipeline"))
         stop("pipeline object required")
     componentList <- getComponents(pipeline)
@@ -563,28 +557,26 @@ graphPipeline <- function(pipeline) {
     pipeList <- getPipes(pipeline)
 
     ## create edge list. Each component is a node, and for each node
-    ## the egde list must indicate to which nodes there is an edge
+    ## the edge list must indicate to which nodes there is an edge
     ## (pipe). All nodes must have a list of edges, even if this list
     ## is empty.
-    edgeList <- lapply(
+    edgeList <- sapply(
         ## for each component
         componentNames,
         function(x, pipeList) {
-            ## returns names of components to which there is an pipe
+            ## returns names of components to which there is a pipe
             ## with the current component as startComponent
             edges <- lapply(pipeList,
                    function(y, x) {
                        if (startComponent(y) == x) {
                            endComponent(y)
                        } else {
-                           NULL
+                           character()
                        }
                    }, x)
-            list(edges = unlist(edges))
+            unlist(edges)
         }, pipeList)
-    ## create graph object representing pipeline
-    graph::graphNEL(nodes=componentNames, edgeL=edgeList,
-                    edgemode="directed")
+    edgeList
 }
 
 #' Run a pipeline
@@ -668,8 +660,8 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
     if (!valid) stop(paste0("Pipeline '", name, "' is invalid."))
 
     ## determine execution order of components
-    componentGraph <- graphPipeline(pipeline)
-    componentOrder <- RBGL::tsort(componentGraph)
+    edges <- pipesAsEdges(pipeline)
+    componentOrder <- topologicalSort(edges)
 
     ## resolve inputs
     inputList <- calculateInputs(pipeList, componentList, pipelinePath)

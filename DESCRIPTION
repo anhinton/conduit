@@ -15,9 +15,7 @@ Depends:
     methods
 Imports:
     RCurl,
-    XML,
-    graph,
-    RBGL
+    XML
 Suggests:
     Rgraphviz,
     gridGraphviz,

@@ -111,22 +111,18 @@ test_that("calculateInputs() produces appropriate object", {
         inputList)))
 })
 
-test_that("graphPipeline() produces appropriate object", {
+test_that("pipesAsEdges() produces appropriate object", {
     ## fails for invalid input
-    expect_error(graphPipeline(unclass(simpleGraph)),
+    expect_error(pipesAsEdges(unclass(simpleGraph)),
                  "pipeline object required")
 
     ## expected output
-    graph1 <- graphPipeline(simpleGraph)
-    expect_is(graph1, "graphNEL")
-    expect_equal(graph::numNodes(graph1),
+    edges1 <- pipesAsEdges(simpleGraph)
+    expect_is(edges1, "list")
+    expect_equal(length(edges1),
                  length(getComponents(simpleGraph)))
-    expect_equal(graph::numEdges(graph1),
+    expect_equal(length(unlist(edges1)),
                  length(getPipes(simpleGraph)))
-    expect_match(RBGL::tsort(graph1)[1],
-                 "createGraph")
-    expect_match(RBGL::tsort(graph1)[3],
-                 "plotGraph")
 })
 
 test_that("runComponent() returns correctly", {
