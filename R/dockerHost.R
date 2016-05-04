@@ -87,8 +87,7 @@ executeCommand.dockerHost <- function(moduleHost, outputLocation, command) {
                   "-w", guestdir, 
                   moduleHost$image,
                   paste(args, collapse = " "))
-    system2(command = "docker",
-            args = args)
+    system2(command = "docker", args = args, stdout = TRUE, stderr = TRUE)
 }
 
 #' @describeIn retrieveModuleHost does nothing

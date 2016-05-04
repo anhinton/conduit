@@ -316,5 +316,6 @@ executeCommand <- function(moduleHost, outputLocation, command) {
 #'     \code{moduleHost}
 executeCommand.default <- function(moduleHost, outputLocation, command) {
     system2(command = command$command,
-            args = command$args)
+            args = command$args,
+            stdout = TRUE, stderr = TRUE)
 }
