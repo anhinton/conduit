@@ -1006,9 +1006,10 @@ runModule <- function(module, targetDirectory = getwd(),
     
     ## execute script file
     exec_result <- executeScript(script, moduleHost, outputLocation)
-    if (exec_result != 0)
-        stop("Unable to execute module script")
-
+    if (!is.null(attr(exec_result, "status"))) {
+        stop(paste("Unable to execute module script: ", exec_result))
+    }
+        
     ## retrieve outputs from moduleHost
     if (!is.null(moduleHost)) {
         retrieveModuleHost(moduleHost = moduleHost,
