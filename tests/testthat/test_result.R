@@ -202,6 +202,10 @@ test_that("pipelineResult() returns correctly", {
 })
 
 test_that("can export and import componentResult objects", {
+    ## skip these tests on CRAN cause of lots of file and archive reading
+    ## and writing
+    skip_on_cran()
+    
     p1 <- loadPipeline("p1", system.file("extdata", "simpleGraph",
                                          "pipeline.xml",
                                          package = "conduit"))

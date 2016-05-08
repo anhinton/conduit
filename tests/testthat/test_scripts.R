@@ -134,10 +134,11 @@ test_that("executeCommand() returns appropriately", {
                                 command = unclass(command1)),
                  "command object required")
 
-    ## returns cleanly for default
-    expect_equal(executeCommand(moduleHost = NULL, outputLocation = NULL,
-                                command = command1),
-                 0)
+    ## returns character vector with no status attribute
+    execResult <- executeCommand(moduleHost = NULL, outputLocation = NULL,
+                                 command = command1)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 test_that("executeScript() returns correctly", {
@@ -169,10 +170,10 @@ test_that("executeScript() returns correctly", {
                  "outputLocation object required")
     
     ## valid return for no moduleHost
-    expect_equal(
-        executeScript(script = script1, moduleHost = NULL,
-                      outputLocation = NULL),
-        0)
+    execResult <- executeScript(script = script1, moduleHost = NULL,
+                      outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 ## test executeScript.LANGUAGE
@@ -187,8 +188,10 @@ test_that("can execute R scripts", {
                                package = "conduit"))
     inputObjects <- NULL
     script <- prepareScript(module1)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               outputLocation = NULL), 0)
+    execResult <- executeScript(script = script, moduleHost = NULL,
+                                outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 test_that("can execute python scripts", {
@@ -207,9 +210,10 @@ test_that("can execute python scripts", {
                 ioFormat("python list"))))
     inputObjects <- NULL
     script <- prepareScript(module2)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               outputLocation = NULL),
-                 0)
+    execResult <- executeScript(script = script, moduleHost = NULL,
+                                outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 test_that("can execute shell scripts", {
@@ -228,7 +232,8 @@ test_that("can execute shell scripts", {
                 ioFormat("shell environment variable"))))
     inputObjects <- NULL
     script <- prepareScript(module3)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               outputLocation = NULL),
-                 0)
+    execResult <- executeScript(script = script, moduleHost = NULL,
+                                 outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })

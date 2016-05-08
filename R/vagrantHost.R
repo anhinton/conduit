@@ -109,8 +109,7 @@ executeCommand.vagrantHost <- function(moduleHost, outputLocation,
     guestdir <- file.path(moduleHost$guestdir, outputLocation)
     args <- paste("ssh", "-c", "'cd", guestdir, ";",
                   paste(args, collapse = " "), "'")
-    system2(command = "vagrant",
-            args = args)
+    system2(command = "vagrant", args = args, stdout = TRUE, stderr = TRUE)
 }
 
 #' @describeIn retrieveModuleHost retrieve module output from
