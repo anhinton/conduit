@@ -33,3 +33,12 @@ readModuleInputHostXML <- function (moduleInputHostXML) {
     name <- attrs[["name"]]
     moduleInputHost(name = name)
 }
+
+#' @describeIn moduleHostToXML Create XML corresponding to a
+#'     \code{moduleInputHost} object
+#'
+#' @import XML
+moduleHostToXML.moduleInputHost <- function(moduleInputHost) {
+    child <- newXMLNode("moduleInput", attrs = moduleInputHost)
+    newXMLNode(name = "host", kids = list(child))
+}

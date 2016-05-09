@@ -30,45 +30,18 @@ test_that("readModuleInputHostXML() returns correctly", {
     expect_match(mih1$name, name)
 })
 
-## test_that("moduleHostToXML.moduleInputHost() creates correct XML", {
-##     library(XML)
-##     mih1 <- moduleInputHost(moduleInputfile)
-##     mih2 <- moduleInputHost(moduleInputfile, hostdir)
-##     mih3 <- moduleInputHost(moduleInputfile, hostdir, guestdir)
+test_that("moduleHostToXML.moduleInputHost() creates correct XML", {
+    library(XML)
+    mih1 <- moduleInputHost(name = name)
 
-##     ## just moduleInputfile
-##     hostNode1 <- moduleHostToXML(mih1)
-##     child1 <- xmlChildren(hostNode1)[[1]]
-##     attrs1 <- xmlAttrs(child1)
-##     expect_is(hostNode1, "XMLInternalElementNode")
-##     expect_match(xmlName(hostNode1), "host")
-##     expect_match(xmlName(child1), "moduleInput")
-##     expect_match(attrs1[["moduleInputfile"]], normalizePath(moduleInputfile))
-##     expect_match(attrs1[["hostdir"]], dirname(moduleInputfile))
-##     expect_match(attrs1[["guestdir"]], "/moduleInput")
-
-##     ## moduleInputfile and hostdir
-##     hostNode2 <- moduleHostToXML(mih2)
-##     child2 <- xmlChildren(hostNode2)[[1]]
-##     attrs2 <- xmlAttrs(child2)
-##     expect_is(hostNode2, "XMLInternalElementNode")
-##     expect_match(xmlName(hostNode2), "host")
-##     expect_match(xmlName(child2), "moduleInput")
-##     expect_match(attrs2[["moduleInputfile"]], normalizePath(moduleInputfile))
-##     expect_match(attrs2[["hostdir"]], normalizePath(hostdir))
-##     expect_match(attrs2[["guestdir"]], "/moduleInput")
-
-##     ## moduleInputfile hostdir guestdir
-##     hostNode3 <- moduleHostToXML(mih3)
-##     child3 <- xmlChildren(hostNode3)[[1]]
-##     attrs3 <- xmlAttrs(child3)
-##     expect_is(hostNode3, "XMLInternalElementNode")
-##     expect_match(xmlName(hostNode3), "host")
-##     expect_match(xmlName(child3), "moduleInput")
-##     expect_match(attrs3[["moduleInputfile"]], normalizePath(moduleInputfile))
-##     expect_match(attrs3[["hostdir"]], normalizePath(hostdir))
-##     expect_match(attrs3[["guestdir"]], guestdir)
-## })
+    hostNode1 <- moduleHostToXML(mih1)
+    child1 <- xmlChildren(hostNode1)[[1]]
+    attrs1 <- xmlAttrs(child1)
+    expect_is(hostNode1, "XMLInternalElementNode")
+    expect_match(xmlName(hostNode1), "host")
+    expect_match(xmlName(child1), "moduleInput")
+    expect_match(attrs1[["name"]], name)
+})
 
 ## test_that("prepareModuleHost.moduleInputHost() returns correctly", {
 ##     if (skipHost) {
