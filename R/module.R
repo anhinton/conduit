@@ -475,7 +475,7 @@ loadModule <- function(name, ref, path = NULL,
 #' This function creates a \code{moduleHost} object from valid host
 #' elements.
 #'
-#' As of 2016-02-26 only \samp{<vagrant/>} elements are
+#' As of 2016-05-09 \samp{<docker>} and \samp{<vagrant/>} elements are
 #' supported.
 #'
 #' @param moduleHostXML host XML node
@@ -487,8 +487,9 @@ readModuleHostXML <- function(moduleHostXML) {
     type <- xmlName(moduleHostXML)
     moduleHost <- switch(
         type,
-        vagrant = readVagrantHostXML(moduleHostXML),
-        docker = readDockerHostXML(moduleHostXML)
+        docker = readDockerHostXML(moduleHostXML),
+        moduleInput = readModuleInputHostXML(moduleHostXML),
+        vagrant = readVagrantHostXML(moduleHostXML)
     )
     if(!inherits(moduleHost, "moduleHost"))
         class(moduleHost) <- c(class(moduleHost), "moduleHost")

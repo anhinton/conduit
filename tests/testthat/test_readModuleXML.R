@@ -197,6 +197,20 @@ test_that("readModuleHostXML() returns correctly", {
         attrs = list(vagrantfile = vagrantfile))
     vh1 <- readModuleHostXML(vhXML1)
     expect_is(vh1, "moduleHost")
+    
+    ## <docker/> host XML
+    vhXML2 <- newXMLNode(
+        name = "docker",
+        attrs = list(image = "ubuntu:latest"))
+    vh2 <- readModuleHostXML(vhXML2)
+    expect_is(vh2, "moduleHost")
+    
+    ## <moduleInput/> host XML
+    vhXML3 <- newXMLNode(
+        name = "moduleInput",
+        attrs = list(name = "myHost"))
+    vh3 <- readModuleHostXML(vhXML3)
+    expect_is(vh3, "moduleHost")
 })
 
 ## load module from XML file
