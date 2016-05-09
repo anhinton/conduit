@@ -671,6 +671,12 @@ readModuleXML <- function (name, xml, location = getwd()) {
             lapply(outputNodes, readModuleIOXML)
         }
 
+    ## check that any moduleInput host matches a named input
+    if (inherits(host, "moduleInputHost")) {
+        if (!(host$name) %in% names(inputs))
+            stop("moduleInput host name does not match any input names")
+        }
+
     module(name = name,
            language = language,
            host = host,
