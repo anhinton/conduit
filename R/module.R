@@ -673,7 +673,7 @@ readModuleXML <- function (name, xml, location = getwd()) {
 
     ## check that any moduleInput host matches a named input
     if (inherits(host, "moduleInputHost")) {
-        if (!(host$name) %in% names(inputs))
+        if (!(host$name) %in% sapply(inputs, getName))
             stop("moduleInput host name does not match any input names")
         }
 
@@ -980,8 +980,7 @@ runModule <- function(module, targetDirectory = getwd(),
     moduleInputList <- module$inputs
     moduleOutputList <- module$outputs
     language <- getLanguage(module)
-    host <- module$host
-
+    
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
     if (file.exists(modulePath))
@@ -999,10 +998,26 @@ runModule <- function(module, targetDirectory = getwd(),
                            language = language,
                            location = getLocation(module))
 
+    ## prepare script
     script <- prepareScript(module)
 
-    ## prepare moduleHost
+    ## if moduleHost is waiting for a module input, load this now
     moduleHost <- module$host
+    if (inherits(moduleHost, "moduleInputHost")) {
+        inputName <- getName(moduleHost)
+        inputType <- getType(getVessel(moduleInputList[[inputName]]))
+        rawXML <- switch(
+            inputType,
+            fileVessel =,
+            urlVessel = readLines(inputObjects[[inputName]]),
+            stop("input type not defined"))
+        xml <- xmlRoot(xmlParse(rawXML))
+        moduleHost <- readModuleHostXML(xml)
+        if (inherits(moduleHost, "moduleInputHost"))
+            stop("moduleInputHost points to another moduleInputHost!")
+    }
+
+    ## prepare moduleHost
     outputLocation <-
         if (!is.null(moduleHost)) {
             prepareModuleHost(moduleHost = moduleHost, moduleName = name,
@@ -1014,7 +1029,7 @@ runModule <- function(module, targetDirectory = getwd(),
     ## execute script file
     exec_result <- executeScript(script, moduleHost, outputLocation)
     if (!is.null(attr(exec_result, "status"))) {
-        stop(paste("Unable to execute module script: ", exec_result))
+        stop(c("Unable to execute module script: ", exec_result))
     }
         
     ## retrieve outputs from moduleHost
