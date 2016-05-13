@@ -475,8 +475,8 @@ loadModule <- function(name, ref, path = NULL,
 #' This function creates a \code{moduleHost} object from valid host
 #' elements.
 #'
-#' As of 2016-02-26 only \samp{<vagrant/>} elements are
-#' supported.
+#' As of 2016-05-13 \samp{<docker/>}, \samp{<moduleInput/>} and
+#' \samp{<vagrant/>} elements are supported.
 #'
 #' @param moduleHostXML host XML node
 #'
@@ -487,8 +487,9 @@ readModuleHostXML <- function(moduleHostXML) {
     type <- xmlName(moduleHostXML)
     moduleHost <- switch(
         type,
-        vagrant = readVagrantHostXML(moduleHostXML),
-        docker = readDockerHostXML(moduleHostXML)
+        docker = readDockerHostXML(moduleHostXML),
+        moduleInput = readModuleInputHostXML(moduleHostXML),
+        vagrant = readVagrantHostXML(moduleHostXML)
     )
     if(!inherits(moduleHost, "moduleHost"))
         class(moduleHost) <- c(class(moduleHost), "moduleHost")
@@ -611,6 +612,9 @@ readModuleSourceXML <- function (xml) {
 
 #' Parse module XML and return a \code{module} object
 #'
+#' @details If <host/> contains <moduleInput/> function fails if
+#'     moduleInput name does not match any input names.
+#'
 #' @param name module name
 #' @param xml module \code{XMLNode}
 #' @param location file directory of invoking pipeline/module xml (optional)
@@ -668,6 +672,12 @@ readModuleXML <- function (name, xml, location = getwd()) {
             NULL
         } else {
             lapply(outputNodes, readModuleIOXML)
+        }
+
+    ## check that any moduleInput host matches a named input
+    if (inherits(host, "moduleInputHost")) {
+        if (!(host$name) %in% sapply(inputs, getName))
+            stop("moduleInput host name does not match any input names")
         }
 
     module(name = name,
@@ -954,7 +964,8 @@ moduleSourceToXML <- function (moduleSource,
 #' 
 #' runModule(module = mod2, inputObjects = mod2inputs,
 #'           targetDirectory = tempdir())
-#' 
+#'
+#' @import XML
 #' @export
 runModule <- function(module, targetDirectory = getwd(),
                       inputObjects = NULL) {
@@ -973,8 +984,7 @@ runModule <- function(module, targetDirectory = getwd(),
     moduleInputList <- module$inputs
     moduleOutputList <- module$outputs
     language <- getLanguage(module)
-    host <- module$host
-
+    
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
     if (file.exists(modulePath))
@@ -992,10 +1002,29 @@ runModule <- function(module, targetDirectory = getwd(),
                            language = language,
                            location = getLocation(module))
 
+    ## prepare script
     script <- prepareScript(module)
 
-    ## prepare moduleHost
+    ## if moduleHost is waiting for a module input, load this now
     moduleHost <- module$host
+    if (inherits(moduleHost, "moduleInputHost")) {
+        ## load moduleHost from named input
+        inputName <- getName(moduleHost)
+        inputType <- getType(getVessel(moduleInputList[[inputName]]))
+        rawXML <- switch(
+            inputType,
+            fileVessel =,
+            urlVessel = readLines(inputObjects[[inputName]]),
+            stop(paste("unable to load a moduleHost of type", inputType,
+                       "from input")))
+        xml <- xmlRoot(xmlParse(rawXML))
+        moduleHost <- readModuleHostXML(xml)
+        ## don't let moduleInputHost objects recurse
+        if (inherits(moduleHost, "moduleInputHost"))
+            stop("moduleInputHost points to another moduleInputHost!")
+    }
+
+    ## prepare moduleHost
     outputLocation <-
         if (!is.null(moduleHost)) {
             prepareModuleHost(moduleHost = moduleHost, moduleName = name,
@@ -1007,7 +1036,7 @@ runModule <- function(module, targetDirectory = getwd(),
     ## execute script file
     exec_result <- executeScript(script, moduleHost, outputLocation)
     if (!is.null(attr(exec_result, "status"))) {
-        stop(paste("Unable to execute module script: ", exec_result))
+        stop(c("Unable to execute module script: ", exec_result))
     }
         
     ## retrieve outputs from moduleHost

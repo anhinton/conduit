@@ -56,6 +56,7 @@ readDockerHostXML <- function (dockerHostXML) {
 #'     \code{dockerHost} object
 #'
 #' @import XML
+#' @export
 moduleHostToXML.dockerHost <- function(dockerHost) {
     if (!inherits(dockerHost, "dockerHost"))
         stop ("dockerHost object required")
@@ -65,6 +66,8 @@ moduleHostToXML.dockerHost <- function(dockerHost) {
 
 #' @describeIn prepareModuleHost prepare \code{dockerHost}. Returns
 #'     empty string.
+#'
+#' @export
 prepareModuleHost.dockerHost <- function(moduleHost, moduleName, modulePath) {
     ## module execution directory is shared with guest container
     ## SO nothing to do
@@ -78,6 +81,8 @@ prepareModuleHost.dockerHost <- function(moduleHost, moduleName, modulePath) {
 }
 
 #' @describeIn executeCommand execute command on a \code{dockerHost}
+#'
+#' @export
 executeCommand.dockerHost <- function(moduleHost, outputLocation, command) {
     args <- c(command$command, command$args)
     hostdir <- getwd()
@@ -91,6 +96,8 @@ executeCommand.dockerHost <- function(moduleHost, outputLocation, command) {
 }
 
 #' @describeIn retrieveModuleHost does nothing
+#'
+#' @export
 retrieveModuleHost.dockerHost <- function(moduleHost, outputLocation,
                                           modulePath) {
     # module execution directory is shared with guest container

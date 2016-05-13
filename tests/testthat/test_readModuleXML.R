@@ -146,7 +146,7 @@ test_that(
 
 ## read <module> XML
 
-test_that("readModuleXML creates appropriate module object", {
+test_that("readModuleXML creates appropriate module object", {    
     ## minimal module
     minModXML <- moduleToXML(module(
         name = "minMod", language = "R"))
@@ -186,6 +186,18 @@ test_that("readModuleXML creates appropriate module object", {
     expect_true(!is.null(module1$inputs))
     expect_true(!is.null(module1$sources))
     expect_true(!is.null(module1$outputs))
+
+    ## fails for moduleInputHost with no matching input
+    module2Xml <- moduleToXML(module(
+        name = "module2",
+        language = "R",
+        host = moduleInputHost(name = "wrongName"),
+        inputs = list(
+            moduleInput(name = "rightName",
+                        vessel = fileVessel("host.xml"),
+                        format = ioFormat("XML file")))))
+    expect_error(readModuleXML(name = "module1", xml = module2Xml),
+                 "moduleInput host name does not match any input names")    
 })
 
 ## read <host> xml
@@ -197,6 +209,20 @@ test_that("readModuleHostXML() returns correctly", {
         attrs = list(vagrantfile = vagrantfile))
     vh1 <- readModuleHostXML(vhXML1)
     expect_is(vh1, "moduleHost")
+    
+    ## <docker/> host XML
+    vhXML2 <- newXMLNode(
+        name = "docker",
+        attrs = list(image = "ubuntu:latest"))
+    vh2 <- readModuleHostXML(vhXML2)
+    expect_is(vh2, "moduleHost")
+    
+    ## <moduleInput/> host XML
+    vhXML3 <- newXMLNode(
+        name = "moduleInput",
+        attrs = list(name = "myHost"))
+    vh3 <- readModuleHostXML(vhXML3)
+    expect_is(vh3, "moduleHost")
 })
 
 ## load module from XML file

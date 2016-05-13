@@ -68,6 +68,7 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'     \code{vagrantHost} object
 #'
 #' @import XML
+#' @export
 moduleHostToXML.vagrantHost <- function(vagrantHost) {
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
@@ -75,6 +76,8 @@ moduleHostToXML.vagrantHost <- function(vagrantHost) {
 
 #' @describeIn prepareModuleHost prepare \code{vagrantHost}; returns
 #' path to unique module output directory relative to hostdir/guestdir
+#'
+#' @export
 prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                           modulePath) {
     vagrantHost <- moduleHost
@@ -100,6 +103,8 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
 }
 
 #' @describeIn executeCommand execute command on a \code{vagrantHost}
+#'
+#' @export
 executeCommand.vagrantHost <- function(moduleHost, outputLocation,
                                        command) {
     commanddir <- dirname(moduleHost$vagrantfile)
@@ -114,6 +119,8 @@ executeCommand.vagrantHost <- function(moduleHost, outputLocation,
 
 #' @describeIn retrieveModuleHost retrieve module output from
 #'     \code{vagrantHost}
+#'
+#' @export
 retrieveModuleHost.vagrantHost <- function(moduleHost, outputLocation,
                                            modulePath) {
     hostdir <- file.path(moduleHost$hostdir, outputLocation)

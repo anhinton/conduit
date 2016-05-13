@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<pipeline xmlns="http://www.openapi.org/2014/">
+  <description>test host moduleInput</description>
+  <component name="createHost" type="module">
+    <file ref="createHost.xml"/>
+  </component>
+  <component name="executeHost" type="module">
+    <file ref="executeHost.xml"/>
+  </component>
+  <pipe>
+    <start component="createHost" output="vagrantHost"/>
+    <end component="executeHost" input="vagrantHost"/>
+  </pipe>
+</pipeline>
