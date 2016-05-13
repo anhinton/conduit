@@ -961,7 +961,8 @@ moduleSourceToXML <- function (moduleSource,
 #' 
 #' runModule(module = mod2, inputObjects = mod2inputs,
 #'           targetDirectory = tempdir())
-#' 
+#'
+#' @import XML
 #' @export
 runModule <- function(module, targetDirectory = getwd(),
                       inputObjects = NULL) {
@@ -1010,7 +1011,8 @@ runModule <- function(module, targetDirectory = getwd(),
             inputType,
             fileVessel =,
             urlVessel = readLines(inputObjects[[inputName]]),
-            stop("input type not defined"))
+            stop(paste("unable to load a moduleHost of type", inputType,
+                       "from input")))
         xml <- xmlRoot(xmlParse(rawXML))
         moduleHost <- readModuleHostXML(xml)
         if (inherits(moduleHost, "moduleInputHost"))
