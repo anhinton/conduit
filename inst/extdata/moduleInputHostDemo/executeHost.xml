@@ -3,10 +3,10 @@
   <host>
     <moduleInput name="vagrantHost"/>
   </host>
-  <description/>
+  <description></description>
   <input name="vagrantHost">
     <file ref="vagrantHost.xml"/>
-    <format>XML file</format>
+    <format formatType="text">XML file</format>
   </input>
   <source>
     <script><![CDATA[x <- rnorm(10)]]></script>
