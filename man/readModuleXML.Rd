@@ -19,4 +19,8 @@ readModuleXML(name, xml, location = getwd())
 \description{
 Parse module XML and return a \code{module} object
 }
+\details{
+If <host/> contains <moduleInput/> function fails if
+    moduleInput name does not match any input names.
+}
 

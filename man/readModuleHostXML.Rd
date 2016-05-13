@@ -17,7 +17,7 @@ This function creates a \code{moduleHost} object from valid host
 elements.
 }
 \details{
-As of 2016-02-26 only \samp{<vagrant/>} elements are
-supported.
+As of 2016-05-13 \samp{<docker/>}, \samp{<moduleInput/>} and
+\samp{<vagrant/>} elements are supported.
 }
 

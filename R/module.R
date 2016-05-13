@@ -475,8 +475,8 @@ loadModule <- function(name, ref, path = NULL,
 #' This function creates a \code{moduleHost} object from valid host
 #' elements.
 #'
-#' As of 2016-05-09 \samp{<docker>} and \samp{<vagrant/>} elements are
-#' supported.
+#' As of 2016-05-13 \samp{<docker/>}, \samp{<moduleInput/>} and
+#' \samp{<vagrant/>} elements are supported.
 #'
 #' @param moduleHostXML host XML node
 #'
@@ -611,6 +611,9 @@ readModuleSourceXML <- function (xml) {
 }
 
 #' Parse module XML and return a \code{module} object
+#'
+#' @details If <host/> contains <moduleInput/> function fails if
+#'     moduleInput name does not match any input names.
 #'
 #' @param name module name
 #' @param xml module \code{XMLNode}
@@ -1005,6 +1008,7 @@ runModule <- function(module, targetDirectory = getwd(),
     ## if moduleHost is waiting for a module input, load this now
     moduleHost <- module$host
     if (inherits(moduleHost, "moduleInputHost")) {
+        ## load moduleHost from named input
         inputName <- getName(moduleHost)
         inputType <- getType(getVessel(moduleInputList[[inputName]]))
         rawXML <- switch(
@@ -1015,6 +1019,7 @@ runModule <- function(module, targetDirectory = getwd(),
                        "from input")))
         xml <- xmlRoot(xmlParse(rawXML))
         moduleHost <- readModuleHostXML(xml)
+        ## don't let moduleInputHost objects recurse
         if (inherits(moduleHost, "moduleInputHost"))
             stop("moduleInputHost points to another moduleInputHost!")
     }
