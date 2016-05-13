@@ -314,6 +314,8 @@ executeCommand <- function(moduleHost, outputLocation, command) {
 
 #' @describeIn executeCommand execute a command with no
 #'     \code{moduleHost}
+#'
+#' @export
 executeCommand.default <- function(moduleHost, outputLocation, command) {
     system2(command = command$command,
             args = command$args,
