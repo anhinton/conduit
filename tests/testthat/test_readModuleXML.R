@@ -2,7 +2,7 @@ library(conduit)
 context("read module XML")
 
 test_that("readIOFormatXML fails for incorrect node name", {
-    library(XML)
+    #library(XML)
     notAFormat <- newXMLNode(name = "notAFormat")
     expect_error(readIOFormatXML(notAFormat),
                  "ioFormat XML is invalid")

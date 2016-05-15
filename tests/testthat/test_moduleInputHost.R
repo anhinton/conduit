@@ -20,7 +20,7 @@ test_that("moduleInputHost() constructor works right", {
 })
 
 test_that("readModuleInputHostXML() returns correctly", {
-    library(XML)
+    #library(XML)
     mihXML1 <- newXMLNode(
         name = "moduleInput",
         attrs = list(name = name))
@@ -35,7 +35,7 @@ test_that("readModuleInputHostXML() returns correctly", {
 })
 
 test_that("moduleHostToXML.moduleInputHost() creates correct XML", {
-    library(XML)
+    #library(XML)
     mih1 <- moduleInputHost(name = name)
 
     hostNode1 <- moduleHostToXML(mih1)
