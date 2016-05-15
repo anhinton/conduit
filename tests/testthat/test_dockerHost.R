@@ -34,7 +34,7 @@ test_that("dockerHost() constructor works right", {
 })
 
 test_that("readDockerHostXML() returns correctly", {
-    library(XML)
+    #library(XML)
     dhXML1 <- newXMLNode(
         name = "docker",
         attrs = list(image = dockerImage))
@@ -62,7 +62,7 @@ test_that("readDockerHostXML() returns correctly", {
 })
 
 test_that("moduleHostToXML.dockerHost() creates correct XML", {
-    library(XML)
+    #library(XML)
     dh1 <- dockerHost(image = dockerImage)
     dh2 <- dockerHost(image = dockerImage, guestdir = guestdir)
 
@@ -132,7 +132,8 @@ test_that("executeCommand.dockerHost() returns correctly", {
                                              command = command1)
     ## correct defined as not getting error message from wrapped
     ## system2 call
-    expect_equal(exec_result, 0)
+    expect_is(exec_result, "character")
+    expect_true(is.null(attr(exec_result, "status")))
 })
 
 test_that("retrieveModuleHost.dockerHost() returns correctly", {
