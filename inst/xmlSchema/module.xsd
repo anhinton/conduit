@@ -6,6 +6,7 @@
   <xs:include schemaLocation="./host.xsd"/>
 
   <xs:element name="module" type="ModuleType"/>
+  <xs:element name="language" type="LanguageType"/>
   <xs:element name="host" type="HostType"/>
   <xs:element name="moduleInput" type="ModuleInputType"/>
   <xs:element name="description" type="xs:string"/>
@@ -18,15 +19,25 @@
   <xs:element name="script" type="ScriptType"/>
   <xs:element name="format" type="FormatType"/>
 
+  <xs:complexType name="LanguageType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+	<xs:attribute name="minVersion" type="xs:string"/>
+	<xs:attribute name="maxVersion" type="xs:string"/>
+	<xs:attribute name="version" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
   <xs:complexType name="ModuleType">
     <xs:sequence>
+      <xs:element ref="language"/>
       <xs:element ref="host" minOccurs="0"/>
       <xs:element ref="description" minOccurs="0"/>
       <xs:element ref="input" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element ref="source" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element ref="output" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="language" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="HostType">
