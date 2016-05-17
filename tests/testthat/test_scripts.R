@@ -20,18 +20,18 @@ test_that("prepareScriptInput() returns script fragment", {
     
     ## fails for invalid arguments
     expect_error(prepareScriptInput(moduleInput = unclass(moduleInput1),
-                                    language = "R"),
+                                    moduleLanguage = moduleLanguage("R")),
                  "moduleInput object required")
 
     ## produces script for internalVessel
     scriptInput1 <- prepareScriptInput(moduleInput = moduleInput1,
-                                       language = "R")
+                                       moduleLanguage = moduleLanguage("R"))
     expect_is(scriptInput1, "character")
     expect_true(length(scriptInput1) > 0)
 
     ## produces NULL for fileVessel
     scriptInput2 <- prepareScriptInput(moduleInput = moduleInput2,
-                                       language = "R")
+                                       moduleLanguage = moduleLanguage("R"))
     expect_null(scriptInput2)
 })
 
@@ -54,18 +54,18 @@ test_that("prepareScriptOutput() returns script fragment", {
     
     ## fails for invalid arguments
     expect_error(prepareScriptOutput(moduleOutput = unclass(moduleOutput1),
-                                     language = "R"),
+                                     moduleLanguage = moduleLanguage("R")),
                  "moduleOutput object required")
 
     ## produces script for internalVessel
     scriptOutput1 <- prepareScriptOutput(moduleOutput = moduleOutput1,
-                                         language = "R")
+                                         moduleLanguage = moduleLanguage("R"))
     expect_is(scriptOutput1, "character")
     expect_true(length(scriptOutput1) > 0)
 
     ## produces NULL for fileVessel
     scriptOutput2 <- prepareScriptOutput(moduleOutput = moduleOutput2,
-                                         language = "R")
+                                         moduleLanguage = moduleLanguage("R"))
     expect_null(scriptOutput2)
 })
 

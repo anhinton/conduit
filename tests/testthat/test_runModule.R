@@ -53,7 +53,7 @@ test_that("prepareInternalInput() returns correct file path", {
     input <- tempfile()
     system2("touch", input)
     symbol <- "x"
-    language = "python"
+    language = moduleLanguage("python")
     outputDirectory <- tempfile("prepareInternalInput")
     if (!dir.exists(outputDirectory))
         dir.create(outputDirectory)
@@ -175,7 +175,7 @@ test_that("prepareInput() returns resolved input objects", {
     outputDirectory <- tempfile("prepareInput")
     if (!dir.exists(outputDirectory))
         dir.create(outputDirectory)
-    language = "R"
+    language = moduleLanguage("R")
     location <- tempdir()
     urlInput <- "https://cran.stat.auckland.ac.nz/"
     inputList <- list(file = fileInput, internal = internalInput,
@@ -199,7 +199,7 @@ test_that("prepareInput() returns resolved input objects", {
     input1 <- prepareInput(moduleInput = moduleInput1,
                            inputList = inputList,
                            outputDirectory = outputDirectory,
-                           language = language,
+                           moduleLanguage = language,
                            location = location)
     expect_true(file.exists(input1))
 
@@ -210,7 +210,7 @@ test_that("prepareInput() returns resolved input objects", {
     input2 <- prepareInput(moduleInput = moduleInput2,
                            inputList = inputList,
                            outputDirectory = outputDirectory,
-                           language = language,
+                           moduleLanguage = language,
                            location = location)
     expect_true(file.exists(input2))
 
@@ -221,7 +221,7 @@ test_that("prepareInput() returns resolved input objects", {
     input3 <- prepareInput(moduleInput = moduleInput3,
                            inputList = inputList,
                            outputDirectory = outputDirectory,
-                           language = language,
+                           moduleLanguage = language,
                            location = location)
     expect_match(input3, urlInput)
 })
@@ -280,7 +280,7 @@ test_that(
     "output() behaves",
     {
         ## outputObject(output, language, outputDirectory)
-        lang = "R"
+        lang = moduleLanguage("R")
         outdir <- tempdir()
 
         ## fails when not given 'moduleOutput' object
@@ -328,7 +328,7 @@ test_that(
 test_that(
     "resolveOutput() works on local machine",
     {
-        lang = "R"
+        lang = moduleLanguage("R")
         outdir <- tempdir()
         symbol <- basename(tempfile())
         internal_output <- moduleOutput(
@@ -340,12 +340,12 @@ test_that(
         ## TODO(anhinton): write check for URL outputs
         ## internalVessel
         expect_error(resolveOutput(moduleOutput = internal_output,
-                                   language = lang,
+                                   moduleLanguage = lang,
                                    outputDirectory = outdir),
                      "output object '")
         ## fileVessel
         expect_error(resolveOutput(moduleOutput = file_output,
-                                   language = lang,
+                                   moduleLanguage = lang,
                                    outputDirectory = outdir),
                      "output object '") 
     })
@@ -382,7 +382,7 @@ test_that(
         outputObject <-
             file.path(targ, moduleName,
                       paste0(outputName,
-                             internalExtension(getLanguage(moduleLanguage))))
+                             internalExtension((moduleLanguage))))
         absomod <- module(
             name = moduleName,
             language = moduleLanguage,

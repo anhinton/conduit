@@ -7,17 +7,18 @@ if (!dir.exists(modulePath))
 f1 <- moduleOutput("f1", fileVessel("f1.txt"),
                    ioFormat("text file"))
 fileoutput <- output(f1,
-                     language = "R",
+                     moduleLanguage = moduleLanguage("R"),
                      outputDirectory = modulePath)
 u1 <- moduleOutput("u1", urlVessel("http://openapi.net"),
                                  ioFormat("HTML file"))
 urloutput <- output(u1,
-                    language = "python",
+                    moduleLanguage = moduleLanguage("python"),
                     outputDirectory = modulePath)
 i1 <- moduleOutput("i1", internalVessel("x"),
                    ioFormat("python array"))
+internallang = moduleLanguage("python")
 internaloutput <- output(i1,
-                         language = "python",
+                         moduleLanguage = internallang,
                          outputDirectory = modulePath)
 pipelinePath <- tempfile("pipelineResult")
 if (!dir.exists(pipelinePath))
@@ -48,7 +49,7 @@ test_that("resultInput() returns correctly", {
     expect_match(getType(getVessel(res3)), "fileVessel")
     expect_match(getVessel(res3)$ref,
                  paste0(getVessel(internaloutput)$ref,
-                       internalExtension(getLanguage(internaloutput))))
+                        internalExtension(internallang)))
 })
 
 test_that("resultSource() returns correctly", {

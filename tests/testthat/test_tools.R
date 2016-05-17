@@ -11,6 +11,30 @@ test_that("is_length1_char() picks only length 1 character vectors", {
     expect_true(is_length1_char(oneCharacter))
 })
 
+test_that("internalExtension() returns correctly", {
+    ml1 <- moduleLanguage(language = "perl")
+
+    ## fail for invalid argumen
+    expect_error(internalExtension(unclass(ml1)),
+                 "moduleLanguage object required")
+
+    ## fail for unsupported language
+    expect_error(internalExtension(ml1),
+                 "language")
+})
+
+test_that("scriptExtension() returns correctly", {
+    ml1 <- moduleLanguage(language = "perl")
+
+    ## fail for invalid argumen
+    expect_error(scriptExtension(unclass(ml1)),
+                 "moduleLanguage object required")
+
+    ## fail for unsupported language
+    expect_error(scriptExtension(ml1),
+                 "language")
+})
+
 test_that("topologicalSort() returns correctly", {
     ## fail for cycle
     cycle <- list(A = "B", B = "C", C = "A")
