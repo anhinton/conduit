@@ -4,10 +4,10 @@
 \alias{scriptExtension}
 \title{Returns the correct file extension for a language's script files}
 \usage{
-scriptExtension(language)
+scriptExtension(moduleLanguage)
 }
 \arguments{
-\item{language}{language name}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 }
 \value{
 file extension as character ".EXT"

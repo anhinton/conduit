@@ -4,12 +4,12 @@
 \alias{prepareScriptInput}
 \title{Prepare script to create inputs}
 \usage{
-prepareScriptInput(moduleInput, language)
+prepareScriptInput(moduleInput, moduleLanguage)
 }
 \arguments{
 \item{moduleInput}{module input object}
 
-\item{language}{module language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 }
 \value{
 Script as character vector

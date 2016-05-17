@@ -4,12 +4,12 @@
 \alias{prepareScriptOutput}
 \title{Prepare script to create outputs}
 \usage{
-prepareScriptOutput(moduleOutput, language)
+prepareScriptOutput(moduleOutput, moduleLanguage)
 }
 \arguments{
 \item{moduleOutput}{\code{moduleOutput} object}
 
-\item{language}{module language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 }
 \value{
 Script as character vector

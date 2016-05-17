@@ -4,10 +4,10 @@
 \alias{internalExtension}
 \title{Returns the correct file extension for a language's 'internal' files}
 \usage{
-internalExtension(language)
+internalExtension(moduleLanguage)
 }
 \arguments{
-\item{language}{language name}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 }
 \value{
 file exension as character as ".EXT"
