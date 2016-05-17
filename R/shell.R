@@ -5,8 +5,8 @@
 #'
 #' @export
 internalInputScript.shellSymbol <- function (symbol) {
-    paste0(symbol, "=$(cat ", symbol, internalExtension("shell"),
-           ")")
+    paste0(symbol, "=$(cat ", symbol,
+           internalExtension(moduleLanguage("shell")), ")")
 }
 
 #' @describeIn internalOutputScript create script to create internal

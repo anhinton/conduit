@@ -154,6 +154,15 @@ moduleLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
     moduleLanguage
 }
 
+#' @describeIn getLanguage
+#'
+#' Return language name as character
+#'
+#' @export
+getLanguage.moduleLanguage <- function(x) {
+    x$language
+}
+
 #' \code{moduleHost} object
 #'
 #' @seealso \code{vagrantHost}, \code{module}
@@ -409,7 +418,7 @@ getDescription.module <- function(x) {
 
 #' @describeIn getLanguage
 #'
-#' Returns module language
+#' Returns \code{moduleLanguage} object
 #'
 #' @export
 getLanguage.module <- function(x) {
@@ -1059,7 +1068,7 @@ runModule <- function(module, targetDirectory = getwd(),
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
                            outputDirectory = modulePath,
-                           language = getLanguage(moduleLanguage),
+                           moduleLanguage = moduleLanguage,
                            location = getLocation(module))
 
     ## prepare script
@@ -1108,7 +1117,7 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## resolve output objects
     outputList <- lapply(X = module$outputs, FUN = resolveOutput,
-                         language = getLanguage(getLanguage(module)),
+                         moduleLanguage = moduleLanguage,
                          outputDirectory = modulePath)
 
     ## return moduleResult object
@@ -1131,13 +1140,13 @@ runModule <- function(module, targetDirectory = getwd(),
 #' @param moduleInput \code{moduleInput} object
 #' @param inputList list of \code{input} objects provided to module
 #' @param outputDirectory working directory for module execution
-#' @param language Module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param location location of originating module file
 #'
 #' @return \code{input} object. Generally a character string
 #'     referencing a file location or URL
 prepareInput <- function(moduleInput, inputList, outputDirectory,
-                         language, location) {
+                         moduleLanguage, location) {
     name <- getName(moduleInput)
     vessel <- getVessel(moduleInput)
     type <- getType(vessel)
@@ -1147,7 +1156,7 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
         type,
         internalVessel = {
             symbol <- vessel$symbol
-            prepareInternalInput(input, symbol, language,
+            prepareInternalInput(input, symbol, moduleLanguage,
                                  outputDirectory)
         },
         fileVessel = prepareFileInput(vessel, input, outputDirectory,
@@ -1165,13 +1174,14 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
 #'
 #' @param input File path to serialized object
 #' @param symbol Name of module input
-#' @param language Module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param outputDirectory File path to module working directory
 #'
 #' @return File path to serialized internal input.
-prepareInternalInput <- function(input, symbol, language, outputDirectory) {
+prepareInternalInput <- function(input, symbol, moduleLanguage,
+                                 outputDirectory) {
     internalInput <- file.path(
-        outputDirectory, paste0(symbol, internalExtension(language)))
+        outputDirectory, paste0(symbol, internalExtension(moduleLanguage)))
     if (!file.copy(input, internalInput))
         stop("unable to copy input into outputDirectory")
     if (file.exists(internalInput)) {
@@ -1265,7 +1275,7 @@ prepareURLInput <- function(vessel, input) {
 #' module execution. 
 #'
 #' @param moduleOutput \code{moduleOutput} object
-#' @param language module script language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param outputDirectory file location for module execution
 #'
 #' @return \code{output} list object, containing:
@@ -1273,11 +1283,11 @@ prepareURLInput <- function(vessel, input) {
 #' \item{name}{output name}
 #' \item{format}{\code{ioFormat} object}
 #' \item{vessel}{\code{vessel} object}
-#' \item{language}{module language}
+#' \item{moduleLanguage}{\code{moduleLanguage} object}
 #' \item{ref}{address of output object produced}
 #'
 #' @export
-output <- function(moduleOutput, language, outputDirectory) {
+output <- function(moduleOutput, moduleLanguage, outputDirectory) {
     if (!inherits(moduleOutput, "moduleOutput"))
         stop("moduleOutput object required")
     
@@ -1290,7 +1300,8 @@ output <- function(moduleOutput, language, outputDirectory) {
     ref <-
         switch(type,
                internalVessel =
-                   paste0(vessel$symbol, internalExtension(language)),
+                   paste0(vessel$symbol,
+                          internalExtension(moduleLanguage)),
                urlVessel=,
                fileVessel = getRef(vessel),
                stop("vessel type not defined"))
@@ -1307,9 +1318,18 @@ output <- function(moduleOutput, language, outputDirectory) {
 
     ## return output object
     output <-  list(name = name, format = format, vessel = vessel,
-                    language = language, ref = ref)
+                    moduleLanguage = moduleLanguage, ref = ref)
     class(output) <- "output"
     output
+}
+
+#' @describeIn getLanguage
+#'
+#' Get \code{moduleLanguage} object
+#'
+#' @export
+getLanguage.output <- function(x) {
+    x$moduleLanguage
 }
 
 #' Checks a module output object has been created.
@@ -1317,16 +1337,16 @@ output <- function(moduleOutput, language, outputDirectory) {
 #' @details Will produce an error if the object does not exist.
 #'
 #' @param moduleOutput \code{moduleOutput} object
-#' @param language module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param outputDirectory location of module output files
 #'
 #' @return \code{output} object
-resolveOutput <- function (moduleOutput, language,
+resolveOutput <- function (moduleOutput, moduleLanguage,
                            outputDirectory = getwd()) {
     name <- getName(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
-    output <- output(moduleOutput, language, outputDirectory)
+    output <- output(moduleOutput, moduleLanguage, outputDirectory)
     ref <- getRef(output)
 
     ## TODO(anhinton): write check for URL outputs

@@ -5,9 +5,10 @@
 #'
 #' @export
 internalInputScript.pythonSymbol <- function (symbol) {
-    c(paste0("with open('", symbol, internalExtension("python"),
+    c(paste0("with open('", symbol,
+             internalExtension(moduleLanguage("python")),
              "', 'rb') as f:"),
-      paste0("\t", symbol, " = pickle.load(f)"))
+      paste0("    ", symbol, " = pickle.load(f)"))
 }
 
 #' @describeIn internalOutputScript create script to create internal
@@ -16,7 +17,7 @@ internalInputScript.pythonSymbol <- function (symbol) {
 #' @export
 internalOutputScript.pythonSymbol <- function (symbol) {
     c(paste0("with open('", symbol, ".pickle', 'wb') as f:"),
-      paste0("\tpickle.dump(", symbol, ", f)"))
+      paste0("    pickle.dump(", symbol, ", f)"))
 }
 
 

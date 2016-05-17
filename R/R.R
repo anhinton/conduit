@@ -6,7 +6,7 @@
 #' @export
 internalInputScript.RSymbol <- function(symbol) {
     paste0(symbol, " <- readRDS(\"",
-           paste0(symbol, internalExtension("R")), "\")")
+           paste0(symbol, internalExtension(moduleLanguage("R"))), "\")")
 }
 
 #' @describeIn internalOutputScript create script to create internal

@@ -27,10 +27,13 @@ is_length1_char <- function(x) {
 
 #' Returns the correct file extension for a language's 'internal' files
 #'
-#' @param language language name
+#' @param moduleLanguage \code{moduleLanguage} object
+#' 
 #' @return file exension as character as ".EXT"
-internalExtension <- function(language) {
-    extension <- switch(language,
+internalExtension <- function(moduleLanguage) {
+    if (!inherits(moduleLanguage, "moduleLanguage"))
+        stop("moduleLanguage object required")
+    extension <- switch(getLanguage(moduleLanguage),
                         R = ".rds",
                         python = ".pickle",
                         shell = ".txt",
@@ -40,10 +43,13 @@ internalExtension <- function(language) {
 
 #' Returns the correct file extension for a language's script files
 #'
-#' @param language language name
+#' @param moduleLanguage \code{moduleLanguage} object
+#' 
 #' @return file extension as character ".EXT"
-scriptExtension <- function(language) {    
-    extension <- switch(language,
+scriptExtension <- function(moduleLanguage) {  
+    if (!inherits(moduleLanguage, "moduleLanguage"))
+        stop("moduleLanguage object required")  
+    extension <- switch(getLanguage(moduleLanguage),
                         R = ".R",
                         python = ".python",
                         shell = ".sh",

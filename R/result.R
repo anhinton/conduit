@@ -52,7 +52,7 @@ moduleResult <- function(outputList, modulePath, module) {
         stop("module object required")
     
     name <- getName(module)
-    language <- getLanguage(module)
+    moduleLanguage <- getLanguage(module)
     description <- getDescription(module)
     
     ## create result module
@@ -64,7 +64,7 @@ moduleResult <- function(outputList, modulePath, module) {
     moduleOutputList <- lapply(outputList, resultOutput)
     resultModule <- module(
         name = name,
-        language = language,
+        language = moduleLanguage,
         description = description,
         inputs = if (length(moduleInputList)) moduleInputList,
         sources = if (length(moduleSourceList)) moduleSourceList,
@@ -269,7 +269,8 @@ resultSource <- function(output, modulePath) {
         }
     input <- moduleInput(name = getName(output), vessel = getVessel(output),
                          format = getFormat(output))
-    script <- prepareScriptInput(input, language = getLanguage(output))
+    script <- prepareScriptInput(input,
+                                 moduleLanguage = getLanguage(output))
     if (!is.null(script)) {
         return(moduleSource(scriptVessel(script)))
     } else {

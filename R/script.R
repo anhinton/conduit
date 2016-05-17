@@ -128,13 +128,13 @@ prepareScript <- function(module) {
     ## inputScript loads the module's designated inputs
     inputs <- module$inputs
     inputScript <- lapply(inputs, prepareScriptInput,
-                          getLanguage(moduleLanguage))
+                          moduleLanguage = moduleLanguage)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
     outputs <- module$outputs
     outputScript <-
-        lapply(outputs, prepareScriptOutput, getLanguage(moduleLanguage))
+        lapply(outputs, prepareScriptOutput, moduleLanguage = moduleLanguage)
     outputScript <- unlist(outputScript, use.names = FALSE)
 
     moduleScript <- c(inputScript, sourceScript, outputScript)
@@ -151,7 +151,7 @@ prepareScript <- function(module) {
     ## write script file to disk
 
     scriptPath <- paste0("script",
-                         scriptExtension(getLanguage(moduleLanguage)))
+                         scriptExtension(moduleLanguage))
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
@@ -169,16 +169,17 @@ prepareScript <- function(module) {
 #'     in script.
 #' 
 #' @param moduleInput module input object
-#' @param language module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #'
 #' @return Script as character vector
-prepareScriptInput <- function(moduleInput, language) {
+prepareScriptInput <- function(moduleInput, moduleLanguage) {
     if (!inherits(moduleInput, "moduleInput"))
         stop("moduleInput object required")
     vessel <- getVessel(moduleInput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
-        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        class(symbol) <- c(paste0(getLanguage(moduleLanguage), "Symbol"),
+                           class(symbol))
         internalInputScript(symbol)
     } else {
         NULL
@@ -193,16 +194,17 @@ prepareScriptInput <- function(moduleInput, language) {
 #'     be done by the glue system.
 #'
 #' @param moduleOutput \code{moduleOutput} object
-#' @param language module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #'
 #' @return Script as character vector
-prepareScriptOutput <- function(moduleOutput, language) {
+prepareScriptOutput <- function(moduleOutput, moduleLanguage) {
     if (!inherits(moduleOutput, "moduleOutput"))
         stop("moduleOutput object required")
     vessel <- getVessel(moduleOutput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
-        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        class(symbol) <- c(paste0(getLanguage(moduleLanguage), "Symbol"),
+                           class(symbol))
         internalOutputScript(symbol)
     } else {
         NULL
