@@ -743,8 +743,6 @@ readModuleXML <- function (name, xml, location = getwd()) {
 #' @param targetDirectory destination directory
 #' @param filename Filename for resulting XML file
 #' @return resulting file location
-#' @import XML
-#' @export
 #' 
 #' @examples
 #' 
@@ -764,6 +762,9 @@ readModuleXML <- function (name, xml, location = getwd()) {
 #' 		       ref = mod2xml)
 #' saveModule(module = mod2, targetDirectory = targ1,
 #' 	       filename = "myNewModule.xml")
+#' 
+#' @import XML
+#' @export
 saveModule <- function(module, targetDirectory = getwd(),
                        filename = paste0(module$name, ".xml")) {
     targetDirectory <- file.path(targetDirectory)
