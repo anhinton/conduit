@@ -14,7 +14,8 @@
 #' local machine.
 #'
 #' @param name Name of module
-#' @param language Language name
+#' @param language \code{moduleLanguage} object describing source
+#'     script execution language
 #' @param host \code{moduleHost} object describing machine where
 #'     module is to be executed
 #' @param description A basic description of the module
@@ -26,7 +27,7 @@
 #' @return \code{module} list containing:
 #'
 #' \item{name}{module name}
-#' \item{language}{module language}
+#' \item{language}{\code{moduleLanguage} object}
 #' \item{host}{\code{moduleHost} object}
 #' \item{description}{module description}
 #' \item{inputs}{list of \code{moduleInput} objects}
@@ -46,7 +47,7 @@
 #'              name = "x",
 #'              internalVessel(symbol = "x"),
 #'              format = ioFormat("R character string"))
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(outp1),
 #'                sources = list(src1))
@@ -55,7 +56,7 @@
 #' mod2 <-
 #'     module(
 #'         "showY",
-#'         language = "R",
+#'         language = moduleLanguage("R"),
 #'         host = "localhost",
 #'         description = "displays the value of Y",
 #'         inputs =
@@ -83,8 +84,8 @@ module <- function(name, language, host=NULL,
 
     ## check 'language'
     if (!is.null(language)) {
-        if (!is_length1_char(language))
-            stop("'language' is not a length 1 character vector")
+        if (!inherits(language, "moduleLanguage"))
+            stop("'language' is not a moduleLanguage object")
     }
     
     ## check 'host'
@@ -135,6 +136,22 @@ module <- function(name, language, host=NULL,
     class(module) <- "module"
     attr(module, "location") <- location
     module
+}
+
+#' Create a \code{moduleLanguage} object
+#'
+#' @param language Language name
+#' @param minVersion Minimum version required
+#' @param maxVersion Maximum version required
+#' @param version Exact version required
+#'
+#' @return \code{moduleLanguage} object
+moduleLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
+                           version = NULL) {
+    moduleLanguage <- list(language = language, minVersion = minVersion,
+                     maxVersion = maxVersion, version = version)
+    class(moduleLanguage) <- "moduleLanguage"
+    moduleLanguage
 }
 
 #' \code{moduleHost} object
@@ -470,6 +487,23 @@ loadModule <- function(name, ref, path = NULL,
     return(module)
 }
 
+#' Create a \code{moduleLanguage} object from language XML
+#'
+#' @param moduleLanguageXML language XML node
+#'
+#' @return \code{moduleLanguage} object
+#'
+#' @import XML
+readModuleLanguageXML <- function(moduleLanguageXML) {
+    value <- xmlValue(moduleLanguageXML)
+    nodeAttrs <- xmlAttrs(moduleLanguageXML)
+    minVersion <- getXMLAttr(moduleLanguageXML, "minVersion")
+    maxVersion <- getXMLAttr(moduleLanguageXML, "maxVersion")
+    version <- getXMLAttr(moduleLanguageXML, "version")
+    moduleLanguage(language = value, minVersion = minVersion,
+                   maxVersion = maxVersion, version = version)
+}
+
 #' Create a \code{moduleHost} object from host XML
 #'
 #' This function creates a \code{moduleHost} object from valid host
@@ -628,6 +662,10 @@ readModuleXML <- function (name, xml, location = getwd()) {
     nodes <- xmlChildren(xml)
     nodeNames <- names(nodes)
 
+    ## extract language
+    languageNode <- nodes$language
+    language <- readModuleLanguageXML(languageNode)
+
     ## extract host
     host <-
         if ("host" %in% nodeNames) {
@@ -757,8 +795,8 @@ moduleToXML <- function (module,
         stop("'module' is not a 'module' object")
     }
     moduleRoot <- newXMLNode(name = "module",
-                             attrs = c(language = module$language),
                              namespaceDefinitions = namespaceDefinitions)
+    language <- moduleLanguageToXML(getLanguage(module))
     host <-
         if (!is.null(module$host)) {
             moduleHostToXML(module$host)
@@ -775,10 +813,31 @@ moduleToXML <- function (module,
     outputs <- lapply(module$outputs, moduleIOToXML)
     sources <- lapply(module$sources, moduleSourceToXML)
     addChildren(moduleRoot,
-                kids=list(host, description, inputs, sources,
+                kids=list(language, host, description, inputs, sources,
                           outputs))
 }
 
+#' Create XML corresponding to \code{moduleLanguage} object
+#'
+#' @param moduleLanguage \code{moduleLanguage} objects
+#'
+#' @return XML node representing module language
+moduleLanguageToXML <- function(moduleLanguage) {
+    if (!inherits(moduleLanguage, "moduleLanguage"))
+        stop("moduleLanguage object required")
+    language <- getLanguage(moduleLanguage)
+    minVersion <- moduleLanguage$minVersion
+    maxVersion <- moduleLanguage$maxVersion
+    version <- moduleLanguage$version
+    moduleLanguageXML <-
+        newXMLNode(name = "language",
+                   language,
+                   attrs = c(minVersion = minVersion,
+                             maxVersion = maxVersion,
+                             version = version))
+    moduleLanguageXML
+}
+    
 #' Create XML corresponding to a \code{moduleHost} object
 #'
 #' @param moduleHost \code{moduleHost} object
@@ -983,7 +1042,7 @@ runModule <- function(module, targetDirectory = getwd(),
     name <- getName(module)
     moduleInputList <- module$inputs
     moduleOutputList <- module$outputs
-    language <- getLanguage(module)
+    moduleLanguage <- getLanguage(module)
     
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
@@ -999,7 +1058,7 @@ runModule <- function(module, targetDirectory = getwd(),
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
                            outputDirectory = modulePath,
-                           language = language,
+                           language = getLanguage(moduleLanguage),
                            location = getLocation(module))
 
     ## prepare script
@@ -1048,7 +1107,7 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## resolve output objects
     outputList <- lapply(X = module$outputs, FUN = resolveOutput,
-                         language = getLanguage(module),
+                         language = getLanguage(getLanguage(module)),
                          outputDirectory = modulePath)
 
     ## return moduleResult object

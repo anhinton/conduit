@@ -103,7 +103,7 @@ sourceOrder <- function(sources) {
 prepareScript <- function(module) {
     if (!inherits(module, "module"))
         stop("module object required")
-    language <- getLanguage(module)
+    moduleLanguage <- getLanguage(module)
     location <- attr(module, "location")
 
     ## sort sources into correct order
@@ -127,18 +127,19 @@ prepareScript <- function(module) {
 
     ## inputScript loads the module's designated inputs
     inputs <- module$inputs
-    inputScript <- lapply(inputs, prepareScriptInput, language)
+    inputScript <- lapply(inputs, prepareScriptInput,
+                          getLanguage(moduleLanguage))
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
     outputs <- module$outputs
     outputScript <-
-        lapply(outputs, prepareScriptOutput, language)
+        lapply(outputs, prepareScriptOutput, getLanguage(moduleLanguage))
     outputScript <- unlist(outputScript, use.names = FALSE)
 
     moduleScript <- c(inputScript, sourceScript, outputScript)
     moduleScript <- switch(
-        language,
+        getLanguage(moduleLanguage),
         python = c("#!/usr/bin/python", "import os", "import pickle",
                    moduleScript),
         R = c("#!/usr/bin/Rscript", moduleScript),
@@ -149,12 +150,14 @@ prepareScript <- function(module) {
 
     ## write script file to disk
 
-    scriptPath <- paste0("script", scriptExtension(language))
+    scriptPath <- paste0("script",
+                         scriptExtension(getLanguage(moduleLanguage)))
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    class(scriptPath) <- c(paste0(language, "Script"), "script")
+    class(scriptPath) <-
+        c(paste0(getLanguage(moduleLanguage), "Script"), "script")
     scriptPath
 }
 
