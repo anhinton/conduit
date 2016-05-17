@@ -115,11 +115,50 @@ test_that("'moduleSource' object has class \"moduleSource\"", {
     expect_match(class(src2), "^moduleSource$")
 })
 
+test_that("moduleLanguage outputs are correctly formed", {
+    language <- "R"
+    minVersion <- "3.0.1"
+    maxVersion <- "3.3.0"
+    version <- "3.2.5"
+    
+    ## fail for no language argument
+    expect_error(moduleLanguage(minVersion = minVersion,
+                                maxVersion = maxVersion,
+                                version = version))
+
+    ## no minVersion argument
+    ml1 <- moduleLanguage(language, maxVersion = maxVersion,
+                          version = version)
+    expect_is(ml1, "moduleLanguage")
+    expect_match(getLanguage(ml1), language)
+    expect_null(ml1$minVersion)
+    expect_match(ml1$maxVersion, maxVersion)
+    expect_match(ml1$version, version)
+
+    ## no maxVersion argument
+    ml2 <- moduleLanguage(language, minVersion = minVersion,
+                          version = version)
+    expect_is(ml2, "moduleLanguage")
+    expect_match(getLanguage(ml2), language)
+    expect_null(ml2$maxVersion)
+    expect_match(ml2$minVersion, minVersion)
+    expect_match(ml2$version, version)
+
+    ## no version argument
+    ml3 <- moduleLanguage(language, maxVersion = maxVersion,
+                          minVersion = minVersion)
+    expect_is(ml3, "moduleLanguage")
+    expect_match(getLanguage(ml3), language)
+    expect_null(ml3$version)
+    expect_match(ml3$maxVersion, maxVersion)
+    expect_match(ml3$minVersion, minVersion)
+})
+
 ## create module objects
 
 mod1 <- module(
     name = "createGraph",
-    language = "R",
+    language = moduleLanguage("R"),
     host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
     description = "Lays out a graphNEL graph using the Rgraphviz package",
     inputs =
@@ -138,7 +177,7 @@ mod1 <- module(
                 c("library(Rgraphviz)",
                   "Ragraph <- agopen(myGraph, \"myGraph\")")))))
 mod2 <- module(name = "blank",
-               language = "shell")
+               language = moduleLanguage("shell"))
                        
 myInput <- moduleInput(name="name", vessel=internalVessel("lobbo"),
                        format=ioFormat("R character vector"))
@@ -148,58 +187,57 @@ test_that("'module' fails for invalid arguments", {
                  "'name' is not a length 1 character vector")
     expect_error(module(name = 16),
                  "'name' is not a length 1 character vector")
-    ## 'language' tests are sparse as this is properly tested in
+    ## 'language' tests are sparse as this is more properly tested in
     ## test_moduleLanguage.R
-    expect_error(module(name = "moddy", language = character(2)),
-                 "'language' is not a length 1 character vector")
-    expect_error(module(name = "moddy", language = numeric(1)),
-                 "'language' is not a length 1 character vector")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy",
+                        language = unclass(moduleLanguage("R"))),,
+                 "'language' is not a moduleLanguage object")
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         host = character(2)),
                  "'host' is not moduleHost object")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         description = numeric(2)),
                  "'description' is not a character object")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         description = list("my new module")),
                  "'description' is not a character object")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         inputs = character(2)),
                  "'inputs' is not a list object")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         inputs = list(character(1))),
                  "inputs must be moduleInput objects")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         outputs = character(2)),
                  "'outputs' is not a list object")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         outputs = list(character(1))),
                  "outputs must be moduleOutput objects")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         sources = character(2)),
                  "'sources' is not a list object")
-    expect_error(module(name = "moddy", language = "R",
+    expect_error(module(name = "moddy", language = moduleLanguage("R"),
                         sources = list(character(1))),
                  "sources must be moduleSource objects")
 })
 
 test_that("'module' slots are correct type and length", {
     expect_true(is_length1_char(mod1$name))
-    expect_equal(length(mod1$language), 1)
+    expect_is(getLanguage(mod1), "moduleLanguage")
     expect_true(is.character(mod1$description))
     expect_true(is.null(mod2$desctription))
     expect_is(mod1$host, "moduleHost")
     expect_true(is.null(mod2$host))
     expect_true(is.list(mod1$inputs))
-    expect_match(class(mod1$inputs[[1]]), "^moduleInput$", all=F)
-    expect_match(class(mod1$inputs[[1]]), "^moduleIO$", all=F)
+    expect_is(mod1$inputs[[1]], "moduleInput")
+    expect_is(mod1$inputs[[1]], "moduleIO")
     expect_true(is.null(mod2$inputs))
     expect_true(is.list(mod1$outputs))
-    expect_match(class(mod1$outputs[[1]]), "^moduleOutput$", all=F)
-    expect_match(class(mod1$outputs[[1]]), "^moduleIO$", all=F)
+    expect_is(mod1$outputs[[1]], "moduleOutput")
+    expect_is(mod1$outputs[[1]], "moduleIO")
     expect_true(is.null(mod2$outputs))
     expect_true(is.list(mod1$sources))
-    expect_match(class(mod1$sources[[1]]), "^moduleSource$")
+    expect_is(mod1$sources[[1]], "moduleSource")
     expect_true(is.null(mod2$sources))
 })
 
@@ -221,6 +259,6 @@ test_that("'module' object has appropriate slots", {
 })
 
 test_that("'module' object has class \"module\"", {
-    expect_match(class(mod1), "^module$")
-    expect_match(class(mod2), "^module$")
+    expect_is(mod1, "module")
+    expect_is(mod2, "module")
 })

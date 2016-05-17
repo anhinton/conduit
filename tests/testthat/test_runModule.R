@@ -376,15 +376,16 @@ test_that(
         absRef <- system.file("extdata", "simpleGraph", "createGraph.xml",
                               package = "conduit")
         moduleName <- "absomod"
-        language = "R"
+        moduleLanguage = moduleLanguage("R")
         outputName <- "lines"
         outputType <- "internalVessel"
         outputObject <-
             file.path(targ, moduleName,
-                      paste0(outputName, internalExtension(language)))
+                      paste0(outputName,
+                             internalExtension(getLanguage(moduleLanguage))))
         absomod <- module(
             name = moduleName,
-            language = language,
+            language = moduleLanguage,
             inputs = list(
                 moduleInput(
                     name = "file",

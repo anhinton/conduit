@@ -14,7 +14,9 @@ pipeXML <- c("<pipe>",
 pipeXML <- xmlRoot(xmlParse(pipeXML))
 
 inlineModuleXML <- c("<component name=\"a\">",
-                     "<module language = \"R\"/>",
+                     "<module>",
+                     "<language>R</language>",
+                     "</module>",
                      "</component>")
 inlineModuleXML <- xmlRoot(xmlParse(inlineModuleXML))
 pipelineXML <- newXMLNode("pipeline", inlineModuleXML, pipeXML)
@@ -38,10 +40,14 @@ filePipelineXML <- xmlRoot(xmlParse(filePipelineXML))
 pipelineXML <- xmlRoot(xmlParse(
     c("<pipeline>",
       "<component name=\"a\">",
-      "<module language=\"R\"/>",
+      "<module>",
+      "<language>R</language>",
+      "</module>",
       "</component>",
       "<component name=\"b\">",
-      "<module language=\"R\"/>",
+      "<module>",
+      "<language>R</language>",
+      "</module>",
       "</component>",
       "<pipe>",
       "<start component=\"a\" output=\"out\"/>",

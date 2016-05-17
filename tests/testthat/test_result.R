@@ -22,7 +22,7 @@ internaloutput <- output(i1,
 pipelinePath <- tempfile("pipelineResult")
 if (!dir.exists(pipelinePath))
     dir.create(pipelinePath)
-moduleComp <- component(value = module("m1", "R"),
+moduleComp <- component(value = module("m1", moduleLanguage("R")),
                         vessel = fileVessel("./m1/m1.xml"))
 compRes1 <- runComponent(moduleComp, pipelinePath = pipelinePath)
 
@@ -97,7 +97,7 @@ test_that("resultOutput() returns correctly", {
 
 test_that("moduleResult() returns correctly", {
     objects <- list(fileoutput, urloutput, internaloutput)
-    module <- module("m1", "R", outputs = list(f1, u1, i1))
+    module <- module("m1", moduleLanguage("R"), outputs = list(f1, u1, i1))
 
     ## fail for invalid arguments
     expect_error(moduleResult(list(unclass(objects[[1]]),
@@ -148,10 +148,10 @@ test_that("resultComponent() returns correctly", {
 
 test_that("pipelineResult() returns correctly", {
     outputList1 <- list(fileoutput)
-    module1 <- module("m1", "R", outputs = list(f1))
+    module1 <- module("m1", moduleLanguage("R"), outputs = list(f1))
     modRes1 <- moduleResult(outputList1, modulePath, module1)
     outputList2 <- list(urloutput)
-    module2 <- module("m2", "python", outputs = list(u1))
+    module2 <- module("m2", moduleLanguage("python"), outputs = list(u1))
     modRes2 <- moduleResult(outputList2, modulePath, module2)
     componentResultList <- list(modRes1, modRes2)
     pipeline <- pipeline("p1", components = list(module1, module1))

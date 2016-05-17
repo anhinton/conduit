@@ -78,7 +78,7 @@ test_that("prepareScript() returns script file", {
     on.exit(setwd(oldwd))
     module1 <- module(
         name = "mod1",
-        language = "R",
+        language = moduleLanguage("R"),
         inputs = list(
             moduleInput(name = "X",
                         vessel = internalVessel("X"),
@@ -199,7 +199,7 @@ test_that("can execute python scripts", {
     on.exit(setwd(oldwd))
     module2 <- module(
         "module2",
-        "python",
+        moduleLanguage("python"),
         sources = list(
             moduleSource(
                 scriptVessel("x = [1, 2, 3, 5, 10]"))),
@@ -221,7 +221,7 @@ test_that("can execute shell scripts", {
     on.exit(setwd(oldwd))
     module3 <- module(
         "module3",
-        "shell",
+        moduleLanguage("shell"),
         sources = list(
             moduleSource(
                 scriptVessel("x=\"lemon duds\"]"))),

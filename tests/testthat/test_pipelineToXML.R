@@ -1,7 +1,7 @@
 library(conduit)
 context("convert pipelines to XML")
 
-m1 <- module("m1", "R")
+m1 <- module("m1", moduleLanguage("R"))
 c1 <- component(value = m1)
 desc <- "mock pipeline"
 pipe1 <- pipe("a", "b", "1", "2")
@@ -15,7 +15,7 @@ fv <- fileVessel(p2file)
 p2 <- loadPipeline("p2", p2file) 
 c3 <- component(vessel = fv, value = p1)
 c4 <- component(vessel = urlVessel("http://openapi.org"),
-                value = module("m4", "R"))
+                value = module("m4", moduleLanguage("R")))
 
 test_that("componentToXML() creates appropriate XML", {
     ## module component
