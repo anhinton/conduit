@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<module xmlns="http://www.openapi.org/2014/">
+  <language>R</language>
+  <description/>
+  <source>
+    <script><![CDATA[x <- rnorm(10)]]></script>
+  </source>
+  <output name="x">
+    <internal symbol="x"/>
+    <format formatType="text">R numeric vector</format>
+  </output>
+</module>
