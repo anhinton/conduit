@@ -146,6 +146,8 @@ module <- function(name, language, host=NULL,
 #' @param version Exact version required
 #'
 #' @return \code{moduleLanguage} object
+#'
+#' @export
 moduleLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
                            version = NULL) {
     moduleLanguage <- list(language = language, minVersion = minVersion,
