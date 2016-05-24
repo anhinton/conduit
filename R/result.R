@@ -54,6 +54,7 @@ moduleResult <- function(outputList, modulePath, module) {
     name <- getName(module)
     moduleLanguage <- getLanguage(module)
     description <- getDescription(module)
+    execLanguageVersion <- getExecLanguageVersion(modulePath)
     
     ## create result module
     moduleInputList <- lapply(outputList, resultInput, modulePath = modulePath)
@@ -74,9 +75,30 @@ moduleResult <- function(outputList, modulePath, module) {
     ## return result module and outputs
     moduleResult <- list(name = name, file = moduleFile,
                          component = resultModule,
-                         outputList = outputList)
+                         outputList = outputList,
+                         execLanguageVersion = execLanguageVersion)
     class(moduleResult) <- c("moduleResult", "componentResult")
     moduleResult
+}
+
+#' Parse \file{.languageVersion} from \file{modulePath}
+getExecLanguageVersion <- function(modulePath) {
+    dotLanguageVersion <- file.path(modulePath, ".languageVersion")
+    execLanguageVersion <- 
+        if (file.exists(dotLanguageVersion)) {
+            languageVersion <- readLines(dotLanguageVersion)
+            execVersion <- languageVersion[1]
+            failMin <- as.logical(as.numeric(languageVersion[2]))
+            failMax <- as.logical(as.numeric(languageVersion[3]))
+            failExact <- as.logical(as.numeric(languageVersion[4]))
+            list(execVersion = execVersion,
+                 failMin = failMin,
+                 failMax = failMax,
+                 failExect = failExact)
+        } else {
+            NULL
+        }
+    execLanguageVersion
 }
 
 #' @describeIn componentResult returns the result of running a
