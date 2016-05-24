@@ -130,6 +130,7 @@ test_that("moduleLanguage outputs are correctly formed", {
     ml1 <- moduleLanguage(language, maxVersion = maxVersion,
                           version = version)
     expect_is(ml1, "moduleLanguage")
+    expect_is(ml1, paste0(language, "ModuleLanguage"))
     expect_match(getLanguage(ml1), language)
     expect_null(ml1$minVersion)
     expect_match(ml1$maxVersion, maxVersion)
@@ -139,6 +140,7 @@ test_that("moduleLanguage outputs are correctly formed", {
     ml2 <- moduleLanguage(language, minVersion = minVersion,
                           version = version)
     expect_is(ml2, "moduleLanguage")
+    expect_is(ml2, paste0(language, "ModuleLanguage"))
     expect_match(getLanguage(ml2), language)
     expect_null(ml2$maxVersion)
     expect_match(ml2$minVersion, minVersion)
@@ -148,6 +150,7 @@ test_that("moduleLanguage outputs are correctly formed", {
     ml3 <- moduleLanguage(language, maxVersion = maxVersion,
                           minVersion = minVersion)
     expect_is(ml3, "moduleLanguage")
+    expect_is(ml3, paste0(language, "ModuleLanguage"))
     expect_match(getLanguage(ml3), language)
     expect_null(ml3$version)
     expect_match(ml3$maxVersion, maxVersion)
