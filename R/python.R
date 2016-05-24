@@ -1,5 +1,49 @@
 ### Platform support for python platform
 
+#' @describeIn prepareScriptInit
+#'
+#' Init script for python langage
+prepareScriptInit.pythonModuleLanguage <- function(moduleLanguage) {
+    initScript <- c(
+        "#!/usr/bin/python", "",
+        "## CONDUIT: import modules",
+        "import os", 
+        "import pickle",
+        "from platform import python_version",
+        "from distutils.version import LooseVersion", 
+        "",
+        "## CONDUIT: checking language version",
+        paste0("version = {'minVersion':LooseVersion('",
+               moduleLanguage$minVersion, "'),"), 
+        paste0("           'maxVersion':LooseVersion('",
+               moduleLanguage$maxVersion, "'),"),
+        paste0("           'version':LooseVersion('",
+               moduleLanguage$version, "')}"), 
+        "thisVersion = LooseVersion(python_version())",
+        "try:",
+        "    failMin = thisVersion < version['minVersion']", 
+        "except AttributeError:",
+        "    failMin = False", "try:",
+        "    failMax = thisVersion > version['maxVersion']", 
+        "except AttributeError:",
+        "    failMax = False",
+        "try:",
+        "    failExact = thisVersion != version['version']", 
+        "except AttributeError:",
+        "    failExact = False",
+        "languageVersion = [str(thisVersion), str(int(failMin)), str(int(failMax)),", 
+        "                   str(int(failExact))]",
+        "languageVersion = '\\n'.join(languageVersion)", 
+        "if (thisVersion >= LooseVersion('3.0.0')):",
+        "    with open('.languageVersion', 'w', encoding='UTF-8') as outFile:", 
+        "        n = outFile.write(languageVersion + '\\n')",
+        "else:", 
+        "    with open('.languageVersion', 'w') as outFile:",
+        "        n = outFile.write(languageVersion + '\\n')", 
+        "")
+    initScript
+}
+
 #' @describeIn internalInputScript prepare internal input script for
 #' python language
 #'
@@ -26,7 +70,7 @@ internalOutputScript.pythonSymbol <- function (symbol) {
 #'
 #' @export
 command.pythonScript <- function(script) {
-    command <- list(command = "python",
+    command <- list(command = "python2",
                     args = script)
     class(command) <- "command"
     command
