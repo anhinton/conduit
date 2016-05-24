@@ -150,7 +150,9 @@ moduleLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
                            version = NULL) {
     moduleLanguage <- list(language = language, minVersion = minVersion,
                      maxVersion = maxVersion, version = version)
-    class(moduleLanguage) <- "moduleLanguage"
+    class(moduleLanguage) <- c(
+        paste0(moduleLanguage$language, "ModuleLanguage"),
+        "moduleLanguage")
     moduleLanguage
 }
 
