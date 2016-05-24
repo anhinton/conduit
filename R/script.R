@@ -106,6 +106,10 @@ prepareScript <- function(module) {
     moduleLanguage <- getLanguage(module)
     location <- attr(module, "location")
 
+    ## initScript does the setup required by conduit before running
+    ## a module's source scripts
+    initScript <- prepareScriptInit(moduleLanguage)
+
     ## sort sources into correct order
     sources <- module$sources
     sources <- lapply(sourceOrder(sources),
@@ -137,13 +141,13 @@ prepareScript <- function(module) {
         lapply(outputs, prepareScriptOutput, moduleLanguage = moduleLanguage)
     outputScript <- unlist(outputScript, use.names = FALSE)
 
-    moduleScript <- c(inputScript, sourceScript, outputScript)
-    moduleScript <- switch(
-        getLanguage(moduleLanguage),
-        python = c("#!/usr/bin/python", "import os", "import pickle",
-                   moduleScript),
-        R = c("#!/usr/bin/Rscript", moduleScript),
-        shell = c("#!/bin/sh", moduleScript))
+    moduleScript <- c(initScript, inputScript, sourceScript, outputScript)
+    ## moduleScript <- switch(
+    ##     getLanguage(moduleLanguage),
+    ##     python = c("#!/usr/bin/python", "import os", "import pickle",
+    ##                moduleScript),
+    ##     R = c("#!/usr/bin/Rscript", moduleScript),
+    ##     shell = c("#!/bin/sh", moduleScript))
     ## script might be empty
     if (is.null(moduleScript))
         moduleScript <- ""
@@ -159,6 +163,15 @@ prepareScript <- function(module) {
     class(scriptPath) <-
         c(paste0(getLanguage(moduleLanguage), "Script"), "script")
     scriptPath
+}
+
+#' Prepare init script to prepare for conudit to run module source scripts.
+#'
+#' @param moduleLanguage \code{moduleLanguage} object
+#'
+#' @return initScript character vector
+prepareScriptInit <- function(moduleLanguage) {
+    UseMethod("prepareScriptInit")
 }
 
 #' Prepare script to create inputs
