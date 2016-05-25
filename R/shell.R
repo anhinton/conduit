@@ -1,5 +1,22 @@
 ### Platform support for shell platform
 
+#' @describeIn prepareScriptInit
+#'
+#' Init script for bash script langage
+prepareScriptInit.shellModuleLanguage <- function(moduleLanguage) {
+    initScript <- c(
+        "#!/bin/bash",
+        "## CONDUIT: checking language version",
+        "## for bash no actual checking is done, but the current version is returned", 
+        "outfile=\".languageVersion\"",
+        "echo \"$BASH_VERSION\" > $outfile", 
+        "counter=0", "while [ $counter -lt 3 ];",
+        "do",
+        "    echo \"0\" >> $outfile", 
+        "    let counter=counter+1", "done", "")
+    initScript
+}
+
 #' @describeIn internalInputScript prepare internal input script for
 #' shell language
 #'
@@ -22,7 +39,7 @@ internalOutputScript.shellSymbol <- function (symbol) {
 #'
 #' @export
 command.shellScript <- function(script) {
-    command <- list(command = "sh",
+    command <- list(command = "/bin/bash",
                     args = script)
     class(command) <- "command"
     command
