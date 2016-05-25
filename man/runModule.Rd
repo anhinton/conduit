@@ -4,7 +4,8 @@
 \alias{runModule}
 \title{Execute a \code{module}'s source(s)}
 \usage{
-runModule(module, targetDirectory = getwd(), inputObjects = NULL)
+runModule(module, targetDirectory = getwd(), inputObjects = NULL,
+  warnVersion = FALSE)
 }
 \arguments{
 \item{module}{\code{module} object}
