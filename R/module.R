@@ -1041,7 +1041,7 @@ moduleSourceToXML <- function (moduleSource,
 #' @import XML
 #' @export
 runModule <- function(module, targetDirectory = getwd(),
-                      inputObjects = NULL) {
+                      inputObjects = NULL, warnVersion = FALSE) {
     ## fail if not given a module
     if (class(module) != "module"){
         stop("'module' is not a 'module' object")
@@ -1124,8 +1124,14 @@ runModule <- function(module, targetDirectory = getwd(),
                          moduleLanguage = moduleLanguage,
                          outputDirectory = modulePath)
 
-    ## return moduleResult object
-    moduleResult(outputList, modulePath, module)
+    ## create moduleResult object
+    moduleResult <- moduleResult(outputList, modulePath, module)
+
+    ## warn if language versions not met
+    if (warnVersion) 
+        warnLanguageVersion(module = module, moduleResult = moduleResult)
+
+    moduleResult
 }
 
 #' Prepare input object
@@ -1409,4 +1415,36 @@ retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
     if (!dir.exists(modulePath))
         stop("modulePath does not exist")
     UseMethod("retrieveModuleHost")
+}
+
+#' Give warning if module execution violated moduleLanguage versions.
+#'
+#' @param module \code{module} object
+#' @param moduleResult \code{moduleResult} object
+#'
+#' @return NULL
+warnLanguageVersion <- function(module, moduleResult) {
+    execLanguageVersion <- moduleResult$execLanguageVersion
+    execVersion <- execLanguageVersion$execVersion
+    
+    moduleLanguage <- getLanguage(module)
+    moduleName <- getName(module)
+    if (execLanguageVersion$failMin) {
+        warning(paste(getLanguage(moduleLanguage),
+                      execVersion, "was less than minVersion",
+                      moduleLanguage$minVersion,
+                      "when executing module", moduleName))
+    }
+    if (execLanguageVersion$failMax) {
+        warning(paste(getLanguage(moduleLanguage),
+                      execVersion, "was greater than maxVersion",
+                      moduleLanguage$maxVersion,
+                      "when executing module", moduleName))
+    }
+    if (execLanguageVersion$failExact) {
+        warning(paste(getLanguage(moduleLanguage),
+                      execVersion, "was not exactly version",
+                      moduleLanguage$version,
+                      "when executing module", moduleName))
+    }
 }
