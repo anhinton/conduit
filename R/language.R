@@ -44,7 +44,7 @@ internalExtension <- function(moduleLanguage) {
     extension <- switch(getLanguage(moduleLanguage),
                         R = ".rds",
                         python2 =, python3= ".pickle",
-                        shell = ".txt",
+                        bash = ".txt",
                         stop(paste("language", language, "not supported")))
     extension
 }
@@ -60,7 +60,7 @@ scriptExtension <- function(moduleLanguage) {
     extension <- switch(getLanguage(moduleLanguage),
                         R = ".R",
                         python2 =, python3 = ".python",
-                        shell = ".sh",
+                        bash = ".sh",
                         stop(paste("language", language, "not supported")))
     extension
 }

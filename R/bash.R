@@ -1,9 +1,9 @@
-### Platform support for shell platform
+### Platform support for bash platform
 
 #' @describeIn prepareScriptInit
 #'
 #' Init script for bash script langage
-prepareScriptInit.shellModuleLanguage <- function(moduleLanguage) {
+prepareScriptInit.bashModuleLanguage <- function(moduleLanguage) {
     initScript <- c(
         "#!/bin/bash",
         "## CONDUIT: checking language version",
@@ -18,27 +18,27 @@ prepareScriptInit.shellModuleLanguage <- function(moduleLanguage) {
 }
 
 #' @describeIn internalInputScript prepare internal input script for
-#' shell language
+#' bash language
 #'
 #' @export
-internalInputScript.shellSymbol <- function (symbol) {
+internalInputScript.bashSymbol <- function (symbol) {
     paste0(symbol, "=$(cat ", symbol,
-           internalExtension(moduleLanguage("shell")), ")")
+           internalExtension(moduleLanguage("bash")), ")")
 }
 
 #' @describeIn internalOutputScript create script to create internal
-#' output for language = "shell"
+#' output for language = "bash"
 #'
 #' @export
-internalOutputScript.shellSymbol <- function (symbol) {
+internalOutputScript.bashSymbol <- function (symbol) {
     paste0("echo ${", symbol, "} > ", symbol, ".txt")
 }
 
-#' @describeIn command generate a command to execute a shell language
+#' @describeIn command generate a command to execute a bash language
 #'     script
 #'
 #' @export
-command.shellScript <- function(script) {
+command.bashScript <- function(script) {
     command <- list(command = "/bin/bash",
                     args = script)
     class(command) <- "command"
