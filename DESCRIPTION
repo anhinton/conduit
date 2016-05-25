@@ -18,7 +18,8 @@ SystemRequirements:
     python3 (>= 3.4)
 Imports:
     XML,
-    rPython
+    rPython,
+    whisker
 Suggests:
     Rgraphviz,
     gridGraphviz,
