@@ -65,7 +65,8 @@ moduleResult <- function(outputList, modulePath, module) {
     moduleOutputList <- lapply(outputList, resultOutput)
     resultModule <- module(
         name = name,
-        language = moduleLanguage,
+        language = moduleLanguage(language = getLanguage(moduleLanguage),
+                                  version = execLanguageVersion$execVersion),
         description = description,
         inputs = if (length(moduleInputList)) moduleInputList,
         sources = if (length(moduleSourceList)) moduleSourceList,
@@ -94,7 +95,7 @@ getExecLanguageVersion <- function(modulePath) {
             list(execVersion = execVersion,
                  failMin = failMin,
                  failMax = failMax,
-                 failExect = failExact)
+                 failExact = failExact)
         } else {
             NULL
         }
