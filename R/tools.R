@@ -25,38 +25,6 @@ is_length1_char <- function(x) {
     return(value)
 }
 
-#' Returns the correct file extension for a language's 'internal' files
-#'
-#' @param moduleLanguage \code{moduleLanguage} object
-#' 
-#' @return file exension as character as ".EXT"
-internalExtension <- function(moduleLanguage) {
-    if (!inherits(moduleLanguage, "moduleLanguage"))
-        stop("moduleLanguage object required")
-    extension <- switch(getLanguage(moduleLanguage),
-                        R = ".rds",
-                        python = ".pickle",
-                        shell = ".txt",
-                        stop(paste("language", language, "not supported")))
-    extension
-}
-
-#' Returns the correct file extension for a language's script files
-#'
-#' @param moduleLanguage \code{moduleLanguage} object
-#' 
-#' @return file extension as character ".EXT"
-scriptExtension <- function(moduleLanguage) {  
-    if (!inherits(moduleLanguage, "moduleLanguage"))
-        stop("moduleLanguage object required")  
-    extension <- switch(getLanguage(moduleLanguage),
-                        R = ".R",
-                        python = ".python",
-                        shell = ".sh",
-                        stop(paste("language", language, "not supported")))
-    extension
-}
-
 #' Tests if a file path is absolute
 #'
 #' @param path file path
