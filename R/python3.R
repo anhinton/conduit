@@ -1,11 +1,11 @@
-### Platform support for python platform
+### Platform support for python3 platform
 
 #' @describeIn prepareScriptInit
 #'
-#' Init script for python langage
-prepareScriptInit.pythonModuleLanguage <- function(moduleLanguage) {
+#' Init script for python3 langage
+prepareScriptInit.python3ModuleLanguage <- function(moduleLanguage) {
     initScript <- c(
-        "#!/usr/bin/python", "",
+        "#!/usr/bin/python3", "",
         "## CONDUIT: import modules",
         "import os", 
         "import pickle",
@@ -45,32 +45,32 @@ prepareScriptInit.pythonModuleLanguage <- function(moduleLanguage) {
 }
 
 #' @describeIn internalInputScript prepare internal input script for
-#' python language
+#' python3 language
 #'
 #' @export
-internalInputScript.pythonSymbol <- function (symbol) {
+internalInputScript.python3Symbol <- function (symbol) {
     c(paste0("with open('", symbol,
-             internalExtension(moduleLanguage("python")),
+             internalExtension(moduleLanguage("python3")),
              "', 'rb') as f:"),
       paste0("    ", symbol, " = pickle.load(f)"))
 }
 
 #' @describeIn internalOutputScript create script to create internal
-#' output for language = "python"
+#' output for language = "python3"
 #'
 #' @export
-internalOutputScript.pythonSymbol <- function (symbol) {
+internalOutputScript.python3Symbol <- function (symbol) {
     c(paste0("with open('", symbol, ".pickle', 'wb') as f:"),
       paste0("    pickle.dump(", symbol, ", f)"))
 }
 
 
-#' @describeIn command generate a command to execute a python language
+#' @describeIn command generate a command to execute a python3 language
 #'     script
 #'
 #' @export
-command.pythonScript <- function(script) {
-    command <- list(command = "python2",
+command.python3Script <- function(script) {
+    command <- list(command = "python3",
                     args = script)
     class(command) <- "command"
     command
