@@ -1,9 +1,9 @@
 #!/usr/bin/Rscript
 
 ## CONDUIT: checking language version
-version <- list(minVersion = "",
-                maxVersion = "",
-                version = "")
+version <- list(minVersion = "{{minVersion}}",
+                maxVersion = "{{maxVersion}}",
+                version = "{{version}}")
 failMin <- getRversion() < numeric_version(version$minVersion,
                                            strict = FALSE)
 failMax <- getRversion() > numeric_version(version$maxVersion,
