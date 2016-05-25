@@ -33,13 +33,9 @@ prepareScriptInit.python3ModuleLanguage <- function(moduleLanguage) {
         "    failExact = False",
         "languageVersion = [str(thisVersion), str(int(failMin)), str(int(failMax)),", 
         "                   str(int(failExact))]",
-        "languageVersion = '\\n'.join(languageVersion)", 
-        "if (thisVersion >= LooseVersion('3.0.0')):",
-        "    with open('.languageVersion', 'w', encoding='UTF-8') as outFile:", 
-        "        n = outFile.write(languageVersion + '\\n')",
-        "else:", 
-        "    with open('.languageVersion', 'w') as outFile:",
-        "        n = outFile.write(languageVersion + '\\n')", 
+        "languageVersion = '\\n'.join(languageVersion)",
+        "with open('.languageVersion', 'w', encoding='UTF-8') as outFile:", 
+        "    n = outFile.write(languageVersion + '\\n')",
         "")
     initScript
 }
