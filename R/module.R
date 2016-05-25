@@ -150,8 +150,12 @@ module <- function(name, language, host=NULL,
 #' @export
 moduleLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
                            version = NULL) {
+    if (!is.null(version))
+        minVersion = maxVersion = NULL
+    language = execLanguage(language = language, minVersion = minVersion,
+                            maxVersion = maxVersion, version = version)
     moduleLanguage <- list(language = language, minVersion = minVersion,
-                     maxVersion = maxVersion, version = version)
+                           maxVersion = maxVersion, version = version)
     class(moduleLanguage) <- c(
         paste0(moduleLanguage$language, "ModuleLanguage"),
         "moduleLanguage")
