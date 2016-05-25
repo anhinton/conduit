@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <module xmlns="http://www.openapi.org/2014/">
-  <language>shell</language>
+  <language>bash</language>
   <description/>
   <input name="dotfile">
     <file ref="dot.dot"/>
