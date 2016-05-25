@@ -133,7 +133,7 @@ test_that("moduleLanguage outputs are correctly formed", {
     expect_is(ml1, paste0(language, "ModuleLanguage"))
     expect_match(getLanguage(ml1), language)
     expect_null(ml1$minVersion)
-    expect_match(ml1$maxVersion, maxVersion)
+    expect_null(ml1$maxVersion)
     expect_match(ml1$version, version)
 
     ## no maxVersion argument
@@ -143,7 +143,7 @@ test_that("moduleLanguage outputs are correctly formed", {
     expect_is(ml2, paste0(language, "ModuleLanguage"))
     expect_match(getLanguage(ml2), language)
     expect_null(ml2$maxVersion)
-    expect_match(ml2$minVersion, minVersion)
+    expect_null(ml2$minVersion)
     expect_match(ml2$version, version)
 
     ## no version argument
@@ -180,7 +180,7 @@ mod1 <- module(
                 c("library(Rgraphviz)",
                   "Ragraph <- agopen(myGraph, \"myGraph\")")))))
 mod2 <- module(name = "blank",
-               language = moduleLanguage("shell"))
+               language = moduleLanguage("bash"))
                        
 myInput <- moduleInput(name="name", vessel=internalVessel("lobbo"),
                        format=ioFormat("R character vector"))

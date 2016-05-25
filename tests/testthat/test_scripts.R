@@ -216,12 +216,12 @@ test_that("can execute python scripts", {
     expect_true(is.null(attr(execResult, "status")))
 })
 
-test_that("can execute shell scripts", {
+test_that("can execute bash scripts", {
     oldwd <- setwd(tempdir())
     on.exit(setwd(oldwd))
     module3 <- module(
         "module3",
-        moduleLanguage("shell"),
+        moduleLanguage("bash"),
         sources = list(
             moduleSource(
                 scriptVessel("x=\"lemon duds\"]"))),
@@ -229,7 +229,7 @@ test_that("can execute shell scripts", {
             moduleOutput(
                 "x",
                 internalVessel("x"),
-                ioFormat("shell environment variable"))))
+                ioFormat("bash environment variable"))))
     inputObjects <- NULL
     script <- prepareScript(module3)
     execResult <- executeScript(script = script, moduleHost = NULL,
