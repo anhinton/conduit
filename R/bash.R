@@ -4,16 +4,15 @@
 #'
 #' Init script for bash script langage
 prepareScriptInit.bashModuleLanguage <- function(moduleLanguage) {
-    initScript <- c(
-        "#!/bin/bash",
-        "## CONDUIT: checking language version",
-        "## for bash no actual checking is done, but the current version is returned", 
-        "outfile=\".languageVersion\"",
-        "echo \"$BASH_VERSION\" > $outfile", 
-        "counter=0", "while [ $counter -lt 3 ];",
-        "do",
-        "    echo \"0\" >> $outfile", 
-        "    let counter=counter+1", "done", "")
+    template <- readLines(system.file("scriptTemplates", "script.sh",
+                                      package = "conduit"))
+    ## ## as of 2016-05-30 no version testing done for BASH
+    ## data <- list(minVersion = moduleLanguage$minVersion,
+    ##              maxVersion = moduleLanguage$maxVersion,
+    ##              version = moduleLanguage$version)
+    ## initScript <- whisker::whisker.render(template = template,
+    ##                                       data = data)
+    initScript <- template
     initScript
 }
 

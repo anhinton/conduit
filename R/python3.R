@@ -4,39 +4,13 @@
 #'
 #' Init script for python3 langage
 prepareScriptInit.python3ModuleLanguage <- function(moduleLanguage) {
-    initScript <- c(
-        "#!/usr/bin/python3", "",
-        "## CONDUIT: import modules",
-        "import os", 
-        "import pickle",
-        "from platform import python_version",
-        "from distutils.version import LooseVersion", 
-        "",
-        "## CONDUIT: checking language version",
-        paste0("version = {'minVersion':LooseVersion('",
-               moduleLanguage$minVersion, "'),"), 
-        paste0("           'maxVersion':LooseVersion('",
-               moduleLanguage$maxVersion, "'),"),
-        paste0("           'version':LooseVersion('",
-               moduleLanguage$version, "')}"), 
-        "thisVersion = LooseVersion(python_version())",
-        "try:",
-        "    failMin = thisVersion < version['minVersion']", 
-        "except AttributeError:",
-        "    failMin = False", "try:",
-        "    failMax = thisVersion > version['maxVersion']", 
-        "except AttributeError:",
-        "    failMax = False",
-        "try:",
-        "    failExact = thisVersion != version['version']", 
-        "except AttributeError:",
-        "    failExact = False",
-        "languageVersion = [str(thisVersion), str(int(failMin)), str(int(failMax)),", 
-        "                   str(int(failExact))]",
-        "languageVersion = '\\n'.join(languageVersion)",
-        "with open('.languageVersion', 'w', encoding='UTF-8') as outFile:", 
-        "    n = outFile.write(languageVersion + '\\n')",
-        "")
+    template <- readLines(system.file("scriptTemplates", "script3.py",
+                                      package = "conduit"))
+    data <- list(minVersion = moduleLanguage$minVersion,
+                 maxVersion = moduleLanguage$maxVersion,
+                 version = moduleLanguage$version)
+    initScript <- whisker::whisker.render(template = template,
+                                          data = data)
     initScript
 }
 

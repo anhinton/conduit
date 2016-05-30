@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2
 
 ## CONDUIT: import modules
 import os
@@ -26,5 +26,5 @@ except AttributeError:
 languageVersion = [str(thisVersion), str(int(failMin)), str(int(failMax)),
                    str(int(failExact))]
 languageVersion = '\n'.join(languageVersion)
-with open('.languageVersion', 'w', encoding='UTF-8') as outFile:
+with open('.languageVersion', 'w') as outFile:
     n = outFile.write(languageVersion + '\n')
