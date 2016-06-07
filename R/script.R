@@ -142,13 +142,6 @@ prepareScript <- function(module) {
     outputScript <- unlist(outputScript, use.names = FALSE)
 
     moduleScript <- c(initScript, inputScript, sourceScript, outputScript)
-    ## moduleScript <- switch(
-    ##     getLanguage(moduleLanguage),
-    ##     python = c("#!/usr/bin/python", "import os", "import pickle",
-    ##                moduleScript),
-    ##     R = c("#!/usr/bin/Rscript", moduleScript),
-    ##     shell = c("#!/bin/sh", moduleScript))
-    ## script might be empty
     if (is.null(moduleScript))
         moduleScript <- ""
 
