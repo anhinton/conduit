@@ -124,7 +124,7 @@ executeCommand.vagrantHost <- function(moduleHost, outputLocation,
 retrieveModuleHost.vagrantHost <- function(moduleHost, outputLocation,
                                            modulePath) {
     hostdir <- file.path(moduleHost$hostdir, outputLocation)
-    files <- list.files(path = hostdir, full.names = TRUE)
+    files <- list.files(path = hostdir, all.files = TRUE, full.names = TRUE)
     for (f in files)
         file.copy(f, modulePath, recursive = TRUE)
 }

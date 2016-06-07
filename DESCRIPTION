@@ -13,8 +13,13 @@ License: GPL (>= 3)
 Depends:
     R (>= 3.3.0),
     methods
+SystemRequirements:
+    python2 (>= 2.7),
+    python3 (>= 3.4)
 Imports:
-    XML
+    XML,
+    rPython,
+    whisker
 Suggests:
     Rgraphviz,
     gridGraphviz,

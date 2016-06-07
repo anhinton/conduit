@@ -10,7 +10,8 @@ module(name, language, host = NULL, description = NULL, inputs = NULL,
 \arguments{
 \item{name}{Name of module}
 
-\item{language}{Language name}
+\item{language}{\code{moduleLanguage} object describing source
+script execution language}
 
 \item{host}{\code{moduleHost} object describing machine where
 module is to be executed}
@@ -29,7 +30,7 @@ module is to be executed}
 \code{module} list containing:
 
 \item{name}{module name}
-\item{language}{module language}
+\item{language}{\code{moduleLanguage} object}
 \item{host}{\code{moduleHost} object}
 \item{description}{module description}
 \item{inputs}{list of \code{moduleInput} objects}
@@ -58,7 +59,7 @@ outp1 <- moduleOutput(
              name = "x",
              internalVessel(symbol = "x"),
              format = ioFormat("R character string"))
-mod1 <- module(name = "setX", language = "R",
+mod1 <- module(name = "setX", language = moduleLanguage("R"),
                description = "sets the value of x",
                outputs = list(outp1),
                sources = list(src1))
@@ -67,7 +68,7 @@ mod1 <- module(name = "setX", language = "R",
 mod2 <-
     module(
         "showY",
-        language = "R",
+        language = moduleLanguage("R"),
         host = "localhost",
         description = "displays the value of Y",
         inputs =

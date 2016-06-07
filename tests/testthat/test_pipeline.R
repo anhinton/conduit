@@ -1,7 +1,7 @@
 library(conduit)
 context("create pipeline objects")
 
-mod1 <- module("mod1", "R")
+mod1 <- module("mod1", moduleLanguage("R"))
 pipeStart <- list(component = "mod1", output = "a")
 pipeEnd <- list(component = "mod2", input = "b")
 pipe1 <- pipe(pipeStart[[1]], pipeStart[[2]], pipeEnd[[1]], pipeEnd[[2]])

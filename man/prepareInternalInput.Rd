@@ -4,14 +4,14 @@
 \alias{prepareInternalInput}
 \title{Prepare internal input object.}
 \usage{
-prepareInternalInput(input, symbol, language, outputDirectory)
+prepareInternalInput(input, symbol, moduleLanguage, outputDirectory)
 }
 \arguments{
 \item{input}{File path to serialized object}
 
 \item{symbol}{Name of module input}
 
-\item{language}{Module language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 
 \item{outputDirectory}{File path to module working directory}
 }

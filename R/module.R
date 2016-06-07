@@ -14,7 +14,8 @@
 #' local machine.
 #'
 #' @param name Name of module
-#' @param language Language name
+#' @param language \code{moduleLanguage} object describing source
+#'     script execution language
 #' @param host \code{moduleHost} object describing machine where
 #'     module is to be executed
 #' @param description A basic description of the module
@@ -26,7 +27,7 @@
 #' @return \code{module} list containing:
 #'
 #' \item{name}{module name}
-#' \item{language}{module language}
+#' \item{language}{\code{moduleLanguage} object}
 #' \item{host}{\code{moduleHost} object}
 #' \item{description}{module description}
 #' \item{inputs}{list of \code{moduleInput} objects}
@@ -46,7 +47,7 @@
 #'              name = "x",
 #'              internalVessel(symbol = "x"),
 #'              format = ioFormat("R character string"))
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(outp1),
 #'                sources = list(src1))
@@ -55,7 +56,7 @@
 #' mod2 <-
 #'     module(
 #'         "showY",
-#'         language = "R",
+#'         language = moduleLanguage("R"),
 #'         host = "localhost",
 #'         description = "displays the value of Y",
 #'         inputs =
@@ -83,8 +84,8 @@ module <- function(name, language, host=NULL,
 
     ## check 'language'
     if (!is.null(language)) {
-        if (!is_length1_char(language))
-            stop("'language' is not a length 1 character vector")
+        if (!inherits(language, "moduleLanguage"))
+            stop("'language' is not a moduleLanguage object")
     }
     
     ## check 'host'
@@ -135,6 +136,39 @@ module <- function(name, language, host=NULL,
     class(module) <- "module"
     attr(module, "location") <- location
     module
+}
+
+#' Create a \code{moduleLanguage} object
+#'
+#' @param language Language name
+#' @param minVersion Minimum version required
+#' @param maxVersion Maximum version required
+#' @param version Exact version required
+#'
+#' @return \code{moduleLanguage} object
+#'
+#' @export
+moduleLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
+                           version = NULL) {
+    if (!is.null(version))
+        minVersion = maxVersion = NULL
+    language = execLanguage(language = language, minVersion = minVersion,
+                            maxVersion = maxVersion, version = version)
+    moduleLanguage <- list(language = language, minVersion = minVersion,
+                           maxVersion = maxVersion, version = version)
+    class(moduleLanguage) <- c(
+        paste0(moduleLanguage$language, "ModuleLanguage"),
+        "moduleLanguage")
+    moduleLanguage
+}
+
+#' @describeIn getLanguage
+#'
+#' Return language name as character
+#'
+#' @export
+getLanguage.moduleLanguage <- function(x) {
+    x$language
 }
 
 #' \code{moduleHost} object
@@ -392,7 +426,7 @@ getDescription.module <- function(x) {
 
 #' @describeIn getLanguage
 #'
-#' Returns module language
+#' Returns \code{moduleLanguage} object
 #'
 #' @export
 getLanguage.module <- function(x) {
@@ -468,6 +502,23 @@ loadModule <- function(name, ref, path = NULL,
     attr(module, "location") <- attr(rawXML, "location")
     
     return(module)
+}
+
+#' Create a \code{moduleLanguage} object from language XML
+#'
+#' @param moduleLanguageXML language XML node
+#'
+#' @return \code{moduleLanguage} object
+#'
+#' @import XML
+readModuleLanguageXML <- function(moduleLanguageXML) {
+    value <- xmlValue(moduleLanguageXML)
+    nodeAttrs <- xmlAttrs(moduleLanguageXML)
+    minVersion <- getXMLAttr(moduleLanguageXML, "minVersion")
+    maxVersion <- getXMLAttr(moduleLanguageXML, "maxVersion")
+    version <- getXMLAttr(moduleLanguageXML, "version")
+    moduleLanguage(language = value, minVersion = minVersion,
+                   maxVersion = maxVersion, version = version)
 }
 
 #' Create a \code{moduleHost} object from host XML
@@ -628,6 +679,10 @@ readModuleXML <- function (name, xml, location = getwd()) {
     nodes <- xmlChildren(xml)
     nodeNames <- names(nodes)
 
+    ## extract language
+    languageNode <- nodes$language
+    language <- readModuleLanguageXML(languageNode)
+
     ## extract host
     host <-
         if ("host" %in% nodeNames) {
@@ -758,8 +813,8 @@ moduleToXML <- function (module,
         stop("'module' is not a 'module' object")
     }
     moduleRoot <- newXMLNode(name = "module",
-                             attrs = c(language = module$language),
                              namespaceDefinitions = namespaceDefinitions)
+    language <- moduleLanguageToXML(getLanguage(module))
     host <-
         if (!is.null(module$host)) {
             moduleHostToXML(module$host)
@@ -776,10 +831,31 @@ moduleToXML <- function (module,
     outputs <- lapply(module$outputs, moduleIOToXML)
     sources <- lapply(module$sources, moduleSourceToXML)
     addChildren(moduleRoot,
-                kids=list(host, description, inputs, sources,
+                kids=list(language, host, description, inputs, sources,
                           outputs))
 }
 
+#' Create XML corresponding to \code{moduleLanguage} object
+#'
+#' @param moduleLanguage \code{moduleLanguage} objects
+#'
+#' @return XML node representing module language
+moduleLanguageToXML <- function(moduleLanguage) {
+    if (!inherits(moduleLanguage, "moduleLanguage"))
+        stop("moduleLanguage object required")
+    language <- getLanguage(moduleLanguage)
+    minVersion <- moduleLanguage$minVersion
+    maxVersion <- moduleLanguage$maxVersion
+    version <- moduleLanguage$version
+    moduleLanguageXML <-
+        newXMLNode(name = "language",
+                   language,
+                   attrs = c(minVersion = minVersion,
+                             maxVersion = maxVersion,
+                             version = version))
+    moduleLanguageXML
+}
+    
 #' Create XML corresponding to a \code{moduleHost} object
 #'
 #' @param moduleHost \code{moduleHost} object
@@ -909,7 +985,8 @@ moduleSourceToXML <- function (moduleSource,
 
 #' Execute a \code{module}'s source(s)
 #'
-#' Execute the scripts contained in or referenced by a \code{module}'s sources.
+#' Execute the scripts contained in or referenced by a \code{module}'s
+#' sources.
 #'
 #' @details This function:
 #' \itemize{
@@ -933,16 +1010,20 @@ moduleSourceToXML <- function (moduleSource,
 #' If \code{module$host} is not NULL the remote host must exist and be
 #' accessible by conduit or this function will fail.
 #'
+#' If \code{warnVersion} is \code{TRUE} this function will give a
+#' warning when the executing language does not meet the module's
+#' \code{moduleLanguage} requirments.
+#'
 #' @param module \code{module} object
 #' @param targetDirectory File path for module output
 #' @param inputObjects Named list of input objects
+#' @param warnVersion should conduit warn if module language
+#'     version requirements are not met
 #' 
-#' @seealso \code{module}, \code{moduleSource}
+#' @seealso \code{module}, \code{moduleSource}, \code{moduleLanguage}
+#'     for creating modules, \code{moduleResult} for result objects
 #'
-#' @return a \code{moduleResult} object containing:
-#' \item{file}{file path to resulting module XML}
-#' \item{component}{resulting \code{module} object}
-#' \item{outputList}{list of \code{output} objects produced by module}
+#' @return \code{moduleResult}
 #'
 #' @examples
 #'
@@ -969,7 +1050,7 @@ moduleSourceToXML <- function (moduleSource,
 #' @import XML
 #' @export
 runModule <- function(module, targetDirectory = getwd(),
-                      inputObjects = NULL) {
+                      inputObjects = NULL, warnVersion = FALSE) {
     ## fail if not given a module
     if (class(module) != "module"){
         stop("'module' is not a 'module' object")
@@ -984,7 +1065,7 @@ runModule <- function(module, targetDirectory = getwd(),
     name <- getName(module)
     moduleInputList <- module$inputs
     moduleOutputList <- module$outputs
-    language <- getLanguage(module)
+    moduleLanguage <- getLanguage(module)
     
     ## create a directory for this module's output
     modulePath <- file.path(targetDirectory, getName(module))
@@ -1000,7 +1081,7 @@ runModule <- function(module, targetDirectory = getwd(),
     inputObjects <- lapply(X = moduleInputList, FUN = prepareInput,
                            inputList = inputObjects,
                            outputDirectory = modulePath,
-                           language = language,
+                           moduleLanguage = moduleLanguage,
                            location = getLocation(module))
 
     ## prepare script
@@ -1049,11 +1130,17 @@ runModule <- function(module, targetDirectory = getwd(),
 
     ## resolve output objects
     outputList <- lapply(X = module$outputs, FUN = resolveOutput,
-                         language = getLanguage(module),
+                         moduleLanguage = moduleLanguage,
                          outputDirectory = modulePath)
 
-    ## return moduleResult object
-    moduleResult(outputList, modulePath, module)
+    ## create moduleResult object
+    moduleResult <- moduleResult(outputList, modulePath, module)
+
+    ## warn if language versions not met
+    if (warnVersion) 
+        warnLanguageVersion(module = module, moduleResult = moduleResult)
+
+    moduleResult
 }
 
 #' Prepare input object
@@ -1072,13 +1159,13 @@ runModule <- function(module, targetDirectory = getwd(),
 #' @param moduleInput \code{moduleInput} object
 #' @param inputList list of \code{input} objects provided to module
 #' @param outputDirectory working directory for module execution
-#' @param language Module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param location location of originating module file
 #'
 #' @return \code{input} object. Generally a character string
 #'     referencing a file location or URL
 prepareInput <- function(moduleInput, inputList, outputDirectory,
-                         language, location) {
+                         moduleLanguage, location) {
     name <- getName(moduleInput)
     vessel <- getVessel(moduleInput)
     type <- getType(vessel)
@@ -1088,7 +1175,7 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
         type,
         internalVessel = {
             symbol <- vessel$symbol
-            prepareInternalInput(input, symbol, language,
+            prepareInternalInput(input, symbol, moduleLanguage,
                                  outputDirectory)
         },
         fileVessel = prepareFileInput(vessel, input, outputDirectory,
@@ -1106,13 +1193,14 @@ prepareInput <- function(moduleInput, inputList, outputDirectory,
 #'
 #' @param input File path to serialized object
 #' @param symbol Name of module input
-#' @param language Module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param outputDirectory File path to module working directory
 #'
 #' @return File path to serialized internal input.
-prepareInternalInput <- function(input, symbol, language, outputDirectory) {
+prepareInternalInput <- function(input, symbol, moduleLanguage,
+                                 outputDirectory) {
     internalInput <- file.path(
-        outputDirectory, paste0(symbol, internalExtension(language)))
+        outputDirectory, paste0(symbol, internalExtension(moduleLanguage)))
     if (!file.copy(input, internalInput))
         stop("unable to copy input into outputDirectory")
     if (file.exists(internalInput)) {
@@ -1206,7 +1294,7 @@ prepareURLInput <- function(vessel, input) {
 #' module execution. 
 #'
 #' @param moduleOutput \code{moduleOutput} object
-#' @param language module script language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param outputDirectory file location for module execution
 #'
 #' @return \code{output} list object, containing:
@@ -1214,11 +1302,11 @@ prepareURLInput <- function(vessel, input) {
 #' \item{name}{output name}
 #' \item{format}{\code{ioFormat} object}
 #' \item{vessel}{\code{vessel} object}
-#' \item{language}{module language}
+#' \item{moduleLanguage}{\code{moduleLanguage} object}
 #' \item{ref}{address of output object produced}
 #'
 #' @export
-output <- function(moduleOutput, language, outputDirectory) {
+output <- function(moduleOutput, moduleLanguage, outputDirectory) {
     if (!inherits(moduleOutput, "moduleOutput"))
         stop("moduleOutput object required")
     
@@ -1231,7 +1319,8 @@ output <- function(moduleOutput, language, outputDirectory) {
     ref <-
         switch(type,
                internalVessel =
-                   paste0(vessel$symbol, internalExtension(language)),
+                   paste0(vessel$symbol,
+                          internalExtension(moduleLanguage)),
                urlVessel=,
                fileVessel = getRef(vessel),
                stop("vessel type not defined"))
@@ -1248,9 +1337,18 @@ output <- function(moduleOutput, language, outputDirectory) {
 
     ## return output object
     output <-  list(name = name, format = format, vessel = vessel,
-                    language = language, ref = ref)
+                    moduleLanguage = moduleLanguage, ref = ref)
     class(output) <- "output"
     output
+}
+
+#' @describeIn getLanguage
+#'
+#' Get \code{moduleLanguage} object
+#'
+#' @export
+getLanguage.output <- function(x) {
+    x$moduleLanguage
 }
 
 #' Checks a module output object has been created.
@@ -1258,16 +1356,16 @@ output <- function(moduleOutput, language, outputDirectory) {
 #' @details Will produce an error if the object does not exist.
 #'
 #' @param moduleOutput \code{moduleOutput} object
-#' @param language module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #' @param outputDirectory location of module output files
 #'
 #' @return \code{output} object
-resolveOutput <- function (moduleOutput, language,
+resolveOutput <- function (moduleOutput, moduleLanguage,
                            outputDirectory = getwd()) {
     name <- getName(moduleOutput)
     vessel <- getVessel(moduleOutput)
     type <- getType(vessel)
-    output <- output(moduleOutput, language, outputDirectory)
+    output <- output(moduleOutput, moduleLanguage, outputDirectory)
     ref <- getRef(output)
 
     ## TODO(anhinton): write check for URL outputs
@@ -1326,4 +1424,51 @@ retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
     if (!dir.exists(modulePath))
         stop("modulePath does not exist")
     UseMethod("retrieveModuleHost")
+}
+
+#' Give warning if module execution violated moduleLanguage versions.
+#'
+#' If the version of the language used to execute a module's source
+#' scripts has violated the \code{moduleLanguage}'s minVersion,
+#' maxVersion or version, this function will raise a warning.
+#'
+#' @param module \code{module} object
+#' @param moduleResult \code{moduleResult} object
+#'
+#' @seealso \code{runModule}
+#' 
+#' @return NULL
+warnLanguageVersion <- function(module, moduleResult) {
+    if (!inherits(module, "module"))
+        stop("module required")
+    if (!inherits(moduleResult, "moduleResult"))
+        stop("moduleResult required")
+
+    ## execution language info
+    execLanguageVersion <- moduleResult$execLanguageVersion
+    execVersion <- execLanguageVersion$execVersion
+
+    ## module language requirements
+    moduleLanguage <- getLanguage(module)
+    moduleName <- getName(module)
+
+    ## warnings
+    if (execLanguageVersion$failMin) {
+        warning(paste(getLanguage(moduleLanguage),
+                      execVersion, "was less than minVersion",
+                      moduleLanguage$minVersion,
+                      "when executing module", moduleName))
+    }
+    if (execLanguageVersion$failMax) {
+        warning(paste(getLanguage(moduleLanguage),
+                      execVersion, "was greater than maxVersion",
+                      moduleLanguage$maxVersion,
+                      "when executing module", moduleName))
+    }
+    if (execLanguageVersion$failExact) {
+        warning(paste(getLanguage(moduleLanguage),
+                      execVersion, "was not exactly version",
+                      moduleLanguage$version,
+                      "when executing module", moduleName))
+    }
 }

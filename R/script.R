@@ -88,10 +88,10 @@ sourceOrder <- function(sources) {
 #' This function creates an executable script file from a
 #' \code{module} object.
 #'
-#' The script returned will include code to load internal inputs,
-#' followed by the module source scripts in the correct order, and
-#' ending with code to produce internal outputs for consumption by
-#' other modules.
+#' The script returned will include any initialisation required by
+#' conduit, followed by code to load internal inputs, followed by the
+#' module source scripts in the correct order, and ending with code to
+#' produce internal outputs for consumption by other modules.
 #'
 #' The resulting script is saved to the current working directory.
 #'
@@ -103,8 +103,12 @@ sourceOrder <- function(sources) {
 prepareScript <- function(module) {
     if (!inherits(module, "module"))
         stop("module object required")
-    language <- getLanguage(module)
+    moduleLanguage <- getLanguage(module)
     location <- attr(module, "location")
+
+    ## initScript does the setup required by conduit before running
+    ## a module's source scripts
+    initScript <- prepareScriptInit(moduleLanguage)
 
     ## sort sources into correct order
     sources <- module$sources
@@ -127,35 +131,62 @@ prepareScript <- function(module) {
 
     ## inputScript loads the module's designated inputs
     inputs <- module$inputs
-    inputScript <- lapply(inputs, prepareScriptInput, language)
+    inputScript <- lapply(inputs, prepareScriptInput,
+                          moduleLanguage = moduleLanguage)
     inputScript <- unlist(inputScript, use.names = FALSE)
 
     ## outputScript loads the module's designated outputs
     outputs <- module$outputs
     outputScript <-
-        lapply(outputs, prepareScriptOutput, language)
+        lapply(outputs, prepareScriptOutput, moduleLanguage = moduleLanguage)
     outputScript <- unlist(outputScript, use.names = FALSE)
 
-    moduleScript <- c(inputScript, sourceScript, outputScript)
-    moduleScript <- switch(
-        language,
-        python = c("#!/usr/bin/python", "import os", "import pickle",
-                   moduleScript),
-        R = c("#!/usr/bin/Rscript", moduleScript),
-        shell = c("#!/bin/sh", moduleScript))
+    moduleScript <- c(initScript, inputScript, sourceScript, outputScript)
+    ## moduleScript <- switch(
+    ##     getLanguage(moduleLanguage),
+    ##     python = c("#!/usr/bin/python", "import os", "import pickle",
+    ##                moduleScript),
+    ##     R = c("#!/usr/bin/Rscript", moduleScript),
+    ##     shell = c("#!/bin/sh", moduleScript))
     ## script might be empty
     if (is.null(moduleScript))
         moduleScript <- ""
 
     ## write script file to disk
 
-    scriptPath <- paste0("script", scriptExtension(language))
+    scriptPath <- paste0("script",
+                         scriptExtension(moduleLanguage))
     scriptFile <- file(scriptPath)
     writeLines(moduleScript, scriptFile)
     close(scriptFile)
 
-    class(scriptPath) <- c(paste0(language, "Script"), "script")
+    class(scriptPath) <-
+        c(paste0(getLanguage(moduleLanguage), "Script"), "script")
     scriptPath
+}
+
+#' Create initScript for module source execution
+#'
+#' @details For each module language supported, conduit should produce an
+#' initScript which produces a file \file{.languageVersion} in the
+#' working directory. This file should contain four lines of text:
+#' 
+#' \enumerate{
+#'     \item the exact version of the language used for execution
+#'     \item \samp{1} if language did not meet minVersion, else \samp{0}
+#'     \item \samp{1} if language did not meet maxVersion, else \samp{0}
+#'     \item \samp{1} if language did not match version, else \samp{0}
+#' }
+#'
+#' @param moduleLanguage \code{moduleLanguage} object
+#'
+#' @return initScript character vector
+#'
+#' @seealso \code{getExecLanguageVersion}
+prepareScriptInit <- function(moduleLanguage) {
+    if (!inherits(moduleLanguage, "moduleLanguage"))
+        stop("moduleLanguage object required")
+    UseMethod("prepareScriptInit")
 }
 
 #' Prepare script to create inputs
@@ -166,16 +197,17 @@ prepareScript <- function(module) {
 #'     in script.
 #' 
 #' @param moduleInput module input object
-#' @param language module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #'
 #' @return Script as character vector
-prepareScriptInput <- function(moduleInput, language) {
+prepareScriptInput <- function(moduleInput, moduleLanguage) {
     if (!inherits(moduleInput, "moduleInput"))
         stop("moduleInput object required")
     vessel <- getVessel(moduleInput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
-        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        class(symbol) <- c(paste0(getLanguage(moduleLanguage), "Symbol"),
+                           class(symbol))
         internalInputScript(symbol)
     } else {
         NULL
@@ -190,16 +222,17 @@ prepareScriptInput <- function(moduleInput, language) {
 #'     be done by the glue system.
 #'
 #' @param moduleOutput \code{moduleOutput} object
-#' @param language module language
+#' @param moduleLanguage \code{moduleLanguage} object
 #'
 #' @return Script as character vector
-prepareScriptOutput <- function(moduleOutput, language) {
+prepareScriptOutput <- function(moduleOutput, moduleLanguage) {
     if (!inherits(moduleOutput, "moduleOutput"))
         stop("moduleOutput object required")
     vessel <- getVessel(moduleOutput)
     if (inherits(vessel, "internalVessel")) {
         symbol <- vessel$symbol
-        class(symbol) <- c(paste0(language, "Symbol"), class(symbol))
+        class(symbol) <- c(paste0(getLanguage(moduleLanguage), "Symbol"),
+                           class(symbol))
         internalOutputScript(symbol)
     } else {
         NULL

@@ -1,7 +1,7 @@
 library(conduit)
 context("execute pipelines")
 
-lang = "R"
+lang = moduleLanguage("R")
 outdir <- tempdir()
 symbol <- "x"
 internal_output <- moduleOutput(
@@ -18,7 +18,7 @@ comp1 <- component(value = mod1)
 p2 <- pipeline("p2", components = list(comp1))
 comp2 <- component(value = p2)
 mod3 <- module(
-    name = "A", language = "R",
+    name = "A", language = moduleLanguage("R"),
     outputs = list(
         moduleOutput("B", fileVessel("myfile"),
                      ioFormat("text file")),

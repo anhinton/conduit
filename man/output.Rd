@@ -4,12 +4,12 @@
 \alias{output}
 \title{return \code{output} produced by a \code{moduleOutput}}
 \usage{
-output(moduleOutput, language, outputDirectory)
+output(moduleOutput, moduleLanguage, outputDirectory)
 }
 \arguments{
 \item{moduleOutput}{\code{moduleOutput} object}
 
-\item{language}{module script language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 
 \item{outputDirectory}{file location for module execution}
 }
@@ -19,7 +19,7 @@ output(moduleOutput, language, outputDirectory)
 \item{name}{output name}
 \item{format}{\code{ioFormat} object}
 \item{vessel}{\code{vessel} object}
-\item{language}{module language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 \item{ref}{address of output object produced}
 }
 \description{

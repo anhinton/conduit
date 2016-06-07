@@ -159,8 +159,8 @@ exportComponent <- function(component, targetDirectory = getwd()) {
 #'
 #' @return list of \code{output} objects
 calculateModuleOutputs <- function(module, outputDirectory) {
-    language <- getLanguage(module)
-    outputs <- lapply(module$outputs, output, language,
+    moduleLanguage <- getLanguage(module)
+    outputs <- lapply(module$outputs, output, moduleLanguage,
                       outputDirectory)
     outputs
 }

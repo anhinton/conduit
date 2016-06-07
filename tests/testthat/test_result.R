@@ -1,30 +1,66 @@
 library(conduit)
 context("test module and pipeline result objects")
 
+## prepare module output directory
 modulePath <- tempfile("moduleResult")
 if (!dir.exists(modulePath))
     dir.create(modulePath)
+
+## create .languageVersion file
+execVersion = as.character(getRversion())
+failMin = failMax = "1"
+failExact = "0"
+dotLanguageVersion = file.path(modulePath, ".languageVersion")
+con = file(description = dotLanguageVersion)
+writeLines(text = c(execVersion, failMin, failMax, failExact),
+           con = con)
+close(con)
+
+## create moudule outputs
 f1 <- moduleOutput("f1", fileVessel("f1.txt"),
                    ioFormat("text file"))
 fileoutput <- output(f1,
-                     language = "R",
+                     moduleLanguage = moduleLanguage("R"),
                      outputDirectory = modulePath)
 u1 <- moduleOutput("u1", urlVessel("http://openapi.net"),
                                  ioFormat("HTML file"))
 urloutput <- output(u1,
-                    language = "python",
+                    moduleLanguage = moduleLanguage("python"),
                     outputDirectory = modulePath)
 i1 <- moduleOutput("i1", internalVessel("x"),
                    ioFormat("python array"))
+internallang = moduleLanguage("python")
 internaloutput <- output(i1,
-                         language = "python",
+                         moduleLanguage = internallang,
                          outputDirectory = modulePath)
+
+## create component output
 pipelinePath <- tempfile("pipelineResult")
 if (!dir.exists(pipelinePath))
     dir.create(pipelinePath)
-moduleComp <- component(value = module("m1", "R"),
+moduleComp <- component(value = module("m1", moduleLanguage("R")),
                         vessel = fileVessel("./m1/m1.xml"))
 compRes1 <- runComponent(moduleComp, pipelinePath = pipelinePath)
+
+## getExecLanguageVersion() should return a list with execVersion,
+## failMin, failMax and failExact
+test_that("getExecLanguageVersion() returns correctly", {
+    falsePath <- tempfile(pattern = "execLanguage")
+    if (!dir.exists(falsePath))
+        dir.create(path = falsePath, recursive = TRUE)
+
+    ## fail for invalid arguments
+    expect_error(getExecLanguageVersion(modulePath = tempfile()),
+                 "modulePath does not exist")
+    expect_error(getExecLanguageVersion(modulePath = falsePath),
+                 ".languageVersion file does not exist")
+
+    execLanguageVersion <- getExecLanguageVersion(modulePath = modulePath)
+    expect_match(execVersion, execLanguageVersion$execVersion)
+    expect_true(execLanguageVersion$failMin)
+    expect_true(execLanguageVersion$failMax)
+    expect_false(execLanguageVersion$failExact)
+})
 
 test_that("resultInput() returns correctly", {
     ## fails for invalid arguments
@@ -48,7 +84,7 @@ test_that("resultInput() returns correctly", {
     expect_match(getType(getVessel(res3)), "fileVessel")
     expect_match(getVessel(res3)$ref,
                  paste0(getVessel(internaloutput)$ref,
-                       internalExtension(getLanguage(internaloutput))))
+                        internalExtension(internallang)))
 })
 
 test_that("resultSource() returns correctly", {
@@ -97,7 +133,7 @@ test_that("resultOutput() returns correctly", {
 
 test_that("moduleResult() returns correctly", {
     objects <- list(fileoutput, urloutput, internaloutput)
-    module <- module("m1", "R", outputs = list(f1, u1, i1))
+    module <- module("m1", moduleLanguage("R"), outputs = list(f1, u1, i1))
 
     ## fail for invalid arguments
     expect_error(moduleResult(list(unclass(objects[[1]]),
@@ -134,6 +170,13 @@ test_that("moduleResult() returns correctly", {
     ## output objects
     expect_match(names(res1), "outputList", all = FALSE)
     expect_true(all(sapply(res1$objects, inherits, what = "output")))
+
+    ## exec language information
+    expect_match(names(res1), "execLanguageVersion", all = FALSE)
+    expect_match(execVersion, res1$execLanguageVersion$execVersion)
+    expect_true(res1$execLanguageVersion$failMin)
+    expect_true(res1$execLanguageVersion$failMax)
+    expect_false(res1$execLanguageVersion$failExact)    
 })
 
 test_that("resultComponent() returns correctly", {
@@ -148,10 +191,10 @@ test_that("resultComponent() returns correctly", {
 
 test_that("pipelineResult() returns correctly", {
     outputList1 <- list(fileoutput)
-    module1 <- module("m1", "R", outputs = list(f1))
+    module1 <- module("m1", moduleLanguage("R"), outputs = list(f1))
     modRes1 <- moduleResult(outputList1, modulePath, module1)
     outputList2 <- list(urloutput)
-    module2 <- module("m2", "python", outputs = list(u1))
+    module2 <- module("m2", moduleLanguage("python"), outputs = list(u1))
     modRes2 <- moduleResult(outputList2, modulePath, module2)
     componentResultList <- list(modRes1, modRes2)
     pipeline <- pipeline("p1", components = list(module1, module1))

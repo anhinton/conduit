@@ -4,7 +4,7 @@
 \alias{prepareInput}
 \title{Prepare input object}
 \usage{
-prepareInput(moduleInput, inputList, outputDirectory, language, location)
+prepareInput(moduleInput, inputList, outputDirectory, moduleLanguage, location)
 }
 \arguments{
 \item{moduleInput}{\code{moduleInput} object}
@@ -13,7 +13,7 @@ prepareInput(moduleInput, inputList, outputDirectory, language, location)
 
 \item{outputDirectory}{working directory for module execution}
 
-\item{language}{Module language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 
 \item{location}{location of originating module file}
 }

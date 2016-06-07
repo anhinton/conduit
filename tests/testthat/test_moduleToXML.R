@@ -1,6 +1,52 @@
 library(conduit)
 context("convert modules to XML")
 
+test_that("moduleLanguageToXML() returns correctly", {
+    #library(XML)
+    language <- "R"
+    minVersion <- "3.0.1"
+    maxVersion <- "3.3.0"
+    version <- "3.2.5"
+    ml1 <- moduleLanguage(language = language)
+    ml2 <- moduleLanguage(language, maxVersion = maxVersion)
+    ml3 <- moduleLanguage(language, minVersion = minVersion)
+    ml4 <- moduleLanguage(language, version = version)
+
+    ## fails for invalid argumen
+    expect_error(moduleLanguageToXML(unclass(ml1)),
+                 "moduleLanguage object required")
+
+    ## just language
+    mlx1 <- moduleLanguageToXML(ml1)
+    expect_match(xmlValue(mlx1), language)
+    expect_null(getXMLAttr(mlx1, "minVersion"))
+    expect_null(getXMLAttr(mlx1, "maxVersion"))
+    expect_null(getXMLAttr(mlx1, "version"))
+
+    ## maxVersion attribute
+    mlx2 <- moduleLanguageToXML(ml2)
+    expect_match(xmlValue(mlx2), language)
+    expect_match(getXMLAttr(mlx2, "maxVersion"), maxVersion)
+    expect_null(getXMLAttr(mlx2, "minVersion"))
+    expect_null(getXMLAttr(mlx2, "version"))
+
+    ## minVersion attribute
+    mlx3 <- moduleLanguageToXML(ml3)
+    attrs3 <- xmlAttrs(mlx3)
+    expect_match(xmlValue(mlx3), language)
+    expect_match(getXMLAttr(mlx3, "minVersion"), minVersion)
+    expect_null(getXMLAttr(mlx3, "maxVersion"))
+    expect_null(getXMLAttr(mlx3, "version"))
+
+    ## version attribute
+    mlx4 <- moduleLanguageToXML(ml4)
+    attrs4 <- xmlAttrs(mlx4)
+    expect_match(xmlValue(mlx4), language)
+    expect_match(getXMLAttr(mlx4, "version"), version)
+    expect_null(getXMLAttr(mlx4, "minVersion"))
+    expect_null(getXMLAttr(mlx4, "maxVersion"))
+})
+
 test_that("moduleHostToXML() fails for invalid argument", {
     expect_error(moduleHostToXML(list(a = "b", c = "d")),
                  "moduleHost object required")
@@ -101,18 +147,19 @@ test_that("moduleSourceToXML outputs correct file XML", {
 
 ## convert 'module' objects to XML
 test_that("moduleToXML() creates correct output", {
-    mod1 <- module(name = "setX", language = "R")
-    mod2 <- module(name = "setY", language = "R",
-                   host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
-                   description = "a short description",
-                   inputs = list(moduleInput("in1",
-                                             internalVessel("y"),
-                                             ioFormat("R data frame"))),
-                   sources = list(moduleSource(
-                       scriptVessel("x <- y"))),
-                   outputs = list(moduleOutput("out1",
-                                               internalVessel("x"),
-                                               ioFormat("R data frame"))))
+    mod1 <- module(name = "setX", language = moduleLanguage("R"))
+    mod2 <- module(
+        name = "setY", language = moduleLanguage("R"),
+        host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
+        description = "a short description",
+        inputs = list(moduleInput("in1",
+                                  internalVessel("y"),
+                                  ioFormat("R data frame"))),
+        sources = list(moduleSource(
+            scriptVessel("x <- y"))),
+        outputs = list(moduleOutput("out1",
+                                    internalVessel("x"),
+                                    ioFormat("R data frame"))))
 
     ## fails for non-module objects"
     expect_error(moduleToXML(list(name="fake", language="R")),
@@ -121,18 +168,18 @@ test_that("moduleToXML() creates correct output", {
     ## minimal module
     mod1XML <- moduleToXML(mod1)
     expect_match(xmlName(mod1XML), "module")
-    attrs1 <- xmlAttrs(mod1XML)
-    expect_match(attrs1[["language"]], "R")
     children1 <- xmlChildren(mod1XML)
-    expect_equal(length(children1), 0)
+    expect_equal(length(children1), 1)
+    expect_match(xmlValue(getLanguage(children1)),
+                 getLanguage(getLanguage(mod1)))
 
     ## module with vagrantHost
     mod2XML <- moduleToXML(mod2)
     expect_match(xmlName(mod2XML), "module")
-    attrs2 <- xmlAttrs(mod2XML)
-    expect_match(attrs2[["language"]], "R")
     children2 <- xmlChildren(mod2XML)
-    expect_equal(length(children2), 5)
+    expect_match(xmlValue(getLanguage(children1)),
+                 getLanguage(getLanguage(mod1)))
+    expect_equal(length(children2), 6)
     expect_match(names(children2), "host", all=F)
     expect_match(names(children2), "description", all=F)
     expect_match(names(children2), "input", all=F)
@@ -142,7 +189,7 @@ test_that("moduleToXML() creates correct output", {
 
 ## save module XML to file
 test_that("saveModule() behaves correctly", {
-    mod2 <- module(name = "setY", language = "R",
+    mod2 <- module(name = "setY", language = moduleLanguage("R"),
                    host = vagrantHost("~/vagrant/vagrant-conduit/Vagrantfile"),
                    description = "a short description",
                    inputs = list(moduleInput("in1",
