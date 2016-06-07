@@ -10,6 +10,10 @@ NULL
 #' @details This functions is used to construct the objects returned
 #'     by \code{runModule}.
 #'
+#' The \code{module} object returned, and its corresponding XML
+#' \code{file}, will specify the version of the language used to
+#' execute the source scripts in its \code{moduleLanguage}.
+#'
 #' The \code{export} function can be used to export these objects to a
 #' gzipped tarfile. The resulting tarfile can be read loaded into
 #' conduit using the \code{importModule} function

@@ -1428,16 +1428,31 @@ retrieveModuleHost <- function(moduleHost, outputLocation, modulePath) {
 
 #' Give warning if module execution violated moduleLanguage versions.
 #'
+#' If the version of the language used to execute a module's source
+#' scripts has violated the \code{moduleLanguage}'s minVersion,
+#' maxVersion or version, this function will raise a warning.
+#'
 #' @param module \code{module} object
 #' @param moduleResult \code{moduleResult} object
 #'
+#' @seealso \code{runModule}
+#' 
 #' @return NULL
 warnLanguageVersion <- function(module, moduleResult) {
+    if (!inherits(module, "module"))
+        stop("module required")
+    if (!inherits(moduleResult, "moduleResult"))
+        stop("moduleResult required")
+
+    ## execution language info
     execLanguageVersion <- moduleResult$execLanguageVersion
     execVersion <- execLanguageVersion$execVersion
-    
+
+    ## module language requirements
     moduleLanguage <- getLanguage(module)
     moduleName <- getName(module)
+
+    ## warnings
     if (execLanguageVersion$failMin) {
         warning(paste(getLanguage(moduleLanguage),
                       execVersion, "was less than minVersion",

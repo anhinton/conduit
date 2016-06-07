@@ -429,4 +429,39 @@ test_that(
         expect_true(file.exists(getRef(result2$outputList[[1]])))
     })
 
+## conduit should give warnings when a module was executed in a
+## version of the language which did not meet its language version
+## requirements
+test_that("runModule() warns for language version violations", {
+    ## warn for exact version failure
+    mod1 <- module(name = "mod1",
+                   language = moduleLanguage(
+                       language = "R",
+                       version = "2.4.6"))
+    expect_warning(
+        mod1res <- runModule(module = mod1, targetDirectory = tempdir(),
+                             warnVersion = TRUE),
+        "was not exactly")
+    
+    ## warn for minVersion failure
+    mod2 <- module(name = "mod2",
+                   language = moduleLanguage(
+                       language = "R",
+                       minVersion = "999.999"))
+    expect_warning(
+        mod2res <- runModule(module = mod2, targetDirectory = tempdir(),
+                             warnVersion = TRUE),
+        "was less than minVersion")
+    
+    ## warn for maxVersion failure
+    mod3 <- module(name = "mod3",
+                   language = moduleLanguage(
+                       language = "R",
+                       maxVersion = "0.1.999"))
+    expect_warning(
+        mod3res <- runModule(module = mod3, targetDirectory = tempdir(),
+                             warnVersion = TRUE),
+        "was greater than maxVersion")
+})
+
 ## TODO(anhinton): runModule() works for a module with a moduleHost

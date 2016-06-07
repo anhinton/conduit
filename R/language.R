@@ -2,8 +2,18 @@
 
 #' Select execLanguage to store in \code{moduleLanguage} object
 #'
+#' @details For most languages this function will simply return
+#'     \code{language}. For \samp{python} this function returns
+#'     \samp{python2} or \samp{python3} depending on the version
+#'     specifications; the default is \samp{python3}.
+#'
+#' @return execLanguage as character
+#' 
+#' @seealso \code{moduleLanguage}
+#'
 #' @import rPython
-execLanguage <- function(language, minVersion, maxVersion, version) {
+execLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
+                         version = NULL) {
     ## default to python3
     if (language == "python") {
         threshold = "3.0.0"
