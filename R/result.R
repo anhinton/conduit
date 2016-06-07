@@ -1,46 +1,34 @@
-#' Create \code{componentResult} objects
+#' Result of \code{runModule} or \code{runPipeline}
 #'
-#' Constructor functions to create \code{componentResult} objects.
+#' @name componentResult
 #'
-#' These functions are used to construct the objects returned by
-#'     \code{runModule} and \code{runPipeline}.
+#' @seealso \code{moduleResult}, \code{pipelineResult}
+NULL
+
+#' Create \code{moduleResult} object
 #'
-#' The \code{moduleResult} constructor takes a list of module
-#' \code{output} objects created by \code{resolveOutput}, the original
-#' \code{module}, and the module's output location
-#' \code{modulePath}. A \code{moduleResult} object is returned.
-#'
-#' The \code{pipelineResult} constructor takes a list of
-#' \code{componentResult} objects produced by \code{runComponent}, the
-#' original \code{pipeline}, and the pipeline's output location
-#' \code{pipelinePath}. A \code{pipelineResult} object is returned.
+#' @details This functions is used to construct the objects returned
+#'     by \code{runModule}.
 #'
 #' The \code{export} function can be used to export these objects to a
 #' gzipped tarfile. The resulting tarfile can be read loaded into
-#' conduit using the \code{importModule} and \code{importPipeline}
-#' functions.
-#'
-#' @name componentResult
+#' conduit using the \code{importModule} function
 #' 
 #' @param outputList list of \code{output} objects
 #' @param modulePath file path to module output
 #' @param module \code{module} object which produced \code{outputList}
-#' @param componentResultList list of \code{componentResult} objects
-#' @param pipelinePath file path to pipeline output
-#' @param pipeline \code{pipeline} object which produced
-#'     \code{componentResultList}
 #'
-#' @return object of class \code{componentResult} and either
-#'     \code{moduleResult} or \code{componentResult} containing:
+#' @return object of class \code{componentResult} and
+#'     \code{moduleResult} containing:
 #' 
-#' \item{file}{file path to resulting module or pipeline XML}
-#' \item{component}{resulting \code{module} or \code{pipeline} object}
-#' \item{outputList}{list of \code{output} objects produced by
-#'     module(s)}
-NULL
-
-#' @describeIn componentResult returns the result of running a
-#'     \code{module}
+#' \item{name}{module name}
+#' \item{file}{file path to resulting module XML}
+#' \item{component}{resulting \code{module} object}
+#' \item{outputList}{list of \code{output} objects produced by module}
+#' \item{execLanguageVersion}{executing language information}
+#'
+#' @seealso \code{pipelineResult}, \code{module}, \code{runModule},
+#'     \code{export}, \code{importModule}
 #'
 #' @export
 moduleResult <- function(outputList, modulePath, module) {
@@ -82,28 +70,72 @@ moduleResult <- function(outputList, modulePath, module) {
     moduleResult
 }
 
-#' Parse \file{.languageVersion} from \file{modulePath}
+#' Recovers module execution language information
+#'
+#' Interprets the \file{.languageVersion} file produced when module
+#' sources script is executed.
+#'
+#' The \file{.languageVersion} file should contain four lines of text:
+#' 
+#' \enumerate{
+#'     \item the exact version of the language used for execution
+#'     \item \samp{1} if language did not meet minVersion, else \samp{0}
+#'     \item \samp{1} if language did not meet maxVersion, else \samp{0}
+#'     \item \samp{1} if language did not match version, else \samp{0}
+#' }
+#'
+#' @param modulePath module output file directory
+#'
+#' @return list containing:
+#' \item{\code{execVersion}}{exact version of executing language as character}
+#' \item{\code{failMain}}{\code{TRUE} if language did not meet minVersion}
+#' \item{\code{failMax}}{\code{TRUE} if language did not meet maxVersion}
+#' \item{\code{failExact}}{\code{TRUE} if language did not match version}
+#'
+#' @seealso prepareScriptInit
 getExecLanguageVersion <- function(modulePath) {
+    if (!dir.exists(modulePath))
+        stop("modulePath does not exist")
     dotLanguageVersion <- file.path(modulePath, ".languageVersion")
-    execLanguageVersion <- 
-        if (file.exists(dotLanguageVersion)) {
-            languageVersion <- readLines(dotLanguageVersion)
-            execVersion <- languageVersion[1]
-            failMin <- as.logical(as.numeric(languageVersion[2]))
-            failMax <- as.logical(as.numeric(languageVersion[3]))
-            failExact <- as.logical(as.numeric(languageVersion[4]))
-            list(execVersion = execVersion,
-                 failMin = failMin,
-                 failMax = failMax,
-                 failExact = failExact)
-        } else {
-            NULL
-        }
-    execLanguageVersion
+    if (!file.exists(dotLanguageVersion))
+        stop(".languageVersion file does not exist")
+    
+    languageVersion <- readLines(dotLanguageVersion)
+    execVersion <- languageVersion[1]
+    failMin <- as.logical(as.numeric(languageVersion[2]))
+    failMax <- as.logical(as.numeric(languageVersion[3]))
+    failExact <- as.logical(as.numeric(languageVersion[4]))
+    list(execVersion = execVersion,
+         failMin = failMin,
+         failMax = failMax,
+         failExact = failExact)
 }
 
-#' @describeIn componentResult returns the result of running a
-#'     \code{pipeline}
+#' Create \code{pipelineResult} object
+#'
+#' @details This function is used to construct the objects returned
+#'     by \code{runPipeline}.
+#'
+#' The \code{export} function can be used to export these objects to a
+#' gzipped tarfile. The resulting tarfile can be read loaded into
+#' conduit using the \code{importPipeline} function
+#'
+#' @param componentResultList list of \code{componentResult} objects
+#' @param pipelinePath file path to pipeline output
+#' @param pipeline \code{pipeline} object which produced
+#'     \code{componentResultList}
+#'
+#' @return object of class \code{componentResult} and
+#'     \code{pipelineResult} containing:
+#' 
+#' \item{name}{module name}
+#' \item{file}{file path to resulting pipeline XML}
+#' \item{component}{resulting \code{pipeline} object}
+#' \item{outputList}{list of \code{output} objects produced by components}
+#' \item{componentResultList}{list of \code{componentResult} objects}
+#'
+#' @seealso \code{moduleResult}, \code{pipeline}, \code{runPipeline},
+#'     \code{export}, \code{importPipeline}
 #'
 #' @export
 pipelineResult <- function(componentResultList, pipelinePath, pipeline) {

@@ -10,6 +10,17 @@ test_that("internalInputScript() returns sensible script fragment", {
     ## TODO(anhinton): write language-specific tests
 })
 
+test_that("prepareScriptInit() returns script fragment", {
+    mlang1 <- moduleLanguage(language = "R")
+
+    ## fail for invalid input
+    expect_error(prepareScriptInit(moduleLanguage = unclass(mlang1)),
+                 "moduleLanguage object required")
+
+    ## language-specific testing found in test_LANGUAGE.R files
+    ## TODO(anhinton): write language-specific tests    
+})
+
 test_that("prepareScriptInput() returns script fragment", {
     moduleInput1 <- moduleInput(name = "x",
                                 vessel = internalVessel("X"),

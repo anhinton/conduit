@@ -985,7 +985,8 @@ moduleSourceToXML <- function (moduleSource,
 
 #' Execute a \code{module}'s source(s)
 #'
-#' Execute the scripts contained in or referenced by a \code{module}'s sources.
+#' Execute the scripts contained in or referenced by a \code{module}'s
+#' sources.
 #'
 #' @details This function:
 #' \itemize{
@@ -1009,16 +1010,20 @@ moduleSourceToXML <- function (moduleSource,
 #' If \code{module$host} is not NULL the remote host must exist and be
 #' accessible by conduit or this function will fail.
 #'
+#' If \code{warnVersion} is \code{TRUE} this function will give a
+#' warning when the executing language does not meet the module's
+#' \code{moduleLanguage} requirments.
+#'
 #' @param module \code{module} object
 #' @param targetDirectory File path for module output
 #' @param inputObjects Named list of input objects
+#' @param warnVersion should conduit warn if module language
+#'     version requirements are not met
 #' 
-#' @seealso \code{module}, \code{moduleSource}
+#' @seealso \code{module}, \code{moduleSource}, \code{moduleLanguage}
+#'     for creating modules, \code{moduleResult} for result objects
 #'
-#' @return a \code{moduleResult} object containing:
-#' \item{file}{file path to resulting module XML}
-#' \item{component}{resulting \code{module} object}
-#' \item{outputList}{list of \code{output} objects produced by module}
+#' @return \code{moduleResult}
 #'
 #' @examples
 #'

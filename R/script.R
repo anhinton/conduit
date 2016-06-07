@@ -88,10 +88,10 @@ sourceOrder <- function(sources) {
 #' This function creates an executable script file from a
 #' \code{module} object.
 #'
-#' The script returned will include code to load internal inputs,
-#' followed by the module source scripts in the correct order, and
-#' ending with code to produce internal outputs for consumption by
-#' other modules.
+#' The script returned will include any initialisation required by
+#' conduit, followed by code to load internal inputs, followed by the
+#' module source scripts in the correct order, and ending with code to
+#' produce internal outputs for consumption by other modules.
 #'
 #' The resulting script is saved to the current working directory.
 #'
@@ -165,12 +165,27 @@ prepareScript <- function(module) {
     scriptPath
 }
 
-#' Prepare init script to prepare for conudit to run module source scripts.
+#' Create initScript for module source execution
+#'
+#' @details For each module language supported, conduit should produce an
+#' initScript which produces a file \file{.languageVersion} in the
+#' working directory. This file should contain four lines of text:
+#' 
+#' \enumerate{
+#'     \item the exact version of the language used for execution
+#'     \item \samp{1} if language did not meet minVersion, else \samp{0}
+#'     \item \samp{1} if language did not meet maxVersion, else \samp{0}
+#'     \item \samp{1} if language did not match version, else \samp{0}
+#' }
 #'
 #' @param moduleLanguage \code{moduleLanguage} object
 #'
 #' @return initScript character vector
+#'
+#' @seealso \code{getExecLanguageVersion}
 prepareScriptInit <- function(moduleLanguage) {
+    if (!inherits(moduleLanguage, "moduleLanguage"))
+        stop("moduleLanguage object required")
     UseMethod("prepareScriptInit")
 }
 
