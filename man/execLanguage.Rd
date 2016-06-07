@@ -4,7 +4,8 @@
 \alias{execLanguage}
 \title{Select execLanguage to store in \code{moduleLanguage} object}
 \usage{
-execLanguage(language, minVersion, maxVersion, version)
+execLanguage(language, minVersion = NULL, maxVersion = NULL,
+  version = NULL)
 }
 \value{
 execLanguage as character
