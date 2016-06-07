@@ -620,11 +620,11 @@ pipesAsEdges <- function(pipeline) {
 #'                                           "pipeline.xml", package="conduit"))
 #' runPipeline(pythonExample, targetDirectory = tempdir())
 #'
-#' ## shell language example
-#' shellExample <- loadPipeline("shellExample",
-#'                              system.file("extdata", "shellExample",
+#' ## bash language example
+#' bashExample <- loadPipeline("bashExample",
+#'                              system.file("extdata", "bashExample",
 #'                                          "pipeline.xml", package="conduit"))
-#' runPipeline(shellExample, targetDirectory = tempdir())
+#' runPipeline(bashExample, targetDirectory = tempdir())
 #'
 #' ## A pipeline with a module run on a remote host
 #' \dontrun{
