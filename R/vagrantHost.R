@@ -125,6 +125,10 @@ retrieveModuleHost.vagrantHost <- function(moduleHost, outputLocation,
                                            modulePath) {
     hostdir <- file.path(moduleHost$hostdir, outputLocation)
     files <- list.files(path = hostdir, all.files = TRUE, full.names = TRUE)
+    ## we return all.files = TRUE to capture hidden files, but as a result we
+    ## need to exclude current (.)  and parent (..) directory from files to
+    ## be copied
+    files <- files[basename(files) != ".." & basename(files) != "."]
     for (f in files)
         file.copy(f, modulePath, recursive = TRUE)
 }
