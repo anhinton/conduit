@@ -162,7 +162,7 @@ test_that("executeCommand.vagrantHost() returns correctly", {
 
     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
     mod1 <- module(name = "mod1",
-                   language = "R",
+                   language = moduleLanguage("R"),
                    host = vagrantHost1,
                    sources = list(moduleSource(scriptVessel("x <- 1:10"))),
                    outputs = list(moduleOutput(
