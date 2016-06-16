@@ -701,7 +701,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #'
 #' @examples
 #' ## create a pipeline with one module
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(
 #'                    moduleOutput(
@@ -713,7 +713,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #'                        vessel = scriptVessel("x <- \"set\""))))
 #' pline1 <- pipeline(name = "trivialpipeline", components = list(mod1))
 #' ## create a new module
-#' mod2 <- module("showY", language = "R",
+#' mod2 <- module("showY", language = moduleLanguage("R"),
 #'                description = "displays the value of Y",
 #'                inputs = list(
 #'                    moduleInput(
