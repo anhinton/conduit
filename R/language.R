@@ -7,6 +7,11 @@
 #'     \samp{python2} or \samp{python3} depending on the version
 #'     specifications; the default is \samp{python3}.
 #'
+#' @param language execution language as character string
+#' @param minVersion minimum language version as character string
+#' @param maxVersion maximum language version as character string
+#' @param version exact language version as character string
+#'
 #' @return execLanguage as character
 #' 
 #' @seealso \code{moduleLanguage}
