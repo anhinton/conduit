@@ -22,7 +22,7 @@
 #'
 #' @examples
 #' ## create some modules
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(
 #'                    moduleOutput(
@@ -32,7 +32,7 @@
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("x <- \"set\""))))
-#' mod2 <- module("showY", language = "R",
+#' mod2 <- module("showY", language = moduleLanguage("R"),
 #'                description = "displays the value of Y",
 #'                inputs = list(
 #'                    moduleInput(
