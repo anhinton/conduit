@@ -69,7 +69,6 @@ mod2 <-
     module(
         "showY",
         language = moduleLanguage("R"),
-        host = "localhost",
         description = "displays the value of Y",
         inputs =
             list(
