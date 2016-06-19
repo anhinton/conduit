@@ -11,7 +11,7 @@
 
 moduleHostToXML(moduleHost)
 
-\method{moduleHostToXML}{moduleInputHost}(moduleInputHost)
+\method{moduleHostToXML}{moduleInputHost}(moduleHost)
 
 \method{moduleHostToXML}{vagrantHost}(moduleHost)
 }
