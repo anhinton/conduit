@@ -296,7 +296,7 @@ executeScript <- function(script, moduleHost, outputLocation) {
 #'
 #' This function is usually called by \code{executeScript}.
 #'
-#' @param \code{script} object
+#' @param script \code{script} object
 #'
 #' @return \code{command} list containing \code{command} and
 #'     \code{args} character vectors
