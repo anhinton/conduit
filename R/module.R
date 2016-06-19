@@ -1040,7 +1040,7 @@ moduleSourceToXML <- function (moduleSource,
 #' 
 #' ## mod2 input names
 #' names(mod2$inputs)
-#' mod2inputs <- lapply(result1$outputList, getResult)
+#' mod2inputs <- lapply(result1$outputList, getRef)
 #' names(mod2inputs) <- names(mod2$inputs)
 #' 
 #' runModule(module = mod2, inputObjects = mod2inputs,
