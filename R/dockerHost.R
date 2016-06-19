@@ -57,9 +57,8 @@ readDockerHostXML <- function (dockerHostXML) {
 #'
 #' @import XML
 #' @export
-moduleHostToXML.dockerHost <- function(dockerHost) {
-    if (!inherits(dockerHost, "dockerHost"))
-        stop ("dockerHost object required")
+moduleHostToXML.dockerHost <- function(moduleHost) {
+    dockerHost <- moduleHost
     child <- newXMLNode("docker", attrs = dockerHost)
     newXMLNode(name = "host", kids = list(child))
 }

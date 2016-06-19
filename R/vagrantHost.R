@@ -69,7 +69,8 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'
 #' @import XML
 #' @export
-moduleHostToXML.vagrantHost <- function(vagrantHost) {
+moduleHostToXML.vagrantHost <- function(moduleHost) {
+    vagrantHost <- moduleHost
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
 }

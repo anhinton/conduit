@@ -7,13 +7,13 @@
 \alias{moduleHostToXML.vagrantHost}
 \title{Create XML corresponding to a \code{moduleHost} object}
 \usage{
-\method{moduleHostToXML}{dockerHost}(dockerHost)
+\method{moduleHostToXML}{dockerHost}(moduleHost)
 
 moduleHostToXML(moduleHost)
 
 \method{moduleHostToXML}{moduleInputHost}(moduleInputHost)
 
-\method{moduleHostToXML}{vagrantHost}(vagrantHost)
+\method{moduleHostToXML}{vagrantHost}(moduleHost)
 }
 \arguments{
 \item{moduleHost}{\code{moduleHost} object}
