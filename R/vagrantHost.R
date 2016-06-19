@@ -90,7 +90,7 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                tmpdir = file.path("conduit.out"))
     hostdir <- file.path(hostdir, outputLocation)
     if (dir.exists(hostdir))
-        unlink(hostdir, rescursive = TRUE)
+        unlink(hostdir, recursive = TRUE)
     dir.create(hostdir, recursive = TRUE)
     
     ## make contents of modulePath available to vagrantHost

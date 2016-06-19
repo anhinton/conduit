@@ -56,7 +56,8 @@ execLanguage <- function(language, minVersion = NULL, maxVersion = NULL,
 internalExtension <- function(moduleLanguage) {
     if (!inherits(moduleLanguage, "moduleLanguage"))
         stop("moduleLanguage object required")
-    extension <- switch(getLanguage(moduleLanguage),
+    language <- getLanguage(moduleLanguage)
+    extension <- switch(language,
                         R = ".rds",
                         python2 =, python3= ".pickle",
                         bash = ".txt",
@@ -71,8 +72,9 @@ internalExtension <- function(moduleLanguage) {
 #' @return file extension as character ".EXT"
 scriptExtension <- function(moduleLanguage) {  
     if (!inherits(moduleLanguage, "moduleLanguage"))
-        stop("moduleLanguage object required")  
-    extension <- switch(getLanguage(moduleLanguage),
+        stop("moduleLanguage object required")
+    language <- getLanguage(moduleLanguage)
+    extension <- switch(language,
                         R = ".R",
                         python2 =, python3 = ".python",
                         bash = ".sh",

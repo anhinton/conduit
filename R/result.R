@@ -198,7 +198,7 @@ export.componentResult <- function(x, targetDirectory = getwd()) {
 
     ## tarball directory containing componentResult
     files <- list.dirs(name)
-    sys <- tar(tarfile, files = files, compression = "gzip")
+    sys <- utils::tar(tarfile, files = files, compression = "gzip")
     if (sys != 0) {
         stop("unable to produce tarball")
     } else {
@@ -230,7 +230,7 @@ importModule <- function(tarfile, name) {
     exportName <- gsub(".tar.gz", "", basename(tarfile))
     if (missing(name))
         name <- exportName
-    untar(tarfile, exdir = tempdir())
+    utils::untar(tarfile, exdir = tempdir())
     moduleXML <- file.path(tempdir(), exportName,
                            paste0(exportName, ".xml"))
     loadModule(name = name, ref = moduleXML)
@@ -260,7 +260,7 @@ importPipeline <- function(tarfile, name) {
     exportName <- gsub(".tar.gz", "", basename(tarfile))
     if (missing(name))
         name <- exportName
-    untar(tarfile, exdir = tempdir())
+    utils::untar(tarfile, exdir = tempdir())
     pipelineXML <- file.path(tempdir(), exportName, "pipeline.xml")
     loadPipeline(name = name, ref = pipelineXML)
 }

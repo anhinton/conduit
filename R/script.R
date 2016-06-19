@@ -26,6 +26,8 @@ extractModuleSource.fileVessel <- function(moduleSource) {
 #'
 #' @export
 extractModuleSource.urlVessel <- function(moduleSource) {
+    vessel <- moduleSource$vessel
+    ref <- vessel$ref
     con <- url(ref)
     on.exit(close(con))
     script <- readLines(con)
