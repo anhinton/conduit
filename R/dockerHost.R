@@ -57,10 +57,14 @@ readDockerHostXML <- function (dockerHostXML) {
 #'
 #' @import XML
 #' @export
-moduleHostToXML.dockerHost <- function(moduleHost) {
+moduleHostToXML.dockerHost <- function(moduleHost,
+                                       parent = NULL,
+                                       addFinalizer = is.null(parent)) {
     dockerHost <- moduleHost
-    child <- newXMLNode("docker", attrs = dockerHost)
-    newXMLNode(name = "host", kids = list(child))
+    hostNode <- newXMLNode(name = "host", parent = parent,
+                           addFinalizer = addFinalizer)
+    dockerNode <- newXMLNode("docker", attrs = dockerHost, parent = hostNode)
+    hostNode
 }
 
 #' @describeIn prepareModuleHost prepare \code{dockerHost}. Returns

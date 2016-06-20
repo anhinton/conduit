@@ -82,26 +82,34 @@ getValue.component <- function(x) {
 #'
 #' @param component \code{component} object
 #' @param namespaceDefinitions As named character vector
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
 #' 
 #' @return \code{xmlNode} object
 #'
+#' @seealso \code{XML::newXMLNode}
+#'
 #' @import XML
-componentToXML <- function(component, namespaceDefinitions = NULL) {
+componentToXML <- function(component, namespaceDefinitions = NULL,
+                           parent = NULL,
+                           addFinalizer = is.null(parent)) {
     name <- getName(component)
     vessel <- getVessel(component)
     type <- getType(component)
     value <- getValue(component)    
-    componentRoot <- newXMLNode("component", attrs = c(name = name))
+    componentRoot <- newXMLNode("component", attrs = c(name = name),
+                                parent = parent,
+                                addFinalizer = addFinalizer)
     valueXML <-
         if(is.null(vessel)) {
             switch(
                 type,
-                module = moduleToXML(value, namespaceDefinitions),
-                pipeline = pipelineToXML(value, namespaceDefinitions))
+                module = moduleToXML(value, namespaceDefinitions,
+                                     parent = componentRoot),
+                pipeline = pipelineToXML(value, namespaceDefinitions,
+                                         parent = componentRoot))
         } else {
-            vesselToXML(vessel)
+            vesselToXML(vessel = vessel, parent = componentRoot)
         }
-    componentRoot <- addChildren(componentRoot, kids = list(valueXML))
     if (!is.null(vessel))
         xmlAttrs(componentRoot, append = TRUE) <-  c(type = type)
     componentRoot

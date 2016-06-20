@@ -110,22 +110,32 @@ endInput <- function(pipe) {
 #'
 #' @param pipe \code{pipe} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
+#' 
+#' @return \code{XMLNode} object
 #'
-#' @return \code{xmlNode} object
+#' @seealso \code{XML::newXMLNode}
 #'
 #' @import XML
-pipeToXML <- function(pipe, namespaceDefinitions = NULL) {
+pipeToXML <- function(pipe, namespaceDefinitions = NULL,
+                      parent = NULL, addFinalizer = is.null(parent)) {
     start <- start(pipe)
     end <- end(pipe)
     startAttrs <- c(component = start$component,
                     output = start$output)
     endAttrs <- c(component =end$component,
                   input = end$input)
-    pipeXML <- newXMLNode("pipe")
-    pipeXML <-
-        addChildren(
-            node = pipeXML,
-            kids=list(newXMLNode(name = "start", attrs=startAttrs),
-                      newXMLNode(name = "end", attrs=endAttrs)))
+    pipeXML <- newXMLNode(name = "pipe",
+                          namespaceDefinitions = namespaceDefinitions,
+                          parent = parent,
+                          addFinalizer = addFinalizer)
+    startNode <- newXMLNode(name = "start",
+                            namespaceDefinitions = namespaceDefinitions,
+                            attrs=startAttrs,
+                            parent = pipeXML)
+    endNode <- newXMLNode(name = "end",
+                          namespaceDefinitions = namespaceDefinitions,
+                          attrs=endAttrs, parent = pipeXML)
     pipeXML
 }

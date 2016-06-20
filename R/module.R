@@ -788,10 +788,9 @@ saveModule <- function(module, targetDirectory = getwd(),
         stop("no such target directory")
     }
     namespace <- "http://www.openapi.org/2014/"
-    moduleXML <- moduleToXML(module, namespaceDefinitions = namespace)
-    moduleDoc <- newXMLDoc(
-        namespaces = namespace,
-        node = moduleXML)
+    moduleDoc <- newXMLDoc(namespaces = namespace)
+    moduleXML <- moduleToXML(module = module, namespaceDefinitions = namespace,
+                             parent = moduleDoc)
     moduleFilePath <- file.path(targetDirectory, filename)
     saveXML(moduleDoc, moduleFilePath)
 }
@@ -800,46 +799,50 @@ saveModule <- function(module, targetDirectory = getwd(),
 #'
 #' @param module \code{module} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
 #' 
 #' @return \code{XMLInternalNode} object
 #'
-#' @seealso \code{module} objects
+#' @seealso \code{module} objects, \code{XML::newXMLNode}
 #' 
 #' @import XML
 moduleToXML <- function (module,
-                         namespaceDefinitions=NULL) {
+                         namespaceDefinitions=NULL,
+                         parent = NULL,
+                         addFinalizer = is.null(parent)) {
     if (class(module) != "module") {
         stop("'module' is not a 'module' object")
     }
     moduleRoot <- newXMLNode(name = "module",
-                             namespaceDefinitions = namespaceDefinitions)
-    language <- moduleLanguageToXML(getLanguage(module))
-    host <-
-        if (!is.null(module$host)) {
-            moduleHostToXML(module$host)
-        } else {
-            NULL
-        }
-    description <-
-        if (!is.null(module$description)) {
-            newXMLNode("description", children = module$description)
-        } else {
-            NULL
-        }
-    inputs <- lapply(module$inputs, moduleIOToXML)
-    outputs <- lapply(module$outputs, moduleIOToXML)
-    sources <- lapply(module$sources, moduleSourceToXML)
-    addChildren(moduleRoot,
-                kids=list(language, host, description, inputs, sources,
-                          outputs))
+                             namespaceDefinitions = namespaceDefinitions,
+                             parent = parent, addFinalizer = addFinalizer)
+    language <- moduleLanguageToXML(moduleLanguage = getLanguage(module),
+                                    parent = moduleRoot)
+    if (!is.null(module$host))
+        host <- moduleHostToXML(moduleHost = module$host, parent = moduleRoot)
+    if (!is.null(module$description)) {
+        description <- newXMLNode(name = "description",
+                                  children = module$description,
+                                  parent = moduleRoot)
+    }
+    inputs <- lapply(module$inputs, moduleIOToXML, parent = moduleRoot)
+    sources <- lapply(module$sources, moduleSourceToXML, parent = moduleRoot)
+    outputs <- lapply(module$outputs, moduleIOToXML, parent = moduleRoot)
+    moduleRoot
 }
 
 #' Create XML corresponding to \code{moduleLanguage} object
 #'
 #' @param moduleLanguage \code{moduleLanguage} objects
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
+#'
+#' @seealso \code{XML::newXMLNode}
 #'
 #' @return XML node representing module language
-moduleLanguageToXML <- function(moduleLanguage) {
+moduleLanguageToXML <- function(moduleLanguage, parent = NULL,
+                                addFinalizer = is.null(parent)) {
     if (!inherits(moduleLanguage, "moduleLanguage"))
         stop("moduleLanguage object required")
     language <- getLanguage(moduleLanguage)
@@ -851,16 +854,23 @@ moduleLanguageToXML <- function(moduleLanguage) {
                    language,
                    attrs = c(minVersion = minVersion,
                              maxVersion = maxVersion,
-                             version = version))
+                             version = version),
+                   parent = parent, addFinalizer = addFinalizer)
     moduleLanguageXML
 }
     
 #' Create XML corresponding to a \code{moduleHost} object
 #'
 #' @param moduleHost \code{moduleHost} object
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
+#'
+#' @seealso \code{XML::newXMLNode}
 #'
 #' @return XML node representing module host
-moduleHostToXML <- function(moduleHost) {
+moduleHostToXML <- function(moduleHost,
+                            parent = NULL,
+                            addFinalizer = is.null(parent)) {
     if (!inherits(moduleHost, "moduleHost"))
         stop("moduleHost object required")
     UseMethod("moduleHostToXML")
@@ -870,14 +880,18 @@ moduleHostToXML <- function(moduleHost) {
 #'
 #' @param vessel \code{vessel} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
 #'
 #' @return \code{XMLInternalNode} object
 #'
-#' @seealso \code{vessel} objects
+#' @seealso \code{vessel} objects, \code{XML::newXMLNode}
 #' 
 #' @import XML
 vesselToXML <- function (vessel,
-                         namespaceDefinitions=NULL) {
+                         namespaceDefinitions=NULL,
+                         parent = NULL,
+                         addFinalizer = is.null(parent)) {
     if (!("vessel" %in% class(vessel))) {
         stop("'vessel' is not a 'vessel' object")
     }
@@ -893,72 +907,90 @@ vesselToXML <- function (vessel,
 
     ## create vessel XML object
     vesselXML <- newXMLNode(name = type,
-                            namespaceDefinitions=namespaceDefinitions)
+                            namespaceDefinitions=namespaceDefinitions,
+                            parent = parent,
+                            addFinalizer = addFinalizer)
 
     ## assign value/attributes
     if (type == "script") {
-        xmlChildren(vesselXML) <- newXMLCDataNode(vessel$value)
+        newXMLCDataNode(text = vessel$value, parent = vesselXML)
     } else {
         attributes <- unlist(vessel)
         xmlAttrs(vesselXML) <- attributes
     }
     
-    return(vesselXML)
+    vesselXML
 }
     
 #' Create XML corresponding to an \code{ioFormat} object
 #'
 #' @param ioFormat \code{ioFormat} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
 #'
 #' @return \code{XMLInternalNode} object
 #'
-#' @seealso \code{ioFormat} objects
+#' @seealso \code{ioFormat} objects, \code{XML::newXMLNode}
 #'
 #' @import XML
 ioFormatToXML <- function (ioFormat,
-                           namespaceDefinitions=NULL) {
+                           namespaceDefinitions=NULL,
+                           parent = NULL,
+                           addFinalizer = is.null(parent)) {
     if (class(ioFormat) != "ioFormat") {
         stop("'ioFormat' is not an 'ioFormat' object")
     }
     ioFormatXML <- newXMLNode("format",
-                              namespaceDefinitions=namespaceDefinitions)
+                              namespaceDefinitions=namespaceDefinitions,
+                              parent = parent,
+                              addFinalizer = addFinalizer)
     xmlAttrs(ioFormatXML) <- c("formatType" = ioFormat$type)
-    xmlChildren(ioFormatXML) <- newXMLTextNode(ioFormat$value)
-    return(ioFormatXML)
+    value <- newXMLTextNode(ioFormat$value, parent = ioFormatXML)
+    ioFormatXML
 }
 
 #' Create XML corresponding to \code{moduleIO} object
 #'
 #' @param moduleIO \code{moduleIO} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
 #'
 #' @return \code{XMLInternalNode} object
 #'
-#' @seealso \code{moduleIO} objects
+#' @seealso \code{moduleIO} objects, \code{XML::newXMLNode}
 #'
 #' @import XML
 moduleIOToXML <- function (moduleIO,
-                           namespaceDefinitions = NULL) {
+                           namespaceDefinitions = NULL,
+                           parent = NULL,
+                           addFinalizer = is.null(parent)) {
     if (!("moduleIO" %in% class(moduleIO))) {
         stop("'moduleIO' is not a 'moduleIO' object")
     }
     moduleIOXML <- newXMLNode(name = moduleIO$type,
                               attrs = c(name = moduleIO$name),
-                              namespaceDefinitions = namespaceDefinitions)
+                              namespaceDefinitions = namespaceDefinitions,
+                              parent = parent,
+                              addFinalizer = addFinalizer)
     vesselXML <- vesselToXML(moduleIO$vessel, 
-                             namespaceDefinitions = namespaceDefinitions)
+                             namespaceDefinitions = namespaceDefinitions,
+                             parent = moduleIOXML)
     ioFormatXML <- ioFormatToXML(moduleIO$format,
-                                 namespaceDefinitions = namespaceDefinitions)
-    xmlChildren(moduleIOXML) <- list(vesselXML,
-                                     ioFormatXML)
-    return(moduleIOXML)
+                                 namespaceDefinitions = namespaceDefinitions,
+                                 parent = moduleIOXML)
+    moduleIOXML
 }
 
 #' Create XML corresponding to \code{moduleSource} object
 #'
 #' @param moduleSource \code{moduleSource} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
+#'
+#' @seealso \code{XML::newXMLNode}
 #'
 #' @return \code{XMLInternalNode} object
 #'
@@ -966,18 +998,21 @@ moduleIOToXML <- function (moduleIO,
 #'
 #' @import XML
 moduleSourceToXML <- function (moduleSource,
-                               namespaceDefinitions = NULL) {
+                               namespaceDefinitions = NULL,
+                               parent = NULL,
+                               addFinalizer = is.null(parent)) {
     if (class(moduleSource) != "moduleSource") {
         stop("'moduleSource' is not a 'moduleSource' object")
     }
     moduleSourceXML <- newXMLNode(name = "source",
-                                  namespaceDefinitions = namespaceDefinitions)
+                                  namespaceDefinitions = namespaceDefinitions,
+                                  parent = parent, addFinalizer = addFinalizer)
     if (!is.null(moduleSource$order)) {
         xmlAttrs(moduleSourceXML) <- c("order" = moduleSource$order)
     }
-    vesselXML <- vesselToXML(moduleSource$vessel)
-    xmlChildren(moduleSourceXML) <- list(vesselXML)
-    return(moduleSourceXML)
+    vesselXML <- vesselToXML(vessel = moduleSource$vessel,
+                             parent = moduleSourceXML)
+    moduleSourceXML
 }
 
 ## RUNNING A MODULE
