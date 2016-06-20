@@ -19,7 +19,7 @@
 command(script)
 }
 \arguments{
-\item{\code{script}}{object}
+\item{script}{\code{script} object}
 }
 \value{
 \code{command} list containing \code{command} and

@@ -7,6 +7,15 @@
 execLanguage(language, minVersion = NULL, maxVersion = NULL,
   version = NULL)
 }
+\arguments{
+\item{language}{execution language as character string}
+
+\item{minVersion}{minimum language version as character string}
+
+\item{maxVersion}{maximum language version as character string}
+
+\item{version}{exact language version as character string}
+}
 \value{
 execLanguage as character
 }

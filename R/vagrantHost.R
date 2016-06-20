@@ -69,7 +69,8 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'
 #' @import XML
 #' @export
-moduleHostToXML.vagrantHost <- function(vagrantHost) {
+moduleHostToXML.vagrantHost <- function(moduleHost) {
+    vagrantHost <- moduleHost
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
 }
@@ -89,7 +90,7 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                tmpdir = file.path("conduit.out"))
     hostdir <- file.path(hostdir, outputLocation)
     if (dir.exists(hostdir))
-        unlink(hostdir, rescursive = TRUE)
+        unlink(hostdir, recursive = TRUE)
     dir.create(hostdir, recursive = TRUE)
     
     ## make contents of modulePath available to vagrantHost

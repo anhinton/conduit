@@ -26,6 +26,8 @@ extractModuleSource.fileVessel <- function(moduleSource) {
 #'
 #' @export
 extractModuleSource.urlVessel <- function(moduleSource) {
+    vessel <- moduleSource$vessel
+    ref <- vessel$ref
     con <- url(ref)
     on.exit(close(con))
     script <- readLines(con)
@@ -296,7 +298,7 @@ executeScript <- function(script, moduleHost, outputLocation) {
 #'
 #' This function is usually called by \code{executeScript}.
 #'
-#' @param \code{script} object
+#' @param script \code{script} object
 #'
 #' @return \code{command} list containing \code{command} and
 #'     \code{args} character vectors
