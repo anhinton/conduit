@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<module xmlns="http://www.openapi.org/2014/" language="R">
+<module xmlns="http://www.openapi.org/2014/">
+  <language>R</language>
   <description>create scatterplot matrix of data from a CSV file</description>
   <input name="x">
     <internal symbol="x"/>

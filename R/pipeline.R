@@ -22,7 +22,7 @@
 #'
 #' @examples
 #' ## create some modules
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(
 #'                    moduleOutput(
@@ -32,7 +32,7 @@
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("x <- \"set\""))))
-#' mod2 <- module("showY", language = "R",
+#' mod2 <- module("showY", language = moduleLanguage("R"),
 #'                description = "displays the value of Y",
 #'                inputs = list(
 #'                    moduleInput(
@@ -405,7 +405,7 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
 #'
 #' @examples
 #' ## create a pipeline
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(
 #'                    moduleOutput(
@@ -415,7 +415,7 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("x <- \"set\""))))
-#' mod2 <- module("showY", language = "R",
+#' mod2 <- module("showY", language = moduleLanguage("R"),
 #'                description = "displays the value of Y",
 #'                inputs = list(
 #'                    moduleInput(
@@ -488,7 +488,7 @@ input <- function (pipe, outputList) {
     startOutput <- start(pipe)$output
     componentOutputs <- outputList[[startComponent]]
     if (is.null(componentOutputs)) stop("start component does not exist")
-    input <- getResult(componentOutputs[[startOutput]])
+    input <- getRef(componentOutputs[[startOutput]])
     if (is.null(input)) stop("start output does not exist")
     class(input) <- "input"
     input
@@ -541,21 +541,15 @@ calculateInputs <- function(pipeList, componentList, pipelinePath) {
     inputList
 }
 
-#' Create a \code{graphNEL} node-and-edge graph of a pipeline
+#' Get pipes as list of edges
 #'
-#' \code{graphPipeline} produces a directed graph of the given
-#' \code{pipeline} with components as nodes and pipes as directed edges.
-#'
-#' The edges in the resulting graph object are a dumb representation
-#' of the pipes in a pipeline, i.e. they do not retain output and
-#' input information. They merely serve to provide on object for a
-#' topological sort for the purposes of determining the execution
-#' order of a pipeline's components.
+#' For each vertex (component) get a vector of vertices to which there
+#' is an edge (pipe).
 #'
 #' @param pipeline A \code{pipeline} list object
 #'
-#' @return A \pkg{graph} \code{graphNEL} object
-graphPipeline <- function(pipeline) {
+#' @return named list of character vectors for each component
+pipesAsEdges <- function(pipeline) {
     if (!inherits(pipeline, "pipeline"))
         stop("pipeline object required")
     componentList <- getComponents(pipeline)
@@ -563,28 +557,26 @@ graphPipeline <- function(pipeline) {
     pipeList <- getPipes(pipeline)
 
     ## create edge list. Each component is a node, and for each node
-    ## the egde list must indicate to which nodes there is an edge
+    ## the edge list must indicate to which nodes there is an edge
     ## (pipe). All nodes must have a list of edges, even if this list
     ## is empty.
-    edgeList <- lapply(
+    edgeList <- sapply(
         ## for each component
         componentNames,
         function(x, pipeList) {
-            ## returns names of components to which there is an pipe
+            ## returns names of components to which there is a pipe
             ## with the current component as startComponent
             edges <- lapply(pipeList,
                    function(y, x) {
                        if (startComponent(y) == x) {
                            endComponent(y)
                        } else {
-                           NULL
+                           character()
                        }
                    }, x)
-            list(edges = unlist(edges))
+            unlist(edges)
         }, pipeList)
-    ## create graph object representing pipeline
-    graph::graphNEL(nodes=componentNames, edgeL=edgeList,
-                    edgemode="directed")
+    edgeList
 }
 
 #' Run a pipeline
@@ -628,11 +620,11 @@ graphPipeline <- function(pipeline) {
 #'                                           "pipeline.xml", package="conduit"))
 #' runPipeline(pythonExample, targetDirectory = tempdir())
 #'
-#' ## shell language example
-#' shellExample <- loadPipeline("shellExample",
-#'                              system.file("extdata", "shellExample",
+#' ## bash language example
+#' bashExample <- loadPipeline("bashExample",
+#'                              system.file("extdata", "bashExample",
 #'                                          "pipeline.xml", package="conduit"))
-#' runPipeline(shellExample, targetDirectory = tempdir())
+#' runPipeline(bashExample, targetDirectory = tempdir())
 #'
 #' ## A pipeline with a module run on a remote host
 #' \dontrun{
@@ -668,8 +660,8 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
     if (!valid) stop(paste0("Pipeline '", name, "' is invalid."))
 
     ## determine execution order of components
-    componentGraph <- graphPipeline(pipeline)
-    componentOrder <- RBGL::tsort(componentGraph)
+    edges <- pipesAsEdges(pipeline)
+    componentOrder <- topologicalSort(edges)
 
     ## resolve inputs
     inputList <- calculateInputs(pipeList, componentList, pipelinePath)
@@ -709,7 +701,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #'
 #' @examples
 #' ## create a pipeline with one module
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(
 #'                    moduleOutput(
@@ -721,7 +713,7 @@ runPipeline <- function(pipeline, targetDirectory = getwd()) {
 #'                        vessel = scriptVessel("x <- \"set\""))))
 #' pline1 <- pipeline(name = "trivialpipeline", components = list(mod1))
 #' ## create a new module
-#' mod2 <- module("showY", language = "R",
+#' mod2 <- module("showY", language = moduleLanguage("R"),
 #'                description = "displays the value of Y",
 #'                inputs = list(
 #'                    moduleInput(
@@ -758,7 +750,7 @@ addComponent <- function(newComponent, pipeline) {
 #'
 #' @examples
 #' ## create a pipeline with two modules
-#' mod1 <- module(name = "setX", language = "R",
+#' mod1 <- module(name = "setX", language = moduleLanguage("R"),
 #'                description = "sets the value of x",
 #'                outputs = list(
 #'                    moduleOutput(
@@ -768,7 +760,7 @@ addComponent <- function(newComponent, pipeline) {
 #'                sources = list(
 #'                    moduleSource(
 #'                        vessel = scriptVessel("x <- \"set\""))))
-#' mod2 <- module("showY", language = "R",
+#' mod2 <- module("showY", language = moduleLanguage("R"),
 #'                description = "displays the value of Y",
 #'                inputs = list(
 #'                    moduleInput(

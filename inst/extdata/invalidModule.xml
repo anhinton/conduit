@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<module name="myCoolModule" xmlns="http://www.openapi.org/2014/" language="R">
-  <description>This module is invalid as module's do not support name attributes for the &lt;module&gt; element</description>
+<module xmlns="http://www.openapi.org/2014/" name="createGraph">
+  <language>R</language>
+  <description>This module is invalid as modules do not support name attributes for the &lt;module&gt; element</description>
   <source>
     <script><![CDATA[library(graph)
 nodes <- c("a", "b", "c", "d")
@@ -9,8 +10,7 @@ edgeList <- list(a=list(edges=c("b")),
                  c=list(edges=c("d")),
                  d=list(edges=c("a")))
 directedGraph <- new("graphNEL", nodes=nodes, edgeL=edgeList, 
-                     edgemode="directed")]]>
-    </script>
+                     edgemode="directed")]]></script>
   </source>
   <output name="directedGraph">
     <internal symbol="directedGraph"/>

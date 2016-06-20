@@ -17,10 +17,10 @@ This function creates an executable script file from a
 \code{module} object.
 }
 \details{
-The script returned will include code to load internal inputs,
-followed by the module source scripts in the correct order, and
-ending with code to produce internal outputs for consumption by
-other modules.
+The script returned will include any initialisation required by
+conduit, followed by code to load internal inputs, followed by the
+module source scripts in the correct order, and ending with code to
+produce internal outputs for consumption by other modules.
 
 The resulting script is saved to the current working directory.
 }

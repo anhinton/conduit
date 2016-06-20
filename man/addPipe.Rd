@@ -19,7 +19,7 @@ This functions adds a new \code{pipe} to a \code{pipeline}.
 }
 \examples{
 ## create a pipeline with two modules
-mod1 <- module(name = "setX", language = "R",
+mod1 <- module(name = "setX", language = moduleLanguage("R"),
                description = "sets the value of x",
                outputs = list(
                    moduleOutput(
@@ -29,7 +29,7 @@ mod1 <- module(name = "setX", language = "R",
                sources = list(
                    moduleSource(
                        vessel = scriptVessel("x <- \\"set\\""))))
-mod2 <- module("showY", language = "R",
+mod2 <- module("showY", language = moduleLanguage("R"),
                description = "displays the value of Y",
                inputs = list(
                    moduleInput(

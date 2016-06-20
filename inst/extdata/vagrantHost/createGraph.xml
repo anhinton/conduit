@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
-<module xmlns="http://www.openapi.org/2014/" language="R">
+<module xmlns="http://www.openapi.org/2014/">
+  <language>R</language>
   <host>
-    <vagrant
-	vagrantfile="~/vagrant/vagrant-conduit/Vagrantfile"
-	hostdir="~/vagrant/vagrant-conduit"/>
+    <vagrant vagrantfile="~/vagrant/vagrant-conduit/Vagrantfile" hostdir="~/vagrant/vagrant-conduit"/>
   </host>
   <description>Create a simple directed graphNEL graph object with four nodes and four edges</description>
   <source>
@@ -14,8 +13,7 @@ edgeList <- list(a=list(edges=c("b")),
                  c=list(edges=c("d")),
                  d=list(edges=c("a")))
 directedGraph <- new("graphNEL", nodes=nodes, edgeL=edgeList, 
-                     edgemode="directed")]]>
-    </script>
+                     edgemode="directed")]]></script>
   </source>
   <output name="directedGraph">
     <internal symbol="directedGraph"/>

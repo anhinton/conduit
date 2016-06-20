@@ -43,7 +43,7 @@ test_that("vagrantHost() constructor works right", {
 })
 
 test_that("readVagrantHostXML() returns correctly", {
-    library(XML)
+    #library(XML)
     vhXML1 <- newXMLNode(
         name = "vagrant",
         attrs = list(vagrantfile = vagrantfile))
@@ -86,7 +86,7 @@ test_that("readVagrantHostXML() returns correctly", {
 })
 
 test_that("moduleHostToXML.vagrantHost() creates correct XML", {
-    library(XML)
+    #library(XML)
     vh1 <- vagrantHost(vagrantfile)
     vh2 <- vagrantHost(vagrantfile, hostdir)
     vh3 <- vagrantHost(vagrantfile, hostdir, guestdir)
@@ -162,7 +162,7 @@ test_that("executeCommand.vagrantHost() returns correctly", {
 
     vagrantHost1 <- vagrantHost(vagrantfile = vagrantfile)
     mod1 <- module(name = "mod1",
-                   language = "R",
+                   language = moduleLanguage("R"),
                    host = vagrantHost1,
                    sources = list(moduleSource(scriptVessel("x <- 1:10"))),
                    outputs = list(moduleOutput(
@@ -183,7 +183,8 @@ test_that("executeCommand.vagrantHost() returns correctly", {
                                               command = command1)
     ## correct defined as not getting error message from wrapped
     ## system2 call
-    expect_equal(exec_result, 0)
+    expect_is(exec_result, "character")
+    expect_true(is.null(attr(exec_result, "status")))
 })
 
 test_that("retrieveModuleHost.vagrantHost() returns correctly", {

@@ -4,13 +4,19 @@
 \alias{getLanguage}
 \alias{getLanguage.default}
 \alias{getLanguage.module}
+\alias{getLanguage.moduleLanguage}
+\alias{getLanguage.output}
 \title{Retrieve object language}
 \usage{
 getLanguage(x)
 
 \method{getLanguage}{default}(x)
 
+\method{getLanguage}{moduleLanguage}(x)
+
 \method{getLanguage}{module}(x)
+
+\method{getLanguage}{output}(x)
 }
 \arguments{
 \item{x}{object}
@@ -22,6 +28,10 @@ Retrieve object language
 \itemize{
 \item \code{default}: 
 
-\item \code{module}: Returns module language
+\item \code{moduleLanguage}: Return language name as character
+
+\item \code{module}: Returns \code{moduleLanguage} object
+
+\item \code{output}: Get \code{moduleLanguage} object
 }}
 

@@ -10,6 +10,17 @@ test_that("internalInputScript() returns sensible script fragment", {
     ## TODO(anhinton): write language-specific tests
 })
 
+test_that("prepareScriptInit() returns script fragment", {
+    mlang1 <- moduleLanguage(language = "R")
+
+    ## fail for invalid input
+    expect_error(prepareScriptInit(moduleLanguage = unclass(mlang1)),
+                 "moduleLanguage object required")
+
+    ## language-specific testing found in test_LANGUAGE.R files
+    ## TODO(anhinton): write language-specific tests    
+})
+
 test_that("prepareScriptInput() returns script fragment", {
     moduleInput1 <- moduleInput(name = "x",
                                 vessel = internalVessel("X"),
@@ -20,18 +31,18 @@ test_that("prepareScriptInput() returns script fragment", {
     
     ## fails for invalid arguments
     expect_error(prepareScriptInput(moduleInput = unclass(moduleInput1),
-                                    language = "R"),
+                                    moduleLanguage = moduleLanguage("R")),
                  "moduleInput object required")
 
     ## produces script for internalVessel
     scriptInput1 <- prepareScriptInput(moduleInput = moduleInput1,
-                                       language = "R")
+                                       moduleLanguage = moduleLanguage("R"))
     expect_is(scriptInput1, "character")
     expect_true(length(scriptInput1) > 0)
 
     ## produces NULL for fileVessel
     scriptInput2 <- prepareScriptInput(moduleInput = moduleInput2,
-                                       language = "R")
+                                       moduleLanguage = moduleLanguage("R"))
     expect_null(scriptInput2)
 })
 
@@ -54,18 +65,18 @@ test_that("prepareScriptOutput() returns script fragment", {
     
     ## fails for invalid arguments
     expect_error(prepareScriptOutput(moduleOutput = unclass(moduleOutput1),
-                                     language = "R"),
+                                     moduleLanguage = moduleLanguage("R")),
                  "moduleOutput object required")
 
     ## produces script for internalVessel
     scriptOutput1 <- prepareScriptOutput(moduleOutput = moduleOutput1,
-                                         language = "R")
+                                         moduleLanguage = moduleLanguage("R"))
     expect_is(scriptOutput1, "character")
     expect_true(length(scriptOutput1) > 0)
 
     ## produces NULL for fileVessel
     scriptOutput2 <- prepareScriptOutput(moduleOutput = moduleOutput2,
-                                         language = "R")
+                                         moduleLanguage = moduleLanguage("R"))
     expect_null(scriptOutput2)
 })
 
@@ -78,7 +89,7 @@ test_that("prepareScript() returns script file", {
     on.exit(setwd(oldwd))
     module1 <- module(
         name = "mod1",
-        language = "R",
+        language = moduleLanguage("R"),
         inputs = list(
             moduleInput(name = "X",
                         vessel = internalVessel("X"),
@@ -134,10 +145,11 @@ test_that("executeCommand() returns appropriately", {
                                 command = unclass(command1)),
                  "command object required")
 
-    ## returns cleanly for default
-    expect_equal(executeCommand(moduleHost = NULL, outputLocation = NULL,
-                                command = command1),
-                 0)
+    ## returns character vector with no status attribute
+    execResult <- executeCommand(moduleHost = NULL, outputLocation = NULL,
+                                 command = command1)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 test_that("executeScript() returns correctly", {
@@ -169,10 +181,10 @@ test_that("executeScript() returns correctly", {
                  "outputLocation object required")
     
     ## valid return for no moduleHost
-    expect_equal(
-        executeScript(script = script1, moduleHost = NULL,
-                      outputLocation = NULL),
-        0)
+    execResult <- executeScript(script = script1, moduleHost = NULL,
+                      outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 ## test executeScript.LANGUAGE
@@ -187,8 +199,10 @@ test_that("can execute R scripts", {
                                package = "conduit"))
     inputObjects <- NULL
     script <- prepareScript(module1)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               outputLocation = NULL), 0)
+    execResult <- executeScript(script = script, moduleHost = NULL,
+                                outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
 test_that("can execute python scripts", {
@@ -196,7 +210,7 @@ test_that("can execute python scripts", {
     on.exit(setwd(oldwd))
     module2 <- module(
         "module2",
-        "python",
+        moduleLanguage("python"),
         sources = list(
             moduleSource(
                 scriptVessel("x = [1, 2, 3, 5, 10]"))),
@@ -207,17 +221,18 @@ test_that("can execute python scripts", {
                 ioFormat("python list"))))
     inputObjects <- NULL
     script <- prepareScript(module2)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               outputLocation = NULL),
-                 0)
+    execResult <- executeScript(script = script, moduleHost = NULL,
+                                outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })
 
-test_that("can execute shell scripts", {
+test_that("can execute bash scripts", {
     oldwd <- setwd(tempdir())
     on.exit(setwd(oldwd))
     module3 <- module(
         "module3",
-        "shell",
+        moduleLanguage("bash"),
         sources = list(
             moduleSource(
                 scriptVessel("x=\"lemon duds\"]"))),
@@ -225,10 +240,11 @@ test_that("can execute shell scripts", {
             moduleOutput(
                 "x",
                 internalVessel("x"),
-                ioFormat("shell environment variable"))))
+                ioFormat("bash environment variable"))))
     inputObjects <- NULL
     script <- prepareScript(module3)
-    expect_equal(executeScript(script = script, moduleHost = NULL,
-                               outputLocation = NULL),
-                 0)
+    execResult <- executeScript(script = script, moduleHost = NULL,
+                                 outputLocation = NULL)
+    expect_is(execResult, "character")
+    expect_true(is.null(attr(execResult, "status")))
 })

@@ -129,7 +129,7 @@ fetchVessel.fileVessel <- function(vessel, location = getwd()) {
 #'
 #' @export
 fetchVessel.urlVessel <- function(vessel, location = getwd()) {
-    con <- textConnection(RCurl::getURL(vessel$ref))
+    con <- url(vessel$ref)
     on.exit(close(con))
     content <- readLines(con)
     attr(content, "location") <- location

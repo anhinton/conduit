@@ -4,7 +4,8 @@
 \alias{runModule}
 \title{Execute a \code{module}'s source(s)}
 \usage{
-runModule(module, targetDirectory = getwd(), inputObjects = NULL)
+runModule(module, targetDirectory = getwd(), inputObjects = NULL,
+  warnVersion = FALSE)
 }
 \arguments{
 \item{module}{\code{module} object}
@@ -12,15 +13,16 @@ runModule(module, targetDirectory = getwd(), inputObjects = NULL)
 \item{targetDirectory}{File path for module output}
 
 \item{inputObjects}{Named list of input objects}
+
+\item{warnVersion}{should conduit warn if module language
+version requirements are not met}
 }
 \value{
-a \code{moduleResult} object containing:
-\item{file}{file path to resulting module XML}
-\item{component}{resulting \code{module} object}
-\item{outputList}{list of \code{output} objects produced by module}
+\code{moduleResult}
 }
 \description{
-Execute the scripts contained in or referenced by a \code{module}'s sources.
+Execute the scripts contained in or referenced by a \code{module}'s
+sources.
 }
 \details{
 This function:
@@ -44,6 +46,10 @@ module's output is also created in this directory.
 
 If \code{module$host} is not NULL the remote host must exist and be
 accessible by conduit or this function will fail.
+
+If \code{warnVersion} is \code{TRUE} this function will give a
+warning when the executing language does not meet the module's
+\code{moduleLanguage} requirments.
 }
 \examples{
 
@@ -54,21 +60,9 @@ mod1 <- loadModule("createGraph",
 		      ref = mod1xml)
 result1 <- runModule(module = mod1, targetDirectory = tempdir())
 
-## run a module with inputs
-mod2xml <- system.file("extdata", "simpleGraph", "layoutGraph.xml",
-		          package = "conduit")
-mod2 <- loadModule("layoutGraph", ref = mod2xml)
-
-## mod2 input names
-names(mod2$inputs)
-mod2inputs <- lapply(result1$outputList, getResult)
-names(mod2inputs) <- names(mod2$inputs)
-
-runModule(module = mod2, inputObjects = mod2inputs,
-          targetDirectory = tempdir())
-
 }
 \seealso{
-\code{module}, \code{moduleSource}
+\code{module}, \code{moduleSource}, \code{moduleLanguage}
+    for creating modules, \code{moduleResult} for result objects
 }
 

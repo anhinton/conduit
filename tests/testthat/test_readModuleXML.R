@@ -1,8 +1,51 @@
 library(conduit)
 context("read module XML")
 
+test_that("readModuleLanguageXML() returns appropriately", {
+    #library(XML)
+    language <- "R"
+    minVersion <- "3.0.1"
+    maxVersion <- "3.3.0"
+    version <- "3.2.5"
+    mlx1 <- newXMLNode(name = "language", language)
+    mlx2 <- newXMLNode(name = "language", language,
+                      attrs = c(minVersion = minVersion))
+    mlx3 <- newXMLNode(name = "language", language,
+                      attrs = c(maxVersion = maxVersion))
+    mlx4 <- newXMLNode(name = "language", language,
+                       attrs = c(version = version))
+
+    ## just language
+    ml1 <- readModuleLanguageXML(mlx1)
+    expect_is(ml1, "moduleLanguage")
+    expect_null(ml1$minVersion)
+    expect_null(ml1$maxVersion)
+    expect_null(ml1$version)
+
+    ## minVersion attribute
+    ml2 <- readModuleLanguageXML(mlx2)
+    expect_is(ml2, "moduleLanguage")
+    expect_match(ml2$minVersion, minVersion)
+    expect_null(ml2$maxVersion)
+    expect_null(ml2$version)
+
+    ## maxVersion attribute
+    ml3 <- readModuleLanguageXML(mlx3)
+    expect_is(ml3, "moduleLanguage")
+    expect_match(ml3$maxVersion, maxVersion)
+    expect_null(ml3$mimVersion)
+    expect_null(ml3$version)
+
+    ## version attribute
+    ml4 <- readModuleLanguageXML(mlx4)
+    expect_is(ml4, "moduleLanguage")
+    expect_match(ml4$version, version)
+    expect_null(ml4$maxVersion)
+    expect_null(ml4$minVersion)
+})
+
 test_that("readIOFormatXML fails for incorrect node name", {
-    library(XML)
+    #library(XML)
     notAFormat <- newXMLNode(name = "notAFormat")
     expect_error(readIOFormatXML(notAFormat),
                  "ioFormat XML is invalid")
@@ -146,14 +189,14 @@ test_that(
 
 ## read <module> XML
 
-test_that("readModuleXML creates appropriate module object", {
+test_that("readModuleXML creates appropriate module object", {    
     ## minimal module
     minModXML <- moduleToXML(module(
-        name = "minMod", language = "R"))
+        name = "minMod", language = moduleLanguage("R")))
     minMod <- readModuleXML(name = "minMod", xml = minModXML)
     expect_is(minMod, "module")
     expect_match(getName(minMod), "minMod")
-    expect_match(getLanguage(minMod), "R")
+    expect_match(getLanguage(getLanguage(minMod)), "R")
     expect_null(minMod$host)
     expect_null(minMod$description)
     expect_null(minMod$inputs)
@@ -163,7 +206,7 @@ test_that("readModuleXML creates appropriate module object", {
     ## moduleXML with the works
     sources = list(moduleSource(scriptVessel("alpha")))
     name = "setX"
-    language = "R"
+    language = moduleLanguage("R")
     host = vagrantHost(
         vagrantfile = "~/vagrant/vagrant-conduit/Vagrantfile")
     description="your whole life"
@@ -180,12 +223,24 @@ test_that("readModuleXML creates appropriate module object", {
     module1 <- readModuleXML(name = "first", xml = module1Xml)
     expect_is(module1, "module")
     expect_match(getName(module1), "first")
-    expect_match(getLanguage(module1), "R")
+    expect_match(getLanguage(getLanguage(module1)), "R")
     expect_identical(module1$host, host)
     expect_match(module1$description, description)
     expect_true(!is.null(module1$inputs))
     expect_true(!is.null(module1$sources))
     expect_true(!is.null(module1$outputs))
+
+    ## fails for moduleInputHost with no matching input
+    module2Xml <- moduleToXML(module(
+        name = "module2",
+        language = moduleLanguage("R"),
+        host = moduleInputHost(name = "wrongName"),
+        inputs = list(
+            moduleInput(name = "rightName",
+                        vessel = fileVessel("host.xml"),
+                        format = ioFormat("XML file")))))
+    expect_error(readModuleXML(name = "module1", xml = module2Xml),
+                 "moduleInput host name does not match any input names")    
 })
 
 ## read <host> xml
@@ -197,6 +252,20 @@ test_that("readModuleHostXML() returns correctly", {
         attrs = list(vagrantfile = vagrantfile))
     vh1 <- readModuleHostXML(vhXML1)
     expect_is(vh1, "moduleHost")
+    
+    ## <docker/> host XML
+    vhXML2 <- newXMLNode(
+        name = "docker",
+        attrs = list(image = "ubuntu:latest"))
+    vh2 <- readModuleHostXML(vhXML2)
+    expect_is(vh2, "moduleHost")
+    
+    ## <moduleInput/> host XML
+    vhXML3 <- newXMLNode(
+        name = "moduleInput",
+        attrs = list(name = "myHost"))
+    vh3 <- readModuleHostXML(vhXML3)
+    expect_is(vh3, "moduleHost")
 })
 
 ## load module from XML file

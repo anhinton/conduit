@@ -1,57 +1,57 @@
 <?xml version="1.0"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-        xmlns:oa="http://www.openapi.org/2014/"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://www.openapi.org/2014/"
         targetNamespace="http://www.openapi.org/2014/">
 
-  <include schemaLocation="./module.xsd"/>
+  <xs:include schemaLocation="./module.xsd"/>
 
-  <element name="pipeline" type="oa:PipelineType"/>
-  <element name="component" type="oa:ComponentType"/>
-  <element name="pipe" type="oa:PipeType"/>
-  <element name="start" type="oa:StartType"/>
-  <element name="end" type="oa:EndType"/>
+  <xs:element name="pipeline" type="PipelineType"/>
+  <xs:element name="component" type="ComponentType"/>
+  <xs:element name="pipe" type="PipeType"/>
+  <xs:element name="start" type="StartType"/>
+  <xs:element name="end" type="EndType"/>
   
-  <complexType name="PipelineType">
-    <sequence>
-      <element ref="oa:description" minOccurs="0"/>
-      <element ref="oa:component" minOccurs="1" maxOccurs="unbounded"/>
-      <element ref="oa:pipe" minOccurs="0" maxOccurs="unbounded"/>
-    </sequence>
-  </complexType>
+  <xs:complexType name="PipelineType">
+    <xs:sequence>
+      <xs:element ref="description" minOccurs="0"/>
+      <xs:element ref="component" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="pipe" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
 
-  <complexType name="ComponentType">
-    <choice>
-      <element ref="oa:module"/>
-      <element ref="oa:pipeline"/>
-      <element ref="oa:file"/>
-      <element ref="oa:url"/>
-    </choice>
-    <attribute name="name" type="string" use="required"/>
-    <attribute name="type" type="oa:ComponentTypeType"/>
-  </complexType>
+  <xs:complexType name="ComponentType">
+    <xs:choice>
+      <xs:element ref="module"/>
+      <xs:element ref="pipeline"/>
+      <xs:element ref="file"/>
+      <xs:element ref="url"/>
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="ComponentTypeType"/>
+  </xs:complexType>
 
-  <simpleType name="ComponentTypeType">
-    <restriction base="string">
-      <enumeration value="module"/>
-      <enumeration value="pipeline"/>
-    </restriction>
-  </simpleType>
+  <xs:simpleType name="ComponentTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="module"/>
+      <xs:enumeration value="pipeline"/>
+    </xs:restriction>
+  </xs:simpleType>
 
-  <complexType name="PipeType">
-    <all>
-      <element ref="oa:start" minOccurs="1"/>
-      <element ref="oa:end" minOccurs="1"/>
-    </all>
-  </complexType>
+  <xs:complexType name="PipeType">
+    <xs:all>
+      <xs:element ref="start" minOccurs="1"/>
+      <xs:element ref="end" minOccurs="1"/>
+    </xs:all>
+  </xs:complexType>
 
-  <complexType name="StartType">
-    <attribute name="component" type="string" use="required"/>
-    <attribute name="output" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="StartType">
+    <xs:attribute name="component" type="xs:string" use="required"/>
+    <xs:attribute name="output" type="xs:string" use="required"/>
+  </xs:complexType>
 
-  <complexType name="EndType">
-    <attribute name="component" type="string" use="required"/>
-    <attribute name="input" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="EndType">
+    <xs:attribute name="component" type="xs:string" use="required"/>
+    <xs:attribute name="input" type="xs:string" use="required"/>
+  </xs:complexType>
 
-</schema>
+</xs:schema>

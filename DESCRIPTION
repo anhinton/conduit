@@ -1,8 +1,8 @@
 Package: conduit
 Type: Package
 Title: A prototype glue system for OpenAPI
-Version: 0.5
-Date: 2016-04-27
+Version: 0.6
+Date: 2016-06-20
 Authors@R: c(person(given="Ashley Noel", family="Hinton",
     email="ahin017@aucklanduni.ac.nz",
     role=c("cre","aut")),
@@ -11,13 +11,15 @@ Authors@R: c(person(given="Ashley Noel", family="Hinton",
 Description: Manage and run OpenAPI pipelines and modules.
 License: GPL (>= 3)
 Depends:
-    R (>= 3.2),
+    R (>= 3.3.0),
     methods
+SystemRequirements:
+    python2 (>= 2.7),
+    python3 (>= 3.4)
 Imports:
-    RCurl,
     XML,
-    graph,
-    RBGL
+    rPython,
+    whisker
 Suggests:
     Rgraphviz,
     gridGraphviz,

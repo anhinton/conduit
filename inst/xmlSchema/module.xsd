@@ -1,94 +1,105 @@
 <?xml version="1.0"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-        xmlns:oa="http://www.openapi.org/2014/"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://www.openapi.org/2014/"
         targetNamespace="http://www.openapi.org/2014/">
 
-  <include schemaLocation="./host.xsd"/>
+  <xs:include schemaLocation="./host.xsd"/>
 
-  <element name="module" type="oa:ModuleType"/>
-  <element name="host" type="oa:HostType"/>
-  <element name="moduleInput" type="oa:ModuleInputType"/>
-  <element name="description" type="string"/>
-  <element name="input" type="oa:IOType"/>
-  <element name="output" type="oa:IOType"/>
-  <element name="source" type="oa:SourceType"/>
-  <element name="internal" type="oa:InternalType"/>
-  <element name="file" type="oa:FileType"/>
-  <element name="url" type="oa:URLType"/>
-  <element name="script" type="oa:ScriptType"/>
-  <element name="format" type="oa:FormatType"/>
+  <xs:element name="module" type="ModuleType"/>
+  <xs:element name="language" type="LanguageType"/>
+  <xs:element name="host" type="HostType"/>
+  <xs:element name="moduleInput" type="ModuleInputType"/>
+  <xs:element name="description" type="xs:string"/>
+  <xs:element name="input" type="IOType"/>
+  <xs:element name="output" type="IOType"/>
+  <xs:element name="source" type="SourceType"/>
+  <xs:element name="internal" type="InternalType"/>
+  <xs:element name="file" type="FileType"/>
+  <xs:element name="url" type="URLType"/>
+  <xs:element name="script" type="ScriptType"/>
+  <xs:element name="format" type="FormatType"/>
 
-  <complexType name="ModuleType">
-    <sequence>
-      <element ref="oa:host" minOccurs="0"/>
-      <element ref="oa:description" minOccurs="0"/>
-      <element ref="oa:input" minOccurs="0" maxOccurs="unbounded"/>
-      <element ref="oa:source" minOccurs="0" maxOccurs="unbounded"/>
-      <element ref="oa:output" minOccurs="0" maxOccurs="unbounded"/>
-    </sequence>
-    <attribute name="language" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="ModuleType">
+    <xs:sequence>
+      <xs:element ref="language"/>
+      <xs:element ref="host" minOccurs="0"/>
+      <xs:element ref="description" minOccurs="0"/>
+      <xs:element ref="input" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="source" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="output" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
 
-  <complexType name="HostType">
-    <sequence>
-      <choice>
-	<element ref="oa:vagrant"/>
-	<element ref="oa:docker"/>
-	<element ref="oa:moduleInput"/>
-      </choice>
-    </sequence>
-  </complexType>
+  <xs:complexType name="LanguageType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+	<xs:attribute name="minVersion" type="xs:string"/>
+	<xs:attribute name="maxVersion" type="xs:string"/>
+	<xs:attribute name="version" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
 
-  <complexType name="ModuleInputType">
-    <attribute name="name" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="HostType">
+    <xs:sequence>
+      <xs:choice>
+	<xs:element ref="vagrant"/>
+	<xs:element ref="docker"/>
+	<xs:element ref="moduleInput"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ModuleInputType">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
   
-  <complexType name="IOType">
-    <sequence>
-      <choice>
-	<element ref="oa:internal"/>
-	<element ref="oa:file"/>
-	<element ref="oa:url"/>
-      </choice>
-      <element ref="oa:format"/>
-    </sequence>
-    <attribute name="name" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="IOType">
+    <xs:sequence>
+      <xs:choice>
+	<xs:element ref="internal"/>
+	<xs:element ref="file"/>
+	<xs:element ref="url"/>
+      </xs:choice>
+      <xs:element ref="format"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
 
-  <complexType name="SourceType">
-    <sequence>
-      <choice>
-	<element ref="oa:file"/>
-	<element ref="oa:url"/>
-	<element ref="oa:script"/>
-      </choice>
-    </sequence>
-    <attribute name="order" type="string"/>
-  </complexType>
+  <xs:complexType name="SourceType">
+    <xs:sequence>
+      <xs:choice>
+	<xs:element ref="file"/>
+	<xs:element ref="url"/>
+	<xs:element ref="script"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="order" type="xs:string"/>
+  </xs:complexType>
 
-  <complexType name="InternalType">
-    <attribute name="symbol" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="InternalType">
+    <xs:attribute name="symbol" type="xs:string" use="required"/>
+  </xs:complexType>
   
-  <simpleType name="ScriptType">
-    <restriction base="string"/>
-  </simpleType>
+  <xs:simpleType name="ScriptType">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
 
-  <complexType name="FileType">
-    <attribute name="ref" type="string" use="required"/>
-    <attribute name="path" type="string"/>
-  </complexType>
+  <xs:complexType name="FileType">
+    <xs:attribute name="ref" type="xs:string" use="required"/>
+    <xs:attribute name="path" type="xs:string"/>
+  </xs:complexType>
 
-  <complexType name="URLType">
-    <attribute name="ref" type="string" use="required"/>
-  </complexType>
+  <xs:complexType name="URLType">
+    <xs:attribute name="ref" type="xs:string" use="required"/>
+  </xs:complexType>
 
-  <complexType name="FormatType">
-    <simpleContent>
-      <extension base="string">
-	<attribute name="formatType" type="string"/>
-      </extension>
-    </simpleContent>
-  </complexType>
+  <xs:complexType name="FormatType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+	<xs:attribute name="formatType" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
 
-</schema>
+</xs:schema>

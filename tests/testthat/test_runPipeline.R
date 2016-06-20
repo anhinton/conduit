@@ -1,7 +1,7 @@
 library(conduit)
 context("execute pipelines")
 
-lang = "R"
+lang = moduleLanguage("R")
 outdir <- tempdir()
 symbol <- "x"
 internal_output <- moduleOutput(
@@ -18,7 +18,7 @@ comp1 <- component(value = mod1)
 p2 <- pipeline("p2", components = list(comp1))
 comp2 <- component(value = p2)
 mod3 <- module(
-    name = "A", language = "R",
+    name = "A", language = moduleLanguage("R"),
     outputs = list(
         moduleOutput("B", fileVessel("myfile"),
                      ioFormat("text file")),
@@ -111,22 +111,18 @@ test_that("calculateInputs() produces appropriate object", {
         inputList)))
 })
 
-test_that("graphPipeline() produces appropriate object", {
+test_that("pipesAsEdges() produces appropriate object", {
     ## fails for invalid input
-    expect_error(graphPipeline(unclass(simpleGraph)),
+    expect_error(pipesAsEdges(unclass(simpleGraph)),
                  "pipeline object required")
 
     ## expected output
-    graph1 <- graphPipeline(simpleGraph)
-    expect_is(graph1, "graphNEL")
-    expect_equal(graph::numNodes(graph1),
+    edges1 <- pipesAsEdges(simpleGraph)
+    expect_is(edges1, "list")
+    expect_equal(length(edges1),
                  length(getComponents(simpleGraph)))
-    expect_equal(graph::numEdges(graph1),
+    expect_equal(length(unlist(edges1)),
                  length(getPipes(simpleGraph)))
-    expect_match(RBGL::tsort(graph1)[1],
-                 "createGraph")
-    expect_match(RBGL::tsort(graph1)[3],
-                 "plotGraph")
 })
 
 test_that("runComponent() returns correctly", {
@@ -146,17 +142,17 @@ test_that("runComponent() returns correctly", {
     expect_is(result1, "componentResult")
     expect_equal(length(result1$outputList), 1)
     expect_is(result1$outputList[[1]], "output")
-    expect_true(file.exists(getResult(result1$outputList[[1]])))
+    expect_true(file.exists(getRef(result1$outputList[[1]])))
                             
     ## component with inputs
     result2 <- runComponent(component = componentList[["layoutGraph"]],
                             inputList = list(
-                                myGraph = getResult(result1$outputList[[1]])),
+                                myGraph = getRef(result1$outputList[[1]])),
                             pipelinePath = pipelinePath)
     expect_is(result2, "componentResult")
     expect_equal(length(result2$outputList), 1)
     expect_is(result2$outputList[[1]], "output")
-    expect_true(file.exists(getResult(result2$outputList[[1]])))
+    expect_true(file.exists(getRef(result2$outputList[[1]])))
 })
 
 test_that("runPipeline() produces expected results", {

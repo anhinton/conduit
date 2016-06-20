@@ -53,7 +53,7 @@ test_that("prepareInternalInput() returns correct file path", {
     input <- tempfile()
     system2("touch", input)
     symbol <- "x"
-    language = "python"
+    language = moduleLanguage("python")
     outputDirectory <- tempfile("prepareInternalInput")
     if (!dir.exists(outputDirectory))
         dir.create(outputDirectory)
@@ -175,7 +175,7 @@ test_that("prepareInput() returns resolved input objects", {
     outputDirectory <- tempfile("prepareInput")
     if (!dir.exists(outputDirectory))
         dir.create(outputDirectory)
-    language = "R"
+    language = moduleLanguage("R")
     location <- tempdir()
     urlInput <- "https://cran.stat.auckland.ac.nz/"
     inputList <- list(file = fileInput, internal = internalInput,
@@ -199,7 +199,7 @@ test_that("prepareInput() returns resolved input objects", {
     input1 <- prepareInput(moduleInput = moduleInput1,
                            inputList = inputList,
                            outputDirectory = outputDirectory,
-                           language = language,
+                           moduleLanguage = language,
                            location = location)
     expect_true(file.exists(input1))
 
@@ -210,7 +210,7 @@ test_that("prepareInput() returns resolved input objects", {
     input2 <- prepareInput(moduleInput = moduleInput2,
                            inputList = inputList,
                            outputDirectory = outputDirectory,
-                           language = language,
+                           moduleLanguage = language,
                            location = location)
     expect_true(file.exists(input2))
 
@@ -221,7 +221,7 @@ test_that("prepareInput() returns resolved input objects", {
     input3 <- prepareInput(moduleInput = moduleInput3,
                            inputList = inputList,
                            outputDirectory = outputDirectory,
-                           language = language,
+                           moduleLanguage = language,
                            location = location)
     expect_match(input3, urlInput)
 })
@@ -280,7 +280,7 @@ test_that(
     "output() behaves",
     {
         ## outputObject(output, language, outputDirectory)
-        lang = "R"
+        lang = moduleLanguage("R")
         outdir <- tempdir()
 
         ## fails when not given 'moduleOutput' object
@@ -296,7 +296,7 @@ test_that(
         output1 <- output(internal_output, lang, outdir)
         expect_is(output1, "output")
         expect_match(
-            getResult(output1),
+            getRef(output1),
             file.path(outdir, paste0(symbol, internalExtension(lang))))
 
         ## works for urlVessel
@@ -305,7 +305,7 @@ test_that(
             "url", urlVessel(url), ioFormat("HTML file"))
         output2 <- output(url_output, lang, outdir)
         expect_is(output2, "output")
-        expect_match(getResult(output2), url)
+        expect_match(getRef(output2), url)
         
         ## works for fileVessel
         file <- "output.csv"
@@ -313,7 +313,7 @@ test_that(
             "file", fileVessel(file), ioFormat("CSV file"))
         output3 <- output(file_output, lang, outdir)
         expect_is(output3, "output")
-        expect_match(getResult(output3), file.path(outdir, file))
+        expect_match(getRef(output3), file.path(outdir, file))
         
         ## fails for unknown vessel type
         not_a_real_output <- internal_output
@@ -328,7 +328,7 @@ test_that(
 test_that(
     "resolveOutput() works on local machine",
     {
-        lang = "R"
+        lang = moduleLanguage("R")
         outdir <- tempdir()
         symbol <- basename(tempfile())
         internal_output <- moduleOutput(
@@ -340,12 +340,12 @@ test_that(
         ## TODO(anhinton): write check for URL outputs
         ## internalVessel
         expect_error(resolveOutput(moduleOutput = internal_output,
-                                   language = lang,
+                                   moduleLanguage = lang,
                                    outputDirectory = outdir),
                      "output object '")
         ## fileVessel
         expect_error(resolveOutput(moduleOutput = file_output,
-                                   language = lang,
+                                   moduleLanguage = lang,
                                    outputDirectory = outdir),
                      "output object '") 
     })
@@ -376,15 +376,16 @@ test_that(
         absRef <- system.file("extdata", "simpleGraph", "createGraph.xml",
                               package = "conduit")
         moduleName <- "absomod"
-        language = "R"
+        moduleLanguage = moduleLanguage("R")
         outputName <- "lines"
         outputType <- "internalVessel"
         outputObject <-
             file.path(targ, moduleName,
-                      paste0(outputName, internalExtension(language)))
+                      paste0(outputName,
+                             internalExtension((moduleLanguage))))
         absomod <- module(
             name = moduleName,
-            language = language,
+            language = moduleLanguage,
             inputs = list(
                 moduleInput(
                     name = "file",
@@ -413,11 +414,11 @@ test_that(
         result1 <- runModule(createGraph, targetDirectory = targ)
         expect_match(result1$outputList[[1]]$name, output1$name)
         expect_is(result1, "moduleResult")
-        expect_true(file.exists(getResult(result1$outputList[[1]])))
+        expect_true(file.exists(getRef(result1$outputList[[1]])))
         
         ## run the layoutGraph module, providing the output from
         ## createGraph as input
-        inputObjects <- list(getResult(result1$outputList[[1]]))
+        inputObjects <- list(getRef(result1$outputList[[1]]))
         names(inputObjects) <- layoutGraph$inputs[[1]]$name
         output2 <- layoutGraph$outputs[[1]]
         result2 <- runModule(layoutGraph,
@@ -425,7 +426,42 @@ test_that(
                              targetDirectory = targ)
         expect_is(result2, "moduleResult")
         expect_match(result2$outputList[[1]]$name, output2$name)
-        expect_true(file.exists(getResult(result2$outputList[[1]])))
+        expect_true(file.exists(getRef(result2$outputList[[1]])))
     })
+
+## conduit should give warnings when a module was executed in a
+## version of the language which did not meet its language version
+## requirements
+test_that("runModule() warns for language version violations", {
+    ## warn for exact version failure
+    mod1 <- module(name = "mod1",
+                   language = moduleLanguage(
+                       language = "R",
+                       version = "2.4.6"))
+    expect_warning(
+        mod1res <- runModule(module = mod1, targetDirectory = tempdir(),
+                             warnVersion = TRUE),
+        "was not exactly")
+    
+    ## warn for minVersion failure
+    mod2 <- module(name = "mod2",
+                   language = moduleLanguage(
+                       language = "R",
+                       minVersion = "999.999"))
+    expect_warning(
+        mod2res <- runModule(module = mod2, targetDirectory = tempdir(),
+                             warnVersion = TRUE),
+        "was less than minVersion")
+    
+    ## warn for maxVersion failure
+    mod3 <- module(name = "mod3",
+                   language = moduleLanguage(
+                       language = "R",
+                       maxVersion = "0.1.999"))
+    expect_warning(
+        mod3res <- runModule(module = mod3, targetDirectory = tempdir(),
+                             warnVersion = TRUE),
+        "was greater than maxVersion")
+})
 
 ## TODO(anhinton): runModule() works for a module with a moduleHost

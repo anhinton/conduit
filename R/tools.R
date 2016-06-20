@@ -25,32 +25,6 @@ is_length1_char <- function(x) {
     return(value)
 }
 
-#' Returns the correct file extension for a language's 'internal' files
-#'
-#' @param language language name
-#' @return file exension as character as ".EXT"
-internalExtension <- function(language) {
-    extension <- switch(language,
-                        R = ".rds",
-                        python = ".pickle",
-                        shell = ".txt",
-                        stop(paste("language", language, "not supported")))
-    extension
-}
-
-#' Returns the correct file extension for a language's script files
-#'
-#' @param language language name
-#' @return file extension as character ".EXT"
-scriptExtension <- function(language) {    
-    extension <- switch(language,
-                        R = ".R",
-                        python = ".python",
-                        shell = ".sh",
-                        stop(paste("language", language, "not supported")))
-    extension
-}
-
 #' Tests if a file path is absolute
 #'
 #' @param path file path
@@ -61,4 +35,60 @@ is_absolute <- function (path) {
     if (regexpr("^/", path) != -1) return(TRUE)
     if (regexpr("^[[:alpha:]]+:(/|\\\\)", path) != -1) return(TRUE)
     else return(FALSE)
+}
+
+#' Do a topological sort on a graph
+#'
+#' Return a linear ordering of vertices in an acyclic directed graph
+#' such that for every directed edge from u to v, u comes before v in
+#' the ordering.
+#'
+#' \code{edges} list should be named for each vertex in the
+#' graph. Each vertex object should be a character vector of vectors
+#' to which the vector has a directed edge.
+#'
+#' Uses Kahn's algorithm
+#' \url{https://en.wikipedia.org/wiki/Topological_sorting#Kahn.27s_algorithm}
+#'
+#' @param edges named list of edges from each vertex as character
+#'     vector
+#'
+#' @return character vector of sorted vertices
+topologicalSort <- function(edges) {
+    ## check all edges connect to a named vertex
+    for (i in unlist(edges)) {
+        if (!(i %in% names(edges))) {
+            stop(paste("vertex", i, "is not defined"))
+        }
+    }
+    
+    ## find nodes with no incoming edges
+    startNodes <- lapply(
+        X = names(edges),
+        FUN = function (n, edges) {
+            if (!(n %in% edges))
+                n
+        },
+        edges = unique(unlist(edges)))
+    startNodes <- unlist(startNodes)
+
+    order <- character()
+    while (length(startNodes)) {
+        n <- startNodes[1]
+        startNodes <- startNodes[-1]
+        order <- c(order, n)
+        for (i in edges[[n]]) {
+            e <- edges[[n]][1]
+            edges[[n]] <- edges[[n]][-1]
+            if (!(e %in% unlist(edges))) {
+                startNodes <- c(startNodes, e)
+            }
+        }
+    }
+
+    ## if any edges remain there must be a cycle
+    if (length(unlist(edges)))
+        stop ("graph has at least one cycle")
+
+    order
 }

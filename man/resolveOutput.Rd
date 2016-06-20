@@ -4,12 +4,12 @@
 \alias{resolveOutput}
 \title{Checks a module output object has been created.}
 \usage{
-resolveOutput(moduleOutput, language, outputDirectory = getwd())
+resolveOutput(moduleOutput, moduleLanguage, outputDirectory = getwd())
 }
 \arguments{
 \item{moduleOutput}{\code{moduleOutput} object}
 
-\item{language}{module language}
+\item{moduleLanguage}{\code{moduleLanguage} object}
 
 \item{outputDirectory}{location of module output files}
 }

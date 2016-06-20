@@ -46,5 +46,6 @@ mod2 <- loadModule("layoutGraph",
 		       ref = mod2xml)
 saveModule(module = mod2, targetDirectory = targ1,
 	       filename = "myNewModule.xml")
+
 }
 

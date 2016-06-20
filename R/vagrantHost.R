@@ -68,13 +68,17 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'     \code{vagrantHost} object
 #'
 #' @import XML
-moduleHostToXML.vagrantHost <- function(vagrantHost) {
+#' @export
+moduleHostToXML.vagrantHost <- function(moduleHost) {
+    vagrantHost <- moduleHost
     child <- newXMLNode("vagrant", attrs = vagrantHost)
     newXMLNode(name = "host", kids = list(child))
 }
 
 #' @describeIn prepareModuleHost prepare \code{vagrantHost}; returns
 #' path to unique module output directory relative to hostdir/guestdir
+#'
+#' @export
 prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                           modulePath) {
     vagrantHost <- moduleHost
@@ -86,7 +90,7 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
                                tmpdir = file.path("conduit.out"))
     hostdir <- file.path(hostdir, outputLocation)
     if (dir.exists(hostdir))
-        unlink(hostdir, rescursive = TRUE)
+        unlink(hostdir, recursive = TRUE)
     dir.create(hostdir, recursive = TRUE)
     
     ## make contents of modulePath available to vagrantHost
@@ -100,6 +104,8 @@ prepareModuleHost.vagrantHost <- function(moduleHost, moduleName,
 }
 
 #' @describeIn executeCommand execute command on a \code{vagrantHost}
+#'
+#' @export
 executeCommand.vagrantHost <- function(moduleHost, outputLocation,
                                        command) {
     commanddir <- dirname(moduleHost$vagrantfile)
@@ -109,16 +115,21 @@ executeCommand.vagrantHost <- function(moduleHost, outputLocation,
     guestdir <- file.path(moduleHost$guestdir, outputLocation)
     args <- paste("ssh", "-c", "'cd", guestdir, ";",
                   paste(args, collapse = " "), "'")
-    system2(command = "vagrant",
-            args = args)
+    system2(command = "vagrant", args = args, stdout = TRUE, stderr = TRUE)
 }
 
 #' @describeIn retrieveModuleHost retrieve module output from
 #'     \code{vagrantHost}
+#'
+#' @export
 retrieveModuleHost.vagrantHost <- function(moduleHost, outputLocation,
                                            modulePath) {
     hostdir <- file.path(moduleHost$hostdir, outputLocation)
-    files <- list.files(path = hostdir, full.names = TRUE)
+    files <- list.files(path = hostdir, all.files = TRUE, full.names = TRUE)
+    ## we return all.files = TRUE to capture hidden files, but as a result we
+    ## need to exclude current (.)  and parent (..) directory from files to
+    ## be copied
+    files <- files[basename(files) != ".." & basename(files) != "."]
     for (f in files)
         file.copy(f, modulePath, recursive = TRUE)
 }
