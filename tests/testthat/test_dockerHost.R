@@ -37,15 +37,17 @@ test_that("readDockerHostXML() returns correctly", {
     #library(XML)
     dhXML1 <- newXMLNode(
         name = "docker",
-        attrs = list(image = dockerImage))
+        attrs = list(image = dockerImage),
+        addFinalizer = TRUE)
     dhXML2 <- newXMLNode(
         name = "docker",
         attrs = list(
             image = dockerImage,
-            guestdir = guestdir))
+            guestdir = guestdir),
+        addFinalizer = TRUE)
 
     ## fail for invalid argument
-    expect_error(readDockerHostXML(newXMLNode("doocker")),
+    expect_error(readDockerHostXML(newXMLNode("doocker", addFinalizer = TRUE)),
                  "docker element required")
 
     ## image only

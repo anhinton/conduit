@@ -4,12 +4,17 @@
 \alias{moduleToXML}
 \title{Convert a \code{module} object to XML}
 \usage{
-moduleToXML(module, namespaceDefinitions = NULL)
+moduleToXML(module, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{module}{\code{module} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{XMLInternalNode} object
@@ -18,6 +23,6 @@ moduleToXML(module, namespaceDefinitions = NULL)
 Convert a \code{module} object to XML
 }
 \seealso{
-\code{module} objects
+\code{module} objects, \code{XML::newXMLNode}
 }
 

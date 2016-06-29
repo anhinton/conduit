@@ -4,12 +4,17 @@
 \alias{ioFormatToXML}
 \title{Create XML corresponding to an \code{ioFormat} object}
 \usage{
-ioFormatToXML(ioFormat, namespaceDefinitions = NULL)
+ioFormatToXML(ioFormat, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{ioFormat}{\code{ioFormat} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{XMLInternalNode} object
@@ -18,6 +23,6 @@ ioFormatToXML(ioFormat, namespaceDefinitions = NULL)
 Create XML corresponding to an \code{ioFormat} object
 }
 \seealso{
-\code{ioFormat} objects
+\code{ioFormat} objects, \code{XML::newXMLNode}
 }
 

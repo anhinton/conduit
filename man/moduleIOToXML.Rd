@@ -4,12 +4,17 @@
 \alias{moduleIOToXML}
 \title{Create XML corresponding to \code{moduleIO} object}
 \usage{
-moduleIOToXML(moduleIO, namespaceDefinitions = NULL)
+moduleIOToXML(moduleIO, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{moduleIO}{\code{moduleIO} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{XMLInternalNode} object
@@ -18,6 +23,6 @@ moduleIOToXML(moduleIO, namespaceDefinitions = NULL)
 Create XML corresponding to \code{moduleIO} object
 }
 \seealso{
-\code{moduleIO} objects
+\code{moduleIO} objects, \code{XML::newXMLNode}
 }
 

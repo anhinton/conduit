@@ -4,17 +4,25 @@
 \alias{pipelineToXML}
 \title{Convert a pipeline to XML}
 \usage{
-pipelineToXML(pipeline, namespaceDefinitions = NULL)
+pipelineToXML(pipeline, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{pipeline}{\code{pipeline} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{XMLNode} object
 }
 \description{
 Convert a pipeline to XML
+}
+\seealso{
+\code{XML::newXMLNode}
 }
 
