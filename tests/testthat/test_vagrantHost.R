@@ -46,21 +46,25 @@ test_that("readVagrantHostXML() returns correctly", {
     #library(XML)
     vhXML1 <- newXMLNode(
         name = "vagrant",
-        attrs = list(vagrantfile = vagrantfile))
+        attrs = list(vagrantfile = vagrantfile),
+        addFinalizer = TRUE)
     vhXML2 <- newXMLNode(
         name = "vagrant",
         attrs = list(
             vagrantfile = vagrantfile,
-            hostdir = hostdir))
+            hostdir = hostdir),
+        addFinalizer = TRUE)
     vhXML3 <- newXMLNode(
         name = "vagrant",
         attrs = list(
             vagrantfile = vagrantfile,
             hostdir = hostdir,
-            guestdir = guestdir))
+            guestdir = guestdir),
+        addFinalizer = TRUE)
 
     ## fail for invalid argument
-    expect_error(readVagrantHostXML(newXMLNode("voogrant")),
+    expect_error(readVagrantHostXML(newXMLNode("voogrant",
+                                               addFinalizer = TRUE)),
                  "vagrant element required")
 
     ## vagrantfile only

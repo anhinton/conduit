@@ -19,9 +19,11 @@ inlineModuleXML <- c("<component name=\"a\">",
                      "</module>",
                      "</component>")
 inlineModuleXML <- xmlRoot(xmlParse(inlineModuleXML))
-pipelineXML <- newXMLNode("pipeline", inlineModuleXML, pipeXML)
+pipelineXML <- newXMLNode("pipeline", inlineModuleXML, pipeXML,
+                          addFinalizer = TRUE)
 inlinePipelineXML <- newXMLNode("component", pipelineXML,
-                                attrs = list(name = "x"))
+                                attrs = list(name = "x"),
+                                addFinalizer = TRUE)
 
 moduleFile <- system.file("extdata", "simpleGraph", "createGraph.xml",
                           package = "conduit")

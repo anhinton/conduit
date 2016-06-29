@@ -7,14 +7,18 @@ test_that("readModuleLanguageXML() returns appropriately", {
     minVersion <- "3.0.1"
     maxVersion <- "3.3.0"
     version <- "3.2.5"
-    mlx1 <- newXMLNode(name = "language", language)
+    mlx1 <- newXMLNode(name = "language", language,
+                       addFinalizer = TRUE)
     mlx2 <- newXMLNode(name = "language", language,
-                      attrs = c(minVersion = minVersion))
+                       attrs = c(minVersion = minVersion),
+                       addFinalizer = TRUE)
     mlx3 <- newXMLNode(name = "language", language,
-                      attrs = c(maxVersion = maxVersion))
+                       attrs = c(maxVersion = maxVersion),
+                       addFinalizer = TRUE)
     mlx4 <- newXMLNode(name = "language", language,
-                       attrs = c(version = version))
-
+                       attrs = c(version = version),
+                       addFinalizer = TRUE)
+    
     ## just language
     ml1 <- readModuleLanguageXML(mlx1)
     expect_is(ml1, "moduleLanguage")
@@ -46,7 +50,8 @@ test_that("readModuleLanguageXML() returns appropriately", {
 
 test_that("readIOFormatXML fails for incorrect node name", {
     #library(XML)
-    notAFormat <- newXMLNode(name = "notAFormat")
+    notAFormat <- newXMLNode(name = "notAFormat",
+                             addFinalizer = TRUE)
     expect_error(readIOFormatXML(notAFormat),
                  "ioFormat XML is invalid")
 })
@@ -65,7 +70,8 @@ test_that("readIOFormatXML creates appropriate ioFormat objects", {
 
 
 test_that("readModuleIOXML fails for invalid named XML", {
-    notIO <- XML::newXMLNode("notInput")
+    notIO <- XML::newXMLNode("notInput",
+                             addFinalizer = TRUE)
     expect_error(readModuleIOXML(notIO),
                  "moduleIO XML is invalid")
 })
@@ -106,7 +112,8 @@ test_that("readModuleIOXML creates appropriate outputs", {
 ## read <source> XML
 
 test_that("readModuleSourceXML fails for invalid XML", {
-    notSource <- XML::newXMLNode("notSource")
+    notSource <- XML::newXMLNode("notSource",
+                                 addFinalizer = TRUE)
     expect_error(readModuleSourceXML(notSource),
                  "moduleSource XML is invalid")
 })
@@ -130,7 +137,8 @@ test_that("readModuleSourceXML creates appropriate objects", {
 ## read vessel XML - <internal>, <file>, <url>
 
 test_that("readVesselXML fails for unknown type", {
-    nonVessel <- XML::newXMLNode(name = "notAVessel")
+    nonVessel <- XML::newXMLNode(name = "notAVessel",
+                                 addFinalizer = TRUE)
     expect_error(readVesselXML(nonVessel),
                  "'vessel' xml unknown type")
 })
@@ -249,21 +257,24 @@ test_that("readModuleHostXML() returns correctly", {
     vagrantfile <- "~/vagrant/vagrant-conduit/Vagrantfile"
     vhXML1 <- newXMLNode(
         name = "vagrant",
-        attrs = list(vagrantfile = vagrantfile))
+        attrs = list(vagrantfile = vagrantfile),
+        addFinalizer = TRUE)
     vh1 <- readModuleHostXML(vhXML1)
     expect_is(vh1, "moduleHost")
     
     ## <docker/> host XML
     vhXML2 <- newXMLNode(
         name = "docker",
-        attrs = list(image = "ubuntu:latest"))
+        attrs = list(image = "ubuntu:latest"),
+        addFinalizer = TRUE)
     vh2 <- readModuleHostXML(vhXML2)
     expect_is(vh2, "moduleHost")
     
     ## <moduleInput/> host XML
     vhXML3 <- newXMLNode(
         name = "moduleInput",
-        attrs = list(name = "myHost"))
+        attrs = list(name = "myHost"),
+        addFinalizer = TRUE)
     vh3 <- readModuleHostXML(vhXML3)
     expect_is(vh3, "moduleHost")
 })
