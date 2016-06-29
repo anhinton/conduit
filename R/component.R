@@ -82,6 +82,7 @@ getValue.component <- function(x) {
 #'
 #' @param component \code{component} object
 #' @param namespaceDefinitions As named character vector
+#' @param parent XML object
 #' @param addFinalizer logical add finalizer to free internal xmlDoc
 #' 
 #' @return \code{xmlNode} object
