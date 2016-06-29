@@ -4,12 +4,17 @@
 \alias{moduleSourceToXML}
 \title{Create XML corresponding to \code{moduleSource} object}
 \usage{
-moduleSourceToXML(moduleSource, namespaceDefinitions = NULL)
+moduleSourceToXML(moduleSource, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{moduleSource}{\code{moduleSource} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{XMLInternalNode} object
@@ -18,6 +23,8 @@ moduleSourceToXML(moduleSource, namespaceDefinitions = NULL)
 Create XML corresponding to \code{moduleSource} object
 }
 \seealso{
+\code{XML::newXMLNode}
+
 \code{moduleSource} objects
 }
 

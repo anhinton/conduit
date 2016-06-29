@@ -69,10 +69,15 @@ readVagrantHostXML <- function (vagrantHostXML) {
 #'
 #' @import XML
 #' @export
-moduleHostToXML.vagrantHost <- function(moduleHost) {
+moduleHostToXML.vagrantHost <- function(moduleHost,
+                                        parent = NULL,
+                                        addFinalizer = is.null(parent)) {
     vagrantHost <- moduleHost
-    child <- newXMLNode("vagrant", attrs = vagrantHost)
-    newXMLNode(name = "host", kids = list(child))
+    hostNode <- newXMLNode(name = "host", parent = parent,
+                           addFinalizer = addFinalizer)
+    vagrantNode <- newXMLNode("vagrant", attrs = vagrantHost,
+                              parent = hostNode)
+    hostNode
 }
 
 #' @describeIn prepareModuleHost prepare \code{vagrantHost}; returns

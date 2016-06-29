@@ -7,16 +7,23 @@
 \alias{moduleHostToXML.vagrantHost}
 \title{Create XML corresponding to a \code{moduleHost} object}
 \usage{
-\method{moduleHostToXML}{dockerHost}(moduleHost)
+\method{moduleHostToXML}{dockerHost}(moduleHost, parent = NULL,
+  addFinalizer = is.null(parent))
 
-moduleHostToXML(moduleHost)
+moduleHostToXML(moduleHost, parent = NULL, addFinalizer = is.null(parent))
 
-\method{moduleHostToXML}{moduleInputHost}(moduleHost)
+\method{moduleHostToXML}{moduleInputHost}(moduleHost, parent = NULL,
+  addFinalizer = is.null(parent))
 
-\method{moduleHostToXML}{vagrantHost}(moduleHost)
+\method{moduleHostToXML}{vagrantHost}(moduleHost, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{moduleHost}{\code{moduleHost} object}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 XML node representing module host
@@ -35,4 +42,7 @@ Create XML corresponding to a \code{moduleHost} object
 \item \code{vagrantHost}: Create XML corresponding to a
 \code{vagrantHost} object
 }}
+\seealso{
+\code{XML::newXMLNode}
+}
 

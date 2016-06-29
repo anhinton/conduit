@@ -4,12 +4,17 @@
 \alias{vesselToXML}
 \title{Create XML corresponding to a \code{vessel} object.}
 \usage{
-vesselToXML(vessel, namespaceDefinitions = NULL)
+vesselToXML(vessel, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{vessel}{\code{vessel} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{XMLInternalNode} object
@@ -18,6 +23,6 @@ vesselToXML(vessel, namespaceDefinitions = NULL)
 Create XML corresponding to a \code{vessel} object.
 }
 \seealso{
-\code{vessel} objects
+\code{vessel} objects, \code{XML::newXMLNode}
 }
 

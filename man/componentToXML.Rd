@@ -4,12 +4,17 @@
 \alias{componentToXML}
 \title{Convert a component to XML}
 \usage{
-componentToXML(component, namespaceDefinitions = NULL)
+componentToXML(component, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{component}{\code{component} object}
 
 \item{namespaceDefinitions}{As named character vector}
+
+\item{parent}{XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
 \code{xmlNode} object
@@ -17,5 +22,8 @@ componentToXML(component, namespaceDefinitions = NULL)
 \description{
 Convert a \code{component} object into the corresponding openapi XML
 format.
+}
+\seealso{
+\code{XML::newXMLNode}
 }
 

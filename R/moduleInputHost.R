@@ -39,8 +39,13 @@ readModuleInputHostXML <- function (moduleInputHostXML) {
 #'
 #' @import XML
 #' @export
-moduleHostToXML.moduleInputHost <- function(moduleHost) {
+moduleHostToXML.moduleInputHost <- function(moduleHost,
+                                            parent = NULL,
+                                            addFinalizer = is.null(parent)) {
     moduleInputHost <- moduleHost
-    child <- newXMLNode("moduleInput", attrs = moduleInputHost)
-    newXMLNode(name = "host", kids = list(child))
+    hostNode <- newXMLNode(name = "host", parent = parent,
+                           addFinalizer = addFinalizer)
+    moduleInputNode <- newXMLNode("moduleInput", attrs = moduleInputHost,
+                                  parent = hostNode)
+    hostNode
 }

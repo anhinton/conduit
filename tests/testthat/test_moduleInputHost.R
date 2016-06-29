@@ -23,11 +23,13 @@ test_that("readModuleInputHostXML() returns correctly", {
     #library(XML)
     mihXML1 <- newXMLNode(
         name = "moduleInput",
-        attrs = list(name = name))
+        attrs = list(name = name),
+        addFinalizer = TRUE)
 
     ## fail for invalid argument
-    expect_error(readModuleInputHostXML(newXMLNode("mooduleInputHost")),
-                 "moduleInput element required")
+    expect_error(readModuleInputHostXML(
+        newXMLNode("mooduleInputHost", addFinalizer = TRUE)),
+        "moduleInput element required")
 
     mih1 <- readModuleInputHostXML(mihXML1)
     expect_is(mih1, "moduleInputHost")

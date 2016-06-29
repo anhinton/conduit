@@ -318,26 +318,34 @@ readPipeXML <- function(node) {
 #'
 #' @param pipeline \code{pipeline} object
 #' @param namespaceDefinitions XML namespaces as character vector
+#' @param parent parent XML object
+#' @param addFinalizer logical add finalizer to free internal xmlDoc
 #' 
 #' @return \code{XMLNode} object
 #'
+#' @seealso \code{XML::newXMLNode}
+#'
 #' @import XML
-pipelineToXML <- function(pipeline, namespaceDefinitions = NULL) {
+pipelineToXML <- function(pipeline, namespaceDefinitions = NULL,
+                          parent = NULL,
+                          addFinalizer = is.null(parent)) {
     components <- getComponents(pipeline)
     pipes <- getPipes(pipeline)
     description <- getDescription(pipeline)
     pipelineRoot <- newXMLNode("pipeline",
-                               namespaceDefinitions=namespaceDefinitions)
-    descXML <- newXMLNode("description", description)
+                               namespaceDefinitions = namespaceDefinitions,
+                               parent = parent,
+                               addFinalizer = addFinalizer)
+    descXML <- newXMLNode(name = "description", description,
+                          parent = pipelineRoot)
     componentXML <-
         lapply(X = components,
                FUN = componentToXML,
-               namespaceDefinitions = namespaceDefinitions)
+               namespaceDefinitions = namespaceDefinitions,
+               parent = pipelineRoot)
     pipeXML <-
-        lapply(pipes, pipeToXML, namespaceDefinitions = namespaceDefinitions)
-    pipelineRoot <- addChildren(
-        node = pipelineRoot,
-        kids = c(list(descXML), componentXML, pipeXML))
+        lapply(pipes, pipeToXML, namespaceDefinitions = namespaceDefinitions,
+               parent = pipelineRoot)
     pipelineRoot
 }
 
@@ -374,10 +382,11 @@ savePipeline <- function(pipeline, targetDirectory = getwd(),
     }
     pipelineDoc <-
         newXMLDoc(namespaces="http://www.openapi.org/2014/",
-                  node=pipelineToXML(pipeline=pipeline,
-                      namespaceDefinitions="http://www.openapi.org/2014/"))
-    pipelineFilePath <-
-        file.path(targetDirectory, filename)
+                  node = pipelineToXML(
+                      pipeline = pipeline,
+                      namespaceDefinitions="http://www.openapi.org/2014/",
+                      parent = NULL))
+    pipelineFilePath <- file.path(targetDirectory, filename)
     saveXML(pipelineDoc, pipelineFilePath)
 }
 

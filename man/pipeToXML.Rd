@@ -4,17 +4,25 @@
 \alias{pipeToXML}
 \title{Convert a pipe to XML}
 \usage{
-pipeToXML(pipe, namespaceDefinitions = NULL)
+pipeToXML(pipe, namespaceDefinitions = NULL, parent = NULL,
+  addFinalizer = is.null(parent))
 }
 \arguments{
 \item{pipe}{\code{pipe} object}
 
 \item{namespaceDefinitions}{XML namespaces as character vector}
+
+\item{parent}{parent XML object}
+
+\item{addFinalizer}{logical add finalizer to free internal xmlDoc}
 }
 \value{
-\code{xmlNode} object
+\code{XMLNode} object
 }
 \description{
 Convert a pipe to XML
+}
+\seealso{
+\code{XML::newXMLNode}
 }
 
