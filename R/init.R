@@ -22,6 +22,6 @@ initSearch <- function () {
     pathSep <- "|"
     assign("pathSep", pathSep, .conduit.global)
     assign("defaultSearchPaths",
-           paste(".//", "${ROOT}", sep = pathSep),
+           paste(".//", getwd(), sep = pathSep),
            .conduit.global)
 }
