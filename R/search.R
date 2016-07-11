@@ -86,6 +86,8 @@ findFile <- function (ref, path = NULL, location = getwd()) {
             } else {
                 amendSearchPaths(path)
             }
+        searchPaths <- gsub(pattern = "[.]//", replacement = location,
+                            x = searchPaths)
         searchPaths <- splitPaths(searchPaths)
         searchPaths <- unique(expandSearchPaths(searchPaths, location))
         count <- 1
