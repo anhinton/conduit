@@ -4,12 +4,12 @@
 \alias{prepareFileInput}
 \title{Prepare file input object}
 \usage{
-prepareFileInput(vessel, input, outputDirectory, location)
+prepareFileInput(vessel, inputObject, outputDirectory, location)
 }
 \arguments{
 \item{vessel}{Module input vessel object}
 
-\item{input}{File path to input}
+\item{inputObject}{File path to input}
 
 \item{outputDirectory}{File path to module working directory}
 

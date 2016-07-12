@@ -86,7 +86,7 @@ test_that("prepareFileInput() works with input = NULL", {
                                   vessel = fileVessel(ref = tempfile()),
                                   outputDirectory = outputDirectory,
                                   location = location),
-                 "unable to locate input file")
+                 "unable to locate inputObject file")
     ## fails if unable to copy file
     expect_error(
         suppressWarnings(
@@ -94,7 +94,7 @@ test_that("prepareFileInput() works with input = NULL", {
                              vessel = vessel1,
                              outputDirectory = tempfile(),
                              location = location)),
-        "unable to copy input into outputDirectory")
+        "unable to copy inputObject into outputDirectory")
 
     ## success for absolute file ref
     fileInput1 <- prepareFileInput(input = NULL,
@@ -126,14 +126,14 @@ test_that("prepareFileInput() succeeds given input" , {
                                   vessel = fileVessel(ref = ref1),
                                   outputDirectory = outputDirectory,
                                   location = location),
-                 "input does not match path given in fileVessel")
+                 "inputObject does not match path given in fileVessel")
     ## fails if unable to copy file
     expect_error(
         suppressWarnings(prepareFileInput(input = input,
                                           vessel = vessel1,
                                           outputDirectory = tempfile(),
                                           location = location)),
-        "unable to copy input into outputDirectory")
+        "unable to copy inputObject into outputDirectory")
 
     ## succeeds for absolute file ref
     fileInput1 <- prepareFileInput(input = ref1,
