@@ -92,3 +92,31 @@ topologicalSort <- function(edges) {
 
     order
 }
+
+#' Copy a directory and its contents
+#'
+#' @details Copies a directory and all its contents recursively to a
+#'     new location. If the \file{to} directory does not exist it will
+#'     be created. If it does exist the contens of \file{from} will be
+#'     copied into \code{to}. By default contents of \file{to} will
+#'     not be overwritten.
+#'
+#' @param from directory to copy
+#' @param to destination directory
+#' @param overwrite logical; should existing destination files be
+#'     overwritten
+#'
+#' @return logical vector indicating which files were successfully
+#'     copied
+dir.copy <- function(from, to, overwrite = FALSE) {
+    if (!file.info(from)$isdir)
+        stop("from must be a file directory")
+    if (file.exists(to) & !file.info(to)$isdir)
+        stop("to must be a file directory")
+    if (!dir.exists(to))
+        dir.create(path = to)
+    dirContents <- list.files(
+        path = from, all.files = TRUE, full.names = TRUE,
+        recursive = TRUE)
+    file.copy(from = dirContents, to = to, overwrite = overwrite)
+}
