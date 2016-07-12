@@ -93,7 +93,7 @@ findFile <- function (ref, path = NULL, location = getwd()) {
         count <- 1
         while (is.null(result) && count <= length(searchPaths)) {
             filesInPath <- list.files(path=searchPaths[count], recursive=TRUE,
-                                      full.names=TRUE)
+                                      full.names=TRUE, include.dirs = TRUE)
             whichFiles <- grep(paste0(ref, "$"), filesInPath)
             files <- filesInPath[whichFiles]
             result <-
